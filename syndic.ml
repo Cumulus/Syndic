@@ -386,6 +386,8 @@ let link_of_xml' =
   ] in
   generate_catcher attr_producer None make_link
 
+(* RFC Compliant (or raise error) *)
+
 let make_logo (l : [< `LogoURI of Neturl.url] list) =
   let uri = match find (function `LogoURI _ -> true | _ -> false) l with
     | Some (`LogoURI u) -> u
