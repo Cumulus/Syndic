@@ -66,6 +66,7 @@ type feed = {
   logo: Neturl.url option (* iri *);
   published: string option (* date *);
   rights: string option;
+  source: feed option;
   subtitle: string option;
   content: content option;
   (*
@@ -118,6 +119,8 @@ exception ExpectedIconURI
 exception ExpectedIdURI
 exception ExpectedLinkHREF
 exception ExpectedLogoURI
+exception ExpectedPublishedDate
+exception ExpectedRightsData
 
 (* Util *)
 
@@ -138,9 +141,10 @@ let datas_has_leaf = List.exists (function | Leaf _ -> true | _ -> false)
 let get_leaf l = match find (function Leaf _ -> true | _ -> false) l with
   | Some (Leaf s) -> s
   | _ -> raise ExpectedLeaf
-let get_attr (_, attrs) = attrs
+let get_attrs (_, attrs) = attrs
 let get_value (_, value) = value
 let get_attr_name ((prefix, name), _) = name
+let get_tag_name ((prefix, name), _) = name
 
 let make_context ?enc ?strip ?ns ?entity input =
   { state = Root; input = Xmlm.make_input input; }
@@ -221,7 +225,7 @@ let generate_catcher attr_producer data_producer maker =
       | None -> catch_attr acc r end
     | [] -> acc
   in
-  let rec catch_data datas = match data_producer with
+  let catch_data datas = match data_producer with
     | Some f ->
       if datas_has_leaf datas
       then [f (get_leaf datas)]
@@ -229,7 +233,36 @@ let generate_catcher attr_producer data_producer maker =
     | None -> []
   in
   let generate ctx (tag, datas) =
-    maker (catch_attr (catch_data datas) (get_attr tag))
+    maker (catch_attr (catch_data datas) (get_attrs tag))
+  in generate
+
+let generate_catcher'
+  ?(attr_producer=[])
+  ?(data_producer=[])
+  ?(leaf_producer=None) maker =
+  let get_producer name map =
+    try Some (List.assoc name map)
+    with _ -> None
+  in
+  let rec catch_attr acc = function
+    | attr :: r -> begin match get_producer (get_attr_name attr) attr_producer with
+      | Some f -> catch_attr ((f attr) :: acc) r
+      | None -> catch_attr acc r end
+    | [] -> acc
+  in
+  let rec catch_datas acc = function
+    | Node (tag, datas) :: r ->
+      begin match get_producer (get_tag_name tag) data_producer with
+      | Some f -> catch_datas ((f (tag, datas)) :: acc) r
+      | None -> catch_datas acc r end
+    | Leaf str :: r ->
+      begin match leaf_producer with
+      | Some f -> catch_datas ((f str) :: acc) r
+      | None -> catch_datas acc r end
+    | [] -> acc
+  in
+  let generate ctx (tag, datas) =
+    maker (catch_attr (catch_datas [] datas) (get_attrs tag))
   in generate
 
 (* RFC Compliant (or raise error) *)
@@ -282,7 +315,7 @@ let category_of_xml ctx (tag, datas) =
       aux ((`CategoryLabel (get_value attr)) :: acc) r
     | _ :: r -> aux acc r
     | [] -> acc
-  in make_category (aux [] (get_attr tag))
+  in make_category (aux [] (get_attrs tag))
 
 (* RFC Compliant (or raise error) *)
 
@@ -312,7 +345,7 @@ let generator_of_xml ctx (tag, datas) =
     | _ :: r -> catch_attr acc r
     | [] -> acc
   in let catch_data = if datas_has_leaf datas then [`GeneratorContent (get_leaf datas)] else [] in
-  make_generator (catch_attr catch_data (get_attr tag))
+  make_generator (catch_attr catch_data (get_attrs tag))
 
 (* RFC Compliant (or raise error) *)
 
@@ -384,7 +417,7 @@ let link_of_xml' =
     ("title", (function attr -> `LinkTitle (get_value attr)));
     ("length", (function attr -> `LinkLength (int_of_string (get_value attr))));
   ] in
-  generate_catcher attr_producer None make_link
+  generate_catcher' ~attr_producer make_link
 
 (* RFC Compliant (or raise error) *)
 
@@ -398,6 +431,32 @@ let logo_of_xml =
   let attr_producer = [] in
   let data_producer = Some (function data -> `LogoURI (url_of_string (make_opts_neturl ()) data)) in
   generate_catcher attr_producer data_producer make_logo
+
+(* RFC Compliant (or raise error) *)
+
+let make_published (l : [< `PublishedDate of string] list) =
+  let date = match find (function `PublishedDate _ -> true | _ -> false) l with
+    | Some (`PublishedDate d) -> d
+    | _ -> raise ExpectedPublishedDate
+  in date
+
+let published_of_xml =
+  let attr_producer = [] in
+  let data_producer = Some (function data -> `PublishedDate data) in
+  generate_catcher attr_producer data_producer make_published
+
+(* RFC Compliant (or raise error) *)
+
+let make_rights (l : [< `RightData of string] list) =
+  let rights = match find (function `RightData _ -> true | _ -> false) l with
+    | Some (`RightData d) -> d
+    | _ -> raise ExpectedRightsData
+  in rights
+
+let rights_of_xml =
+  let attr_producer = [] in
+  let data_producer = Some (function data -> `RightData data) in
+  generate_catcher attr_producer data_producer make_rights
 
 let rec analyze_tree ctx = function
   | Node (tag, datas) when ctx.state = Root && tag_is tag "entry" ->
