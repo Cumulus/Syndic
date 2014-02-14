@@ -117,6 +117,7 @@ exception ExpectedGeneratorContent
 exception ExpectedIconURI
 exception ExpectedIdURI
 exception ExpectedLinkHREF
+exception ExpectedLogoURI
 
 (* Util *)
 
@@ -139,6 +140,7 @@ let get_leaf l = match find (function Leaf _ -> true | _ -> false) l with
   | _ -> raise ExpectedLeaf
 let get_attr (_, attrs) = attrs
 let get_value (_, value) = value
+let get_attr_name ((prefix, name), _) = name
 
 let make_context ?enc ?strip ?ns ?entity input =
   { state = Root; input = Xmlm.make_input input; }
@@ -208,6 +210,27 @@ let string_of_xml ctx =
 
 (* Produce XML *)
 
+let generate_catcher attr_producer data_producer maker =
+  let get_producer attr map =
+    try Some (List.assoc (get_attr_name attr) map)
+    with _ -> None
+  in
+  let rec catch_attr acc = function
+    | attr :: r -> begin match get_producer attr attr_producer with
+      | Some f -> catch_attr ((f attr) :: acc) r
+      | None -> catch_attr acc r end
+    | [] -> acc
+  in
+  let rec catch_data datas = match data_producer with
+    | Some f ->
+      if datas_has_leaf datas
+      then [f (get_leaf datas)]
+      else []
+    | None -> []
+  in
+  let generate ctx (tag, datas) =
+    maker (catch_attr (catch_data datas) (get_attr tag))
+  in generate
 
 (* RFC Compliant (or raise error) *)
 
@@ -352,23 +375,27 @@ let rel_of_string s = match String.lowercase (String.trim s) with
   | "via" -> Via
   | uri -> Link (url_of_string (make_opts_neturl ()) uri)
 
-let link_of_xml ctx (tag, datas) =
-  let rec catch_attr acc = function
-    | attr :: r when attr_is attr "href" ->
-      catch_attr ((`LinkHREF (url_of_string (make_opts_neturl ()) (get_value attr))) :: acc) r
-    | attr :: r when attr_is attr "rel" ->
-      catch_attr ((`LinkRel (rel_of_string (get_value attr))) :: acc) r
-    | attr :: r when attr_is attr "type" ->
-      catch_attr ((`LinkType (get_value attr)) :: acc) r
-    | attr :: r when attr_is attr "hreflang" ->
-      catch_attr ((`LinkHREFLang (get_value attr)) :: acc) r
-    | attr :: r when attr_is attr "title" ->
-      catch_attr ((`LinkTitle (get_value attr)) :: acc) r
-    | attr :: r when attr_is attr "length" ->
-      catch_attr ((`LinkLength (int_of_string (get_value attr))) :: acc) r
-    | _ :: r -> catch_attr acc r
-    | [] -> acc
-  in make_link (catch_attr [] (get_attr tag))
+let link_of_xml' =
+  let attr_producer = [
+    ("href", (function attr -> `LinkHREF (url_of_string (make_opts_neturl ()) (get_value attr))));
+    ("rel", (function attr -> `LinkRel (rel_of_string (get_value attr))));
+    ("type", (function attr -> `LinkType (get_value attr)));
+    ("hreflang", (function attr -> `LinkHREFLang (get_value attr)));
+    ("title", (function attr -> `LinkTitle (get_value attr)));
+    ("length", (function attr -> `LinkLength (int_of_string (get_value attr))));
+  ] in
+  generate_catcher attr_producer None make_link
+
+let make_logo (l : [< `LogoURI of Neturl.url] list) =
+  let uri = match find (function `LogoURI _ -> true | _ -> false) l with
+    | Some (`LogoURI u) -> u
+    | _ -> raise ExpectedLogoURI
+  in uri
+
+let logo_of_xml =
+  let attr_producer = [] in
+  let data_producer = Some (function data -> `LogoURI (url_of_string (make_opts_neturl ()) data)) in
+  generate_catcher attr_producer data_producer make_logo
 
 let rec analyze_tree ctx = function
   | Node (tag, datas) when ctx.state = Root && tag_is tag "entry" ->
