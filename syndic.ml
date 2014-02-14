@@ -14,6 +14,7 @@ type rel =
   | Self
   | Enclosure
   | Via
+  | Link of Neturl.url
 
 type ty_content =
   | Html
@@ -43,10 +44,10 @@ type generator = {
 type link = {
   href: Neturl.url; (* iri *)
   rel: rel;
-  typemedia: string;
-  hreflang: string;
-  title: string;
-  length: int;
+  type_media: string option;
+  hreflang: string option;
+  title: string option;
+  length: int option;
 }
 
 type feed = {
@@ -114,6 +115,8 @@ exception ExpectedAuthorName
 exception ExpectedCategoryTerm
 exception ExpectedGeneratorContent
 exception ExpectedIconURI
+exception ExpectedIdURI
+exception ExpectedLinkHREF
 
 (* Util *)
 
@@ -297,10 +300,75 @@ let make_icon (l : [< `IconURI of Neturl.url] list) =
   in uri
 
 let icon_of_xml ctx (tag, datas) =
-  let catch_data = if datas_has_leaf datas then [`IconURI (url_of_string (make_opts_neturl ()) (get_leaf datas))] else [] in
-  make_icon catch_data
+  let catch_data =
+    if datas_has_leaf datas
+    then [`IconURI (url_of_string (make_opts_neturl ()) (get_leaf datas))]
+    else []
+  in make_icon catch_data
 
 (* RFC Compliant (or raise error) *)
+
+let make_id (l : [< `IdURI of Neturl.url] list) =
+  let uri = match find (function `IdURI _ -> true | _ -> false) l with
+    | Some (`IdURI u) -> u
+    | _ -> raise ExpectedIdURI
+  in uri
+
+let id_of_xml ctx (tag, datas) =
+  let catch_data =
+    if datas_has_leaf datas
+    then [`IdURI (url_of_string (make_opts_neturl ()) (get_leaf datas))]
+    else []
+  in make_id catch_data
+
+(* RFC Compliant (or raise error) *)
+
+let make_link (l : [< `LinkHREF of Neturl.url | `LinkRel of rel | `LinkType of string | `LinkHREFLang of string | `LinkTitle of string | `LinkLength of int] list) =
+  let href = match find (function `LinkHREF _ -> true | _ -> false) l with
+    | Some (`LinkHREF u) -> u
+    | _ -> raise ExpectedLinkHREF
+  in let rel = match find (function `LinkRel _ -> true | _ -> false) l with
+    | Some (`LinkRel r) -> r
+    | _ -> Alternate (* cf. RFC 4287 § 4.2.7.2 *)
+  in let type_media = match find (function `LinkType _ -> true | _ -> false) l with
+    | Some (`LinkType t) -> Some t
+    | _ -> None
+  in let hreflang = match find (function `LinkHREFLang _ -> true | _ -> false) l with
+    | Some (`LinkHREFLang l) -> Some l
+    | _ -> None
+  in let title = match find (function `LinkTitle _ -> true | _ -> false) l with
+    | Some (`LinkTitle s) -> Some s
+    | _ -> None
+  in let length = match find (function `LinkLength _ -> true | _ -> false) l with
+    | Some (`LinkLength i) -> Some i
+    | _ -> None
+  in { href; rel; type_media; hreflang; title; length; }
+
+let rel_of_string s = match String.lowercase (String.trim s) with
+  | "alternate" -> Alternate
+  | "related" -> Related
+  | "self" -> Self
+  | "enclosure" -> Enclosure
+  | "via" -> Via
+  | uri -> Link (url_of_string (make_opts_neturl ()) uri)
+
+let link_of_xml ctx (tag, datas) =
+  let rec catch_attr acc = function
+    | attr :: r when attr_is attr "href" ->
+      catch_attr ((`LinkHREF (url_of_string (make_opts_neturl ()) (get_value attr))) :: acc) r
+    | attr :: r when attr_is attr "rel" ->
+      catch_attr ((`LinkRel (rel_of_string (get_value attr))) :: acc) r
+    | attr :: r when attr_is attr "type" ->
+      catch_attr ((`LinkType (get_value attr)) :: acc) r
+    | attr :: r when attr_is attr "hreflang" ->
+      catch_attr ((`LinkHREFLang (get_value attr)) :: acc) r
+    | attr :: r when attr_is attr "title" ->
+      catch_attr ((`LinkTitle (get_value attr)) :: acc) r
+    | attr :: r when attr_is attr "length" ->
+      catch_attr ((`LinkLength (int_of_string (get_value attr))) :: acc) r
+    | _ :: r -> catch_attr acc r
+    | [] -> acc
+  in make_link (catch_attr [] (get_attr tag))
 
 let rec analyze_tree ctx = function
   | Node (tag, datas) when ctx.state = Root && tag_is tag "entry" ->
