@@ -12,7 +12,7 @@ CMX = $(ML:.ml=.cmx)
 
 
 OCAMLDEP = ocamlfind ocamldep
-CAMLFLAGS = -w Aelz -linkpkg -package xmlm,netstring
+CAMLFLAGS = -w Aelz -linkpkg -package xmlm,netstring,uri
 OCAMLC = ocamlfind ocamlc $(CAMLFLAGS)
 OCAMLOPT = ocamlfind ocamlopt $(CAMLFLAGS)
 OCAMLDOC = ocamlfind ocamldoc -html -d $(ROOT)/doc
