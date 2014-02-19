@@ -180,34 +180,29 @@ type opts_neturl = {
 
 (* Exception *)
 
-exception Malformed_URL of string
+type expected_type =
+  | EAttr of string
+  | ETag of string
+  | EData
+
+exception Expected of expected_type * expected_type
 exception ExpectedLeaf
-exception ExpectedAuthorName
-exception ExpectedCategoryTerm
-exception ExpectedGeneratorContent
-exception ExpectedIconURI
-exception ExpectedIdURI
-exception ExpectedLinkHREF
-exception ExpectedLogoURI
-exception ExpectedPublishedDate
-exception ExpectedRightsData
-exception ExpectedOneAuthorSource
-exception ExpectedIdSource
-exception ExpectedOneLinkSource
-exception ExpectedTitleSource
-exception ExpectedTitleData
-exception ExpectedSubtitleData
-exception ExpectedUpdatedData
-exception ExpectedOneAuthorEntry
-exception ExpectedIdEntry
-exception ExpectedTitleEntry
-exception ExpectedDataSummary
-exception ExpectedUpdatedEntry
-exception ExpectedIdFeed
-exception ExpectedOneLinkFeed
-exception ExpectedTitleFeed
-exception ExpectedUpdatedFeed
-exception ExpectedNodeRoot
+
+let string_of_expectation (a, b) =
+  let string_of_expected_type = function
+    | EAttr a -> a ^ "="
+    | ETag a -> "<" ^ a ^ ">"
+    | EData -> "data"
+  in let buffer = Buffer.create 16 in
+  Buffer.add_string buffer "Expected ";
+  Buffer.add_string buffer (string_of_expected_type a);
+  Buffer.add_string buffer " in ";
+  Buffer.add_string buffer (string_of_expected_type b);
+  Buffer.contents buffer
+
+exception Malformed_URL of string
+
+let raise_expectation data in_data = raise (Expected (data, in_data))
 
 (* Util *)
 
@@ -335,7 +330,7 @@ let generate_catcher'
 let make_author (l : [< `AuthorName of string | `AuthorURI of Uri.t | `AuthorEmail of string] list) =
   let name = match find (function `AuthorName _ -> true | _ -> false) l with
     | Some (`AuthorName s) -> s
-    | _ -> raise ExpectedAuthorName
+    | _ -> raise_expectation (ETag "name") (ETag "author")
   in let uri = match find (function `AuthorURI _ -> true | _ -> false) l with
     | Some (`AuthorURI u) -> Some u
     | _ -> None
@@ -361,7 +356,7 @@ let author_of_xml (tag, datas) =
 let make_category (l : [< `CategoryTerm of string | `CategoryScheme of Uri.t | `CategoryLabel of string] list) =
   let term = match find (function `CategoryTerm _ -> true | _ -> false) l with
     | Some (`CategoryTerm t) -> t
-    | _ -> raise ExpectedCategoryTerm
+    | _ -> raise_expectation (EAttr "term") (ETag "category")
   in let scheme = match find (function `CategoryScheme _ -> true | _ -> false) l with
     | Some (`CategoryScheme u) -> Some u
     | _ -> None
@@ -392,7 +387,7 @@ let contributor_of_xml = author_of_xml
 let make_generator (l : [< `GeneratorURI of Uri.t | `GeneratorVersion of string | `GeneratorContent of string] list) =
   let content = match find (function `GeneratorContent _ -> true | _ -> false) l with
     | Some ((`GeneratorContent c)) -> c
-    | _ -> raise ExpectedGeneratorContent
+    | _ -> raise_expectation EData (ETag "generator")
   in let version = match find (function `GeneratorVersion _ -> true | _ -> false) l with
     | Some ((`GeneratorVersion v)) -> Some v
     | _ -> None
@@ -417,7 +412,7 @@ let generator_of_xml (tag, datas) =
 let make_icon (l : [< `IconURI of Uri.t] list) =
   let uri = match find (fun (`IconURI _) -> true) l with
     | Some (`IconURI u) -> u
-    | _ -> raise ExpectedIconURI
+    | _ -> raise_expectation EData (ETag "icon")
   in uri
 
 let icon_of_xml (tag, datas) =
@@ -432,7 +427,7 @@ let icon_of_xml (tag, datas) =
 let make_id (l : [< `IdURI of Uri.t] list) =
   let uri = match find (fun (`IdURI _) -> true) l with
     | Some (`IdURI u) -> u
-    | _ -> raise ExpectedIdURI
+    | _ -> raise_expectation EData (ETag "id")
   in uri
 
 let id_of_xml (tag, datas) =
@@ -447,7 +442,7 @@ let id_of_xml (tag, datas) =
 let make_link (l : [< `LinkHREF of Uri.t | `LinkRel of rel | `LinkType of string | `LinkHREFLang of string | `LinkTitle of string | `LinkLength of int] list) =
   let href = match find (function `LinkHREF _ -> true | _ -> false) l with
     | Some (`LinkHREF u) -> u
-    | _ -> raise ExpectedLinkHREF
+    | _ -> raise_expectation (EAttr "href") (ETag "link")
   in let rel = match find (function `LinkRel _ -> true | _ -> false) l with
     | Some (`LinkRel r) -> r
     | _ -> Alternate (* cf. RFC 4287 § 4.2.7.2 *)
@@ -489,7 +484,7 @@ let link_of_xml =
 let make_logo (l : [< `LogoURI of Uri.t] list) =
   let uri = match find (fun (`LogoURI _) -> true) l with
     | Some (`LogoURI u) -> u
-    | _ -> raise ExpectedLogoURI
+    | _ -> raise_expectation EData (ETag "logo")
   in uri
 
 let logo_of_xml =
@@ -501,7 +496,7 @@ let logo_of_xml =
 let make_published (l : [< `PublishedDate of string] list) =
   let date = match find (fun (`PublishedDate _) -> true) l with
     | Some (`PublishedDate d) -> d
-    | _ -> raise ExpectedPublishedDate
+    | _ -> raise_expectation EData (ETag "published")
   in date
 
 let published_of_xml =
@@ -514,7 +509,7 @@ let published_of_xml =
 let make_rights (l : [< `RightData of string] list) =
   let rights = match find (fun (`RightData _) -> true) l with
     | Some (`RightData d) -> d
-    | _ -> raise ExpectedRightsData
+    | _ -> raise_expectation EData (ETag "rights")
   in rights
 
 let rights_of_xml =
@@ -527,7 +522,7 @@ let rights_of_xml =
 let make_title (l : [< `TitleData of string] list) =
   let title = match find (fun (`TitleData _) -> true) l with
     | Some (`TitleData d) -> d
-    | _ -> raise ExpectedTitleData
+    | _ -> raise_expectation EData (ETag "title")
   in title
 
 let title_of_xml =
@@ -540,7 +535,7 @@ let title_of_xml =
 let make_subtitle (l : [< `SubtitleData of string] list) =
   let subtitle = match find (fun (`SubtitleData _) -> true) l with
     | Some (`SubtitleData d) -> d
-    | _ -> raise ExpectedSubtitleData
+    | _ -> raise_expectation EData (ETag "subtitle")
   in subtitle
 
 let subtitle_of_xml =
@@ -553,7 +548,7 @@ let subtitle_of_xml =
 let make_updated (l : [< `UpdatedData of string] list) =
   let updated = match find (fun (`UpdatedData _) -> true) l with
     | Some (`UpdatedData d) -> d
-    | _ -> raise ExpectedUpdatedData
+    | _ -> raise_expectation EData (ETag "updated")
   in updated
 
 let updated_of_xml =
@@ -565,7 +560,7 @@ let updated_of_xml =
 
 let make_source (l : [< source'] list) =
   let author =
-    (function [] -> raise ExpectedOneAuthorSource | x :: r -> x, r)
+    (function [] -> raise_expectation (ETag "author") (ETag "source") | x :: r -> x, r)
     (List.fold_left (fun acc -> function `SourceAuthor x -> x :: acc | _ -> acc) [] l)
   in let category = List.fold_left (fun acc -> function `SourceCategory x -> x :: acc | _ -> acc) [] l
   in let contributor = List.fold_left (fun acc -> function `SourceContributor x -> x :: acc | _ -> acc) [] l
@@ -577,9 +572,9 @@ let make_source (l : [< source'] list) =
     | _ -> None
   in let id = match find (function `SourceId _ -> true | _ -> false) l with
     | Some (`SourceId i) -> i
-    | _ -> raise ExpectedIdSource
+    | _ -> raise_expectation (ETag "id") (ETag "source")
   in let link =
-    (function [] -> raise ExpectedOneLinkSource | x :: r -> (x, r))
+    (function [] -> raise_expectation (ETag "link") (ETag "source") | x :: r -> (x, r))
     (List.fold_left (fun acc -> function `SourceLink x -> x :: acc | _ -> acc) [] l)
   in let logo = match find (function `SourceLogo _ -> true | _ -> false) l with
     | Some (`SourceLogo u) -> Some u
@@ -592,7 +587,7 @@ let make_source (l : [< source'] list) =
     | _ -> None
   in let title = match find (function `SourceTitle _ -> true | _ -> false) l with
     | Some (`SourceTitle s) -> s
-    | _ -> raise ExpectedTitleSource
+    | _ -> raise_expectation (ETag "title") (ETag "source")
   in let updated = match find (function `SourceUpdated _ -> true | _ -> false) l with
     | Some (`SourceUpdated d) -> Some d
     | _ -> None
@@ -647,7 +642,7 @@ let content_of_xml =
 let make_summary (l : [< `SummaryData of string] list) =
   let data = match find (fun (`SummaryData _) -> true) l with
     | Some (`SummaryData d) -> d
-    | _ -> raise ExpectedDataSummary
+    | _ -> raise_expectation EData (ETag "summary")
   in data
 
 let summary_of_xml =
@@ -658,13 +653,13 @@ let summary_of_xml =
 
 let make_entry (l : [< entry'] list) =
   let author =
-    (function [] -> raise ExpectedOneAuthorEntry | x :: r -> x, r)
+    (function [] -> raise_expectation (ETag "author") (ETag "entry") | x :: r -> x, r)
     (List.fold_left (fun acc -> function `EntryAuthor x -> x :: acc | _ -> acc) [] l)
   in let category = List.fold_left (fun acc -> function `EntryCategory x -> x :: acc | _ -> acc) [] l
   in let contributor = List.fold_left (fun acc -> function `EntryContributor x -> x :: acc | _ -> acc) [] l
   in let id = match find (function `EntryId _ -> true | _ -> false) l with
     | Some (`EntryId i) -> i
-    | _ -> raise ExpectedIdEntry
+    | _ -> raise_expectation (ETag "id") (ETag "entry")
   in let link = List.fold_left (fun acc -> function `EntryLink x -> x :: acc | _ -> acc) [] l
   in let published = match find (function `EntryPublished _ -> true | _ -> false) l with
     | Some (`EntryPublished s) -> Some s
@@ -681,10 +676,10 @@ let make_entry (l : [< entry'] list) =
     | _ -> None
   in let title = match find (function `EntryTitle _ -> true | _ -> false) l with
     | Some (`EntryTitle t) -> t
-    | _ -> raise ExpectedTitleEntry
+    | _ -> raise_expectation (ETag "title") (ETag "entry")
   in let updated = match find (function `EntryUpdated _ -> true | _ -> false) l with
     | Some (`EntryUpdated u) -> u
-    | _ -> raise ExpectedUpdatedEntry
+    | _ -> raise_expectation (ETag "updated") (ETag "entry")
   in ({ author; category; content; contributor; id; link; published; rights; source; summary; title; updated; } : entry)
 
 let entry_of_xml =
@@ -718,9 +713,9 @@ let make_feed (l : [< feed'] list) =
     | _ -> None
   in let id = match find (function `FeedId _ -> true | _ -> false) l with
     | Some (`FeedId i) -> i
-    | _ -> raise ExpectedIdFeed
+    | _ -> raise_expectation (ETag "id") (ETag "feed")
   in let link =
-    (function [] -> raise ExpectedOneLinkFeed | x :: r -> (x, r))
+    (function [] -> raise_expectation (ETag "link") (ETag "feed") | x :: r -> (x, r))
     (List.fold_left (fun acc -> function `FeedLink x -> x :: acc | _ -> acc) [] l)
   in let logo = match find (function `FeedLogo _ -> true | _ -> false) l with
     | Some (`FeedLogo l) -> Some l
@@ -733,10 +728,10 @@ let make_feed (l : [< feed'] list) =
     | _ -> None
   in let title = match find (function `FeedTitle _ -> true | _ -> false) l with
     | Some (`FeedTitle t) -> t
-    | _ -> raise ExpectedTitleFeed
+    | _ -> raise_expectation (ETag "title") (ETag "feed")
   in let updated = match find (function `FeedUpdated _ -> true | _ -> false) l with
     | Some (`FeedUpdated u) -> u
-    | _ -> raise ExpectedUpdatedFeed
+    | _ -> raise_expectation (ETag "updated") (ETag "feed")
   in let entry = List.fold_left (fun acc -> function `FeedEntry x -> x :: acc | _ -> acc) [] l
   in ({ author; category; contributor; generator; icon; id; link; logo; rights; subtitle; title; updated; entry; } : feed)
 
@@ -760,7 +755,7 @@ let feed_of_xml =
 
 let analyze_tree = function
   | Node (tag, datas) -> feed_of_xml (tag, datas)
-  | _ -> raise ExpectedNodeRoot
+  | _ -> raise_expectation (ETag "feed") (ETag "root")
 
 let produce_tree input =
   let el tag datas = Node (tag, datas) in
@@ -769,4 +764,5 @@ let produce_tree input =
   in tree
 
 let () = let ctx = make_context (`Channel stdin) in
-  let _ = analyze_tree (produce_tree ctx.input) in ()
+  try let _ = analyze_tree (produce_tree ctx.input) in ()
+  with Expected (a, b) -> print_endline (string_of_expectation (a, b))
