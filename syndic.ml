@@ -306,18 +306,18 @@ let generate_catcher
   in
   let rec catch_attr acc = function
     | attr :: r -> begin match get_producer (get_attr_name attr) attr_producer with
-      | Some f -> catch_attr ((f attr) :: acc) r
+      | Some f -> catch_attr ((f acc attr) :: acc) r
       | None -> catch_attr acc r end
     | [] -> acc
   in
   let rec catch_datas acc = function
     | (Node (tag, datas)) :: r ->
       begin match get_producer (get_tag_name tag) data_producer with
-      | Some f -> catch_datas ((f (tag, datas)) :: acc) r
+      | Some f -> catch_datas ((f acc (tag, datas)) :: acc) r
       | None -> catch_datas acc r end
     | (Leaf str) :: r ->
       begin match leaf_producer with
-      | Some f -> catch_datas ((f str) :: acc) r
+      | Some f -> catch_datas ((f acc str) :: acc) r
       | None -> catch_datas acc r end
     | [] -> acc
   in
@@ -353,9 +353,9 @@ let author_email_of_xml (tag, datas) =
 
 let author_of_xml =
   let data_producer = [
-    ("name", (fun a -> `AuthorName (author_name_of_xml a)));
-    ("uri", (fun a -> `AuthorURI (author_uri_of_xml a)));
-    ("email", (fun a -> `AuthorEmail (author_email_of_xml a)));
+    ("name", (fun ctx a -> `AuthorName (author_name_of_xml a)));
+    ("uri", (fun ctx a -> `AuthorURI (author_uri_of_xml a)));
+    ("email", (fun ctx a -> `AuthorEmail (author_email_of_xml a)));
   ] in
   generate_catcher ~data_producer make_author
 
@@ -375,9 +375,9 @@ let make_category (l : [< `CategoryTerm of string | `CategoryScheme of Uri.t | `
 
 let category_of_xml =
   let attr_producer = [
-    ("term", (fun attr -> `CategoryTerm (get_value attr)));
-    ("scheme", (fun attr -> `CategoryScheme (Uri.of_string (get_value attr))));
-    ("label", (fun attr -> `CategoryLabel (get_value attr)))
+    ("term", (fun ctx attr -> `CategoryTerm (get_value attr)));
+    ("scheme", (fun ctx attr -> `CategoryScheme (Uri.of_string (get_value attr))));
+    ("label", (fun ctx attr -> `CategoryLabel (get_value attr)))
   ] in
   generate_catcher ~attr_producer make_category
 
@@ -402,8 +402,8 @@ let make_generator (l : [< `GeneratorURI of Uri.t | `GeneratorVersion of string 
 
 let generator_of_xml =
   let attr_producer = [
-    ("version", (fun attr -> `GeneratorVersion (get_value attr)));
-    ("uri", (fun attr -> `GeneratorURI (Uri.of_string (get_value attr))));
+    ("version", (fun ctx attr -> `GeneratorVersion (get_value attr)));
+    ("uri", (fun ctx attr -> `GeneratorURI (Uri.of_string (get_value attr))));
   ] in
   generate_catcher ~attr_producer make_generator
 
@@ -416,7 +416,7 @@ let make_icon (l : [< `IconURI of Uri.t] list) =
   in uri
 
 let icon_of_xml =
-  let leaf_producer data = `IconURI (Uri.of_string data)
+  let leaf_producer ctx data = `IconURI (Uri.of_string data)
   in generate_catcher ~leaf_producer make_icon
 
 (* RFC Compliant (or raise error) *)
@@ -428,7 +428,7 @@ let make_id (l : [< `IdURI of Uri.t] list) =
   in uri
 
 let id_of_xml =
-  let leaf_producer data = `IdURI (Uri.of_string data)
+  let leaf_producer ctx data = `IdURI (Uri.of_string data)
   in generate_catcher ~leaf_producer make_id
 
 (* RFC Compliant (or raise error) *)
@@ -464,12 +464,12 @@ let rel_of_string s = match String.lowercase (String.trim s) with
 
 let link_of_xml =
   let attr_producer = [
-    ("href", (function attr -> `LinkHREF (Uri.of_string (get_value attr))));
-    ("rel", (function attr -> `LinkRel (rel_of_string (get_value attr))));
-    ("type", (function attr -> `LinkType (get_value attr)));
-    ("hreflang", (function attr -> `LinkHREFLang (get_value attr)));
-    ("title", (function attr -> `LinkTitle (get_value attr)));
-    ("length", (function attr -> `LinkLength (int_of_string (get_value attr))));
+    ("href", (fun ctx attr -> `LinkHREF (Uri.of_string (get_value attr))));
+    ("rel", (fun ctx attr -> `LinkRel (rel_of_string (get_value attr))));
+    ("type", (fun ctx attr -> `LinkType (get_value attr)));
+    ("hreflang", (fun ctx attr -> `LinkHREFLang (get_value attr)));
+    ("title", (fun ctx attr -> `LinkTitle (get_value attr)));
+    ("length", (fun ctx attr -> `LinkLength (int_of_string (get_value attr))));
   ] in
   generate_catcher ~attr_producer make_link
 
@@ -482,7 +482,7 @@ let make_logo (l : [< `LogoURI of Uri.t] list) =
   in uri
 
 let logo_of_xml =
-  let leaf_producer data = `LogoURI (Uri.of_string data) in
+  let leaf_producer ctx data = `LogoURI (Uri.of_string data) in
   generate_catcher ~leaf_producer make_logo
 
 (* RFC Compliant (or raise error) *)
@@ -495,7 +495,7 @@ let make_published (l : [< `PublishedDate of string] list) =
 
 let published_of_xml =
   let attr_producer = [] in
-  let leaf_producer data = `PublishedDate data in
+  let leaf_producer ctx data = `PublishedDate data in
   generate_catcher ~attr_producer ~leaf_producer make_published
 
 (* RFC Compliant (or raise error) *)
@@ -508,7 +508,7 @@ let make_rights (l : [< `RightData of string] list) =
 
 let rights_of_xml =
   let attr_producer = [] in
-  let leaf_producer data = `RightData data in
+  let leaf_producer ctx data = `RightData data in
   generate_catcher ~attr_producer ~leaf_producer make_rights
 
 (* RFC Compliant (or raise error) *)
@@ -521,7 +521,7 @@ let make_title (l : [< `TitleData of string] list) =
 
 let title_of_xml =
   let attr_producer = [] in
-  let leaf_producer data = `TitleData data in
+  let leaf_producer ctx data = `TitleData data in
   generate_catcher ~attr_producer ~leaf_producer make_title
 
 (* RFC Compliant (or raise error) *)
@@ -534,7 +534,7 @@ let make_subtitle (l : [< `SubtitleData of string] list) =
 
 let subtitle_of_xml =
   let attr_producer = [] in
-  let leaf_producer data = `SubtitleData data in
+  let leaf_producer ctx data = `SubtitleData data in
   generate_catcher ~attr_producer ~leaf_producer make_subtitle
 
 (* RFC Compliant (or raise error) *)
@@ -547,7 +547,7 @@ let make_updated (l : [< `UpdatedData of string] list) =
 
 let updated_of_xml =
   let attr_producer = [] in
-  let leaf_producer data = `UpdatedData data in
+  let leaf_producer ctx data = `UpdatedData data in
   generate_catcher ~attr_producer ~leaf_producer make_updated
 
 (* RFC Compliant (or raise error) *)
@@ -589,18 +589,18 @@ let make_source (l : [< source'] list) =
 
 let source_of_xml =
   let data_producer = [
-    ("author", (function a -> `SourceAuthor (author_of_xml a)));
-    ("category", (function a -> `SourceCategory (category_of_xml a)));
-    ("contributor", (function a -> `SourceContributor (contributor_of_xml a)));
-    ("generator", (function a -> `SourceGenerator (generator_of_xml a)));
-    ("icon", (function a -> `SourceIcon (icon_of_xml a)));
-    ("id", (function a -> `SourceId (id_of_xml a)));
-    ("link", (function a -> `SourceLink (link_of_xml a)));
-    ("logo", (function a -> `SourceLogo (logo_of_xml a)));
-    ("rights", (function a -> `SourceRights (rights_of_xml a)));
-    ("subtitle", (function a -> `SourceSubtitle (subtitle_of_xml a)));
-    ("title", (function a -> `SourceTitle (title_of_xml a)));
-    ("updated", (function a -> `SourceUpdated (updated_of_xml a)));
+    ("author", (fun ctx a -> `SourceAuthor (author_of_xml a)));
+    ("category", (fun ctx a -> `SourceCategory (category_of_xml a)));
+    ("contributor", (fun ctx a -> `SourceContributor (contributor_of_xml a)));
+    ("generator", (fun ctx a -> `SourceGenerator (generator_of_xml a)));
+    ("icon", (fun ctx a -> `SourceIcon (icon_of_xml a)));
+    ("id", (fun ctx a -> `SourceId (id_of_xml a)));
+    ("link", (fun ctx a -> `SourceLink (link_of_xml a)));
+    ("logo", (fun ctx a -> `SourceLogo (logo_of_xml a)));
+    ("rights", (fun ctx a -> `SourceRights (rights_of_xml a)));
+    ("subtitle", (fun ctx a -> `SourceSubtitle (subtitle_of_xml a)));
+    ("title", (fun ctx a -> `SourceTitle (title_of_xml a)));
+    ("updated", (fun ctx a -> `SourceUpdated (updated_of_xml a)));
   ] in
   generate_catcher ~data_producer make_source
 
@@ -626,9 +626,9 @@ let type_content_of_string s = match String.lowercase (String.trim s) with
 
 let content_of_xml =
   let attr_producer = [
-    ("type", (fun attr -> `ContentType (type_content_of_string (get_value attr))));
-    ("src", (fun attr -> `ContentSRC (Uri.of_string (get_value attr))));
-  ] in let leaf_producer data = `ContentData data in
+    ("type", (fun ctx attr -> `ContentType (type_content_of_string (get_value attr))));
+    ("src", (fun ctx attr -> `ContentSRC (Uri.of_string (get_value attr))));
+  ] in let leaf_producer ctx data = `ContentData data in
   generate_catcher ~attr_producer ~leaf_producer make_content
 
 (* RFC Compliant (or raise error) *)
@@ -640,7 +640,7 @@ let make_summary (l : [< `SummaryData of string] list) =
   in data
 
 let summary_of_xml =
-  let leaf_producer data = `SummaryData data in
+  let leaf_producer ctx data = `SummaryData data in
   generate_catcher ~leaf_producer make_summary
 
 (* RFC Compliant (or raise error) *)
@@ -678,18 +678,18 @@ let make_entry (l : [< entry'] list) =
 
 let entry_of_xml =
   let data_producer = [
-    ("author", (fun a -> `EntryAuthor (author_of_xml a)));
-    ("category", (fun a -> `EntryCategory (category_of_xml a)));
-    ("contributor", (fun a -> `EntryContributor (contributor_of_xml a)));
-    ("id", (fun a -> `EntryId (id_of_xml a)));
-    ("link", (fun a -> `EntryLink (link_of_xml a)));
-    ("published", (fun a -> `EntryPublished (published_of_xml a)));
-    ("rights", (fun a -> `EntryRights (rights_of_xml a)));
-    ("source", (fun a -> `EntrySource (source_of_xml a)));
-    ("content", (fun a -> `EntryContent (content_of_xml a)));
-    ("summary", (fun a -> `EntrySummary (summary_of_xml a)));
-    ("title", (fun a -> `EntryTitle (title_of_xml a)));
-    ("updated", (fun a -> `EntryUpdated (updated_of_xml a)));
+    ("author", (fun ctx a -> `EntryAuthor (author_of_xml a)));
+    ("category", (fun ctx a -> `EntryCategory (category_of_xml a)));
+    ("contributor", (fun ctx a -> `EntryContributor (contributor_of_xml a)));
+    ("id", (fun ctx a -> `EntryId (id_of_xml a)));
+    ("link", (fun ctx a -> `EntryLink (link_of_xml a)));
+    ("published", (fun ctx a -> `EntryPublished (published_of_xml a)));
+    ("rights", (fun ctx a -> `EntryRights (rights_of_xml a)));
+    ("source", (fun ctx a -> `EntrySource (source_of_xml a)));
+    ("content", (fun ctx a -> `EntryContent (content_of_xml a)));
+    ("summary", (fun ctx a -> `EntrySummary (summary_of_xml a)));
+    ("title", (fun ctx a -> `EntryTitle (title_of_xml a)));
+    ("updated", (fun ctx a -> `EntryUpdated (updated_of_xml a)));
   ] in
   generate_catcher ~data_producer make_entry
 
@@ -731,19 +731,19 @@ let make_feed (l : [< feed'] list) =
 
 let feed_of_xml =
   let data_producer = [
-    ("author", (fun a -> `FeedAuthor (author_of_xml a)));
-    ("category", (fun a -> `FeedCategory (category_of_xml a)));
-    ("contributor", (fun a -> `FeedContributor (contributor_of_xml a)));
-    ("generator", (fun a -> `FeedGenerator (generator_of_xml a)));
-    ("icon", (fun a -> `FeedIcon (icon_of_xml a)));
-    ("id", (fun a -> `FeedId (id_of_xml a)));
-    ("link", (fun a -> `FeedLink (link_of_xml a)));
-    ("logo", (fun a -> `FeedLogo (logo_of_xml a)));
-    ("rights", (fun a -> `FeedRights (rights_of_xml a)));
-    ("subtitle", (fun a -> `FeedSubtitle (subtitle_of_xml a)));
-    ("title", (fun a -> `FeedTitle (title_of_xml a)));
-    ("updated", (fun a -> `FeedUpdated (updated_of_xml a)));
-    ("entry", (fun a -> `FeedEntry (entry_of_xml a)));
+    ("author", (fun ctx a -> `FeedAuthor (author_of_xml a)));
+    ("category", (fun ctx a -> `FeedCategory (category_of_xml a)));
+    ("contributor", (fun ctx a -> `FeedContributor (contributor_of_xml a)));
+    ("generator", (fun ctx a -> `FeedGenerator (generator_of_xml a)));
+    ("icon", (fun ctx a -> `FeedIcon (icon_of_xml a)));
+    ("id", (fun ctx a -> `FeedId (id_of_xml a)));
+    ("link", (fun ctx a -> `FeedLink (link_of_xml a)));
+    ("logo", (fun ctx a -> `FeedLogo (logo_of_xml a)));
+    ("rights", (fun ctx a -> `FeedRights (rights_of_xml a)));
+    ("subtitle", (fun ctx a -> `FeedSubtitle (subtitle_of_xml a)));
+    ("title", (fun ctx a -> `FeedTitle (title_of_xml a)));
+    ("updated", (fun ctx a -> `FeedUpdated (updated_of_xml a)));
+    ("entry", (fun ctx a -> `FeedEntry (entry_of_xml a)));
   ] in
   generate_catcher ~data_producer make_feed
 
