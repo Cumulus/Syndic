@@ -645,10 +645,14 @@ let summary_of_xml =
 
 (* RFC Compliant (or raise error) *)
 
-let make_entry (l : [< entry'] list) =
-  let author =
-    (function [] -> raise_expectation (ETag "author") (ETag "entry") | x :: r -> x, r)
-    (List.fold_left (fun acc -> function `EntryAuthor x -> x :: acc | _ -> acc) [] l)
+let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
+  let feed_author = match find (function `FeedAuthor _ -> true | _ -> false) feed with
+    | Some (`FeedAuthor a) -> Some a
+    | _ -> None
+  in let author =
+    (* default author is feed/author, cf. RFC 4287 § 4.1.2 *)
+    (function None, [] -> raise_expectation (ETag "author") (ETag "entry") | Some a, [] -> a, [] | _, x :: r -> x, r)
+    (feed_author, List.fold_left (fun acc -> function `EntryAuthor x -> x :: acc | _ -> acc) [] l)
   in let category = List.fold_left (fun acc -> function `EntryCategory x -> x :: acc | _ -> acc) [] l
   in let contributor = List.fold_left (fun acc -> function `EntryContributor x -> x :: acc | _ -> acc) [] l
   in let id = match find (function `EntryId _ -> true | _ -> false) l with
@@ -676,7 +680,7 @@ let make_entry (l : [< entry'] list) =
     | _ -> raise_expectation (ETag "updated") (ETag "entry")
   in ({ author; category; content; contributor; id; link; published; rights; source; summary; title; updated; } : entry)
 
-let entry_of_xml =
+let entry_of_xml feed =
   let data_producer = [
     ("author", (fun ctx a -> `EntryAuthor (author_of_xml a)));
     ("category", (fun ctx a -> `EntryCategory (category_of_xml a)));
@@ -691,7 +695,7 @@ let entry_of_xml =
     ("title", (fun ctx a -> `EntryTitle (title_of_xml a)));
     ("updated", (fun ctx a -> `EntryUpdated (updated_of_xml a)));
   ] in
-  generate_catcher ~data_producer make_entry
+  generate_catcher ~data_producer (make_entry feed)
 
 (* RFC Compliant (or raise error) *)
 
@@ -743,7 +747,7 @@ let feed_of_xml =
     ("subtitle", (fun ctx a -> `FeedSubtitle (subtitle_of_xml a)));
     ("title", (fun ctx a -> `FeedTitle (title_of_xml a)));
     ("updated", (fun ctx a -> `FeedUpdated (updated_of_xml a)));
-    ("entry", (fun ctx a -> `FeedEntry (entry_of_xml a)));
+    ("entry", (fun ctx a -> `FeedEntry (entry_of_xml ctx a)));
   ] in
   generate_catcher ~data_producer make_feed
 
