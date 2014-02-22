@@ -129,6 +129,7 @@ type entry' = [
 type feed = {
   (*
    * si tout les atom:entry ne contiennent pas atom:author
+   * et atom:feed ne contient atom:author
    * ne respecte pas la RFC
    *)
   author: author list;
@@ -460,7 +461,7 @@ let rel_of_string s = match String.lowercase (String.trim s) with
   | "self" -> Self
   | "enclosure" -> Enclosure
   | "via" -> Via
-  | uri -> Link (Uri.of_string uri)
+  | uri -> Link (Uri.of_string uri) (* RFC 4287 § 4.2.7.2 *)
 
 let link_of_xml =
   let attr_producer = [
@@ -645,6 +646,65 @@ let summary_of_xml =
 
 (* RFC Compliant (or raise error) *)
 
+module LinkOrder
+  : Set.OrderedType with type t = string * string =
+struct
+  type t = string * string
+  let compare (a : t) (b : t) = match compare (fst a) (fst b) with
+    | 0 -> compare (snd a) (snd b)
+    | n -> n
+end
+
+module LinkSet = Set.Make(LinkOrder)
+
+exception DuplicateLink of ((Uri.t * string * string) * (string * string))
+
+let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
+  let ty = (function Some a -> a | None -> "(none)") type_media in
+  let hl = (function Some a -> a | None -> "(none)") hreflang in
+  let ty' = (function "" -> "(none)" | s -> s) type_media' in
+  let hl' = (function "" -> "(none)" | s -> s) hreflang' in
+  raise (DuplicateLink ((href, ty, hl), (ty', hl')))
+
+let string_of_duplicate_exception ((uri, ty, hl), (ty', hl')) =
+  let buffer = Buffer.create 16 in
+  Buffer.add_string buffer "Duplicate link between [href: ";
+  Buffer.add_string buffer (Uri.to_string uri);
+  Buffer.add_string buffer ", ty: ";
+  Buffer.add_string buffer ty;
+  Buffer.add_string buffer ", hl: ";
+  Buffer.add_string buffer hl;
+  Buffer.add_string buffer "] and [ty: ";
+  Buffer.add_string buffer ty';
+  Buffer.add_string buffer ", hl: ";
+  Buffer.add_string buffer hl';
+  Buffer.add_string buffer "]";
+  Buffer.contents buffer
+
+let uniq_link_alternate (l : link list) =
+  let rec aux acc = function
+    | [] -> l
+    | ({ rel; type_media = Some ty; hreflang = Some hl; _ } as x) :: r when rel = Alternate ->
+      if LinkSet.mem (ty, hl) acc
+      then raise_duplicate_string x (LinkSet.find (ty, hl) acc)
+      else aux (LinkSet.add (ty, hl) acc) r
+    | ({ rel; type_media = None; hreflang = Some hl; _ } as x) :: r when rel = Alternate ->
+      if LinkSet.mem ("", hl) acc
+      then raise_duplicate_string x (LinkSet.find ("", hl) acc)
+      else aux (LinkSet.add ("", hl) acc) r
+    | ({ rel; type_media = Some ty; hreflang = None; _ } as x) :: r when rel = Alternate ->
+      if LinkSet.mem (ty, "") acc
+      then raise_duplicate_string x (LinkSet.find (ty, "") acc)
+      else aux (LinkSet.add (ty, "") acc) r
+    | ({ rel; type_media = None; hreflang = None; _ } as x) :: r when rel = Alternate ->
+      if LinkSet.mem ("", "") acc
+      then raise_duplicate_string x (LinkSet.find ("", "") acc)
+      else aux (LinkSet.add ("", "") acc) r
+
+    | x :: r -> aux acc r
+    | x :: r -> aux acc r
+  in aux LinkSet.empty l
+
 let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
   let feed_author = match find (function `FeedAuthor _ -> true | _ -> false) feed with
     | Some (`FeedAuthor a) -> Some a
@@ -678,7 +738,7 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
   in let updated = match find (function `EntryUpdated _ -> true | _ -> false) l with
     | Some (`EntryUpdated u) -> u
     | _ -> raise_expectation (ETag "updated") (ETag "entry")
-  in ({ author; category; content; contributor; id; link; published; rights; source; summary; title; updated; } : entry)
+  in ({ author; category; content; contributor; id; link = uniq_link_alternate link; published; rights; source; summary; title; updated; } : entry)
 
 let entry_of_xml feed =
   let data_producer = [
@@ -763,4 +823,6 @@ let produce_tree input =
 
 let () = let ctx = make_context (`Channel stdin) in
   try let _ = analyze_tree (produce_tree ctx.input) in ()
-  with Expected (a, b) -> print_endline (string_of_expectation (a, b))
+  with
+    | Expected (a, b) -> print_endline (string_of_expectation (a, b))
+    | DuplicateLink (a, b) -> print_endline (string_of_duplicate_exception (a, b))
