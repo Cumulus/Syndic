@@ -205,6 +205,15 @@ exception Malformed_URL of string
 
 let raise_expectation data in_data = raise (Expected (data, in_data))
 
+exception DuplicateLink of ((Uri.t * string * string) * (string * string))
+
+let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
+  let ty = (function Some a -> a | None -> "(none)") type_media in
+  let hl = (function Some a -> a | None -> "(none)") hreflang in
+  let ty' = (function "" -> "(none)" | s -> s) type_media' in
+  let hl' = (function "" -> "(none)" | s -> s) hreflang' in
+  raise (DuplicateLink ((href, ty, hl), (ty', hl')))
+
 (* Util *)
 
 let find f l = try Some (List.find f l) with Not_found -> None
@@ -657,15 +666,6 @@ end
 
 module LinkSet = Set.Make(LinkOrder)
 
-exception DuplicateLink of ((Uri.t * string * string) * (string * string))
-
-let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
-  let ty = (function Some a -> a | None -> "(none)") type_media in
-  let hl = (function Some a -> a | None -> "(none)") hreflang in
-  let ty' = (function "" -> "(none)" | s -> s) type_media' in
-  let hl' = (function "" -> "(none)" | s -> s) hreflang' in
-  raise (DuplicateLink ((href, ty, hl), (ty', hl')))
-
 let string_of_duplicate_exception ((uri, ty, hl), (ty', hl')) =
   let buffer = Buffer.create 16 in
   Buffer.add_string buffer "Duplicate link between [href: ";
@@ -809,18 +809,11 @@ let feed_of_xml =
   ] in
   generate_catcher ~data_producer make_feed
 
-let analyze_tree = function
-  | Node (tag, datas) -> feed_of_xml (tag, datas)
-  | _ -> raise_expectation (ETag "feed") (ETag "root")
-
-let produce_tree input =
+let analyze input =
   let el tag datas = Node (tag, datas) in
   let data data = Leaf data in
-  let (_, tree) = Xmlm.input_doc_tree ~el ~data input
-  in tree
-
-let () = let ctx = make_context (`Channel stdin) in
-  try let _ = analyze_tree (produce_tree ctx.input) in ()
-  with
-    | Expected (a, b) -> print_endline (string_of_expectation (a, b))
-    | DuplicateLink (a, b) -> print_endline (string_of_duplicate_exception (a, b))
+  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
+  let aux = function
+    | Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
+    | _ -> raise_expectation (ETag "feed") (ETag "[root]")
+  in aux tree
