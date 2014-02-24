@@ -1,0 +1,17 @@
+OASISFormat:     0.4
+Name:            syndic
+Version:         0.1
+Synopsis:        RSS and Atom feed parsing
+Authors:         Romain Calascibetta
+Maintainers:     Romain Calascibetta <romain.calascibetta@gmail.com>
+Homepage:        https://github.com/Cumulus/Syndic
+License:         MIT
+Plugins:         META (0.3)
+BuildDepends:    ocamlbuild
+OCamlVersion:    >= 4.01
+
+Library syndic
+  Path:          src
+  BuildTools:    ocamlbuild
+  BuildDepends:  xmlm, uri, netstring
+  Modules:       Syndic

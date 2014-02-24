@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: c5ad7726cdedac1a6097913ec4d0ce92)
+version = "0.1"
+description = "RSS and Atom feed parsing"
+requires = "ocamlbuild xmlm uri netstring"
+archive(byte) = "syndic.cma"
+archive(byte, plugin) = "syndic.cma"
+archive(native) = "syndic.cmxa"
+archive(native, plugin) = "syndic.cmxs"
+exists_if = "syndic.cma"
+# OASIS_STOP
+

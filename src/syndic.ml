@@ -700,8 +700,6 @@ let uniq_link_alternate (l : link list) =
       if LinkSet.mem ("", "") acc
       then raise_duplicate_string x (LinkSet.find ("", "") acc)
       else aux (LinkSet.add ("", "") acc) r
-
-    | x :: r -> aux acc r
     | x :: r -> aux acc r
   in aux LinkSet.empty l
 
