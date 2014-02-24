@@ -7,11 +7,10 @@ Maintainers:     Romain Calascibetta <romain.calascibetta@gmail.com>
 Homepage:        https://github.com/Cumulus/Syndic
 License:         MIT
 Plugins:         META (0.3)
-BuildDepends:    ocamlbuild
+BuildTools:      ocamlbuild
 OCamlVersion:    >= 4.01
 
 Library syndic
   Path:          src
-  BuildTools:    ocamlbuild
   BuildDepends:  xmlm, uri, netstring
   Modules:       Syndic

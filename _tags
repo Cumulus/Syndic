@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: dcf0f5b276341485320cc054908446a8)
+# DO NOT EDIT (digest: 194b1a06d1ba79cdc6fd3f7070dd9e30)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -15,7 +15,6 @@
 "_darcs": not_hygienic
 # Library syndic
 "src/syndic.cmxs": use_syndic
-<src/*.ml{,i}>: package(ocamlbuild)
 <src/*.ml{,i}>: package(xmlm)
 <src/*.ml{,i}>: package(uri)
 <src/*.ml{,i}>: package(netstring)
