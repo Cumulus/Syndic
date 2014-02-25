@@ -6,7 +6,7 @@ Authors:         Romain Calascibetta
 Maintainers:     Romain Calascibetta <romain.calascibetta@gmail.com>
 Homepage:        https://github.com/Cumulus/Syndic
 License:         MIT
-Plugins:         META (0.3)
+Plugins:         META (0.3), DevFiles (0.3)
 BuildTools:      ocamlbuild
 OCamlVersion:    >= 4.01
 
