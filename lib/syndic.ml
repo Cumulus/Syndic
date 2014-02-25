@@ -205,14 +205,14 @@ exception Malformed_URL of string
 
 let raise_expectation data in_data = raise (Expected (data, in_data))
 
-exception DuplicateLink of ((Uri.t * string * string) * (string * string))
+exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
 
 let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
   let ty = (function Some a -> a | None -> "(none)") type_media in
   let hl = (function Some a -> a | None -> "(none)") hreflang in
   let ty' = (function "" -> "(none)" | s -> s) type_media' in
   let hl' = (function "" -> "(none)" | s -> s) hreflang' in
-  raise (DuplicateLink ((href, ty, hl), (ty', hl')))
+  raise (Duplicate_Link ((href, ty, hl), (ty', hl')))
 
 (* Util *)
 
@@ -258,6 +258,7 @@ let update_ctx_state { state; input; } new_state =
 
 (* XML to string *)
 
+(*
 let string_of_name (prefix, name) =
   let buffer = Buffer.create 16 in
   (* Buffer.add_string buffer prefix; *)
@@ -292,7 +293,7 @@ let string_of_close_tag (name, _) =
   Buffer.add_char buffer '>';
   Buffer.contents buffer
 
-let string_of_xml ctx =
+let string_of_xml input =
   let el tag datas =
     let buffer = Buffer.create 16
     in
@@ -301,8 +302,189 @@ let string_of_xml ctx =
       Buffer.add_string buffer (string_of_close_tag tag);
       Buffer.contents buffer
   in let data str = str
-  in let (_, str) = Xmlm.input_doc_tree ~el ~data ctx.input
+  in let (_, str) = Xmlm.input_doc_tree ~el ~data input
   in str
+*)
+
+let string_of_attr name value =
+  let buffer = Buffer.create 16 in
+  Buffer.add_string buffer name;
+  Buffer.add_string buffer "=\"";
+  Buffer.add_string buffer value;
+  Buffer.add_char buffer '"';
+  Buffer.contents buffer
+
+let string_of_attrs l =
+  let buffer = Buffer.create 16 in
+  List.iter
+  (fun (n, v) ->
+    Buffer.add_char buffer ' ';
+    Buffer.add_string buffer (string_of_attr n v)) l;
+  Buffer.contents buffer
+
+let string_of_tag name attrs datas =
+  let buffer = Buffer.create 16 in
+  Buffer.add_char buffer '<';
+  Buffer.add_string buffer name;
+  Buffer.add_string buffer (string_of_attrs attrs);
+  Buffer.add_char buffer '>';
+  Buffer.add_string buffer datas;
+  Buffer.add_string buffer "</";
+  Buffer.add_string buffer name;
+  Buffer.add_char buffer '>';
+  Buffer.contents buffer
+
+let string_of_title = string_of_tag "title" []
+let string_of_subtitle = string_of_tag "subtitle" []
+let string_of_updated = string_of_tag "updated" []
+let string_of_author_uri uri = string_of_tag "uri" [] (Uri.to_string uri)
+let string_of_author_email = string_of_tag "email" []
+let string_of_author_name = string_of_tag "name" []
+let string_of_icon uri = string_of_tag "icon" [] (Uri.to_string uri)
+let string_of_logo uri = string_of_tag "logo" [] (Uri.to_string uri)
+let string_of_rights = string_of_tag "rights" []
+
+let string_of_rel = function
+  | Alternate -> "alternate"
+  | Related -> "related"
+  | Self -> "self"
+  | Enclosure -> "enclosure"
+  | Via -> "via"
+  | Link u -> Uri.to_string u
+
+let string_of_link {
+  href;
+  rel;
+  type_media;
+  hreflang;
+  title;
+  length;
+} =
+  let attrs =
+    ((fun v k -> match v with
+      | Some type_media -> (fun acc -> k (("type", type_media) :: acc))
+      | None -> (fun l -> k l)) type_media)
+    @@
+    ((fun v k -> match v with
+      | Some hreflang -> (fun acc -> k (("hreflang", hreflang) :: acc))
+      | None -> (fun l -> k l)) hreflang)
+    @@
+    ((fun v k -> match v with
+      | Some title -> (fun acc -> k (("title", title) :: acc))
+      | None -> (fun l -> k l)) title)
+    @@
+    ((fun v k -> match v with
+      | Some length -> (fun acc -> k (("length", (string_of_int length)) :: acc))
+      | None -> (fun l -> k l)) length)
+    @@
+    (fun x -> x)
+  in string_of_tag "link" (attrs [("href", (Uri.to_string href)); ("rel", (string_of_rel rel))]) ""
+
+let string_of_generator ({
+  version;
+  uri;
+}, data) =
+  let attrs =
+    ((fun v k -> match v with
+      | Some version -> (fun acc -> k (("version", version) :: acc))
+      | None -> (fun l -> k l)) version)
+    @@
+    ((fun v k -> match v with
+      | Some uri -> (fun acc -> k (("uri", (Uri.to_string uri)) :: acc))
+      | None -> (fun l -> k l)) uri)
+    @@
+    (fun x -> x)
+  in string_of_tag "generator" (attrs []) data
+
+let string_of_category {
+  term;
+  scheme;
+  label;
+} =
+  let attrs =
+    ((fun v k -> match v with
+      | Some scheme -> (fun acc -> k (("scheme", (Uri.to_string scheme)) :: acc))
+      | None -> (fun l -> k l)) scheme)
+    @@
+    ((fun v k -> match v with
+      | Some label -> (fun acc -> k (("label", label) :: acc))
+      | None -> (fun l -> k l)) label)
+    @@
+    (fun x -> x)
+  in string_of_tag "category" (attrs [("term", term)]) ""
+
+let string_of_person tag {
+  name;
+  uri;
+  email;
+} = let buffer = Buffer.create 16 in
+  Buffer.add_char buffer '<';
+  Buffer.add_string buffer tag;
+  Buffer.add_char buffer '>';
+  Buffer.add_string buffer (string_of_author_name name);
+  (function
+    | Some uri -> Buffer.add_string buffer (string_of_author_uri uri)
+    | None -> ()) uri;
+  (function
+    | Some email -> Buffer.add_string buffer (string_of_author_email email)
+    | None -> ()) email;
+  Buffer.add_string buffer "</";
+  Buffer.add_string buffer tag;
+  Buffer.add_char buffer '>';
+  Buffer.contents buffer
+
+let string_of_entry _ = string_of_tag "entry" [] ""
+
+let string_of_author = string_of_person "author"
+let string_of_contributor = string_of_person "contributor"
+
+let string_of_feed {
+  author;
+  category;
+  contributor;
+  generator;
+  icon;
+  id;
+  link;
+  logo;
+  rights;
+  subtitle;
+  title;
+  updated;
+  entry;
+} = let buffer = Buffer.create 16 in
+  Buffer.add_string buffer "<?xml version=\"1.0\" encoding=\"utf-8\" ?>";
+  Buffer.add_string buffer "<feed xmlns=\"http://www.w3.org/2005/Atom\">";
+
+  Buffer.add_string buffer (string_of_title title);
+  Buffer.add_string buffer (string_of_updated updated);
+
+  (function
+    | Some subtitle -> Buffer.add_string buffer (string_of_subtitle subtitle)
+    | None -> ()) subtitle;
+  (function
+    | Some generator -> Buffer.add_string buffer (string_of_generator generator)
+    | None -> ()) generator;
+  (function
+    | Some icon -> Buffer.add_string buffer (string_of_icon icon)
+    | None -> ()) icon;
+  (function
+    | Some logo -> Buffer.add_string buffer (string_of_logo logo)
+    | None -> ()) logo;
+  (function
+    | Some rights -> Buffer.add_string buffer (string_of_rights rights)
+    | None -> ()) rights;
+
+  List.iter (fun x -> Buffer.add_string buffer (string_of_author x)) author;
+  List.iter (fun x -> Buffer.add_string buffer (string_of_category x)) category;
+  List.iter (fun x -> Buffer.add_string buffer (string_of_contributor x)) contributor;
+  List.iter (fun x -> Buffer.add_string buffer (string_of_entry x)) entry;
+
+  (fun (s, l) -> List.iter (fun x -> Buffer.add_string buffer (string_of_link x)) (s :: l)) link;
+
+  Buffer.add_string buffer "</feed>";
+  Buffer.contents buffer
+
 
 (* Produce XML *)
 

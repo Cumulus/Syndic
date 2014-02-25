@@ -11,6 +11,12 @@ BuildTools:      ocamlbuild
 OCamlVersion:    >= 4.01
 
 Library syndic
-  Path:          src
+  Path:          lib
   BuildDepends:  xmlm, uri, netstring
   Modules:       Syndic
+
+Executable tsyndic
+  Install: false
+  Path: src
+  MainIs: main.ml
+  BuildDepends: syndic
