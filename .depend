@@ -1,0 +1,3 @@
+syndic.cmi :
+syndic.cmo : syndic.cmi
+syndic.cmx : syndic.cmi
