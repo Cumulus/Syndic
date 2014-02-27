@@ -142,7 +142,7 @@ type feed = {
    * combinaison atom:link(rel="alternate"; type; hreflang)
    * doit être unique
    *)
-  link: link * link list; (* self link * other link *)
+  link: link list;
   logo: Uri.t option;
   rights: string option;
   subtitle: string option;
@@ -479,8 +479,7 @@ let string_of_feed {
   List.iter (fun x -> Buffer.add_string buffer (string_of_category x)) category;
   List.iter (fun x -> Buffer.add_string buffer (string_of_contributor x)) contributor;
   List.iter (fun x -> Buffer.add_string buffer (string_of_entry x)) entry;
-
-  (fun (s, l) -> List.iter (fun x -> Buffer.add_string buffer (string_of_link x)) (s :: l)) link;
+  List.iter (fun x -> Buffer.add_string buffer (string_of_link x)) link;
 
   Buffer.add_string buffer "</feed>";
   Buffer.contents buffer
@@ -943,6 +942,7 @@ let make_feed (l : [< feed'] list) =
   let author = List.fold_left (fun acc -> function `FeedAuthor x -> x :: acc | _ -> acc) [] l
   in let category = List.fold_left (fun acc -> function `FeedCategory x -> x :: acc | _ -> acc) [] l
   in let contributor = List.fold_left (fun acc -> function `FeedContributor x -> x :: acc | _ -> acc) [] l
+  in let link = List.fold_left (fun acc -> function `FeedLink x -> x :: acc | _ -> acc) [] l
   in let generator = match find (function `FeedGenerator _ -> true | _ -> false) l with
     | Some (`FeedGenerator g) -> Some g
     | _ -> None
@@ -952,9 +952,6 @@ let make_feed (l : [< feed'] list) =
   in let id = match find (function `FeedId _ -> true | _ -> false) l with
     | Some (`FeedId i) -> i
     | _ -> raise_expectation (ETag "id") (ETag "feed")
-  in let link =
-    (function [] -> raise_expectation (ETag "link") (ETag "feed") | x :: r -> (x, r))
-    (List.fold_left (fun acc -> function `FeedLink x -> x :: acc | _ -> acc) [] l)
   in let logo = match find (function `FeedLogo _ -> true | _ -> false) l with
     | Some (`FeedLogo l) -> Some l
     | _ -> None

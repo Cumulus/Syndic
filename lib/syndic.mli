@@ -108,7 +108,7 @@ type feed = {
   generator : (generator * string) option;
   icon : Uri.t option;
   id : Uri.t;
-  link : link * link list;
+  link : link list;
   logo : Uri.t option;
   rights : string option;
   subtitle : string option;
