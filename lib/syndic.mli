@@ -149,13 +149,6 @@ val raise_duplicate_string : link -> string * string -> 'a
 val string_of_duplicate_exception :
   (Uri.t * string * string) * (string * string) -> string
 
-val string_of_feed: feed -> string
-val string_of_link: link -> string
-val string_of_rel: rel -> string
-val string_of_title: string -> string
-val string_of_subtitle: string -> string
-val string_of_updated: string -> string
-
 val make_author :
   [ `AuthorEmail of string | `AuthorName of string | `AuthorURI of Uri.t ]
   list -> author
