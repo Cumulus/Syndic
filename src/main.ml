@@ -1,8 +1,7 @@
 let () =
-  try let _ = Syndic.analyze (Xmlm.make_input (`Channel stdin))
+  try let _ = Rss1.analyze (Xmlm.make_input (`Channel stdin))
   in ()
   with
-    | Syndic.Expected (a, b) -> print_endline (Syndic.string_of_expectation (a, b))
-    | Syndic.Malformed_URL e -> print_endline ("Malformed URL: " ^ e)
-    | Syndic.Duplicate_Link (a, b) -> print_endline (Syndic.string_of_duplicate_exception (a, b))
+    | Rss1.Expected (a, b) -> print_endline (Rss1.string_of_expectation (a, b))
+    | Rss1.Malformed_URL e -> print_endline ("Malformed URL: " ^ e)
     | _ -> print_endline "Unknown error"
