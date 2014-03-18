@@ -12,6 +12,26 @@ type channel = {
   textinput: Uri.t option;
 }
 
+type image = {
+  about: Uri.t;
+  title: string;
+  url: Uri.t;
+  link: Uri.t;
+}
+
+type item = {
+  about: Uri.t;
+  title: string;
+  link: Uri.t;
+  description: string option;
+}
+
+type rdf = {
+  channel: channel;
+  image: image option;
+  item: item list;
+}
+
 (* same Abstraction *)
 
 type opts_neturl = {
@@ -156,6 +176,17 @@ let link_of_xml =
   let leaf_producer ctx data = `LinkData (Uri.of_string data) in
   generate_catcher ~leaf_producer make_link
 
+let make_url (l : [< `URLData of Uri.t] list) =
+  let url = match find (function `URLData _ -> true) l with
+    | Some (`URLData u) -> u
+    | _ -> raise_expectation EData (ETag "url")
+  in url
+
+let url_of_xml =
+  let leaf_producer ctx data = `URLData (Uri.of_string data) in
+  generate_catcher ~leaf_producer make_url
+
+
 let make_li (l : [< `LiRessource of Uri.t] list) =
   let url = match find (function `LiRessource _ -> true) l with
     | Some (`LiRessource u) -> u
@@ -240,15 +271,73 @@ let channel_of_xml =
   ] in
   generate_catcher ~attr_producer ~data_producer make_channel
 
-let make_rdf (l : [< `RDFChannel of channel] list) =
-  let channel = match find (function `RDFChannel _ -> true) l with
+let make_image' (l : [< `ImageTitle of string | `ImageLink of Uri.t | `ImageURL of Uri.t | `ImageAbout of Uri.t] list) =
+  let title = match find (function `ImageTitle _ -> true | _ -> false) l with
+    | Some (`ImageTitle t) -> t
+    | _ -> raise_expectation (ETag "title") (ETag "image")
+  in let link = match find (function `ImageLink _ -> true | _ -> false) l with
+    | Some (`ImageLink u) -> u
+    | _ -> raise_expectation (ETag "link") (ETag "image")
+  in let url = match find (function `ImageURL _ -> true | _ -> false) l with
+    | Some (`ImageURL u) -> u
+    | _ -> raise_expectation (ETag "url") (ETag "image")
+  in let about = match find (function `ImageAbout _ -> true | _ -> false) l with
+    | Some (`ImageAbout a) -> a
+    | _ -> raise_expectation (EAttr "about") (ETag "image")
+  in ({ about; title; url; link; } : image)
+
+let image_of_xml' =
+  let data_producer = [
+    ("title", (fun ctx a -> `ImageTitle (title_of_xml a)));
+    ("link" , (fun ctx a -> `ImageLink (link_of_xml a)));
+    ("url", (fun ctx a -> `ImageURL (url_of_xml a)));
+  ] in
+  let attr_producer = [
+    ("about", (fun ctx attr -> `ImageAbout (Uri.of_string (get_value attr))));
+  ] in
+  generate_catcher ~attr_producer ~data_producer make_image'
+
+let make_item (l : [< `ItemTitle of string | `ItemLink of Uri.t | `ItemDescription of string | `ItemAbout of Uri.t] list) =
+  let title = match find (function `ItemTitle _ -> true | _ -> false) l with
+    | Some (`ItemTitle t) -> t
+    | _ -> raise_expectation (ETag "title") (ETag "item")
+  in let link = match find (function `ItemLink _ -> true | _ -> false) l with
+    | Some (`ItemLink u) -> u
+    | _ -> raise_expectation (ETag "link") (ETag "item")
+  in let description = match find (function `ItemDescription _ -> true | _ -> false) l with
+    | Some (`ItemDescription d) -> Some d
+    | _ -> None
+  in let about = match find (function `ItemAbout _ -> true | _ -> false) l with
+    | Some (`ItemAbout u) -> u
+    | _ -> raise_expectation (EAttr "about") (ETag "item")
+  in ({ about; title; link; description; } : item)
+
+let item_of_xml =
+  let data_producer = [
+    ("title", (fun ctx a -> `ItemTitle (title_of_xml a)));
+    ("link", (fun ctx a -> `ItemLink (link_of_xml a)));
+    ("description", (fun ctx a -> `ItemDescription (description_of_xml a)));
+  ] in
+  let attr_producer = [
+    ("about", (fun ctx attr -> `ItemAbout (Uri.of_string (get_value attr))));
+  ] in
+  generate_catcher ~attr_producer ~data_producer make_item
+
+let make_rdf (l : [< `RDFChannel of channel | `RDFImage of image | `RDFItem of item] list) =
+  let channel = match find (function `RDFChannel _ -> true | _ -> false) l with
     | Some (`RDFChannel channel) -> channel
     | _ -> raise_expectation (ETag "channel") (ETag "RDF")
-  in channel
+  in let image = match find (function `RDFImage _ -> true | _ -> false) l with
+    | Some (`RDFImage image) -> Some image
+    | _ -> None
+  in let item = List.fold_left (fun acc -> function `RDFItem x -> x :: acc | _ -> acc) [] l
+  in ({ channel; image; item; } : rdf)
 
 let rdf_of_xml =
   let data_producer = [
-    ("channel", (fun ctx a -> `RDFChannel (channel_of_xml a)))
+    ("channel", (fun ctx a -> `RDFChannel (channel_of_xml a)));
+    ("image", (fun ctx a -> `RDFImage (image_of_xml' a)));
+    ("item", (fun ctx a -> `RDFItem (item_of_xml a)));
   ] in
   generate_catcher ~data_producer make_rdf
 
