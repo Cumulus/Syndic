@@ -26,10 +26,19 @@ type item = {
   description: string option;
 }
 
+type textinput = {
+  about: Uri.t;
+  title: string;
+  description: string;
+  name: string;
+  link: Uri.t;
+}
+
 type rdf = {
   channel: channel;
   image: image option;
   item: item list;
+  textinput: textinput option;
 }
 
 (* same Abstraction *)
@@ -143,6 +152,16 @@ let make_title (l : [< `TitleData of string] list) =
 let title_of_xml =
   let leaf_producer ctx data = `TitleData data in
   generate_catcher ~leaf_producer make_title
+
+let make_name (l : [< `NameData of string] list) =
+  let name = match find (fun (`NameData _) -> true) l with
+    | Some (`NameData d) -> d
+    | _ -> raise_expectation EData (ETag "name")
+  in name
+
+let name_of_xml =
+  let leaf_producer ctx data = `NameData data in
+  generate_catcher ~leaf_producer make_name
 
 let make_description (l : [< `DescriptionData of string] list) =
   let description = match find (function `DescriptionData _ -> true) l with
@@ -323,21 +342,55 @@ let item_of_xml =
   ] in
   generate_catcher ~attr_producer ~data_producer make_item
 
-let make_rdf (l : [< `RDFChannel of channel | `RDFImage of image | `RDFItem of item] list) =
+let make_textinput' (l : [< `TextInputAbout of Uri.t | `TextInputTitle of string | `TextInputDescription of string | `TextInputName of string | `TextInputLink of Uri.t] list) = 
+  let title = match find (function `TextInputTitle _ -> true | _ -> false) l with
+    | Some (`TextInputTitle s) -> s
+    | _ -> raise_expectation (ETag "title") (ETag "textinput")
+  in let description = match find (function `TextInputDescription _ -> true | _ -> false) l with
+    | Some (`TextInputDescription s) -> s
+    | _ -> raise_expectation (ETag "description") (ETag "textinput")
+  in let name = match find (function `TextInputName _ -> true | _ -> false) l with
+    | Some (`TextInputName n) -> n
+    | _ -> raise_expectation (ETag "name") (ETag "textinput")
+  in let link = match find (function `TextInputLink _ -> true | _ -> false) l with
+    | Some (`TextInputLink u) -> u
+    | _ -> raise_expectation (ETag "link") (ETag "textinput")
+  in let about = match find (function `TextInputAbout _ -> true | _ -> false) l with
+    | Some (`TextInputAbout u) -> u
+    | _ -> raise_expectation (EAttr "about") (ETag "textinput")
+  in ({ about; title; description; name; link; } : textinput)
+
+let textinput_of_xml' =
+  let data_producer = [
+    ("title", (fun ctx a -> `TextInputTitle (title_of_xml a)));
+    ("description", (fun ctx a -> `TextInputDescription (description_of_xml a)));
+    ("name", (fun ctx a -> `TextInputName (name_of_xml a)));
+    ("link", (fun ctx a -> `TextInputLink (link_of_xml a)));
+  ] in
+  let attr_producer = [
+    ("about", (fun ctx attr -> `TextInputAbout (Uri.of_string (get_value attr))))
+  ] in
+  generate_catcher ~attr_producer ~data_producer make_textinput'
+
+let make_rdf (l : [< `RDFChannel of channel | `RDFImage of image | `RDFItem of item | `RDFTextInput of textinput] list) =
   let channel = match find (function `RDFChannel _ -> true | _ -> false) l with
     | Some (`RDFChannel channel) -> channel
     | _ -> raise_expectation (ETag "channel") (ETag "RDF")
   in let image = match find (function `RDFImage _ -> true | _ -> false) l with
     | Some (`RDFImage image) -> Some image
     | _ -> None
+  in let textinput = match find (function `RDFTextInput _ -> true | _ -> false) l with
+    | Some (`RDFTextInput textinput) -> Some textinput
+    | _ -> None
   in let item = List.fold_left (fun acc -> function `RDFItem x -> x :: acc | _ -> acc) [] l
-  in ({ channel; image; item; } : rdf)
+  in ({ channel; image; item; textinput } : rdf)
 
 let rdf_of_xml =
   let data_producer = [
     ("channel", (fun ctx a -> `RDFChannel (channel_of_xml a)));
     ("image", (fun ctx a -> `RDFImage (image_of_xml' a)));
     ("item", (fun ctx a -> `RDFItem (item_of_xml a)));
+    ("textinput", (fun ctx a -> `RDFTextInput (textinput_of_xml' a)))
   ] in
   generate_catcher ~data_producer make_rdf
 

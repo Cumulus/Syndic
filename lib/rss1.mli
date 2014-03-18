@@ -22,10 +22,19 @@ type item = {
   description: string option;
 }
 
+type textinput = {
+  about: Uri.t;
+  title: string;
+  description: string;
+  name: string;
+  link: Uri.t;
+}
+
 type rdf = {
   channel: channel;
   image: image option;
   item: item list;
+  textinput: textinput option;
 }
 
 type expected_type =
