@@ -13,7 +13,7 @@ OCamlVersion:    >= 4.01
 Library syndic
   Path:          lib
   BuildDepends:  xmlm, uri, netstring
-  Modules:       Syndic
+  Modules:       Syndic, Rss1, Atom
 
 Executable tsyndic
   Install: false
