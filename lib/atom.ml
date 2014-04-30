@@ -1,6 +1,5 @@
-type tree =
-  | Node of Xmlm.tag * tree list
-  | Leaf of string
+open Common.XML
+open Common.Util
 
 type rel =
   | Alternate
@@ -161,121 +160,40 @@ type feed' = [
   | `FeedEntry of entry
 ]
 
-type opts_neturl = {
-  schemes: (string, Neturl.url_syntax) Hashtbl.t;
-  base_syntax: Neturl.url_syntax;
-  accept_8bits: bool;
-  enable_fragment: bool;
-}
+module Error = struct
+  include Common.Error
 
-(* Exception *)
+  exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
 
-type expected_type =
-  | EAttr of string
-  | ETag of string
-  | EData
+  let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
+    let ty = (function Some a -> a | None -> "(none)") type_media in
+    let hl = (function Some a -> a | None -> "(none)") hreflang in
+    let ty' = (function "" -> "(none)" | s -> s) type_media' in
+    let hl' = (function "" -> "(none)" | s -> s) hreflang' in
+    raise (Duplicate_Link ((href, ty, hl), (ty', hl')))
 
-exception Expected of expected_type * expected_type
-exception ExpectedLeaf
-
-let string_of_expectation (a, b) =
-  let string_of_expected_type = function
-    | EAttr a -> a ^ "="
-    | ETag a -> "<" ^ a ^ ">"
-    | EData -> "data"
-  in let buffer = Buffer.create 16 in
-  Buffer.add_string buffer "Expected ";
-  Buffer.add_string buffer (string_of_expected_type a);
-  Buffer.add_string buffer " in ";
-  Buffer.add_string buffer (string_of_expected_type b);
-  Buffer.contents buffer
-
-exception Malformed_URL of string
-
-let raise_expectation data in_data = raise (Expected (data, in_data))
-
-exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
-
-let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
-  let ty = (function Some a -> a | None -> "(none)") type_media in
-  let hl = (function Some a -> a | None -> "(none)") hreflang in
-  let ty' = (function "" -> "(none)" | s -> s) type_media' in
-  let hl' = (function "" -> "(none)" | s -> s) hreflang' in
-  raise (Duplicate_Link ((href, ty, hl), (ty', hl')))
-
-(* Util *)
-
-let find f l = try Some (List.find f l) with Not_found -> None
-
-let url_of_string opts_neturl str =
-  try Neturl.parse_url
-    ~schemes:opts_neturl.schemes
-    ~base_syntax:opts_neturl.base_syntax
-    ~accept_8bits:opts_neturl.accept_8bits
-    ~enable_fragment:opts_neturl.enable_fragment
-    str
-  with Neturl.Malformed_URL -> raise (Malformed_URL str)
-
-let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
-let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
-let datas_has_leaf = List.exists (function | Leaf _ -> true | _ -> false)
-let get_leaf l  = match find (function Leaf _ -> true | _ -> false) l with
-  | Some (Leaf s) -> s
-  | _ -> raise ExpectedLeaf
-let get_attrs ((_, attrs) : Xmlm.tag) = attrs
-let get_value ((_, value) : Xmlm.attribute) = value
-let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
-let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
-
-let make_opts_neturl
-  ?(schemes = Neturl.common_url_syntax)
-  ?(base_syntax = Hashtbl.find Neturl.common_url_syntax "http")
-  ?(accept_8bits = true)
-  ?(enable_fragment = true) () =
-{
-  schemes;
-  base_syntax;
-  accept_8bits;
-  enable_fragment;
-}
-
-(* Produce XML *)
-
-let generate_catcher
-  ?(attr_producer=[])
-  ?(data_producer=[])
-  ?leaf_producer maker =
-  let get_producer name map =
-    try Some (List.assoc name map)
-    with _ -> None
-  in
-  let rec catch_attr acc = function
-    | attr :: r -> begin match get_producer (get_attr_name attr) attr_producer with
-      | Some f -> catch_attr ((f acc attr) :: acc) r
-      | None -> catch_attr acc r end
-    | [] -> acc
-  in
-  let rec catch_datas acc = function
-    | (Node (tag, datas)) :: r ->
-      begin match get_producer (get_tag_name tag) data_producer with
-      | Some f -> catch_datas ((f acc (tag, datas)) :: acc) r
-      | None -> catch_datas acc r end
-    | (Leaf str) :: r ->
-      begin match leaf_producer with
-      | Some f -> catch_datas ((f acc str) :: acc) r
-      | None -> catch_datas acc r end
-    | [] -> acc
-  in
-  let generate (tag, datas) =
-    maker (catch_attr (catch_datas [] datas) (get_attrs tag))
-  in generate
+  let string_of_duplicate_exception ((uri, ty, hl), (ty', hl')) =
+    let buffer = Buffer.create 16 in
+    Buffer.add_string buffer "Duplicate link between [href: ";
+    Buffer.add_string buffer (Uri.to_string uri);
+    Buffer.add_string buffer ", ty: ";
+    Buffer.add_string buffer ty;
+    Buffer.add_string buffer ", hl: ";
+    Buffer.add_string buffer hl;
+    Buffer.add_string buffer "] and [ty: ";
+    Buffer.add_string buffer ty';
+    Buffer.add_string buffer ", hl: ";
+    Buffer.add_string buffer hl';
+    Buffer.add_string buffer "]";
+    Buffer.contents buffer
+end
 
 (* RFC Compliant (or raise error) *)
 
 let make_author (l : [< `AuthorName of string | `AuthorURI of Uri.t | `AuthorEmail of string] list) =
   let name = match find (function `AuthorName _ -> true | _ -> false) l with
     | Some (`AuthorName s) -> s
-    | _ -> raise_expectation (ETag "name") (ETag "author")
+    | _ -> Error.raise_expectation (Error.Tag "name") (Error.Tag "author")
   in let uri = match find (function `AuthorURI _ -> true | _ -> false) l with
     | Some (`AuthorURI u) -> Some u
     | _ -> None
@@ -290,7 +208,7 @@ let author_name_of_xml (tag, datas) =
 
 let author_uri_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with ExpectedLeaf -> raise_expectation EData (ETag "author/uri")
+  with Error.ExpectedLeaf -> Error.raise_expectation Error.Data (Error.Tag "author/uri")
 
 let author_email_of_xml (tag, datas) =
   try get_leaf datas
@@ -309,7 +227,7 @@ let author_of_xml =
 let make_category (l : [< `CategoryTerm of string | `CategoryScheme of Uri.t | `CategoryLabel of string] list) =
   let term = match find (function `CategoryTerm _ -> true | _ -> false) l with
     | Some (`CategoryTerm t) -> t
-    | _ -> raise_expectation (EAttr "term") (ETag "category")
+    | _ -> Error.raise_expectation (Error.Attr "term") (Error.Tag "category")
   in let scheme = match find (function `CategoryScheme _ -> true | _ -> false) l with
     | Some (`CategoryScheme u) -> Some u
     | _ -> None
@@ -336,7 +254,7 @@ let contributor_of_xml = author_of_xml
 let make_generator (l : [< `GeneratorURI of Uri.t | `GeneratorVersion of string | `GeneratorContent of string] list) =
   let content = match find (function `GeneratorContent _ -> true | _ -> false) l with
     | Some ((`GeneratorContent c)) -> c
-    | _ -> raise_expectation EData (ETag "generator")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "generator")
   in let version = match find (function `GeneratorVersion _ -> true | _ -> false) l with
     | Some ((`GeneratorVersion v)) -> Some v
     | _ -> None
@@ -357,7 +275,7 @@ let generator_of_xml =
 let make_icon (l : [< `IconURI of Uri.t] list) =
   let uri = match find (fun (`IconURI _) -> true) l with
     | Some (`IconURI u) -> u
-    | _ -> raise_expectation EData (ETag "icon")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "icon")
   in uri
 
 let icon_of_xml =
@@ -369,7 +287,7 @@ let icon_of_xml =
 let make_id (l : [< `IdURI of Uri.t] list) =
   let uri = match find (fun (`IdURI _) -> true) l with
     | Some (`IdURI u) -> u
-    | _ -> raise_expectation EData (ETag "id")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "id")
   in uri
 
 let id_of_xml =
@@ -381,7 +299,7 @@ let id_of_xml =
 let make_link (l : [< `LinkHREF of Uri.t | `LinkRel of rel | `LinkType of string | `LinkHREFLang of string | `LinkTitle of string | `LinkLength of int] list) =
   let href = match find (function `LinkHREF _ -> true | _ -> false) l with
     | Some (`LinkHREF u) -> u
-    | _ -> raise_expectation (EAttr "href") (ETag "link")
+    | _ -> Error.raise_expectation (Error.Attr "href") (Error.Tag "link")
   in let rel = match find (function `LinkRel _ -> true | _ -> false) l with
     | Some (`LinkRel r) -> r
     | _ -> Alternate (* cf. RFC 4287 § 4.2.7.2 *)
@@ -423,7 +341,7 @@ let link_of_xml =
 let make_logo (l : [< `LogoURI of Uri.t] list) =
   let uri = match find (fun (`LogoURI _) -> true) l with
     | Some (`LogoURI u) -> u
-    | _ -> raise_expectation EData (ETag "logo")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "logo")
   in uri
 
 let logo_of_xml =
@@ -435,7 +353,7 @@ let logo_of_xml =
 let make_published (l : [< `PublishedDate of string] list) =
   let date = match find (fun (`PublishedDate _) -> true) l with
     | Some (`PublishedDate d) -> d
-    | _ -> raise_expectation EData (ETag "published")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "published")
   in date
 
 let published_of_xml =
@@ -448,7 +366,7 @@ let published_of_xml =
 let make_rights (l : [< `RightData of string] list) =
   let rights = match find (fun (`RightData _) -> true) l with
     | Some (`RightData d) -> d
-    | _ -> raise_expectation EData (ETag "rights")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "rights")
   in rights
 
 let rights_of_xml =
@@ -461,7 +379,7 @@ let rights_of_xml =
 let make_title (l : [< `TitleData of string] list) =
   let title = match find (fun (`TitleData _) -> true) l with
     | Some (`TitleData d) -> d
-    | _ -> raise_expectation EData (ETag "title")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "title")
   in title
 
 let title_of_xml =
@@ -474,7 +392,7 @@ let title_of_xml =
 let make_subtitle (l : [< `SubtitleData of string] list) =
   let subtitle = match find (fun (`SubtitleData _) -> true) l with
     | Some (`SubtitleData d) -> d
-    | _ -> raise_expectation EData (ETag "subtitle")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "subtitle")
   in subtitle
 
 let subtitle_of_xml =
@@ -487,7 +405,7 @@ let subtitle_of_xml =
 let make_updated (l : [< `UpdatedData of string] list) =
   let updated = match find (fun (`UpdatedData _) -> true) l with
     | Some (`UpdatedData d) -> d
-    | _ -> raise_expectation EData (ETag "updated")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "updated")
   in updated
 
 let updated_of_xml =
@@ -499,7 +417,7 @@ let updated_of_xml =
 
 let make_source (l : [< source'] list) =
   let author =
-    (function [] -> raise_expectation (ETag "author") (ETag "source") | x :: r -> x, r)
+    (function [] -> Error.raise_expectation (Error.Tag "author") (Error.Tag "source") | x :: r -> x, r)
     (List.fold_left (fun acc -> function `SourceAuthor x -> x :: acc | _ -> acc) [] l)
   in let category = List.fold_left (fun acc -> function `SourceCategory x -> x :: acc | _ -> acc) [] l
   in let contributor = List.fold_left (fun acc -> function `SourceContributor x -> x :: acc | _ -> acc) [] l
@@ -511,9 +429,9 @@ let make_source (l : [< source'] list) =
     | _ -> None
   in let id = match find (function `SourceId _ -> true | _ -> false) l with
     | Some (`SourceId i) -> i
-    | _ -> raise_expectation (ETag "id") (ETag "source")
+    | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "source")
   in let link =
-    (function [] -> raise_expectation (ETag "link") (ETag "source") | x :: r -> (x, r))
+    (function [] -> Error.raise_expectation (Error.Tag "link") (Error.Tag "source") | x :: r -> (x, r))
     (List.fold_left (fun acc -> function `SourceLink x -> x :: acc | _ -> acc) [] l)
   in let logo = match find (function `SourceLogo _ -> true | _ -> false) l with
     | Some (`SourceLogo u) -> Some u
@@ -526,7 +444,7 @@ let make_source (l : [< source'] list) =
     | _ -> None
   in let title = match find (function `SourceTitle _ -> true | _ -> false) l with
     | Some (`SourceTitle s) -> s
-    | _ -> raise_expectation (ETag "title") (ETag "source")
+    | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "source")
   in let updated = match find (function `SourceUpdated _ -> true | _ -> false) l with
     | Some (`SourceUpdated d) -> Some d
     | _ -> None
@@ -581,7 +499,7 @@ let content_of_xml =
 let make_summary (l : [< `SummaryData of string] list) =
   let data = match find (fun (`SummaryData _) -> true) l with
     | Some (`SummaryData d) -> d
-    | _ -> raise_expectation EData (ETag "summary")
+    | _ -> Error.raise_expectation Error.Data (Error.Tag "summary")
   in data
 
 let summary_of_xml =
@@ -601,39 +519,24 @@ end
 
 module LinkSet = Set.Make(LinkOrder)
 
-let string_of_duplicate_exception ((uri, ty, hl), (ty', hl')) =
-  let buffer = Buffer.create 16 in
-  Buffer.add_string buffer "Duplicate link between [href: ";
-  Buffer.add_string buffer (Uri.to_string uri);
-  Buffer.add_string buffer ", ty: ";
-  Buffer.add_string buffer ty;
-  Buffer.add_string buffer ", hl: ";
-  Buffer.add_string buffer hl;
-  Buffer.add_string buffer "] and [ty: ";
-  Buffer.add_string buffer ty';
-  Buffer.add_string buffer ", hl: ";
-  Buffer.add_string buffer hl';
-  Buffer.add_string buffer "]";
-  Buffer.contents buffer
-
 let uniq_link_alternate (l : link list) =
   let rec aux acc = function
     | [] -> l
     | ({ rel; type_media = Some ty; hreflang = Some hl; _ } as x) :: r when rel = Alternate ->
       if LinkSet.mem (ty, hl) acc
-      then raise_duplicate_string x (LinkSet.find (ty, hl) acc)
+      then Error.raise_duplicate_string x (LinkSet.find (ty, hl) acc)
       else aux (LinkSet.add (ty, hl) acc) r
     | ({ rel; type_media = None; hreflang = Some hl; _ } as x) :: r when rel = Alternate ->
       if LinkSet.mem ("", hl) acc
-      then raise_duplicate_string x (LinkSet.find ("", hl) acc)
+      then Error.raise_duplicate_string x (LinkSet.find ("", hl) acc)
       else aux (LinkSet.add ("", hl) acc) r
     | ({ rel; type_media = Some ty; hreflang = None; _ } as x) :: r when rel = Alternate ->
       if LinkSet.mem (ty, "") acc
-      then raise_duplicate_string x (LinkSet.find (ty, "") acc)
+      then Error.raise_duplicate_string x (LinkSet.find (ty, "") acc)
       else aux (LinkSet.add (ty, "") acc) r
     | ({ rel; type_media = None; hreflang = None; _ } as x) :: r when rel = Alternate ->
       if LinkSet.mem ("", "") acc
-      then raise_duplicate_string x (LinkSet.find ("", "") acc)
+      then Error.raise_duplicate_string x (LinkSet.find ("", "") acc)
       else aux (LinkSet.add ("", "") acc) r
     | x :: r -> aux acc r
   in aux LinkSet.empty l
@@ -644,13 +547,19 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
     | _ -> None
   in let author =
     (* default author is feed/author, cf. RFC 4287 § 4.1.2 *)
-    (function None, [] -> raise_expectation (ETag "author") (ETag "entry") | Some a, [] -> a, [] | _, x :: r -> x, r)
+    (function
+      | None, [] ->
+        Error.raise_expectation
+          (Error.Tag "author")
+          (Error.Tag "entry")
+      | Some a, [] -> a, []
+      | _, x :: r -> x, r)
     (feed_author, List.fold_left (fun acc -> function `EntryAuthor x -> x :: acc | _ -> acc) [] l)
   in let category = List.fold_left (fun acc -> function `EntryCategory x -> x :: acc | _ -> acc) [] l
   in let contributor = List.fold_left (fun acc -> function `EntryContributor x -> x :: acc | _ -> acc) [] l
   in let id = match find (function `EntryId _ -> true | _ -> false) l with
     | Some (`EntryId i) -> i
-    | _ -> raise_expectation (ETag "id") (ETag "entry")
+    | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "entry")
   in let link = List.fold_left (fun acc -> function `EntryLink x -> x :: acc | _ -> acc) [] l
   in let published = match find (function `EntryPublished _ -> true | _ -> false) l with
     | Some (`EntryPublished s) -> Some s
@@ -667,10 +576,10 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
     | _ -> None
   in let title = match find (function `EntryTitle _ -> true | _ -> false) l with
     | Some (`EntryTitle t) -> t
-    | _ -> raise_expectation (ETag "title") (ETag "entry")
+    | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "entry")
   in let updated = match find (function `EntryUpdated _ -> true | _ -> false) l with
     | Some (`EntryUpdated u) -> u
-    | _ -> raise_expectation (ETag "updated") (ETag "entry")
+    | _ -> Error.raise_expectation (Error.Tag "updated") (Error.Tag "entry")
   in ({ author; category; content; contributor; id; link = uniq_link_alternate link; published; rights; source; summary; title; updated; } : entry)
 
 let entry_of_xml feed =
@@ -705,7 +614,7 @@ let make_feed (l : [< feed'] list) =
     | _ -> None
   in let id = match find (function `FeedId _ -> true | _ -> false) l with
     | Some (`FeedId i) -> i
-    | _ -> raise_expectation (ETag "id") (ETag "feed")
+    | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "feed")
   in let logo = match find (function `FeedLogo _ -> true | _ -> false) l with
     | Some (`FeedLogo l) -> Some l
     | _ -> None
@@ -717,10 +626,10 @@ let make_feed (l : [< feed'] list) =
     | _ -> None
   in let title = match find (function `FeedTitle _ -> true | _ -> false) l with
     | Some (`FeedTitle t) -> t
-    | _ -> raise_expectation (ETag "title") (ETag "feed")
+    | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "feed")
   in let updated = match find (function `FeedUpdated _ -> true | _ -> false) l with
     | Some (`FeedUpdated u) -> u
-    | _ -> raise_expectation (ETag "updated") (ETag "feed")
+    | _ -> Error.raise_expectation (Error.Tag "updated") (Error.Tag "feed")
   in let entry = List.fold_left (fun acc -> function `FeedEntry x -> x :: acc | _ -> acc) [] l
   in ({ author; category; contributor; generator; icon; id; link; logo; rights; subtitle; title; updated; entry; } : feed)
 
@@ -748,5 +657,5 @@ let analyze input =
   let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
   let aux = function
     | Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
-    | _ -> raise_expectation (ETag "feed") (ETag "[root]")
+    | _ -> Error.raise_expectation (Error.Tag "feed") Error.Root
   in aux tree

@@ -1,3 +1,13 @@
+module Error : sig
+  type expected_type
+
+  exception Expected of expected_type * expected_type
+  exception ExpectedLeaf
+  exception Malformed_URL of string
+
+  val string_of_expectation : expected_type * expected_type -> string
+end
+
 type channel = {
   about: Uri.t;
   title: string;
@@ -36,17 +46,5 @@ type rdf = {
   item: item list;
   textinput: textinput option;
 }
-
-type expected_type =
-  | EAttr of string
-  | ETag of string
-  | EData
-
-exception Expected of expected_type * expected_type
-exception ExpectedLeaf
-exception Malformed_URL of string
-
-val string_of_expectation : expected_type * expected_type -> string
-val raise_expectation : expected_type -> expected_type -> 'a
 
 val analyze : Xmlm.input -> rdf

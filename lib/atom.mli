@@ -1,3 +1,16 @@
+module Error : sig
+  type expected_type
+
+  exception Expected of expected_type * expected_type
+  exception ExpectedLeaf
+  exception Malformed_URL of string
+  exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
+
+  val string_of_expectation : expected_type * expected_type -> string
+  val string_of_duplicate_exception :
+    (Uri.t * string * string) * (string * string) -> string
+end
+
 type rel =
   | Alternate
   | Related
@@ -88,22 +101,5 @@ type feed = {
   updated : string;
   entry : entry list;
 }
-
-type expected_type =
-  | EAttr of string
-  | ETag of string
-  | EData
-
-exception Expected of expected_type * expected_type
-exception ExpectedLeaf
-exception Malformed_URL of string
-exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
-
-val string_of_expectation : expected_type * expected_type -> string
-val raise_expectation : expected_type -> expected_type -> 'a
-
-val raise_duplicate_string : link -> string * string -> 'a
-val string_of_duplicate_exception :
-  (Uri.t * string * string) * (string * string) -> string
 
 val analyze : Xmlm.input -> feed
