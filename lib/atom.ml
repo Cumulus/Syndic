@@ -204,7 +204,7 @@ let make_author (l : [< `AuthorName of string | `AuthorURI of Uri.t | `AuthorEma
 
 let author_name_of_xml (tag, datas) =
   try get_leaf datas
-  with _ -> ""
+  with _ -> "" (* mandatory ? *)
 
 let author_uri_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
@@ -212,7 +212,7 @@ let author_uri_of_xml (tag, datas) =
 
 let author_email_of_xml (tag, datas) =
   try get_leaf datas
-  with _ -> ""
+  with _ -> "" (* mandatory ? *)
 
 let author_of_xml =
   let data_producer = [
@@ -238,9 +238,9 @@ let make_category (l : [< `CategoryTerm of string | `CategoryScheme of Uri.t | `
 
 let category_of_xml =
   let attr_producer = [
-    ("term", (fun ctx attr -> `CategoryTerm (get_value attr)));
-    ("scheme", (fun ctx attr -> `CategoryScheme (Uri.of_string (get_value attr))));
-    ("label", (fun ctx attr -> `CategoryLabel (get_value attr)))
+    ("term", (fun ctx a -> `CategoryTerm a));
+    ("scheme", (fun ctx a -> `CategoryScheme (Uri.of_string a)));
+    ("label", (fun ctx a -> `CategoryLabel a))
   ] in
   generate_catcher ~attr_producer make_category
 
@@ -265,8 +265,8 @@ let make_generator (l : [< `GeneratorURI of Uri.t | `GeneratorVersion of string 
 
 let generator_of_xml =
   let attr_producer = [
-    ("version", (fun ctx attr -> `GeneratorVersion (get_value attr)));
-    ("uri", (fun ctx attr -> `GeneratorURI (Uri.of_string (get_value attr))));
+    ("version", (fun ctx a -> `GeneratorVersion a));
+    ("uri", (fun ctx a -> `GeneratorURI (Uri.of_string a)));
   ] in
   generate_catcher ~attr_producer make_generator
 
@@ -327,12 +327,12 @@ let rel_of_string s = match String.lowercase (String.trim s) with
 
 let link_of_xml =
   let attr_producer = [
-    ("href", (fun ctx attr -> `LinkHREF (Uri.of_string (get_value attr))));
-    ("rel", (fun ctx attr -> `LinkRel (rel_of_string (get_value attr))));
-    ("type", (fun ctx attr -> `LinkType (get_value attr)));
-    ("hreflang", (fun ctx attr -> `LinkHREFLang (get_value attr)));
-    ("title", (fun ctx attr -> `LinkTitle (get_value attr)));
-    ("length", (fun ctx attr -> `LinkLength (int_of_string (get_value attr))));
+    ("href", (fun ctx a -> `LinkHREF (Uri.of_string a)));
+    ("rel", (fun ctx a -> `LinkRel (rel_of_string a)));
+    ("type", (fun ctx a -> `LinkType a));
+    ("hreflang", (fun ctx a -> `LinkHREFLang a));
+    ("title", (fun ctx a -> `LinkTitle a));
+    ("length", (fun ctx a -> `LinkLength (int_of_string a)));
   ] in
   generate_catcher ~attr_producer make_link
 
@@ -418,7 +418,7 @@ let updated_of_xml =
 let make_source (l : [< source'] list) =
   let author =
     (function [] -> Error.raise_expectation (Error.Tag "author") (Error.Tag "source") | x :: r -> x, r)
-    (List.fold_left (fun acc -> function `SourceAuthor x -> x :: acc | _ -> acc) [] l)
+      (List.fold_left (fun acc -> function `SourceAuthor x -> x :: acc | _ -> acc) [] l)
   in let category = List.fold_left (fun acc -> function `SourceCategory x -> x :: acc | _ -> acc) [] l
   in let contributor = List.fold_left (fun acc -> function `SourceContributor x -> x :: acc | _ -> acc) [] l
   in let generator = match find (function `SourceGenerator _ -> true | _ -> false) l with
@@ -432,7 +432,7 @@ let make_source (l : [< source'] list) =
     | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "source")
   in let link =
     (function [] -> Error.raise_expectation (Error.Tag "link") (Error.Tag "source") | x :: r -> (x, r))
-    (List.fold_left (fun acc -> function `SourceLink x -> x :: acc | _ -> acc) [] l)
+      (List.fold_left (fun acc -> function `SourceLink x -> x :: acc | _ -> acc) [] l)
   in let logo = match find (function `SourceLogo _ -> true | _ -> false) l with
     | Some (`SourceLogo u) -> Some u
     | _ -> None
@@ -489,8 +489,8 @@ let type_content_of_string s = match String.lowercase (String.trim s) with
 
 let content_of_xml =
   let attr_producer = [
-    ("type", (fun ctx attr -> `ContentType (type_content_of_string (get_value attr))));
-    ("src", (fun ctx attr -> `ContentSRC (Uri.of_string (get_value attr))));
+    ("type", (fun ctx a -> `ContentType (type_content_of_string a)));
+    ("src", (fun ctx a -> `ContentSRC (Uri.of_string a)));
   ] in let leaf_producer ctx data = `ContentData data in
   generate_catcher ~attr_producer ~leaf_producer make_content
 
@@ -554,7 +554,7 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
           (Error.Tag "entry")
       | Some a, [] -> a, []
       | _, x :: r -> x, r)
-    (feed_author, List.fold_left (fun acc -> function `EntryAuthor x -> x :: acc | _ -> acc) [] l)
+      (feed_author, List.fold_left (fun acc -> function `EntryAuthor x -> x :: acc | _ -> acc) [] l)
   in let category = List.fold_left (fun acc -> function `EntryCategory x -> x :: acc | _ -> acc) [] l
   in let contributor = List.fold_left (fun acc -> function `EntryContributor x -> x :: acc | _ -> acc) [] l
   in let id = match find (function `EntryId _ -> true | _ -> false) l with

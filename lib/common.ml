@@ -2,14 +2,15 @@
 
 module XML = struct
   type tree =
-  | Node of Xmlm.tag * tree list
-  | Leaf of string
+    | Node of Xmlm.tag * tree list
+    | Leaf of string
 
   let generate_catcher
-    ?(attr_producer=[])
-    ?(data_producer=[])
-    ?leaf_producer maker =
+      ?(attr_producer=[])
+      ?(data_producer=[])
+      ?leaf_producer maker =
     let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name in
+    let get_attr_value ((_, value) : Xmlm.attribute) = value in
     let get_tag_name (((prefix, name), _) : Xmlm.tag) = name in
     let get_attrs ((_, attrs) : Xmlm.tag) = attrs in
     let get_producer name map =
@@ -18,19 +19,19 @@ module XML = struct
     in
     let rec catch_attr acc = function
       | attr :: r -> begin match get_producer (get_attr_name attr) attr_producer with
-        | Some f -> catch_attr ((f acc attr) :: acc) r
-        | None -> catch_attr acc r end
+          | Some f -> catch_attr ((f acc (get_attr_value attr)) :: acc) r
+          | None -> catch_attr acc r end
       | [] -> acc
     in
     let rec catch_datas acc = function
       | (Node (tag, datas)) :: r ->
         begin match get_producer (get_tag_name tag) data_producer with
-        | Some f -> catch_datas ((f acc (tag, datas)) :: acc) r
-        | None -> catch_datas acc r end
+          | Some f -> catch_datas ((f acc (tag, datas)) :: acc) r
+          | None -> catch_datas acc r end
       | (Leaf str) :: r ->
         begin match leaf_producer with
-        | Some f -> catch_datas ((f acc str) :: acc) r
-        | None -> catch_datas acc r end
+          | Some f -> catch_datas ((f acc str) :: acc) r
+          | None -> catch_datas acc r end
       | [] -> acc
     in
     let generate (tag, datas) =
@@ -82,11 +83,11 @@ module Util = struct
 
   let url_of_string opts_neturl str =
     try Neturl.parse_url
-      ~schemes:opts_neturl.schemes
-      ~base_syntax:opts_neturl.base_syntax
-      ~accept_8bits:opts_neturl.accept_8bits
-      ~enable_fragment:opts_neturl.enable_fragment
-      str
+          ~schemes:opts_neturl.schemes
+          ~base_syntax:opts_neturl.base_syntax
+          ~accept_8bits:opts_neturl.accept_8bits
+          ~enable_fragment:opts_neturl.enable_fragment
+          str
     with Neturl.Malformed_URL -> raise (Error.Malformed_URL str)
 
   let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
@@ -101,15 +102,14 @@ module Util = struct
   let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
 
   let make_opts_neturl
-    ?(schemes = Neturl.common_url_syntax)
-    ?(base_syntax = Hashtbl.find Neturl.common_url_syntax "http")
-    ?(accept_8bits = true)
-    ?(enable_fragment = true) () =
-  {
-    schemes;
-    base_syntax;
-    accept_8bits;
-    enable_fragment;
-  }
+      ?(schemes = Neturl.common_url_syntax)
+      ?(base_syntax = Hashtbl.find Neturl.common_url_syntax "http")
+      ?(accept_8bits = true)
+      ?(enable_fragment = true) () =
+    {
+      schemes;
+      base_syntax;
+      accept_8bits;
+      enable_fragment;
+    }
 end
-

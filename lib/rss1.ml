@@ -84,7 +84,7 @@ let make_image (l : [< `ImageData of Uri.t] list) =
 
 let image_of_xml =
   let attr_producer = [
-    ("resource", (fun ctx attr -> `ImageData (Uri.of_string (get_value attr))));
+    ("resource", (fun ctx a -> `ImageData (Uri.of_string a)));
   ] in
   generate_catcher ~attr_producer make_image
 
@@ -117,7 +117,7 @@ let make_li (l : [< `LiRessource of Uri.t] list) =
 
 let li_of_xml =
   let attr_producer = [
-    ("resource", (fun ctx attr -> `LiRessource (Uri.of_string (get_value attr))));
+    ("resource", (fun ctx a -> `LiRessource (Uri.of_string a)));
   ] in
   generate_catcher ~attr_producer make_li
 
@@ -151,7 +151,7 @@ let make_textinput (l : [< `TextInputResource of Uri.t] list) =
 
 let textinput_of_xml =
   let attr_producer = [
-    ("resource", (fun ctx attr -> `TextInputResource (Uri.of_string (get_value attr))));
+    ("resource", (fun ctx a -> `TextInputResource (Uri.of_string a)));
   ] in
   generate_catcher ~attr_producer make_textinput
 
@@ -189,7 +189,7 @@ let channel_of_xml =
     ("textinput", (fun ctx a -> `ChannelTextInput (textinput_of_xml a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx attr -> `ChannelAbout (Uri.of_string (get_value attr))));
+    ("about", (fun ctx a -> `ChannelAbout (Uri.of_string a)));
   ] in
   generate_catcher ~attr_producer ~data_producer make_channel
 
@@ -215,7 +215,7 @@ let image_of_xml' =
     ("url", (fun ctx a -> `ImageURL (url_of_xml a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx attr -> `ImageAbout (Uri.of_string (get_value attr))));
+    ("about", (fun ctx a -> `ImageAbout (Uri.of_string a)));
   ] in
   generate_catcher ~attr_producer ~data_producer make_image'
 
@@ -241,7 +241,7 @@ let item_of_xml =
     ("description", (fun ctx a -> `ItemDescription (description_of_xml a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx attr -> `ItemAbout (Uri.of_string (get_value attr))));
+    ("about", (fun ctx a -> `ItemAbout (Uri.of_string a)));
   ] in
   generate_catcher ~attr_producer ~data_producer make_item
 
@@ -271,7 +271,7 @@ let textinput_of_xml' =
     ("link", (fun ctx a -> `TextInputLink (link_of_xml a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx attr -> `TextInputAbout (Uri.of_string (get_value attr))))
+    ("about", (fun ctx a -> `TextInputAbout (Uri.of_string a)))
   ] in
   generate_catcher ~attr_producer ~data_producer make_textinput'
 

@@ -4,7 +4,7 @@ module XML : sig
     | Leaf of string
 
   val generate_catcher :
-    ?attr_producer:(string * ('a list -> Xmlm.attribute -> 'a)) list ->
+    ?attr_producer:(string * ('a list -> string -> 'a)) list ->
     ?data_producer:(string * ('a list -> Xmlm.tag * tree list -> 'a)) list ->
     ?leaf_producer:('a list -> string -> 'a) ->
     ('a list -> 'b) -> Xmlm.tag * tree list -> 'b
