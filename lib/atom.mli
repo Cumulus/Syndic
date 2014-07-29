@@ -127,20 +127,27 @@ type published' = [ `Date of Netdate.t ]
 val published_of_xml : Xmlm.tag * Common.XML.tree list -> published
 val published_of_xml' : Xmlm.tag * Common.XML.tree list -> [> published' ] list
 
-type source = {
-  author : author * author list;
-  category : category list;
-  contributor : author list;
-  generator : generator option;
-  icon : icon option;
-  id : id;
-  link : link * link list;
-  logo : logo option;
-  rights : string option;
-  subtitle : string option;
-  title : string;
-  updated : string option;
-}
+type rights = string
+type rights' = [`Data of string]
+
+val rights_of_xml : Xmlm.tag * Common.XML.tree list -> rights
+val rights_of_xml' : Xmlm.tag * Common.XML.tree list -> [> rights' ] list
+
+type source =
+  {
+    author : author * author list;
+    category : category list;
+    contributor : author list;
+    generator : generator option;
+    icon : icon option;
+    id : id;
+    link : link * link list;
+    logo : logo option;
+    rights : rights option;
+    subtitle : string option;
+    title : string;
+    updated : string option;
+  }
 
 type entry = {
   author : author * author list;
@@ -150,7 +157,7 @@ type entry = {
   id : id;
   link : link list;
   published : published option;
-  rights : string option;
+  rights : rights option;
   source : source list;
   summary : string option;
   title : string;
@@ -166,7 +173,7 @@ type feed = {
   id : Uri.t;
   link : link list;
   logo : logo option;
-  rights : string option;
+  rights : rights option;
   subtitle : string option;
   title : string;
   updated : string;

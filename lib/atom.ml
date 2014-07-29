@@ -295,6 +295,8 @@ let make_icon (l : [< icon'] list) =
         (Common.Error.Tag "icon")
   in uri
 
+(** Safe generator, Unsafe generator *)
+
 let icon_of_xml, icon_of_xml' =
   let leaf_producer ctx data = `URI (Uri.of_string data) in
   generate_catcher ~leaf_producer make_icon,
@@ -465,6 +467,8 @@ let rel_of_string s = match String.lowercase (String.trim s) with
   | "via" -> Via
   | uri -> Link (Uri.of_string uri) (* RFC 4287 § 4.2.7.2 *)
 
+(** Safe generator, Unsafe generator *)
+
 let link_of_xml, link_of_xml' =
   let attr_producer = [
     ("href", (fun ctx a -> `HREF (Uri.of_string a)));
@@ -502,6 +506,8 @@ let make_logo (l : [< logo'] list) =
         (Common.Error.Tag "logo")
   in uri
 
+(** Safe generator, Unsafe generator *)
+
 let logo_of_xml, logo_of_xml' =
   let leaf_producer ctx data = `URI (Uri.of_string data) in
   generate_catcher ~leaf_producer make_logo,
@@ -532,27 +538,61 @@ let make_published (l : [< published'] list) =
         (Common.Error.Tag "published")
   in date
 
+(** Safe generator, Unsafe generator *)
+
 let published_of_xml, published_of_xml' =
   let leaf_producer ctx data = `Date (Netdate.parse data) in
   generate_catcher ~leaf_producer make_published,
   generate_catcher ~leaf_producer (fun x -> x)
 
+(** {C See RFC 4287 § 4.2.10 }
+  * The "atom:rights" element is a Text construct that conveys
+  * information about rights held in and over an entry or feed.
+  *
+  * atomRights = element atom:rights { atomTextConstruct } {% \equiv %} [`Data]
+  *
+  * The atom:rights element SHOULD NOT be used to convey machine-readable
+  * licensing information.
+  *
+  * If an atom:entry element does not contain an atom:rights element,
+  * then the atom:rights element of the containing atom:feed element, if
+  * present, is considered to apply to the entry.
+  *)
+
+type rights = string
+type rights' = [ `Data of string ]
+
+let make_rights (l : [< rights'] list) =
+  (** element atom:rights { atomTextConstruct } *)
+  let rights = match find (fun (`Data _) -> true) l with
+    | Some (`Data d) -> d
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "rights")
+  in rights
+
+let rights_of_xml, rights_of_xml' =
+  let leaf_producer ctx data = `Data data in
+  generate_catcher ~leaf_producer make_rights,
+  generate_catcher ~leaf_producer (fun x -> x)
+
 (* RFC Compliant (or raise error) *)
 
-type source = {
-  author: author * author list;
-  category: category list;
-  contributor: author list;
-  generator: generator option;
-  icon: icon option;
-  id: id;
-  link: link * link list;
-  logo: logo option;
-  rights: string option;
-  subtitle: string option;
-  title: string;
-  updated: string option; (* date *)
-}
+type source =
+  {
+    author: author * author list;
+    category: category list;
+    contributor: author list;
+    generator: generator option;
+    icon: icon option;
+    id: id;
+    link: link * link list;
+    logo: logo option;
+    rights: string option;
+    subtitle: string option;
+    title: string;
+    updated: string option; (* date *)
+  }
 
 type entry = {
   (*
@@ -609,24 +649,6 @@ type feed = {
   updated: string;
   entry: entry list;
 }
-
-
-
-type rights' = [
-  | `RightData of string
-]
-
-let make_rights (l : [< rights'] list) =
-  let rights = match find (fun (`RightData _) -> true) l with
-    | Some (`RightData d) -> d
-    | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "rights")
-  in rights
-
-let rights_of_xml =
-  let leaf_producer ctx data = `RightData data in
-  generate_catcher ~leaf_producer make_rights
 
 (* RFC Compliant (or raise error) *)
 
@@ -695,7 +717,7 @@ type source' = [
   | `SourceLogo of Uri.t
   | `SourceSubtitle of string
   | `SourceTitle of string
-  | `SourceRights of string
+  | `SourceRights of rights
   | `SourceUpdated of string
 ]
 
@@ -905,7 +927,7 @@ type feed' = [
   | `FeedId of Uri.t
   | `FeedLink of link
   | `FeedLogo of Uri.t
-  | `FeedRights of string
+  | `FeedRights of rights
   | `FeedSubtitle of string
   | `FeedTitle of string
   | `FeedUpdated of string
@@ -919,7 +941,7 @@ type entry' = [
   | `EntryId of Uri.t
   | `EntryLink of link
   | `EntryPublished of Netdate.t
-  | `EntryRights of string
+  | `EntryRights of rights
   | `EntrySource of source
   | `EntryContent of (content * string)
   | `EntrySummary of string
