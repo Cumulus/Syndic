@@ -69,6 +69,7 @@ type generator =
   {
     version : string option;
     uri : Uri.t option;
+    content : string;
   }
 
 type generator' = [
@@ -92,20 +93,33 @@ type id' = [ `URI of Uri.t ]
 val id_of_xml : Xmlm.tag * Common.XML.tree list -> id
 val id_of_xml' : Xmlm.tag * Common.XML.tree list -> [> id' ] list
 
-type link = {
-  href : Uri.t;
-  rel : rel;
-  type_media : string option;
-  hreflang : string option;
-  title : string option;
-  length : int option;
-}
+type link =
+  {
+    href : Uri.t;
+    rel : rel;
+    type_media : string option;
+    hreflang : string option;
+    title : string option;
+    length : int option;
+  }
+
+type link' = [
+  | `HREF of Uri.t
+  | `Rel of rel
+  | `Type of string
+  | `HREFLang of string
+  | `Title of string
+  | `Length of int
+]
+
+val link_of_xml : Xmlm.tag * Common.XML.tree list -> link
+val link_of_xml' : Xmlm.tag * Common.XML.tree list -> [> link' ] list
 
 type source = {
   author : author * author list;
   category : category list;
   contributor : author list;
-  generator : (generator * string) option;
+  generator : generator option;
   icon : Uri.t option;
   id : Uri.t;
   link : link * link list;
@@ -135,7 +149,7 @@ type feed = {
   author : author list;
   category : category list;
   contributor : author list;
-  generator : (generator * string) option;
+  generator : generator option;
   icon : Uri.t option;
   id : Uri.t;
   link : link list;

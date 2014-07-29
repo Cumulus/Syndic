@@ -41,6 +41,7 @@ type category = {
 type generator = {
   version: string option;
   uri: Uri.t option;
+  content: string;
 }
 
 type link = {
@@ -56,7 +57,7 @@ type source = {
   author: author * author list;
   category: category list;
   contributor: author list;
-  generator: (generator * string) option;
+  generator: generator option;
   icon: Uri.t option;
   id: Uri.t;
   link: link * link list;
@@ -107,7 +108,7 @@ type feed = {
   author: author list;
   category: category list;
   contributor: author list;
-  generator: (generator * string) option;
+  generator: generator option;
   icon: Uri.t option;
   id: Uri.t;
   (*
@@ -353,7 +354,7 @@ let make_generator (l : [< generator'] list) =
   let uri = match find (function `URI _ -> true | _ -> false) l with
     | Some ((`URI u)) -> Some u
     | _ -> None
-  in ({ version; uri; } : generator), content
+  in ({ version; uri; content; } : generator)
 
 (** Safe generator, Unsafe generator *)
 
@@ -380,6 +381,7 @@ let generator_of_xml, generator_of_xml' =
   * (vertical) and SHOULD be suitable for presentation at a small size.
   *)
 
+type icon = Uri.t
 type icon' = [ `URI of Uri.t ]
 
 let make_icon (l : [< icon'] list) =
@@ -407,8 +409,12 @@ let icon_of_xml, icon_of_xml' =
   * definition of "IRI" excludes relative references.  Though the IRI
   * might use a dereferencable scheme, Atom Processors MUST NOT assume it
   * can be dereferenced.
+  *
+  * There is more information in the RFC but they are not necessary here
+  * - at least, they can not be checked here.
   *)
 
+type id = Uri.t
 type id' = [ `URI of Uri.t ]
 
 let make_id (l : [< id'] list) =
@@ -423,40 +429,112 @@ let id_of_xml, id_of_xml' =
   generate_catcher ~leaf_producer make_id,
   generate_catcher ~leaf_producer (fun x -> x)
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.7 }
+  * The "atom:link" element defines a reference from an entry or feed to
+  * a Web resource.  This specification assigns no meaning to the content
+  * (if any) of this element.
+  *
+  * atomLink =
+  *    element atom:link {
+  *       atomCommonAttributes,
+  *       attribute href { atomUri }, {% \equiv %} [`HREF]
+  *       attribute rel { atomNCName | atomUri }?, {% \equiv %} [`Rel]
+  *       attribute type { atomMediaType }?, {% \equiv %} [`Type]
+  *       attribute hreflang { atomLanguageTag }?, {% \equiv %} [`HREFLang]
+  *       attribute title { text }?, {% \equiv %} [`Title]
+  *       attribute length { text }?, {% \equiv %} [`Length]
+  *       undefinedContent
+  *    }
+  *
+  * {C See RFC 4287 § 4.2.7.1 }
+  * The "href" attribute contains the link's IRI. atom:link elements MUST
+  * have an href attribute, whose value MUST be a IRI reference
+  * [RFC3987].
+  *
+  * {C See RFC 4287 § 4.2.7.2 }
+  * atom:link elements MAY have a "rel" attribute that indicates the link
+  * relation type. {b If the "rel" attribute is not present, the link
+  * element MUST be interpreted as if the link relation type is
+  * "alternate".}
+  *
+  * {b The value of "rel" MUST be a string that is non-empty and matches
+  * either the "isegment-nz-nc" or the "IRI" production in [RFC3987].}
+  * Note that use of a relative reference other than a simple name is not
+  * allowed.  If a name is given, implementations MUST consider the link
+  * relation type equivalent to the same name registered within the IANA
+  *
+  * {C See RFC 4287 § 4.2.7.3 }
+  * On the link element, the "type" attribute's value is an advisory
+  * media type: it is a hint about the type of the representation that is
+  * expected to be returned when the value of the href attribute is
+  * dereferenced.  Note that the type attribute does not override the
+  * actual media type returned with the representation.  Link elements
+  * MAY have a type attribute, whose value MUST conform to the syntax of
+  * a MIME media type [MIMEREG].
+  *
+  * {C See RFC 4287 § 4.2.7.4 }
+  * The "hreflang" attribute's content describes the language of the
+  * resource pointed to by the href attribute.  When used together with
+  * the rel="alternate", it implies a translated version of the entry.
+  * Link elements MAY have an hreflang attribute, whose value MUST be a
+  * language tag [RFC3066].
+  *
+  * {C See RFC 4287 § 4.2.7.5 }
+  * The "title" attribute conveys human-readable information about the
+  * link.  The content of the "title" attribute is Language-Sensitive.
+  * Entities such as "&amp;" and "&lt;" represent their corresponding
+  * characters ("&" and "<", respectively), not markup.  Link elements
+  * MAY have a title attribute.
+  *
+  * {C See RFC 4287 § 4.2.7.6 }
+  * The "length" attribute indicates an advisory length of the linked
+  * content in octets; it is a hint about the content length of the
+  * representation returned when the IRI in the href attribute is mapped
+  * to a URI and dereferenced.  Note that the length attribute does not
+  * override the actual content length of the representation as reported
+  * by the underlying protocol.  Link elements MAY have a length
+  * attribute.
+  *)
 
 type link' = [
-  | `LinkHREF of Uri.t
-  | `LinkRel of rel
-  | `LinkType of string
-  | `LinkHREFLang of string
-  | `LinkTitle of string
-  | `LinkLength of int
+  | `HREF of Uri.t
+  | `Rel of rel
+  | `Type of string
+  | `HREFLang of string
+  | `Title of string
+  | `Length of int
 ]
 
 let make_link (l : [< link'] list) =
-  let href = match find (function `LinkHREF _ -> true | _ -> false) l with
-    | Some (`LinkHREF u) -> u
+  (** attribute href { atomUri } *)
+  let href = match find (function `HREF _ -> true | _ -> false) l with
+    | Some (`HREF u) -> u
     | _ -> Error.raise_expectation (Error.Attr "href") (Error.Tag "link")
   in
-  let rel = match find (function `LinkRel _ -> true | _ -> false) l with
-    | Some (`LinkRel r) -> r
+  (** attribute rel { atomNCName | atomUri }? *)
+  let rel = match find (function `Rel _ -> true | _ -> false) l with
+    | Some (`Rel r) -> r
     | _ -> Alternate (* cf. RFC 4287 § 4.2.7.2 *)
   in
-  let type_media = match find (function `LinkType _ -> true | _ -> false) l with
-    | Some (`LinkType t) -> Some t
+  (** attribute type { atomMediaType }? *)
+  let type_media = match find (function `Type _ -> true | _ -> false) l with
+    | Some (`Type t) -> Some t
     | _ -> None
   in
-  let hreflang = match find (function `LinkHREFLang _ -> true | _ -> false) l with
-    | Some (`LinkHREFLang l) -> Some l
+  (** attribute hreflang { atomLanguageTag }? *)
+  let hreflang =
+    match find (function `HREFLang _ -> true | _ -> false) l with
+    | Some (`HREFLang l) -> Some l
     | _ -> None
   in
-  let title = match find (function `LinkTitle _ -> true | _ -> false) l with
-    | Some (`LinkTitle s) -> Some s
+  (** attribute title { text }? *)
+  let title = match find (function `Title _ -> true | _ -> false) l with
+    | Some (`Title s) -> Some s
     | _ -> None
   in
-  let length = match find (function `LinkLength _ -> true | _ -> false) l with
-    | Some (`LinkLength i) -> Some i
+  (** attribute length { text }? *)
+  let length = match find (function `Length _ -> true | _ -> false) l with
+    | Some (`Length i) -> Some i
     | _ -> None
   in
   ({ href; rel; type_media; hreflang; title; length; } : link)
@@ -469,16 +547,17 @@ let rel_of_string s = match String.lowercase (String.trim s) with
   | "via" -> Via
   | uri -> Link (Uri.of_string uri) (* RFC 4287 § 4.2.7.2 *)
 
-let link_of_xml =
+let link_of_xml, link_of_xml' =
   let attr_producer = [
-    ("href", (fun ctx a -> `LinkHREF (Uri.of_string a)));
-    ("rel", (fun ctx a -> `LinkRel (rel_of_string a)));
-    ("type", (fun ctx a -> `LinkType a));
-    ("hreflang", (fun ctx a -> `LinkHREFLang a));
-    ("title", (fun ctx a -> `LinkTitle a));
-    ("length", (fun ctx a -> `LinkLength (int_of_string a)));
+    ("href", (fun ctx a -> `HREF (Uri.of_string a)));
+    ("rel", (fun ctx a -> `Rel (rel_of_string a)));
+    ("type", (fun ctx a -> `Type a));
+    ("hreflang", (fun ctx a -> `HREFLang a));
+    ("title", (fun ctx a -> `Title a));
+    ("length", (fun ctx a -> `Length (int_of_string a)));
   ] in
-  generate_catcher ~attr_producer make_link
+  generate_catcher ~attr_producer make_link,
+  generate_catcher ~attr_producer (fun x -> x)
 
 (* RFC Compliant (or raise error) *)
 
@@ -582,7 +661,7 @@ type source' = [
   | `SourceAuthor of author
   | `SourceCategory of category
   | `SourceContributor of author
-  | `SourceGenerator of (generator * string)
+  | `SourceGenerator of generator
   | `SourceIcon of Uri.t
   | `SourceId of Uri.t
   | `SourceLink of link
@@ -752,7 +831,7 @@ type feed' = [
   | `FeedAuthor of author
   | `FeedCategory of category
   | `FeedContributor of author
-  | `FeedGenerator of (generator * string)
+  | `FeedGenerator of generator
   | `FeedIcon of Uri.t
   | `FeedId of Uri.t
   | `FeedLink of link
