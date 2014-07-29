@@ -1,31 +1,6 @@
 open Common.XML
 open Common.Util
 
-type rel =
-  | Alternate
-  | Related
-  | Self
-  | Enclosure
-  | Via
-  | Link of Uri.t
-
-(* See RFC 4287 § 3.1.1
- * Text constructs MAY have a "type" attribute.  When present, the value
- * MUST be one of [Text], [Html], or [Xhtml].  If the "type" attribute
- * is not provided, Atom Processors MUST behave as though it were
- * present with a value of "text".  Unlike the atom:content element
- * defined in Section 4.1.3, MIME media types [MIMEREG] MUST NOT be used
- * as values for the "type" attribute on Text constructs.
- *)
-
-type type_content =
-  | Html
-  | Text
-  | Xhtml
-  | Mime of string
-
-type content = { ty: type_content; src: Uri.t option; }
-
 (** {C See RFC 4287 § 3.2}
   * A Person construct is an element that describes a person,
   * corporation, or similar entity (hereafter, 'person').
@@ -103,15 +78,34 @@ let author_email_of_xml (tag, datas) =
   try get_leaf datas
   with Common.Error.Expected_Leaf -> "" (* mandatory ? *)
 
-(** Safe generator, Unsafe generator *)
+let author_uri_of_xml' =
+  let leaf_producer ctx data = `URI (Uri.of_string data) in
+  generate_catcher ~leaf_producer (fun x -> List.hd x)
+let author_name_of_xml' =
+  let leaf_producer ctx data = `Name (Uri.of_string data) in
+  generate_catcher ~leaf_producer (fun x -> List.hd x)
+let author_email_of_xml' =
+  let leaf_producer ctx data = `Email (Uri.of_string data) in
+  generate_catcher ~leaf_producer (fun x -> List.hd x)
 
-let author_of_xml, author_of_xml' =
+(** Safe generator *)
+
+let author_of_xml =
   let data_producer = [
     ("name", (fun ctx a -> `Name (author_name_of_xml a)));
     ("uri", (fun ctx a -> `URI (author_uri_of_xml a)));
     ("email", (fun ctx a -> `Email (author_email_of_xml a)));
   ] in
-  generate_catcher ~data_producer make_author,
+  generate_catcher ~data_producer make_author
+
+(** Unsafe generator *)
+
+let author_of_xml' =
+  let data_producer = [
+    ("name", (fun ctx a -> author_name_of_xml' a));
+    ("uri", (fun ctx a -> author_uri_of_xml' a));
+    ("email", (fun ctx a -> author_email_of_xml' a));
+  ] in
   generate_catcher ~data_producer (fun x -> x)
 
 (** {C See RFC 4287 § 4.2.2 }
@@ -202,29 +196,29 @@ let contributor_of_xml = author_of_xml
 let contributor_of_xml' = author_of_xml'
 
 (** {C See RFC 4287 § 4.2.4 }
- * The "atom:generator" element's content identifies the agent used to
- * generate a feed, for debugging and other purposes.
- *
- * atomGenerator = element atom:generator {
- *    atomCommonAttributes,
- *    attribute uri { atomUri }?, {% \equiv %} [`URI]
- *    attribute version { text }?, {% \equiv %} [`Version]
- *    text {% \equiv %} [`Content]
- * }
- *
- * The content of this element, when present, MUST be a string that is a
- * human-readable name for the generating agent.  Entities such as
- * "&amp;" and "&lt;" represent their corresponding characters ("&" and
- * "<" respectively), not markup.
- *
- * The atom:generator element MAY have a "uri" attribute whose value
- * MUST be an IRI reference [RFC3987].  When dereferenced, the resulting
- * URI (mapped from an IRI, if necessary) SHOULD produce a
- * representation that is relevant to that agent.
- *
- * The atom:generator element MAY have a "version" attribute that
- * indicates the version of the generating agent.
- *)
+  * The "atom:generator" element's content identifies the agent used to
+  * generate a feed, for debugging and other purposes.
+  *
+  * atomGenerator = element atom:generator {
+  *    atomCommonAttributes,
+  *    attribute uri { atomUri }?, {% \equiv %} [`URI]
+  *    attribute version { text }?, {% \equiv %} [`Version]
+  *    text {% \equiv %} [`Content]
+  * }
+  *
+  * The content of this element, when present, MUST be a string that is a
+  * human-readable name for the generating agent.  Entities such as
+  * "&amp;" and "&lt;" represent their corresponding characters ("&" and
+  * "<" respectively), not markup.
+  *
+  * The atom:generator element MAY have a "uri" attribute whose value
+  * MUST be an IRI reference [RFC3987].  When dereferenced, the resulting
+  * URI (mapped from an IRI, if necessary) SHOULD produce a
+  * representation that is relevant to that agent.
+  *
+  * The atom:generator element MAY have a "version" attribute that
+  * indicates the version of the generating agent.
+  *)
 
 type generator =
   {
@@ -404,6 +398,14 @@ let id_of_xml, id_of_xml' =
   * attribute.
   *)
 
+type rel =
+  | Alternate
+  | Related
+  | Self
+  | Enclosure
+  | Via
+  | Link of Uri.t
+
 type link =
   {
     href: Uri.t;
@@ -571,252 +573,316 @@ let make_rights (l : [< rights'] list) =
         (Common.Error.Tag "rights")
   in rights
 
+(** Safe generator, Unsafe generator *)
+
 let rights_of_xml, rights_of_xml' =
   let leaf_producer ctx data = `Data data in
   generate_catcher ~leaf_producer make_rights,
   generate_catcher ~leaf_producer (fun x -> x)
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.14 }
+  * The "atom:title" element is a Text construct that conveys a human-
+  * readable title for an entry or feed.
+  *
+  * atomTitle = element atom:title { atomTextConstruct } {% \equiv %} [`Data]
+  *)
 
-type source =
-  {
-    author: author * author list;
-    category: category list;
-    contributor: author list;
-    generator: generator option;
-    icon: icon option;
-    id: id;
-    link: link * link list;
-    logo: logo option;
-    rights: string option;
-    subtitle: string option;
-    title: string;
-    updated: string option; (* date *)
-  }
-
-type entry = {
-  (*
-   * si atom:entry ne contient pas atom:author,
-   * atom:author <- atom:feed/atom:author
-   * sinon erreur
-   *)
-  author: author * author list;
-  category: category list;
-  content: (content * string) option;
-  contributor: author list;
-  id: Uri.t; (* iri *)
-  (*
-   * si pas de atom:content, doit contenir
-   * atom:link avec rel="alternate"
-   *
-   * combinaison atom:link(rel="alternate"; type; hreflang)
-   * doit être unique
-   *)
-  link: link list;
-  published: published option; (* date *)
-  rights: string option;
-  source: source list;
-  (*
-   * atom:summary obligatoire si atom:entry contient atom:content avec
-   * attribut src ou atom:entry codé en base64 (LOL)
-   *)
-  summary: string option;
-  title: string;
-  updated: string; (* date *)
-}
-
-type feed = {
-  (*
-   * si tout les atom:entry ne contiennent pas atom:author
-   * et atom:feed ne contient atom:author
-   * ne respecte pas la RFC
-   *)
-  author: author list;
-  category: category list;
-  contributor: author list;
-  generator: generator option;
-  icon: Uri.t option;
-  id: Uri.t;
-  (*
-   * combinaison atom:link(rel="alternate"; type; hreflang)
-   * doit être unique
-   *)
-  link: link list;
-  logo: logo option;
-  rights: string option;
-  subtitle: string option;
-  title: string;
-  updated: string;
-  entry: entry list;
-}
-
-(* RFC Compliant (or raise error) *)
-
-type title' = [
-  | `TitleData of string
-]
+type title = string
+type title' = [ `Data of string ]
 
 let make_title (l : [< title'] list) =
-  let title = match find (fun (`TitleData _) -> true) l with
-    | Some (`TitleData d) -> d
+  (** element atom:title { atomTextConstruct } *)
+  let title = match find (fun (`Data _) -> true) l with
+    | Some (`Data d) -> d
     | _ -> Common.Error.raise_expectation
         Common.Error.Data
         (Common.Error.Tag "title")
   in title
 
-let title_of_xml =
-  let leaf_producer ctx data = `TitleData data in
-  generate_catcher ~leaf_producer make_title
+(** Safe generator, Unsafe generator *)
 
-(* RFC Compliant (or raise error) *)
+let title_of_xml, title_of_xml' =
+  let leaf_producer ctx data = `Data data in
+  generate_catcher ~leaf_producer make_title,
+  generate_catcher ~leaf_producer (fun x -> x)
 
-type subtitle' = [
-  | `SubtitleData of string
-]
+(** {C See RFC 4287 § 4.2.12 }
+  * The "atom:subtitle" element is a Text construct that conveys a human-
+  * readable description or subtitle for a feed.
+  *
+  * atomSubtitle = element atom:subtitle { atomTextConstruct } {% \equiv %}
+  * [`Data]
+  *)
+
+type subtitle = string
+type subtitle' = [ `Data of string ]
 
 let make_subtitle (l : [< subtitle'] list) =
-  let subtitle = match find (fun (`SubtitleData _) -> true) l with
-    | Some (`SubtitleData d) -> d
+  let subtitle = match find (fun (`Data _) -> true) l with
+    | Some (`Data d) -> d
     | _ -> Common.Error.raise_expectation
         Common.Error.Data
         (Common.Error.Tag "subtitle")
   in subtitle
 
-let subtitle_of_xml =
-  let leaf_producer ctx data = `SubtitleData data in
-  generate_catcher ~leaf_producer make_subtitle
+(** Safe generator, Unsafe generator *)
 
-(* RFC Compliant (or raise error) *)
+let subtitle_of_xml, subtitle_of_xml' =
+  let leaf_producer ctx data = `Data data in
+  generate_catcher ~leaf_producer make_subtitle,
+  generate_catcher ~leaf_producer (fun x -> x)
 
-type updated' = [
-  | `UpdatedData of string
-]
+(** {C See RFC 4287 § 4.2.15 }
+  * The "atom:updated" element is a Date construct indicating the most
+  * recent instant in time when an entry or feed was modified in a way
+  * the publisher considers significant.  Therefore, not all
+  * modifications necessarily result in a changed atom:updated value.
+  *
+  * atomUpdated = element atom:updated { atomDateConstruct } {% \equiv %}
+  * [`Date]
+  *
+  * Publishers MAY change the value of this element over time.
+  *)
+
+type updated = Netdate.t
+type updated' = [ `Date of Netdate.t ]
 
 let make_updated (l : [< updated'] list) =
-  let updated = match find (fun (`UpdatedData _) -> true) l with
-    | Some (`UpdatedData d) -> d
+  (** atom:updated { atomDateConstruct } *)
+  let updated = match find (fun (`Date _) -> true) l with
+    | Some (`Date d) -> d
     | _ -> Common.Error.raise_expectation
         Common.Error.Data
         (Common.Error.Tag "updated")
   in updated
 
-let updated_of_xml =
-  let leaf_producer ctx data = `UpdatedData data in
-  generate_catcher ~leaf_producer make_updated
+(** Safe generator, Unsafe generator *)
 
-(* RFC Compliant (or raise error) *)
+let updated_of_xml, updated_of_xml' =
+  let leaf_producer ctx data = `Date (Netdate.parse data) in
+  generate_catcher ~leaf_producer make_updated,
+  generate_catcher ~leaf_producer (fun x -> x)
+
+(** {C See RFC 4287 § 4.2.11 }
+  * If an atom:entry is copied from one feed into another feed, then the
+  * source atom:feed's metadata (all child elements of atom:feed other
+  * than the atom:entry elements) MAY be preserved within the copied
+  * entry by adding an atom:source child element, if it is not already
+  * present in the entry, and including some or all of the source feed's
+  * Metadata elements as the atom:source element's children.  Such
+  * metadata SHOULD be preserved if the source atom:feed contains any of
+  * the child elements atom:author, atom:contributor, atom:rights, or
+  * atom:category and those child elements are not present in the source
+  * atom:entry.
+  *
+  * atomSource =
+  *    element atom:source {
+  *       atomCommonAttributes,
+  *       (atomAuthor* {% \equiv %} [`Author]
+  *        & atomCategory* {% \equiv %} [`Category]
+  *        & atomContributor* {% \equiv %} [`Contributor]
+  *        & atomGenerator? {% \equiv %} [`Generator]
+  *        & atomIcon? {% \equiv %} [`Icon]
+  *        & atomId? {% \equiv %} [`ID]
+  *        & atomLink* {% \equiv %} [`Link]
+  *        & atomLogo? {% \equiv %} [`Logo]
+  *        & atomRights? {% \equiv %} [`Rights]
+  *        & atomSubtitle? {% \equiv %} [`Subtitle]
+  *        & atomTitle? {% \equiv %} [`Title]
+  *        & atomUpdated? {% \equiv %} [`Updated]
+  *        & extensionElement* )
+  *    }
+  *
+  * The atom:source element is designed to allow the aggregation of
+  * entries from different feeds while retaining information about an
+  * entry's source feed.  For this reason, Atom Processors that are
+  * performing such aggregation SHOULD include at least the required
+  * feed-level Metadata elements (atom:id, atom:title, and atom:updated)
+  * in the atom:source element.
+  *
+  * See RFC 4287 § 4.1.2 for more details.
+  *)
+
+type source =
+  {
+    authors: author * author list;
+    categories: category list;
+    contributors: author list;
+    generator: generator option;
+    icon: icon option;
+    id: id;
+    links: link * link list;
+    logo: logo option;
+    rights: rights option;
+    subtitle: subtitle option;
+    title: title;
+    updated: updated option;
+  }
 
 type source' = [
-  | `SourceAuthor of author
-  | `SourceCategory of category
-  | `SourceContributor of author
-  | `SourceGenerator of generator
-  | `SourceIcon of Uri.t
-  | `SourceId of Uri.t
-  | `SourceLink of link
-  | `SourceLogo of Uri.t
-  | `SourceSubtitle of string
-  | `SourceTitle of string
-  | `SourceRights of rights
-  | `SourceUpdated of string
+  | `Author of author
+  | `Category of category
+  | `Contributor of author
+  | `Generator of generator
+  | `Icon of icon
+  | `ID of id
+  | `Link of link
+  | `Logo of logo
+  | `Subtitle of subtitle
+  | `Title of title
+  | `Rights of rights
+  | `Updated of updated
 ]
 
 let make_source (l : [< source'] list) =
-  let author =
+  (** atomAuthor* *)
+  let authors =
     (function
       | [] -> Common.Error.raise_expectation
           (Common.Error.Tag "author")
           (Common.Error.Tag "source")
       | x :: r -> x, r)
-      (List.fold_left (fun acc -> function `SourceAuthor x -> x :: acc | _ -> acc) [] l)
+      (List.fold_left
+        (fun acc -> function `Author x -> x :: acc | _ -> acc)
+        [] l)
   in
-  let category = List.fold_left (fun acc -> function `SourceCategory x -> x :: acc | _ -> acc) [] l in
-  let contributor = List.fold_left (fun acc -> function `SourceContributor x -> x :: acc | _ -> acc) [] l in
-  let generator = match find (function `SourceGenerator _ -> true | _ -> false) l with
-    | Some (`SourceGenerator g) -> Some g
+  (** atomCategory* *)
+  let categories =
+    List.fold_left
+      (fun acc -> function `Category x -> x :: acc | _ -> acc)
+      [] l in
+  (** atomContributor* *)
+  let contributors =
+    List.fold_left
+      (fun acc -> function `Contributor x -> x :: acc | _ -> acc)
+      [] l in
+  (** atomGenerator? *)
+  let generator =
+    match find (function `Generator _ -> true | _ -> false) l with
+    | Some (`Generator g) -> Some g
     | _ -> None
   in
-  let icon = match find (function `SourceIcon _ -> true | _ -> false) l with
-    | Some (`SourceIcon u) -> Some u
+  (** atomIcon? *)
+  let icon = match find (function `Icon _ -> true | _ -> false) l with
+    | Some (`Icon u) -> Some u
     | _ -> None
   in
-  let id = match find (function `SourceId _ -> true | _ -> false) l with
-    | Some (`SourceId i) -> i
+  (** atomId? *)
+  let id = match find (function `ID _ -> true | _ -> false) l with
+    | Some (`ID i) -> i
     | _ -> Common.Error.raise_expectation
         (Common.Error.Tag "id")
         (Common.Error.Tag "source")
   in
-  let link =
+  (** atomLink* *)
+  let links =
     (function
       | [] -> Common.Error.raise_expectation
           (Common.Error.Tag "link")
           (Common.Error.Tag "source")
       | x :: r -> (x, r))
-      (List.fold_left (fun acc -> function `SourceLink x -> x :: acc | _ -> acc) [] l)
+      (List.fold_left (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l)
   in
-  let logo = match find (function `SourceLogo _ -> true | _ -> false) l with
-    | Some (`SourceLogo u) -> Some u
+  (** atomLogo? *)
+  let logo = match find (function `Logo _ -> true | _ -> false) l with
+    | Some (`Logo u) -> Some u
     | _ -> None
   in
-  let rights = match find (function `SourceRights _ -> true | _ -> false) l with
-    | Some (`SourceRights r) -> Some r
+  (** atomRights? *)
+  let rights = match find (function `Rights _ -> true | _ -> false) l with
+    | Some (`Rights r) -> Some r
     | _ -> None
   in
-  let subtitle = match find (function `SourceSubtitle _ -> true | _ -> false) l with
-    | Some (`SourceSubtitle s) -> Some s
+  (** atomSubtitle? *)
+  let subtitle = match find (function `Subtitle _ -> true | _ -> false) l with
+    | Some (`Subtitle s) -> Some s
     | _ -> None
   in
-  let title = match find (function `SourceTitle _ -> true | _ -> false) l with
-    | Some (`SourceTitle s) -> s
+  (** atomTitle? *)
+  let title = match find (function `Title _ -> true | _ -> false) l with
+    | Some (`Title s) -> s
     | _ -> Common.Error.raise_expectation
         (Common.Error.Tag "title")
         (Common.Error.Tag "source")
   in
-  let updated = match find (function `SourceUpdated _ -> true | _ -> false) l with
-    | Some (`SourceUpdated d) -> Some d
+  (** atomUpdated? *)
+  let updated = match find (function `Updated _ -> true | _ -> false) l with
+    | Some (`Updated d) -> Some d
     | _ -> None
   in
-  ({ author; category; contributor; generator; icon; id; link; logo; rights; subtitle; title; updated; } : source)
+  ({ authors;
+     categories;
+     contributors;
+     generator;
+     icon;
+     id;
+     links;
+     logo;
+     rights;
+     subtitle;
+     title;
+     updated; } : source)
+
+(** Safe generator *)
 
 let source_of_xml =
   let data_producer = [
-    ("author", (fun ctx a -> `SourceAuthor (author_of_xml a)));
-    ("category", (fun ctx a -> `SourceCategory (category_of_xml a)));
-    ("contributor", (fun ctx a -> `SourceContributor (contributor_of_xml a)));
-    ("generator", (fun ctx a -> `SourceGenerator (generator_of_xml a)));
-    ("icon", (fun ctx a -> `SourceIcon (icon_of_xml a)));
-    ("id", (fun ctx a -> `SourceId (id_of_xml a)));
-    ("link", (fun ctx a -> `SourceLink (link_of_xml a)));
-    ("logo", (fun ctx a -> `SourceLogo (logo_of_xml a)));
-    ("rights", (fun ctx a -> `SourceRights (rights_of_xml a)));
-    ("subtitle", (fun ctx a -> `SourceSubtitle (subtitle_of_xml a)));
-    ("title", (fun ctx a -> `SourceTitle (title_of_xml a)));
-    ("updated", (fun ctx a -> `SourceUpdated (updated_of_xml a)));
+    ("author", (fun ctx a -> `Author (author_of_xml a)));
+    ("category", (fun ctx a -> `Category (category_of_xml a)));
+    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml a)));
+    ("generator", (fun ctx a -> `Generator (generator_of_xml a)));
+    ("icon", (fun ctx a -> `Icon (icon_of_xml a)));
+    ("id", (fun ctx a -> `ID (id_of_xml a)));
+    ("link", (fun ctx a -> `Link (link_of_xml a)));
+    ("logo", (fun ctx a -> `Logo (logo_of_xml a)));
+    ("rights", (fun ctx a -> `Rights (rights_of_xml a)));
+    ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml a)));
+    ("title", (fun ctx a -> `Title (title_of_xml a)));
+    ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
   ] in
   generate_catcher ~data_producer make_source
 
-(* RFC Compliant (or raise error) *)
+(** Unsafe generator *)
 
-type content' = [
-  | `ContentType of type_content
-  | `ContentSRC of Uri.t
-  | `ContentData of string
-]
+let source_of_xml' =
+  let data_producer = [
+    ("author", (fun ctx a -> `Author (author_of_xml' a)));
+    ("category", (fun ctx a -> `Category (category_of_xml' a)));
+    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml' a)));
+    ("generator", (fun ctx a -> `Generator (generator_of_xml' a)));
+    ("icon", (fun ctx a -> `Icon (icon_of_xml' a)));
+    ("id", (fun ctx a -> `ID (id_of_xml' a)));
+    ("link", (fun ctx a -> `Link (link_of_xml' a)));
+    ("logo", (fun ctx a -> `Logo (logo_of_xml' a)));
+    ("rights", (fun ctx a -> `Rights (rights_of_xml' a)));
+    ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml' a)));
+    ("title", (fun ctx a -> `Title (title_of_xml' a)));
+    ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
+  ] in
+  generate_catcher ~data_producer (fun x -> x)
 
-let make_content (l : [< content'] list) =
-  let ty = match find (function `ContentType _ -> true | _ -> false) l with
-    | Some (`ContentType ty) -> ty
-    | _ -> Text
-  in
-  let src = match find (function `ContentSRC _ -> true | _ -> false) l with
-    | Some (`ContentSRC s) -> Some s
-    | _ -> None
-  in
-  let data = match find (function `ContentData _ -> true | _ -> false) l with
-    | Some (`ContentData d) -> d
-    | _ -> ""
-  in
-  (({ ty; src; } : content), data)
+(** {C See RFC 4287 § 3.1.1 }
+  * Text constructs MAY have a "type" attribute.  When present, the value
+  * MUST be one of [Text], [Html], or [Xhtml].  If the "type" attribute
+  * is not provided, Atom Processors MUST behave as though it were
+  * present with a value of "text".  Unlike the atom:content element
+  * defined in Section 4.1.3, MIME media types [MIMEREG] MUST NOT be used
+  * as values for the "type" attribute on Text constructs.
+  *
+  * {C See RFC 4287 § 4.1.3.1 }
+  * On the atom:content element, the value of the "type" attribute MAY be
+  * one of "text", "html", or "xhtml".  Failing that, it MUST conform to
+  * the syntax of a MIME media type, but MUST NOT be a composite type
+  * (see Section 4.2.6 of [MIMEREG]).  If neither the type attribute nor
+  * the src attribute is provided, Atom Processors MUST behave as though
+  * the type attribute were present with a value of "text".
+  *)
+
+type type_content =
+  | Html
+  | Text
+  | Xhtml
+  | Mime of string
 
 let type_content_of_string s = match String.lowercase (String.trim s) with
   | "html" -> Html
@@ -824,40 +890,249 @@ let type_content_of_string s = match String.lowercase (String.trim s) with
   | "xhtml" -> Xhtml
   | mime -> Mime mime
 
-let content_of_xml =
-  let attr_producer = [
-    ("type", (fun ctx a -> `ContentType (type_content_of_string a)));
-    ("src", (fun ctx a -> `ContentSRC (Uri.of_string a)));
-  ] in
-  let leaf_producer ctx data = `ContentData data in
-  generate_catcher ~attr_producer ~leaf_producer make_content
+(** {C See RFC 4287 § 4.1.3 }
+  * The "atom:content" element either contains or links to the content of
+  * the entry.  The content of atom:content is Language-Sensitive.
+  *
+  * atomInlineTextContent =
+  *    element atom:content {
+  *       atomCommonAttributes,
+  *       attribute type { "text" | "html" }?, {% \equiv %} [`Type]
+  *       (text)* {% \equiv %} [`Data]
+  *    }
+  *
+  * atomInlineXHTMLContent =
+  *    element atom:content {
+  *       atomCommonAttributes,
+  *       attribute type { "xhtml" }, {% \equiv %} [`Type]
+  *       xhtmlDiv {% \equiv %} [`Data]
+  *    }
+  *
+  * atomInlineOtherContent =
+  *    element atom:content {
+  *       atomCommonAttributes,
+  *       attribute type { atomMediaType }?, {% \equiv %} [`Type]
+  *       (text|anyElement)* {% \equiv %} [`Data]
+  *    }
+  *
+  * atomOutOfLineContent =
+  *    element atom:content {
+  *       atomCommonAttributes,
+  *       attribute type { atomMediaType }?, {% \equiv %} [`Type]
+  *       attribute src { atomUri }, {% \equiv %} [`SRC]
+  *       empty
+  *    }
+  *
+  * atomContent = atomInlineTextContent
+  *  | atomInlineXHTMLContent
+  *  | atomInlineOtherContent
+  *  | atomOutOfLineContent
+  *
+  * {C See RFC 4287 § 4.1.3.2 }
+  * atom:content MAY have a "src" attribute, whose value MUST be an IRI
+  * reference [RFC3987].  If the "src" attribute is present, atom:content
+  * MUST be empty.  Atom Processors MAY use the IRI to retrieve the
+  * content and MAY choose to ignore remote content or to present it in a
+  * different manner than local content.
 
-(* RFC Compliant (or raise error) *)
+  * If the "src" attribute is present, the "type" attribute SHOULD be
+  * provided and MUST be a MIME media type [MIMEREG], rather than "text",
+  * "html", or "xhtml".  The value is advisory; that is to say, when the
+  * corresponding URI (mapped from an IRI, if necessary) is dereferenced,
+  * if the server providing that content also provides a media type, the
+  * server-provided media type is authoritative.
+  *)
 
-type summary' = [
-  | `SummaryData of string
+type content =
+  {
+    ty : type_content;
+    src : Uri.t option;
+    data : string;
+  }
+
+type content' = [
+  | `Type of type_content
+  | `SRC of Uri.t
+  | `Data of string
 ]
 
+(* TODO: see RFC *)
+
+let make_content (l : [< content'] list) =
+  (** attribute type { "text" | "html" }?
+   *  | attribute type { "xhtml" }
+   *  | attribute type { atomMediaType }? *)
+  let ty = match find (function `Type _ -> true | _ -> false) l with
+    | Some (`Type ty) -> ty
+    | _ -> Text
+  in
+  (** attribute src { atomUri }
+   *  | none *)
+  let src = match find (function `SRC _ -> true | _ -> false) l with
+    | Some (`SRC s) -> Some s
+    | _ -> None
+  in
+  (** (text)*
+   *  | xhtmlDiv
+   *  | (text|anyElement)*
+   *  | none *)
+  let data = match find (function `Data _ -> true | _ -> false) l with
+    | Some (`Data d) -> d
+    | _ -> ""
+  in
+  ({ ty; src; data; } : content)
+
+(** Safe generator, Unsafe generator *)
+
+let content_of_xml, content_of_xml' =
+  let attr_producer = [
+    ("type", (fun ctx a -> `Type (type_content_of_string a)));
+    ("src", (fun ctx a -> `SRC (Uri.of_string a)));
+  ] in
+  let leaf_producer ctx data = `Data data in
+  generate_catcher ~attr_producer ~leaf_producer make_content,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+
+(** {C See RFC 4287 § 4.2.13 }
+  * The "atom:summary" element is a Text construct that conveys a short
+  * summary, abstract, or excerpt of an entry.
+  *
+  * atomSummary = element atom:summary { atomTextConstruct } {% \equiv %}
+  * [`Data]
+  *
+  * It is not advisable for the atom:summary element to duplicate
+  * atom:title or atom:content because Atom Processors might assume there
+  * is a useful summary when there is none.
+  *)
+
+type summary = string
+type summary' = [ `Data of string ]
+
 let make_summary (l : [< summary'] list) =
-  let data = match find (fun (`SummaryData _) -> true) l with
-    | Some (`SummaryData d) -> d
+  (** element atom:summaru { atomTextConstruct } *)
+  let data = match find (fun (`Data _) -> true) l with
+    | Some (`Data d) -> d
     | _ -> Common.Error.raise_expectation
         Common.Error.Data
         (Common.Error.Tag "summary")
   in data
 
-let summary_of_xml =
-  let leaf_producer ctx data = `SummaryData data in
-  generate_catcher ~leaf_producer make_summary
+(** Safe generator, Unsafe generator *)
 
-(* RFC Compliant (or raise error) *)
+let summary_of_xml, summary_of_xml' =
+  let leaf_producer ctx data = `Data data in
+  generate_catcher ~leaf_producer make_summary,
+  generate_catcher ~leaf_producer (fun x -> x)
+
+(** {C See RFC 4287 § 4.1.2 }
+ * The "atom:entry" element represents an individual entry, acting as a
+ * container for metadata and data associated with the entry.  This
+ * element can appear as a child of the atom:feed element, or it can
+ * appear as the document (i.e., top-level) element of a stand-alone
+ * Atom Entry Document.
+ *
+ * atomEntry =
+ *    element atom:entry {
+ *       atomCommonAttributes,
+ *       (atomAuthor* {% \equiv %} [`Author]
+ *        & atomCategory* {% \equiv %} [`Category]
+ *        & atomContent? {% \equiv %} [`Content]
+ *        & atomContributor* {% \equiv %} [`Contributor]
+ *        & atomId {% \equiv %} [`ID]
+ *        & atomLink* {% \equiv %} [`Link]
+ *        & atomPublished? {% \equiv %} [`Published]
+ *        & atomRights? {% \equiv %} [`Rights]
+ *        & atomSource? {% \equiv %} [`Source]
+ *        & atomSummary? {% \equiv %} [`Summary]
+ *        & atomTitle {% \equiv %} [`Title]
+ *        & atomUpdated {% \equiv %} [`Updated]
+ *        & extensionElement* )
+ *    }
+ *
+ * This specification assigns no significance to the order of appearance
+ * of the child elements of atom:entry.
+ *
+ * The following child elements are defined by this specification (note
+ * that it requires the presence of some of these elements):
+ *
+ * o  {b atom:entry elements MUST contain one or more atom:author elements,
+ *    unless the atom:entry contains an atom:source element that
+ *    contains an atom:author element or, in an Atom Feed Document, the
+ *    atom:feed element contains an atom:author element itself.}
+ * o  atom:entry elements MAY contain any number of atom:category
+ *    elements.
+ * o  atom:entry elements MUST NOT contain more than one atom:content
+ *    element.
+ * o  atom:entry elements MAY contain any number of atom:contributor
+ *    elements.
+ * o  atom:entry elements MUST contain exactly one atom:id element.
+ * o  {b atom:entry elements that contain no child atom:content element
+ *    MUST contain at least one atom:link element with a rel attribute
+ *    value of "alternate".}
+ * o  {b atom:entry elements MUST NOT contain more than one atom:link
+ *    element with a rel attribute value of "alternate" that has the
+ *    same combination of type and hreflang attribute values.}
+ * o  atom:entry elements MAY contain additional atom:link elements
+ *    beyond those described above.
+ * o  atom:entry elements MUST NOT contain more than one atom:published
+ *    element.
+ * o  atom:entry elements MUST NOT contain more than one atom:rights
+ *    element.
+ * o  atom:entry elements MUST NOT contain more than one atom:source
+ *    element.
+ * o  atom:entry elements MUST contain an atom:summary element in either
+ *    of the following cases:
+ *    *  the atom:entry contains an atom:content that has a "src"
+ *       attribute (and is thus empty).
+ *    *  the atom:entry contains content that is encoded in Base64;
+ *       i.e., the "type" attribute of atom:content is a MIME media type
+ *       [MIMEREG], but is not an XML media type [RFC3023], does not
+ *       begin with "text/", and does not end with "/xml" or "+xml".
+ * o  atom:entry elements MUST NOT contain more than one atom:summary
+ *    element.
+ * o  atom:entry elements MUST contain exactly one atom:title element.
+ * o  atom:entry elements MUST contain exactly one atom:updated element.
+ *)
+
+type entry =
+  {
+    authors: author * author list;
+    categories: category list;
+    content: content option;
+    contributors: author list;
+    id: id;
+    links: link list;
+    published: published option;
+    rights: rights option;
+    sources: source list;
+    summary: summary option;
+    title: title;
+    updated: updated;
+  }
+
+type entry' = [
+  | `Author of author
+  | `Category of category
+  | `Contributor of author
+  | `ID of id
+  | `Link of link
+  | `Published of published
+  | `Rights of rights
+  | `Source of source
+  | `Content of content
+  | `Summary of summary
+  | `Title of title
+  | `Updated of updated
+]
 
 module Error = struct
   include Common.Error
 
   exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
 
-  let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
+  let raise_duplicate_link
+    { href; type_media; hreflang; _}
+    (type_media', hreflang') =
     let ty = (function Some a -> a | None -> "(none)") type_media in
     let hl = (function Some a -> a | None -> "(none)") hreflang in
     let ty' = (function "" -> "(none)" | s -> s) type_media' in
@@ -895,66 +1170,57 @@ let uniq_link_alternate (l : link list) =
   let rec aux acc = function
     | [] -> l
 
-    | ({ rel; type_media = Some ty; hreflang = Some hl; _ } as x) :: r when rel = Alternate ->
+    | ({ rel; type_media = Some ty; hreflang = Some hl; _ } as x) :: r
+      when rel = Alternate ->
       if LinkSet.mem (ty, hl) acc
-      then Error.raise_duplicate_string x (LinkSet.find (ty, hl) acc)
+      then Error.raise_duplicate_link x (LinkSet.find (ty, hl) acc)
       else aux (LinkSet.add (ty, hl) acc) r
 
-    | ({ rel; type_media = None; hreflang = Some hl; _ } as x) :: r when rel = Alternate ->
+    | ({ rel; type_media = None; hreflang = Some hl; _ } as x) :: r
+      when rel = Alternate ->
       if LinkSet.mem ("", hl) acc
-      then Error.raise_duplicate_string x (LinkSet.find ("", hl) acc)
+      then Error.raise_duplicate_link x (LinkSet.find ("", hl) acc)
       else aux (LinkSet.add ("", hl) acc) r
 
-    | ({ rel; type_media = Some ty; hreflang = None; _ } as x) :: r when rel = Alternate ->
+    | ({ rel; type_media = Some ty; hreflang = None; _ } as x) :: r
+      when rel = Alternate ->
       if LinkSet.mem (ty, "") acc
-      then Error.raise_duplicate_string x (LinkSet.find (ty, "") acc)
+      then Error.raise_duplicate_link x (LinkSet.find (ty, "") acc)
       else aux (LinkSet.add (ty, "") acc) r
 
-    | ({ rel; type_media = None; hreflang = None; _ } as x) :: r when rel = Alternate ->
+    | ({ rel; type_media = None; hreflang = None; _ } as x) :: r
+      when rel = Alternate ->
       if LinkSet.mem ("", "") acc
-      then Error.raise_duplicate_string x (LinkSet.find ("", "") acc)
+      then Error.raise_duplicate_link x (LinkSet.find ("", "") acc)
       else aux (LinkSet.add ("", "") acc) r
 
     | x :: r -> aux acc r
   in aux LinkSet.empty l
 
 type feed' = [
-  | `FeedAuthor of author
-  | `FeedCategory of category
-  | `FeedContributor of author
-  | `FeedGenerator of generator
-  | `FeedIcon of Uri.t
-  | `FeedId of Uri.t
-  | `FeedLink of link
-  | `FeedLogo of Uri.t
-  | `FeedRights of rights
-  | `FeedSubtitle of string
-  | `FeedTitle of string
-  | `FeedUpdated of string
-  | `FeedEntry of entry
-]
-
-type entry' = [
-  | `EntryAuthor of author
-  | `EntryCategory of category
-  | `EntryContributor of author
-  | `EntryId of Uri.t
-  | `EntryLink of link
-  | `EntryPublished of Netdate.t
-  | `EntryRights of rights
-  | `EntrySource of source
-  | `EntryContent of (content * string)
-  | `EntrySummary of string
-  | `EntryTitle of string
-  | `EntryUpdated of string
+  | `Author of author
+  | `Category of category
+  | `Contributor of author
+  | `Generator of generator
+  | `Icon of icon
+  | `ID of id
+  | `Link of link
+  | `Logo of logo
+  | `Rights of rights
+  | `Subtitle of subtitle
+  | `Title of title
+  | `Updated of updated
+  | `Entry of entry
 ]
 
 let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
-  let feed_author = match find (function `FeedAuthor _ -> true | _ -> false) feed with
-    | Some (`FeedAuthor a) -> Some a
+  let feed_author =
+    match find (function `Author _ -> true | _ -> false) feed with
+    | Some (`Author a) -> Some a
     | _ -> None
-  in let author =
-    (* default author is feed/author, cf. RFC 4287 § 4.1.2 *)
+  (** (atomAuthor* *)
+  in let authors =
+    (* default author is feed/author, see RFC 4287 § 4.1.2 *)
     (function
       | None, [] ->
         Error.raise_expectation
@@ -962,115 +1228,297 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
           (Error.Tag "entry")
       | Some a, [] -> a, []
       | _, x :: r -> x, r)
-      (feed_author, List.fold_left (fun acc -> function `EntryAuthor x -> x :: acc | _ -> acc) [] l)
-  in let category = List.fold_left (fun acc -> function `EntryCategory x -> x :: acc | _ -> acc) [] l
-  in let contributor = List.fold_left (fun acc -> function `EntryContributor x -> x :: acc | _ -> acc) [] l in
-  let id = match find (function `EntryId _ -> true | _ -> false) l with
-    | Some (`EntryId i) -> i
+      (feed_author,
+       List.fold_left
+         (fun acc -> function `Author x -> x :: acc | _ -> acc)
+         [] l)
+  (** atomCategory* *)
+  in let categories = List.fold_left
+      (fun acc -> function `Category x -> x :: acc | _ -> acc) [] l
+  (** atomContributor* *)
+  in let contributors = List.fold_left
+      (fun acc -> function `Contributor x -> x :: acc | _ -> acc) [] l in
+  (** atomId *)
+  let id = match find (function `ID _ -> true | _ -> false) l with
+    | Some (`ID i) -> i
     | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "entry")
-  in let link = List.fold_left (fun acc -> function `EntryLink x -> x :: acc | _ -> acc) [] l in
-  let published = match find (function `EntryPublished _ -> true | _ -> false) l with
-    | Some (`EntryPublished s) -> Some s
+  (** atomLink* *)
+  in let links = List.fold_left
+      (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l in
+  (** atomPublished? *)
+  let published = match find (function `Published _ -> true | _ -> false) l with
+    | Some (`Published s) -> Some s
     | _ -> None
   in
-  let rights = match find (function `EntryRights _ -> true | _ -> false) l with
-    | Some (`EntryRights r) -> Some r
+  (** atomRights? *)
+  let rights = match find (function `Rights _ -> true | _ -> false) l with
+    | Some (`Rights r) -> Some r
     | _ -> None
-  in let source = List.fold_left (fun acc -> function `EntrySource x -> x :: acc | _ -> acc) [] l in
-  let content = match find (function `EntryContent _ -> true | _ -> false) l with
-    | Some (`EntryContent c) -> Some c
+  (** atomSource? *)
+  in let sources = List.fold_left
+      (fun acc -> function `Source x -> x :: acc | _ -> acc) [] l in
+  (** atomContent? *)
+  let content = match find (function `Content _ -> true | _ -> false) l with
+    | Some (`Content c) -> Some c
     | _ -> None
   in
-  let summary = match find (function `EntrySummary _ -> true | _ -> false) l with
-    | Some (`EntrySummary s) -> Some s
+  (** atomSummary? *)
+  let summary = match find (function `Summary _ -> true | _ -> false) l with
+    | Some (`Summary s) -> Some s
     | _ -> None
   in
-  let title = match find (function `EntryTitle _ -> true | _ -> false) l with
-    | Some (`EntryTitle t) -> t
+  (** atomTitle *)
+  let title = match find (function `Title _ -> true | _ -> false) l with
+    | Some (`Title t) -> t
     | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "entry")
   in
-  let updated = match find (function `EntryUpdated _ -> true | _ -> false) l with
-    | Some (`EntryUpdated u) -> u
+  (** atomUpdated *)
+  let updated = match find (function `Updated _ -> true | _ -> false) l with
+    | Some (`Updated u) -> u
     | _ -> Error.raise_expectation (Error.Tag "updated") (Error.Tag "entry")
   in
-  ({ author; category; content; contributor; id; link = uniq_link_alternate link; published; rights; source; summary; title; updated; } : entry)
+  ({ authors;
+     categories;
+     content;
+     contributors;
+     id;
+     links = uniq_link_alternate links;
+     published;
+     rights;
+     sources;
+     summary;
+     title;
+     updated; } : entry)
+
+(** Safe generator *)
 
 let entry_of_xml feed =
   let data_producer = [
-    ("author", (fun ctx a -> `EntryAuthor (author_of_xml a)));
-    ("category", (fun ctx a -> `EntryCategory (category_of_xml a)));
-    ("contributor", (fun ctx a -> `EntryContributor (contributor_of_xml a)));
-    ("id", (fun ctx a -> `EntryId (id_of_xml a)));
-    ("link", (fun ctx a -> `EntryLink (link_of_xml a)));
-    ("published", (fun ctx a -> `EntryPublished (published_of_xml a)));
-    ("rights", (fun ctx a -> `EntryRights (rights_of_xml a)));
-    ("source", (fun ctx a -> `EntrySource (source_of_xml a)));
-    ("content", (fun ctx a -> `EntryContent (content_of_xml a)));
-    ("summary", (fun ctx a -> `EntrySummary (summary_of_xml a)));
-    ("title", (fun ctx a -> `EntryTitle (title_of_xml a)));
-    ("updated", (fun ctx a -> `EntryUpdated (updated_of_xml a)));
+    ("author", (fun ctx a -> `Author (author_of_xml a)));
+    ("category", (fun ctx a -> `Category (category_of_xml a)));
+    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml a)));
+    ("id", (fun ctx a -> `ID (id_of_xml a)));
+    ("link", (fun ctx a -> `Link (link_of_xml a)));
+    ("published", (fun ctx a -> `Published (published_of_xml a)));
+    ("rights", (fun ctx a -> `Rights (rights_of_xml a)));
+    ("source", (fun ctx a -> `Source (source_of_xml a)));
+    ("content", (fun ctx a -> `Content (content_of_xml a)));
+    ("summary", (fun ctx a -> `Summary (summary_of_xml a)));
+    ("title", (fun ctx a -> `Title (title_of_xml a)));
+    ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
   ] in
   generate_catcher ~data_producer (make_entry feed)
 
-(* RFC Compliant (or raise error) *)
+(** Unsafe generator *)
+
+let entry_of_xml' =
+  let data_producer = [
+    ("author", (fun ctx a -> `Author (author_of_xml' a)));
+    ("category", (fun ctx a -> `Category (category_of_xml' a)));
+    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml' a)));
+    ("id", (fun ctx a -> `ID (id_of_xml' a)));
+    ("link", (fun ctx a -> `Link (link_of_xml' a)));
+    ("published", (fun ctx a -> `Published (published_of_xml' a)));
+    ("rights", (fun ctx a -> `Rights (rights_of_xml' a)));
+    ("source", (fun ctx a -> `Source (source_of_xml' a)));
+    ("content", (fun ctx a -> `Content (content_of_xml' a)));
+    ("summary", (fun ctx a -> `Summary (summary_of_xml' a)));
+    ("title", (fun ctx a -> `Title (title_of_xml' a)));
+    ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
+  ] in
+  generate_catcher ~data_producer (fun x -> x)
+
+(** {C See RFC 4287 § 4.1.1 }
+  * The "atom:feed" element is the document (i.e., top-level) element of
+  * an Atom Feed Document, acting as a container for metadata and data
+  * associated with the feed.  Its element children consist of metadata
+  * elements followed by zero or more atom:entry child elements.
+  *
+  * atomFeed =
+  *    element atom:feed {
+  *       atomCommonAttributes,
+  *       (atomAuthor* {% \equiv %} [`Author]
+  *        & atomCategory* {% \equiv %} [`Category]
+  *        & atomContributor* {% \equiv %} [`Contributor]
+  *        & atomGenerator? {% \equiv %} [`Generator]
+  *        & atomIcon? {% \equiv %} [`Icon]
+  *        & atomId {% \equiv %} [`ID]
+  *        & atomLink* {% \equiv %} [`Link]
+  *        & atomLogo? {% \equiv %} [`Logo]
+  *        & atomRights? {% \equiv %} [`Rights]
+  *        & atomSubtitle? {% \equiv %} [`Subtitle]
+  *        & atomTitle {% \equiv %} [`Title]
+  *        & atomUpdated {% \equiv %} [`Updated]
+  *        & extensionElement* ),
+  *       atomEntry* {% \equiv %} [`Entry]
+  *    }
+  *
+  * This specification assigns no significance to the order of atom:entry
+  * elements within the feed.
+  *
+  * The following child elements are defined by this specification (note
+  * that the presence of some of these elements is required):
+  *
+  * o  atom:feed elements MUST contain one or more atom:author elements,
+  *    unless all of the atom:feed element's child atom:entry elements
+  *    contain at least one atom:author element.
+  * o  atom:feed elements MAY contain any number of atom:category
+  *    elements.
+  * o  atom:feed elements MAY contain any number of atom:contributor
+  *    elements.
+  * o  atom:feed elements MUST NOT contain more than one atom:generator
+  *    element.
+  * o  atom:feed elements MUST NOT contain more than one atom:icon
+  *    element.
+  * o  atom:feed elements MUST NOT contain more than one atom:logo
+  *    element.
+  * o  atom:feed elements MUST contain exactly one atom:id element.
+  * o  atom:feed elements SHOULD contain one atom:link element with a rel
+  *    attribute value of "self".  This is the preferred URI for
+  *    retrieving Atom Feed Documents representing this Atom feed.
+  * o  atom:feed elements MUST NOT contain more than one atom:link
+  *    element with a rel attribute value of "alternate" that has the
+  *    same combination of type and hreflang attribute values.
+  * o  atom:feed elements MAY contain additional atom:link elements
+  *    beyond those described above.
+  * o  atom:feed elements MUST NOT contain more than one atom:rights
+  *    element.
+  * o  atom:feed elements MUST NOT contain more than one atom:subtitle
+  *    element.
+  * o  atom:feed elements MUST contain exactly one atom:title element.
+  * o  atom:feed elements MUST contain exactly one atom:updated element.
+  *
+  * If multiple atom:entry elements with the same atom:id value appear in
+  * an Atom Feed Document, they represent the same entry.  Their
+  * atom:updated timestamps SHOULD be different.  If an Atom Feed
+  * Document contains multiple entries with the same atom:id, Atom
+  * Processors MAY choose to display all of them or some subset of them.
+  * One typical behavior would be to display only the entry with the
+  * latest atom:updated timestamp.
+  *)
+
+type feed =
+  {
+    authors: author list;
+    categories: category list;
+    contributors: author list;
+    generator: generator option;
+    icon: icon option;
+    id: id;
+    links: link list;
+    logo: logo option;
+    rights: rights option;
+    subtitle: subtitle option;
+    title: title;
+    updated: updated;
+    entries: entry list;
+  }
 
 let make_feed (l : [< feed'] list) =
-  let author = List.fold_left (fun acc -> function `FeedAuthor x -> x :: acc | _ -> acc) [] l in
-  let category = List.fold_left (fun acc -> function `FeedCategory x -> x :: acc | _ -> acc) [] l in
-  let contributor = List.fold_left (fun acc -> function `FeedContributor x -> x :: acc | _ -> acc) [] l in
-  let link = List.fold_left (fun acc -> function `FeedLink x -> x :: acc | _ -> acc) [] l in
-  let generator = match find (function `FeedGenerator _ -> true | _ -> false) l with
-    | Some (`FeedGenerator g) -> Some g
+  (** atomAuthor* *)
+  let authors = List.fold_left
+      (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
+  (** atomCategory* *)
+  let categories = List.fold_left
+      (fun acc -> function `Category x -> x :: acc | _ -> acc) [] l in
+  (** atomContributor* *)
+  let contributors = List.fold_left
+      (fun acc -> function `Contributor x -> x :: acc | _ -> acc) [] l in
+  (** atomLink* *)
+  let links = List.fold_left
+      (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l in
+  (** atomGenerator? *)
+  let generator = match find (function `Generator _ -> true | _ -> false) l with
+    | Some (`Generator g) -> Some g
     | _ -> None
   in
-  let icon = match find (function `FeedIcon _ -> true | _ -> false) l with
-    | Some (`FeedIcon i) -> Some i
+  (** atomIcon? *)
+  let icon = match find (function `Icon _ -> true | _ -> false) l with
+    | Some (`Icon i) -> Some i
     | _ -> None
   in
-  let id = match find (function `FeedId _ -> true | _ -> false) l with
-    | Some (`FeedId i) -> i
+  (** atomId *)
+  let id = match find (function `ID _ -> true | _ -> false) l with
+    | Some (`ID i) -> i
     | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "feed")
   in
-  let logo = match find (function `FeedLogo _ -> true | _ -> false) l with
-    | Some (`FeedLogo l) -> Some l
+  (** atomLogo? *)
+  let logo = match find (function `Logo _ -> true | _ -> false) l with
+    | Some (`Logo l) -> Some l
     | _ -> None
   in
-  let rights = match find (function `FeedRights _ -> true | _ -> false) l with
-    | Some (`FeedRights r) -> Some r
+  (** atomRights? *)
+  let rights = match find (function `Rights _ -> true | _ -> false) l with
+    | Some (`Rights r) -> Some r
     | _ -> None
   in
-  let subtitle = match find (function `FeedSubtitle _ -> true | _ -> false) l with
-    | Some (`FeedSubtitle s) -> Some s
+  (** atomSubtitle? *)
+  let subtitle = match find (function `Subtitle _ -> true | _ -> false) l with
+    | Some (`Subtitle s) -> Some s
     | _ -> None
   in
-  let title = match find (function `FeedTitle _ -> true | _ -> false) l with
-    | Some (`FeedTitle t) -> t
+  (** atomTitle *)
+  let title = match find (function `Title _ -> true | _ -> false) l with
+    | Some (`Title t) -> t
     | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "feed")
   in
-  let updated = match find (function `FeedUpdated _ -> true | _ -> false) l with
-    | Some (`FeedUpdated u) -> u
+  (** atomUpdated *)
+  let updated = match find (function `Updated _ -> true | _ -> false) l with
+    | Some (`Updated u) -> u
     | _ -> Error.raise_expectation (Error.Tag "updated") (Error.Tag "feed")
   in
-  let entry = List.fold_left (fun acc -> function `FeedEntry x -> x :: acc | _ -> acc) [] l in
-  ({ author; category; contributor; generator; icon; id; link; logo; rights; subtitle; title; updated; entry; } : feed)
+  (** atomEntry* *)
+  let entries = List.fold_left
+      (fun acc -> function `Entry x -> x :: acc | _ -> acc) [] l in
+  ({ authors;
+     categories;
+     contributors;
+     generator;
+     icon;
+     id;
+     links;
+     logo;
+     rights;
+     subtitle;
+     title;
+     updated;
+     entries; } : feed)
 
 let feed_of_xml =
   let data_producer = [
-    ("author", (fun ctx a -> `FeedAuthor (author_of_xml a)));
-    ("category", (fun ctx a -> `FeedCategory (category_of_xml a)));
-    ("contributor", (fun ctx a -> `FeedContributor (contributor_of_xml a)));
-    ("generator", (fun ctx a -> `FeedGenerator (generator_of_xml a)));
-    ("icon", (fun ctx a -> `FeedIcon (icon_of_xml a)));
-    ("id", (fun ctx a -> `FeedId (id_of_xml a)));
-    ("link", (fun ctx a -> `FeedLink (link_of_xml a)));
-    ("logo", (fun ctx a -> `FeedLogo (logo_of_xml a)));
-    ("rights", (fun ctx a -> `FeedRights (rights_of_xml a)));
-    ("subtitle", (fun ctx a -> `FeedSubtitle (subtitle_of_xml a)));
-    ("title", (fun ctx a -> `FeedTitle (title_of_xml a)));
-    ("updated", (fun ctx a -> `FeedUpdated (updated_of_xml a)));
-    ("entry", (fun ctx a -> `FeedEntry (entry_of_xml ctx a)));
+    ("author", (fun ctx a -> `Author (author_of_xml a)));
+    ("category", (fun ctx a -> `Category (category_of_xml a)));
+    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml a)));
+    ("generator", (fun ctx a -> `Generator (generator_of_xml a)));
+    ("icon", (fun ctx a -> `Icon (icon_of_xml a)));
+    ("id", (fun ctx a -> `ID (id_of_xml a)));
+    ("link", (fun ctx a -> `Link (link_of_xml a)));
+    ("logo", (fun ctx a -> `Logo (logo_of_xml a)));
+    ("rights", (fun ctx a -> `Rights (rights_of_xml a)));
+    ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml a)));
+    ("title", (fun ctx a -> `Title (title_of_xml a)));
+    ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
+    ("entry", (fun ctx a -> `Entry (entry_of_xml ctx a)));
   ] in
   generate_catcher ~data_producer make_feed
+
+let feed_of_xml' =
+  let data_producer = [
+    ("author", (fun ctx a -> `Author (author_of_xml' a)));
+    ("category", (fun ctx a -> `Category (category_of_xml' a)));
+    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml' a)));
+    ("generator", (fun ctx a -> `Generator (generator_of_xml' a)));
+    ("icon", (fun ctx a -> `Icon (icon_of_xml' a)));
+    ("id", (fun ctx a -> `ID (id_of_xml' a)));
+    ("link", (fun ctx a -> `Link (link_of_xml' a)));
+    ("logo", (fun ctx a -> `Logo (logo_of_xml' a)));
+    ("rights", (fun ctx a -> `Rights (rights_of_xml' a)));
+    ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml' a)));
+    ("title", (fun ctx a -> `Title (title_of_xml' a)));
+    ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
+    ("entry", (fun ctx a -> `Entry (entry_of_xml' a)));
+  ] in
+  generate_catcher ~data_producer (fun x -> x)
 
 let analyze input =
   let el tag datas = Node (tag, datas) in

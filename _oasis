@@ -21,3 +21,4 @@ Executable tsyndic
   Path: src
   MainIs: main.ml
   BuildDepends: syndic
+  CompiledObject: best

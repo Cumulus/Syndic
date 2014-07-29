@@ -11,25 +11,6 @@ module Error : sig
     (Uri.t * string * string) * (string * string) -> string
 end
 
-type rel =
-  | Alternate
-  | Related
-  | Self
-  | Enclosure
-  | Via
-  | Link of Uri.t
-
-type type_content =
-  | Html
-  | Text
-  | Xhtml
-  | Mime of string
-
-type content = {
-  ty : type_content;
-  src : Uri.t option;
-}
-
 type author =
   {
     name : string;
@@ -37,14 +18,7 @@ type author =
     email : string option;
   }
 
-type author' = [
-  | `Name of string
-  | `URI of Uri.t
-  | `Email of string
-]
-
 val author_of_xml : Xmlm.tag * Common.XML.tree list -> author
-val author_of_xml' : Xmlm.tag * Common.XML.tree list -> [> author' ] list
 
 type category =
   {
@@ -53,17 +27,9 @@ type category =
     label : string option;
   }
 
-type category' = [
-  | `Term of string
-  | `Scheme of Uri.t
-  | `Label of string
-]
-
 val category_of_xml : Xmlm.tag * Common.XML.tree list -> category
-val category_of_xml' : Xmlm.tag * Common.XML.tree list -> [> category' ] list
 
 val contributor_of_xml : Xmlm.tag * Common.XML.tree list -> author
-val contributor_of_xml' : Xmlm.tag * Common.XML.tree list -> [> author' ] list
 
 type generator =
   {
@@ -72,26 +38,23 @@ type generator =
     content : string;
   }
 
-type generator' = [
-  | `URI of Uri.t
-  | `Version of string
-  | `Content of string
-]
-
 val generator_of_xml : Xmlm.tag * Common.XML.tree list -> generator
-val generator_of_xml' : Xmlm.tag * Common.XML.tree list -> [> generator' ] list
 
 type icon = Uri.t
-type icon' = [ `URI of Uri.t ]
 
 val icon_of_xml : Xmlm.tag * Common.XML.tree list -> icon
-val icon_of_xml' : Xmlm.tag * Common.XML.tree list -> [> icon' ] list
 
 type id = Uri.t
-type id' = [ `URI of Uri.t ]
 
 val id_of_xml : Xmlm.tag * Common.XML.tree list -> id
-val id_of_xml' : Xmlm.tag * Common.XML.tree list -> [> id' ] list
+
+type rel =
+  | Alternate
+  | Related
+  | Self
+  | Enclosure
+  | Via
+  | Link of Uri.t
 
 type link =
   {
@@ -103,81 +66,117 @@ type link =
     length : int option;
   }
 
-type link' = [
-  | `HREF of Uri.t
-  | `Rel of rel
-  | `Type of string
-  | `HREFLang of string
-  | `Title of string
-  | `Length of int
-]
-
 val link_of_xml : Xmlm.tag * Common.XML.tree list -> link
-val link_of_xml' : Xmlm.tag * Common.XML.tree list -> [> link' ] list
 
 type logo = Uri.t
-type logo' = [ `URI of Uri.t ]
 
 val logo_of_xml : Xmlm.tag * Common.XML.tree list -> logo
-val logo_of_xml' : Xmlm.tag * Common.XML.tree list -> [> logo' ] list
 
 type published = Netdate.t
-type published' = [ `Date of Netdate.t ]
 
 val published_of_xml : Xmlm.tag * Common.XML.tree list -> published
-val published_of_xml' : Xmlm.tag * Common.XML.tree list -> [> published' ] list
 
 type rights = string
-type rights' = [`Data of string]
 
 val rights_of_xml : Xmlm.tag * Common.XML.tree list -> rights
-val rights_of_xml' : Xmlm.tag * Common.XML.tree list -> [> rights' ] list
+
+type title = string
+
+val title_of_xml : Xmlm.tag * Common.XML.tree list -> title
+
+type subtitle = string
+
+val subtitle_of_xml : Xmlm.tag * Common.XML.tree list -> subtitle
+
+type updated = Netdate.t
+
+val updated_of_xml : Xmlm.tag * Common.XML.tree list -> updated
 
 type source =
   {
-    author : author * author list;
-    category : category list;
-    contributor : author list;
-    generator : generator option;
-    icon : icon option;
-    id : id;
-    link : link * link list;
-    logo : logo option;
-    rights : rights option;
-    subtitle : string option;
-    title : string;
-    updated : string option;
+    authors: author * author list;
+    categories: category list;
+    contributors: author list;
+    generator: generator option;
+    icon: icon option;
+    id: id;
+    links: link * link list;
+    logo: logo option;
+    rights: rights option;
+    subtitle: subtitle option;
+    title: title;
+    updated: updated option;
   }
 
-type entry = {
-  author : author * author list;
-  category : category list;
-  content : (content * string) option;
-  contributor : author list;
-  id : id;
-  link : link list;
-  published : published option;
-  rights : rights option;
-  source : source list;
-  summary : string option;
-  title : string;
-  updated : string;
-}
+val source_of_xml : Xmlm.tag * Common.XML.tree list -> source
+
+type type_content =
+  | Html
+  | Text
+  | Xhtml
+  | Mime of string
+
+type content =
+  {
+    ty : type_content;
+    src : Uri.t option;
+    data : string;
+  }
+
+val content_of_xml : Xmlm.tag * Common.XML.tree list -> content
+
+type summary = string
+
+val summary_of_xml : Xmlm.tag * Common.XML.tree list -> summary
+
+type entry =
+  {
+    authors: author * author list;
+    categories: category list;
+    content: content option;
+    contributors: author list;
+    id: id;
+    links: link list;
+    published: published option;
+    rights: rights option;
+    sources: source list;
+    summary: summary option;
+    title: title;
+    updated: updated;
+  }
+
+type feed' = [
+  | `Author of author
+  | `Category of category
+  | `Contributor of author
+  | `Generator of generator
+  | `Icon of icon
+  | `ID of id
+  | `Link of link
+  | `Logo of logo
+  | `Rights of rights
+  | `Subtitle of subtitle
+  | `Title of title
+  | `Updated of updated
+  | `Entry of entry
+]
+
+val entry_of_xml : [< feed' > `Author ] list -> Xmlm.tag * Common.XML.tree list -> entry
 
 type feed = {
-  author : author list;
-  category : category list;
-  contributor : author list;
+  authors : author list;
+  categories : category list;
+  contributors : author list;
   generator : generator option;
-  icon : Uri.t option;
-  id : Uri.t;
-  link : link list;
+  icon : icon option;
+  id : id;
+  links : link list;
   logo : logo option;
   rights : rights option;
-  subtitle : string option;
-  title : string;
-  updated : string;
-  entry : entry list;
+  subtitle : subtitle option;
+  title : title;
+  updated : updated;
+  entries : entry list;
 }
 
 val analyze : Xmlm.input -> feed
