@@ -26,132 +26,6 @@ type type_content =
 
 type content = { ty: type_content; src: Uri.t option; }
 
-type author = {
-  name: string;
-  uri: Uri.t option;
-  email: string option;
-}
-
-type category = {
-  term: string;
-  scheme: Uri.t option;
-  label: string option;
-}
-
-type generator = {
-  version: string option;
-  uri: Uri.t option;
-  content: string;
-}
-
-type link = {
-  href: Uri.t; (* iri *)
-  rel: rel;
-  type_media: string option;
-  hreflang: string option;
-  title: string option;
-  length: int option;
-}
-
-type source = {
-  author: author * author list;
-  category: category list;
-  contributor: author list;
-  generator: generator option;
-  icon: Uri.t option;
-  id: Uri.t;
-  link: link * link list;
-  logo: Uri.t option;
-  rights: string option;
-  subtitle: string option;
-  title: string;
-  updated: string option; (* date *)
-}
-
-type entry = {
-  (*
-   * si atom:entry ne contient pas atom:author,
-   * atom:author <- atom:feed/atom:author
-   * sinon erreur
-   *)
-  author: author * author list;
-  category: category list;
-  content: (content * string) option;
-  contributor: author list;
-  id: Uri.t; (* iri *)
-  (*
-   * si pas de atom:content, doit contenir
-   * atom:link avec rel="alternate"
-   *
-   * combinaison atom:link(rel="alternate"; type; hreflang)
-   * doit être unique
-   *)
-  link: link list;
-  published: string option; (* date *)
-  rights: string option;
-  source: source list;
-  (*
-   * atom:summary obligatoire si atom:entry contient atom:content avec
-   * attribut src ou atom:entry codé en base64 (LOL)
-   *)
-  summary: string option;
-  title: string;
-  updated: string; (* date *)
-}
-
-type feed = {
-  (*
-   * si tout les atom:entry ne contiennent pas atom:author
-   * et atom:feed ne contient atom:author
-   * ne respecte pas la RFC
-   *)
-  author: author list;
-  category: category list;
-  contributor: author list;
-  generator: generator option;
-  icon: Uri.t option;
-  id: Uri.t;
-  (*
-   * combinaison atom:link(rel="alternate"; type; hreflang)
-   * doit être unique
-   *)
-  link: link list;
-  logo: Uri.t option;
-  rights: string option;
-  subtitle: string option;
-  title: string;
-  updated: string;
-  entry: entry list;
-}
-
-module Error = struct
-  include Common.Error
-
-  exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
-
-  let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
-    let ty = (function Some a -> a | None -> "(none)") type_media in
-    let hl = (function Some a -> a | None -> "(none)") hreflang in
-    let ty' = (function "" -> "(none)" | s -> s) type_media' in
-    let hl' = (function "" -> "(none)" | s -> s) hreflang' in
-    raise (Duplicate_Link ((href, ty, hl), (ty', hl')))
-
-  let string_of_duplicate_exception ((uri, ty, hl), (ty', hl')) =
-    let buffer = Buffer.create 16 in
-    Buffer.add_string buffer "Duplicate link between [href: ";
-    Buffer.add_string buffer (Uri.to_string uri);
-    Buffer.add_string buffer ", ty: ";
-    Buffer.add_string buffer ty;
-    Buffer.add_string buffer ", hl: ";
-    Buffer.add_string buffer hl;
-    Buffer.add_string buffer "] and [ty: ";
-    Buffer.add_string buffer ty';
-    Buffer.add_string buffer ", hl: ";
-    Buffer.add_string buffer hl';
-    Buffer.add_string buffer "]";
-    Buffer.contents buffer
-end
-
 (** {C See RFC 4287 § 3.2}
   * A Person construct is an element that describes a person,
   * corporation, or similar entity (hereafter, 'person').
@@ -181,6 +55,13 @@ end
   * described above.
   *)
 
+type author =
+  {
+    name: string;
+    uri: Uri.t option;
+    email: string option;
+  }
+
 type author' = [
   | `Name of string
   | `URI of Uri.t
@@ -191,7 +72,9 @@ let make_author (l : [< author'] list) =
   (** element atom:name { text } *)
   let name = match find (function `Name _ -> true | _ -> false) l with
     | Some (`Name s) -> s
-    | _ -> Error.raise_expectation (Error.Tag "name") (Error.Tag "author")
+    | _ -> Common.Error.raise_expectation
+        (Common.Error.Tag "name")
+        (Common.Error.Tag "author")
   in
   (** element atom:uri { atomUri }? *)
   let uri = match find (function `URI _ -> true | _ -> false) l with
@@ -207,16 +90,18 @@ let make_author (l : [< author'] list) =
 
 let author_name_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf -> "" (* mandatory ? *)
+  with Common.Error.Expected_Leaf -> "" (* mandatory ? *)
 
 let author_uri_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "author/uri")
+  with Common.Error.Expected_Leaf ->
+    Common.Error.raise_expectation
+      Common.Error.Data
+      (Common.Error.Tag "author/uri")
 
 let author_email_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf -> "" (* mandatory ? *)
+  with Common.Error.Expected_Leaf -> "" (* mandatory ? *)
 
 (** Safe generator, Unsafe generator *)
 
@@ -228,7 +113,6 @@ let author_of_xml, author_of_xml' =
   ] in
   generate_catcher ~data_producer make_author,
   generate_catcher ~data_producer (fun x -> x)
-
 
 (** {C See RFC 4287 § 4.2.2 }
   * The "atom:category" element conveys information about a category
@@ -261,6 +145,13 @@ let author_of_xml, author_of_xml' =
   * markup.  Category elements MAY have a "label" attribute.
   *)
 
+type category =
+  {
+    term: string;
+    scheme: Uri.t option;
+    label: string option;
+  }
+
 type category' = [
   | `Term of string
   | `Scheme of Uri.t
@@ -271,7 +162,9 @@ let make_category (l : [< category'] list) =
   (** attribute term { text } *)
   let term = match find (function `Term _ -> true | _ -> false) l with
     | Some (`Term t) -> t
-    | _ -> Error.raise_expectation (Error.Attr "term") (Error.Tag "category")
+    | _ -> Common.Error.raise_expectation
+        (Common.Error.Attr "term")
+        (Common.Error.Tag "category")
   in
   (** attribute scheme { atomUri }? *)
   let scheme =
@@ -333,6 +226,13 @@ let contributor_of_xml' = author_of_xml'
  * indicates the version of the generating agent.
  *)
 
+type generator =
+  {
+    version: string option;
+    uri: Uri.t option;
+    content: string;
+  }
+
 type generator' = [
   | `URI of Uri.t
   | `Version of string
@@ -343,7 +243,9 @@ let make_generator (l : [< generator'] list) =
   (** text *)
   let content = match find (function `Content _ -> true | _ -> false) l with
     | Some ((`Content c)) -> c
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "generator")
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "generator")
   in
   (** attribute version { text }? *)
   let version = match find (function `Version _ -> true | _ -> false) l with
@@ -388,7 +290,9 @@ let make_icon (l : [< icon'] list) =
   (** (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> u
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "icon")
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "icon")
   in uri
 
 let icon_of_xml, icon_of_xml' =
@@ -421,7 +325,9 @@ let make_id (l : [< id'] list) =
   (** (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> u
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "id")
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "id")
   in uri
 
 let id_of_xml, id_of_xml' =
@@ -496,6 +402,16 @@ let id_of_xml, id_of_xml' =
   * attribute.
   *)
 
+type link =
+  {
+    href: Uri.t;
+    rel: rel;
+    type_media: string option;
+    hreflang: string option;
+    title: string option;
+    length: int option;
+  }
+
 type link' = [
   | `HREF of Uri.t
   | `Rel of rel
@@ -509,7 +425,9 @@ let make_link (l : [< link'] list) =
   (** attribute href { atomUri } *)
   let href = match find (function `HREF _ -> true | _ -> false) l with
     | Some (`HREF u) -> u
-    | _ -> Error.raise_expectation (Error.Attr "href") (Error.Tag "link")
+    | _ -> Common.Error.raise_expectation
+        (Common.Error.Attr "href")
+        (Common.Error.Tag "link")
   in
   (** attribute rel { atomNCName | atomUri }? *)
   let rel = match find (function `Rel _ -> true | _ -> false) l with
@@ -559,39 +477,140 @@ let link_of_xml, link_of_xml' =
   generate_catcher ~attr_producer make_link,
   generate_catcher ~attr_producer (fun x -> x)
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.8 }
+  * The "atom:logo" element's content is an IRI reference [RFC3987] that
+  * identifies an image that provides visual identification for a feed.
+  *
+  * atomLogo = element atom:logo {
+  *    atomCommonAttributes,
+  *    (atomUri) {% \equiv %} [`URI]
+  * }
+  *
+  * The image SHOULD have an aspect ratio of 2 (horizontal) to 1
+  * (vertical).
+  *)
 
-type logo' = [
-  | `LogoURI of Uri.t
-]
+type logo = Uri.t
+type logo' = [ `URI of Uri.t ]
 
 let make_logo (l : [< logo'] list) =
-  let uri = match find (fun (`LogoURI _) -> true) l with
-    | Some (`LogoURI u) -> u
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "logo")
+  (** (atomUri) *)
+  let uri = match find (fun (`URI _) -> true) l with
+    | Some (`URI u) -> u
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "logo")
   in uri
 
-let logo_of_xml =
-  let leaf_producer ctx data = `LogoURI (Uri.of_string data) in
-  generate_catcher ~leaf_producer make_logo
+let logo_of_xml, logo_of_xml' =
+  let leaf_producer ctx data = `URI (Uri.of_string data) in
+  generate_catcher ~leaf_producer make_logo,
+  generate_catcher ~leaf_producer (fun x -> x)
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.9 }
+  *
+  * The "atom:published" element is a Date construct indicating an
+  * instant in time associated with an event early in the life cycle of
+  * the entry.
+  *
+  * atomPublished = element atom:published { atomDateConstruct } {% \equiv %}
+  * [`Date]
+  *
+  * Typically, atom:published will be associated with the initial
+  * creation or first availability of the resource.
+  *)
 
-type published' = [
-  | `PublishedDate of string
-]
+type published = Netdate.t
+type published' = [ `Date of Netdate.t ]
 
 let make_published (l : [< published'] list) =
-  let date = match find (fun (`PublishedDate _) -> true) l with
-    | Some (`PublishedDate d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "published")
+  (** atom:published { atomDateConstruct } *)
+  let date = match find (fun (`Date _) -> true) l with
+    | Some (`Date d) -> d
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "published")
   in date
 
-let published_of_xml =
-  let leaf_producer ctx data = `PublishedDate data in
-  generate_catcher ~leaf_producer make_published
+let published_of_xml, published_of_xml' =
+  let leaf_producer ctx data = `Date (Netdate.parse data) in
+  generate_catcher ~leaf_producer make_published,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 (* RFC Compliant (or raise error) *)
+
+type source = {
+  author: author * author list;
+  category: category list;
+  contributor: author list;
+  generator: generator option;
+  icon: icon option;
+  id: id;
+  link: link * link list;
+  logo: logo option;
+  rights: string option;
+  subtitle: string option;
+  title: string;
+  updated: string option; (* date *)
+}
+
+type entry = {
+  (*
+   * si atom:entry ne contient pas atom:author,
+   * atom:author <- atom:feed/atom:author
+   * sinon erreur
+   *)
+  author: author * author list;
+  category: category list;
+  content: (content * string) option;
+  contributor: author list;
+  id: Uri.t; (* iri *)
+  (*
+   * si pas de atom:content, doit contenir
+   * atom:link avec rel="alternate"
+   *
+   * combinaison atom:link(rel="alternate"; type; hreflang)
+   * doit être unique
+   *)
+  link: link list;
+  published: published option; (* date *)
+  rights: string option;
+  source: source list;
+  (*
+   * atom:summary obligatoire si atom:entry contient atom:content avec
+   * attribut src ou atom:entry codé en base64 (LOL)
+   *)
+  summary: string option;
+  title: string;
+  updated: string; (* date *)
+}
+
+type feed = {
+  (*
+   * si tout les atom:entry ne contiennent pas atom:author
+   * et atom:feed ne contient atom:author
+   * ne respecte pas la RFC
+   *)
+  author: author list;
+  category: category list;
+  contributor: author list;
+  generator: generator option;
+  icon: Uri.t option;
+  id: Uri.t;
+  (*
+   * combinaison atom:link(rel="alternate"; type; hreflang)
+   * doit être unique
+   *)
+  link: link list;
+  logo: logo option;
+  rights: string option;
+  subtitle: string option;
+  title: string;
+  updated: string;
+  entry: entry list;
+}
+
+
 
 type rights' = [
   | `RightData of string
@@ -600,7 +619,9 @@ type rights' = [
 let make_rights (l : [< rights'] list) =
   let rights = match find (fun (`RightData _) -> true) l with
     | Some (`RightData d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "rights")
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "rights")
   in rights
 
 let rights_of_xml =
@@ -616,7 +637,9 @@ type title' = [
 let make_title (l : [< title'] list) =
   let title = match find (fun (`TitleData _) -> true) l with
     | Some (`TitleData d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "title")
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "title")
   in title
 
 let title_of_xml =
@@ -632,7 +655,9 @@ type subtitle' = [
 let make_subtitle (l : [< subtitle'] list) =
   let subtitle = match find (fun (`SubtitleData _) -> true) l with
     | Some (`SubtitleData d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "subtitle")
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "subtitle")
   in subtitle
 
 let subtitle_of_xml =
@@ -648,7 +673,9 @@ type updated' = [
 let make_updated (l : [< updated'] list) =
   let updated = match find (fun (`UpdatedData _) -> true) l with
     | Some (`UpdatedData d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "updated")
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "updated")
   in updated
 
 let updated_of_xml =
@@ -674,7 +701,11 @@ type source' = [
 
 let make_source (l : [< source'] list) =
   let author =
-    (function [] -> Error.raise_expectation (Error.Tag "author") (Error.Tag "source") | x :: r -> x, r)
+    (function
+      | [] -> Common.Error.raise_expectation
+          (Common.Error.Tag "author")
+          (Common.Error.Tag "source")
+      | x :: r -> x, r)
       (List.fold_left (fun acc -> function `SourceAuthor x -> x :: acc | _ -> acc) [] l)
   in
   let category = List.fold_left (fun acc -> function `SourceCategory x -> x :: acc | _ -> acc) [] l in
@@ -689,10 +720,16 @@ let make_source (l : [< source'] list) =
   in
   let id = match find (function `SourceId _ -> true | _ -> false) l with
     | Some (`SourceId i) -> i
-    | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "source")
+    | _ -> Common.Error.raise_expectation
+        (Common.Error.Tag "id")
+        (Common.Error.Tag "source")
   in
   let link =
-    (function [] -> Error.raise_expectation (Error.Tag "link") (Error.Tag "source") | x :: r -> (x, r))
+    (function
+      | [] -> Common.Error.raise_expectation
+          (Common.Error.Tag "link")
+          (Common.Error.Tag "source")
+      | x :: r -> (x, r))
       (List.fold_left (fun acc -> function `SourceLink x -> x :: acc | _ -> acc) [] l)
   in
   let logo = match find (function `SourceLogo _ -> true | _ -> false) l with
@@ -709,7 +746,9 @@ let make_source (l : [< source'] list) =
   in
   let title = match find (function `SourceTitle _ -> true | _ -> false) l with
     | Some (`SourceTitle s) -> s
-    | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "source")
+    | _ -> Common.Error.raise_expectation
+        (Common.Error.Tag "title")
+        (Common.Error.Tag "source")
   in
   let updated = match find (function `SourceUpdated _ -> true | _ -> false) l with
     | Some (`SourceUpdated d) -> Some d
@@ -780,7 +819,9 @@ type summary' = [
 let make_summary (l : [< summary'] list) =
   let data = match find (fun (`SummaryData _) -> true) l with
     | Some (`SummaryData d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "summary")
+    | _ -> Common.Error.raise_expectation
+        Common.Error.Data
+        (Common.Error.Tag "summary")
   in data
 
 let summary_of_xml =
@@ -788,6 +829,34 @@ let summary_of_xml =
   generate_catcher ~leaf_producer make_summary
 
 (* RFC Compliant (or raise error) *)
+
+module Error = struct
+  include Common.Error
+
+  exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
+
+  let raise_duplicate_string { href; type_media; hreflang; _} (type_media', hreflang') =
+    let ty = (function Some a -> a | None -> "(none)") type_media in
+    let hl = (function Some a -> a | None -> "(none)") hreflang in
+    let ty' = (function "" -> "(none)" | s -> s) type_media' in
+    let hl' = (function "" -> "(none)" | s -> s) hreflang' in
+    raise (Duplicate_Link ((href, ty, hl), (ty', hl')))
+
+  let string_of_duplicate_exception ((uri, ty, hl), (ty', hl')) =
+    let buffer = Buffer.create 16 in
+    Buffer.add_string buffer "Duplicate link between [href: ";
+    Buffer.add_string buffer (Uri.to_string uri);
+    Buffer.add_string buffer ", ty: ";
+    Buffer.add_string buffer ty;
+    Buffer.add_string buffer ", hl: ";
+    Buffer.add_string buffer hl;
+    Buffer.add_string buffer "] and [ty: ";
+    Buffer.add_string buffer ty';
+    Buffer.add_string buffer ", hl: ";
+    Buffer.add_string buffer hl';
+    Buffer.add_string buffer "]";
+    Buffer.contents buffer
+end
 
 module LinkOrder
   : Set.OrderedType with type t = string * string =
@@ -849,7 +918,7 @@ type entry' = [
   | `EntryContributor of author
   | `EntryId of Uri.t
   | `EntryLink of link
-  | `EntryPublished of string
+  | `EntryPublished of Netdate.t
   | `EntryRights of string
   | `EntrySource of source
   | `EntryContent of (content * string)

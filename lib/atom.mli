@@ -115,15 +115,27 @@ type link' = [
 val link_of_xml : Xmlm.tag * Common.XML.tree list -> link
 val link_of_xml' : Xmlm.tag * Common.XML.tree list -> [> link' ] list
 
+type logo = Uri.t
+type logo' = [ `URI of Uri.t ]
+
+val logo_of_xml : Xmlm.tag * Common.XML.tree list -> logo
+val logo_of_xml' : Xmlm.tag * Common.XML.tree list -> [> logo' ] list
+
+type published = Netdate.t
+type published' = [ `Date of Netdate.t ]
+
+val published_of_xml : Xmlm.tag * Common.XML.tree list -> published
+val published_of_xml' : Xmlm.tag * Common.XML.tree list -> [> published' ] list
+
 type source = {
   author : author * author list;
   category : category list;
   contributor : author list;
   generator : generator option;
-  icon : Uri.t option;
-  id : Uri.t;
+  icon : icon option;
+  id : id;
   link : link * link list;
-  logo : Uri.t option;
+  logo : logo option;
   rights : string option;
   subtitle : string option;
   title : string;
@@ -135,9 +147,9 @@ type entry = {
   category : category list;
   content : (content * string) option;
   contributor : author list;
-  id : Uri.t;
+  id : id;
   link : link list;
-  published : string option;
+  published : published option;
   rights : string option;
   source : source list;
   summary : string option;
@@ -153,7 +165,7 @@ type feed = {
   icon : Uri.t option;
   id : Uri.t;
   link : link list;
-  logo : Uri.t option;
+  logo : logo option;
   rights : string option;
   subtitle : string option;
   title : string;
