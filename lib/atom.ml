@@ -28,7 +28,7 @@ open Common.Util
   * elements of the containing atom:feed element are considered to apply
   * to the entry if there are no atom:author elements in the locations
   * described above.
-  *)
+*)
 
 type author =
   {
@@ -48,8 +48,8 @@ let make_author (l : [< author'] list) =
   let name = match find (function `Name _ -> true | _ -> false) l with
     | Some (`Name s) -> s
     | _ -> Common.Error.raise_expectation
-        (Common.Error.Tag "name")
-        (Common.Error.Tag "author")
+             (Common.Error.Tag "name")
+             (Common.Error.Tag "author")
   in
   (** element atom:uri { atomUri }? *)
   let uri = match find (function `URI _ -> true | _ -> false) l with
@@ -137,7 +137,7 @@ let author_of_xml' =
   * Language-Sensitive.  Entities such as "&amp;" and "&lt;" represent
   * their corresponding characters ("&" and "<", respectively), not
   * markup.  Category elements MAY have a "label" attribute.
-  *)
+*)
 
 type category =
   {
@@ -157,8 +157,8 @@ let make_category (l : [< category'] list) =
   let term = match find (function `Term _ -> true | _ -> false) l with
     | Some (`Term t) -> t
     | _ -> Common.Error.raise_expectation
-        (Common.Error.Attr "term")
-        (Common.Error.Tag "category")
+             (Common.Error.Attr "term")
+             (Common.Error.Tag "category")
   in
   (** attribute scheme { atomUri }? *)
   let scheme =
@@ -189,7 +189,7 @@ let category_of_xml, category_of_xml' =
   * person or other entity who contributed to the entry or feed.
   *
   * atomContributor = element atom:contributor { atomPersonConstruct }
-  *)
+*)
 
 let make_contributor = make_author
 let contributor_of_xml = author_of_xml
@@ -218,7 +218,7 @@ let contributor_of_xml' = author_of_xml'
   *
   * The atom:generator element MAY have a "version" attribute that
   * indicates the version of the generating agent.
-  *)
+*)
 
 type generator =
   {
@@ -238,8 +238,8 @@ let make_generator (l : [< generator'] list) =
   let content = match find (function `Content _ -> true | _ -> false) l with
     | Some ((`Content c)) -> c
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "generator")
+             Common.Error.Data
+             (Common.Error.Tag "generator")
   in
   (** attribute version { text }? *)
   let version = match find (function `Version _ -> true | _ -> false) l with
@@ -275,7 +275,7 @@ let generator_of_xml, generator_of_xml' =
   *
   * The image SHOULD have an aspect ratio of one (horizontal) to one
   * (vertical) and SHOULD be suitable for presentation at a small size.
-  *)
+*)
 
 type icon = Uri.t
 type icon' = [ `URI of Uri.t ]
@@ -285,8 +285,8 @@ let make_icon (l : [< icon'] list) =
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> u
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "icon")
+             Common.Error.Data
+             (Common.Error.Tag "icon")
   in uri
 
 (** Safe generator, Unsafe generator *)
@@ -312,7 +312,7 @@ let icon_of_xml, icon_of_xml' =
   *
   * There is more information in the RFC but they are not necessary here
   * - at least, they can not be checked here.
-  *)
+*)
 
 type id = Uri.t
 type id' = [ `URI of Uri.t ]
@@ -322,8 +322,8 @@ let make_id (l : [< id'] list) =
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> u
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "id")
+             Common.Error.Data
+             (Common.Error.Tag "id")
   in uri
 
 let id_of_xml, id_of_xml' =
@@ -396,7 +396,7 @@ let id_of_xml, id_of_xml' =
   * override the actual content length of the representation as reported
   * by the underlying protocol.  Link elements MAY have a length
   * attribute.
-  *)
+*)
 
 type rel =
   | Alternate
@@ -430,8 +430,8 @@ let make_link (l : [< link'] list) =
   let href = match find (function `HREF _ -> true | _ -> false) l with
     | Some (`HREF u) -> u
     | _ -> Common.Error.raise_expectation
-        (Common.Error.Attr "href")
-        (Common.Error.Tag "link")
+             (Common.Error.Attr "href")
+             (Common.Error.Tag "link")
   in
   (** attribute rel { atomNCName | atomUri }? *)
   let rel = match find (function `Rel _ -> true | _ -> false) l with
@@ -494,7 +494,7 @@ let link_of_xml, link_of_xml' =
   *
   * The image SHOULD have an aspect ratio of 2 (horizontal) to 1
   * (vertical).
-  *)
+*)
 
 type logo = Uri.t
 type logo' = [ `URI of Uri.t ]
@@ -504,8 +504,8 @@ let make_logo (l : [< logo'] list) =
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> u
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "logo")
+             Common.Error.Data
+             (Common.Error.Tag "logo")
   in uri
 
 (** Safe generator, Unsafe generator *)
@@ -526,7 +526,7 @@ let logo_of_xml, logo_of_xml' =
   *
   * Typically, atom:published will be associated with the initial
   * creation or first availability of the resource.
-  *)
+*)
 
 type published = Netdate.t
 type published' = [ `Date of Netdate.t ]
@@ -536,8 +536,8 @@ let make_published (l : [< published'] list) =
   let date = match find (fun (`Date _) -> true) l with
     | Some (`Date d) -> d
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "published")
+             Common.Error.Data
+             (Common.Error.Tag "published")
   in date
 
 (** Safe generator, Unsafe generator *)
@@ -559,7 +559,7 @@ let published_of_xml, published_of_xml' =
   * If an atom:entry element does not contain an atom:rights element,
   * then the atom:rights element of the containing atom:feed element, if
   * present, is considered to apply to the entry.
-  *)
+*)
 
 type rights = string
 type rights' = [ `Data of string ]
@@ -569,8 +569,8 @@ let make_rights (l : [< rights'] list) =
   let rights = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "rights")
+             Common.Error.Data
+             (Common.Error.Tag "rights")
   in rights
 
 (** Safe generator, Unsafe generator *)
@@ -585,7 +585,7 @@ let rights_of_xml, rights_of_xml' =
   * readable title for an entry or feed.
   *
   * atomTitle = element atom:title { atomTextConstruct } {% \equiv %} [`Data]
-  *)
+*)
 
 type title = string
 type title' = [ `Data of string ]
@@ -595,8 +595,8 @@ let make_title (l : [< title'] list) =
   let title = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "title")
+             Common.Error.Data
+             (Common.Error.Tag "title")
   in title
 
 (** Safe generator, Unsafe generator *)
@@ -612,7 +612,7 @@ let title_of_xml, title_of_xml' =
   *
   * atomSubtitle = element atom:subtitle { atomTextConstruct } {% \equiv %}
   * [`Data]
-  *)
+*)
 
 type subtitle = string
 type subtitle' = [ `Data of string ]
@@ -621,8 +621,8 @@ let make_subtitle (l : [< subtitle'] list) =
   let subtitle = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "subtitle")
+             Common.Error.Data
+             (Common.Error.Tag "subtitle")
   in subtitle
 
 (** Safe generator, Unsafe generator *)
@@ -642,7 +642,7 @@ let subtitle_of_xml, subtitle_of_xml' =
   * [`Date]
   *
   * Publishers MAY change the value of this element over time.
-  *)
+*)
 
 type updated = Netdate.t
 type updated' = [ `Date of Netdate.t ]
@@ -652,8 +652,8 @@ let make_updated (l : [< updated'] list) =
   let updated = match find (fun (`Date _) -> true) l with
     | Some (`Date d) -> d
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "updated")
+             Common.Error.Data
+             (Common.Error.Tag "updated")
   in updated
 
 (** Safe generator, Unsafe generator *)
@@ -701,7 +701,7 @@ let updated_of_xml, updated_of_xml' =
   * in the atom:source element.
   *
   * See RFC 4287 § 4.1.2 for more details.
-  *)
+*)
 
 type source =
   {
@@ -739,12 +739,12 @@ let make_source (l : [< source'] list) =
   let authors =
     (function
       | [] -> Common.Error.raise_expectation
-          (Common.Error.Tag "author")
-          (Common.Error.Tag "source")
+                (Common.Error.Tag "author")
+                (Common.Error.Tag "source")
       | x :: r -> x, r)
       (List.fold_left
-        (fun acc -> function `Author x -> x :: acc | _ -> acc)
-        [] l)
+         (fun acc -> function `Author x -> x :: acc | _ -> acc)
+         [] l)
   in
   (** atomCategory* *)
   let categories =
@@ -771,15 +771,15 @@ let make_source (l : [< source'] list) =
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
     | _ -> Common.Error.raise_expectation
-        (Common.Error.Tag "id")
-        (Common.Error.Tag "source")
+             (Common.Error.Tag "id")
+             (Common.Error.Tag "source")
   in
   (** atomLink* *)
   let links =
     (function
       | [] -> Common.Error.raise_expectation
-          (Common.Error.Tag "link")
-          (Common.Error.Tag "source")
+                (Common.Error.Tag "link")
+                (Common.Error.Tag "source")
       | x :: r -> (x, r))
       (List.fold_left (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l)
   in
@@ -802,8 +802,8 @@ let make_source (l : [< source'] list) =
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title s) -> s
     | _ -> Common.Error.raise_expectation
-        (Common.Error.Tag "title")
-        (Common.Error.Tag "source")
+             (Common.Error.Tag "title")
+             (Common.Error.Tag "source")
   in
   (** atomUpdated? *)
   let updated = match find (function `Updated _ -> true | _ -> false) l with
@@ -876,7 +876,7 @@ let source_of_xml' =
   * (see Section 4.2.6 of [MIMEREG]).  If neither the type attribute nor
   * the src attribute is provided, Atom Processors MUST behave as though
   * the type attribute were present with a value of "text".
-  *)
+*)
 
 type type_content =
   | Html
@@ -941,7 +941,7 @@ let type_content_of_string s = match String.lowercase (String.trim s) with
   * corresponding URI (mapped from an IRI, if necessary) is dereferenced,
   * if the server providing that content also provides a media type, the
   * server-provided media type is authoritative.
-  *)
+*)
 
 type content =
   {
@@ -1003,7 +1003,7 @@ let content_of_xml, content_of_xml' =
   * It is not advisable for the atom:summary element to duplicate
   * atom:title or atom:content because Atom Processors might assume there
   * is a useful summary when there is none.
-  *)
+*)
 
 type summary = string
 type summary' = [ `Data of string ]
@@ -1013,8 +1013,8 @@ let make_summary (l : [< summary'] list) =
   let data = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
     | _ -> Common.Error.raise_expectation
-        Common.Error.Data
-        (Common.Error.Tag "summary")
+             Common.Error.Data
+             (Common.Error.Tag "summary")
   in data
 
 (** Safe generator, Unsafe generator *)
@@ -1025,74 +1025,74 @@ let summary_of_xml, summary_of_xml' =
   generate_catcher ~leaf_producer (fun x -> x)
 
 (** {C See RFC 4287 § 4.1.2 }
- * The "atom:entry" element represents an individual entry, acting as a
- * container for metadata and data associated with the entry.  This
- * element can appear as a child of the atom:feed element, or it can
- * appear as the document (i.e., top-level) element of a stand-alone
- * Atom Entry Document.
- *
- * atomEntry =
- *    element atom:entry {
- *       atomCommonAttributes,
- *       (atomAuthor* {% \equiv %} [`Author]
- *        & atomCategory* {% \equiv %} [`Category]
- *        & atomContent? {% \equiv %} [`Content]
- *        & atomContributor* {% \equiv %} [`Contributor]
- *        & atomId {% \equiv %} [`ID]
- *        & atomLink* {% \equiv %} [`Link]
- *        & atomPublished? {% \equiv %} [`Published]
- *        & atomRights? {% \equiv %} [`Rights]
- *        & atomSource? {% \equiv %} [`Source]
- *        & atomSummary? {% \equiv %} [`Summary]
- *        & atomTitle {% \equiv %} [`Title]
- *        & atomUpdated {% \equiv %} [`Updated]
- *        & extensionElement* )
- *    }
- *
- * This specification assigns no significance to the order of appearance
- * of the child elements of atom:entry.
- *
- * The following child elements are defined by this specification (note
- * that it requires the presence of some of these elements):
- *
- * o  {b atom:entry elements MUST contain one or more atom:author elements,
- *    unless the atom:entry contains an atom:source element that
- *    contains an atom:author element or, in an Atom Feed Document, the
- *    atom:feed element contains an atom:author element itself.}
- * o  atom:entry elements MAY contain any number of atom:category
- *    elements.
- * o  atom:entry elements MUST NOT contain more than one atom:content
- *    element.
- * o  atom:entry elements MAY contain any number of atom:contributor
- *    elements.
- * o  atom:entry elements MUST contain exactly one atom:id element.
- * o  {b atom:entry elements that contain no child atom:content element
- *    MUST contain at least one atom:link element with a rel attribute
- *    value of "alternate".}
- * o  {b atom:entry elements MUST NOT contain more than one atom:link
- *    element with a rel attribute value of "alternate" that has the
- *    same combination of type and hreflang attribute values.}
- * o  atom:entry elements MAY contain additional atom:link elements
- *    beyond those described above.
- * o  atom:entry elements MUST NOT contain more than one atom:published
- *    element.
- * o  atom:entry elements MUST NOT contain more than one atom:rights
- *    element.
- * o  atom:entry elements MUST NOT contain more than one atom:source
- *    element.
- * o  atom:entry elements MUST contain an atom:summary element in either
- *    of the following cases:
- *    *  the atom:entry contains an atom:content that has a "src"
- *       attribute (and is thus empty).
- *    *  the atom:entry contains content that is encoded in Base64;
- *       i.e., the "type" attribute of atom:content is a MIME media type
- *       [MIMEREG], but is not an XML media type [RFC3023], does not
- *       begin with "text/", and does not end with "/xml" or "+xml".
- * o  atom:entry elements MUST NOT contain more than one atom:summary
- *    element.
- * o  atom:entry elements MUST contain exactly one atom:title element.
- * o  atom:entry elements MUST contain exactly one atom:updated element.
- *)
+  * The "atom:entry" element represents an individual entry, acting as a
+  * container for metadata and data associated with the entry.  This
+  * element can appear as a child of the atom:feed element, or it can
+  * appear as the document (i.e., top-level) element of a stand-alone
+  * Atom Entry Document.
+  *
+  * atomEntry =
+  *    element atom:entry {
+  *       atomCommonAttributes,
+  *       (atomAuthor* {% \equiv %} [`Author]
+  *        & atomCategory* {% \equiv %} [`Category]
+  *        & atomContent? {% \equiv %} [`Content]
+  *        & atomContributor* {% \equiv %} [`Contributor]
+  *        & atomId {% \equiv %} [`ID]
+  *        & atomLink* {% \equiv %} [`Link]
+  *        & atomPublished? {% \equiv %} [`Published]
+  *        & atomRights? {% \equiv %} [`Rights]
+  *        & atomSource? {% \equiv %} [`Source]
+  *        & atomSummary? {% \equiv %} [`Summary]
+  *        & atomTitle {% \equiv %} [`Title]
+  *        & atomUpdated {% \equiv %} [`Updated]
+  *        & extensionElement* )
+  *    }
+  *
+  * This specification assigns no significance to the order of appearance
+  * of the child elements of atom:entry.
+  *
+  * The following child elements are defined by this specification (note
+  * that it requires the presence of some of these elements):
+  *
+  * o  {b atom:entry elements MUST contain one or more atom:author elements,
+  *    unless the atom:entry contains an atom:source element that
+  *    contains an atom:author element or, in an Atom Feed Document, the
+  *    atom:feed element contains an atom:author element itself.}
+  * o  atom:entry elements MAY contain any number of atom:category
+  *    elements.
+  * o  atom:entry elements MUST NOT contain more than one atom:content
+  *    element.
+  * o  atom:entry elements MAY contain any number of atom:contributor
+  *    elements.
+  * o  atom:entry elements MUST contain exactly one atom:id element.
+  * o  {b atom:entry elements that contain no child atom:content element
+  *    MUST contain at least one atom:link element with a rel attribute
+  *    value of "alternate".}
+  * o  {b atom:entry elements MUST NOT contain more than one atom:link
+  *    element with a rel attribute value of "alternate" that has the
+  *    same combination of type and hreflang attribute values.}
+  * o  atom:entry elements MAY contain additional atom:link elements
+  *    beyond those described above.
+  * o  atom:entry elements MUST NOT contain more than one atom:published
+  *    element.
+  * o  atom:entry elements MUST NOT contain more than one atom:rights
+  *    element.
+  * o  atom:entry elements MUST NOT contain more than one atom:source
+  *    element.
+  * o  atom:entry elements MUST contain an atom:summary element in either
+  *    of the following cases:
+  *    *  the atom:entry contains an atom:content that has a "src"
+  *       attribute (and is thus empty).
+  *    *  the atom:entry contains content that is encoded in Base64;
+  *       i.e., the "type" attribute of atom:content is a MIME media type
+  *       [MIMEREG], but is not an XML media type [RFC3023], does not
+  *       begin with "text/", and does not end with "/xml" or "+xml".
+  * o  atom:entry elements MUST NOT contain more than one atom:summary
+  *    element.
+  * o  atom:entry elements MUST contain exactly one atom:title element.
+  * o  atom:entry elements MUST contain exactly one atom:updated element.
+*)
 
 type entry =
   {
@@ -1131,8 +1131,8 @@ module Error = struct
   exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
 
   let raise_duplicate_link
-    { href; type_media; hreflang; _}
-    (type_media', hreflang') =
+      { href; type_media; hreflang; _}
+      (type_media', hreflang') =
     let ty = (function Some a -> a | None -> "(none)") type_media in
     let hl = (function Some a -> a | None -> "(none)") hreflang in
     let ty' = (function "" -> "(none)" | s -> s) type_media' in
@@ -1218,7 +1218,7 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
     match find (function `Author _ -> true | _ -> false) feed with
     | Some (`Author a) -> Some a
     | _ -> None
-  (** (atomAuthor* *)
+    (** (atomAuthor* *)
   in let authors =
     (* default author is feed/author, see RFC 4287 § 4.1.2 *)
     (function
@@ -1232,17 +1232,17 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
        List.fold_left
          (fun acc -> function `Author x -> x :: acc | _ -> acc)
          [] l)
-  (** atomCategory* *)
+      (** atomCategory* *)
   in let categories = List.fold_left
       (fun acc -> function `Category x -> x :: acc | _ -> acc) [] l
-  (** atomContributor* *)
+      (** atomContributor* *)
   in let contributors = List.fold_left
       (fun acc -> function `Contributor x -> x :: acc | _ -> acc) [] l in
   (** atomId *)
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
     | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "entry")
-  (** atomLink* *)
+    (** atomLink* *)
   in let links = List.fold_left
       (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l in
   (** atomPublished? *)
@@ -1254,7 +1254,7 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
   let rights = match find (function `Rights _ -> true | _ -> false) l with
     | Some (`Rights r) -> Some r
     | _ -> None
-  (** atomSource? *)
+    (** atomSource? *)
   in let sources = List.fold_left
       (fun acc -> function `Source x -> x :: acc | _ -> acc) [] l in
   (** atomContent? *)
@@ -1395,7 +1395,7 @@ let entry_of_xml' =
   * Processors MAY choose to display all of them or some subset of them.
   * One typical behavior would be to display only the entry with the
   * latest atom:updated timestamp.
-  *)
+*)
 
 type feed =
   {
