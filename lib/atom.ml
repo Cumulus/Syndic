@@ -366,37 +366,62 @@ let generator_of_xml, generator_of_xml' =
   generate_catcher ~attr_producer ~leaf_producer make_generator,
   generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.5 }
+  * The "atom:icon" element's content is an IRI reference [RFC3987] that
+  * identifies an image that provides iconic visual identification for a
+  * feed.
+  *
+  * atomIcon = element atom:icon {
+  *    atomCommonAttributes,
+  *    (atomUri) {% \equiv %} [`URI]
+  * }
+  *
+  * The image SHOULD have an aspect ratio of one (horizontal) to one
+  * (vertical) and SHOULD be suitable for presentation at a small size.
+  *)
 
-type icon' = [
-  | `IconURI of Uri.t
-]
+type icon' = [ `URI of Uri.t ]
 
 let make_icon (l : [< icon'] list) =
-  let uri = match find (fun (`IconURI _) -> true) l with
-    | Some (`IconURI u) -> u
+  (** (atomUri) *)
+  let uri = match find (fun (`URI _) -> true) l with
+    | Some (`URI u) -> u
     | _ -> Error.raise_expectation Error.Data (Error.Tag "icon")
   in uri
 
-let icon_of_xml =
-  let leaf_producer ctx data = `IconURI (Uri.of_string data)
-  in generate_catcher ~leaf_producer make_icon
+let icon_of_xml, icon_of_xml' =
+  let leaf_producer ctx data = `URI (Uri.of_string data) in
+  generate_catcher ~leaf_producer make_icon,
+  generate_catcher ~leaf_producer (fun x -> x)
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.6 }
+  * The "atom:id" element conveys a permanent, universally unique
+  * identifier for an entry or feed.
+  *
+  * atomId = element atom:id {
+  *    atomCommonAttributes,
+  *    (atomUri) {% \equiv %} [`URI]
+  * }
+  *
+  * Its content MUST be an IRI, as defined by [RFC3987].  Note that the
+  * definition of "IRI" excludes relative references.  Though the IRI
+  * might use a dereferencable scheme, Atom Processors MUST NOT assume it
+  * can be dereferenced.
+  *)
 
-type id' = [
-  | `IdURI of Uri.t
-]
+type id' = [ `URI of Uri.t ]
 
 let make_id (l : [< id'] list) =
-  let uri = match find (fun (`IdURI _) -> true) l with
-    | Some (`IdURI u) -> u
+  (** (atomUri) *)
+  let uri = match find (fun (`URI _) -> true) l with
+    | Some (`URI u) -> u
     | _ -> Error.raise_expectation Error.Data (Error.Tag "id")
   in uri
 
-let id_of_xml =
-  let leaf_producer ctx data = `IdURI (Uri.of_string data)
-  in generate_catcher ~leaf_producer make_id
+let id_of_xml, id_of_xml' =
+  let leaf_producer ctx data = `URI (Uri.of_string data) in
+  generate_catcher ~leaf_producer make_id,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 (* RFC Compliant (or raise error) *)
 

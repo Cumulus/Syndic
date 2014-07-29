@@ -80,6 +80,18 @@ type generator' = [
 val generator_of_xml : Xmlm.tag * Common.XML.tree list -> generator
 val generator_of_xml' : Xmlm.tag * Common.XML.tree list -> [> generator' ] list
 
+type icon = Uri.t
+type icon' = [ `URI of Uri.t ]
+
+val icon_of_xml : Xmlm.tag * Common.XML.tree list -> icon
+val icon_of_xml' : Xmlm.tag * Common.XML.tree list -> [> icon' ] list
+
+type id = Uri.t
+type id' = [ `URI of Uri.t ]
+
+val id_of_xml : Xmlm.tag * Common.XML.tree list -> id
+val id_of_xml' : Xmlm.tag * Common.XML.tree list -> [> id' ] list
+
 type link = {
   href : Uri.t;
   rel : rel;
