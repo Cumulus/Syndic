@@ -72,15 +72,18 @@ end
 (* Util *)
 
 module Util = struct
+  (*
   type opts_neturl = {
     schemes: (string, Neturl.url_syntax) Hashtbl.t;
     base_syntax: Neturl.url_syntax;
     accept_8bits: bool;
     enable_fragment: bool;
   }
+  *)
 
   let find f l = try Some (List.find f l) with Not_found -> None
 
+  (*
   let url_of_string opts_neturl str =
     try Neturl.parse_url
           ~schemes:opts_neturl.schemes
@@ -89,6 +92,7 @@ module Util = struct
           ~enable_fragment:opts_neturl.enable_fragment
           str
     with Neturl.Malformed_URL -> raise (Error.Malformed_URL str)
+  *)
 
   let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
@@ -101,6 +105,7 @@ module Util = struct
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
   let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
 
+  (*
   let make_opts_neturl
       ?(schemes = Neturl.common_url_syntax)
       ?(base_syntax = Hashtbl.find Neturl.common_url_syntax "http")
@@ -112,4 +117,5 @@ module Util = struct
       accept_8bits;
       enable_fragment;
     }
+  *)
 end
