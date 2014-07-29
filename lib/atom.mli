@@ -30,11 +30,21 @@ type content = {
   src : Uri.t option;
 }
 
-type author = {
-  name : string;
-  uri : Uri.t option;
-  email : string option;
-}
+type author =
+  {
+    name : string;
+    uri : Uri.t option;
+    email : string option;
+  }
+
+type author' = [
+  | `Name of string
+  | `URI of Uri.t
+  | `Email of string
+]
+
+val author_of_xml : Xmlm.tag * Common.XML.tree list -> author
+val author_of_xml' : Xmlm.tag * Common.XML.tree list -> [> author' ] list
 
 type category = {
   term : string;

@@ -9,6 +9,15 @@ type rel =
   | Via
   | Link of Uri.t
 
+(* See RFC 4287 § 3.1.1
+ * Text constructs MAY have a "type" attribute.  When present, the value
+ * MUST be one of [Text], [Html], or [Xhtml].  If the "type" attribute
+ * is not provided, Atom Processors MUST behave as though it were
+ * present with a value of "text".  Unlike the atom:content element
+ * defined in Section 4.1.3, MIME media types [MIMEREG] MUST NOT be used
+ * as values for the "type" attribute on Text constructs.
+ *)
+
 type type_content =
   | Html
   | Text
@@ -142,48 +151,83 @@ module Error = struct
     Buffer.contents buffer
 end
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 3.2}
+  * A Person construct is an element that describes a person,
+  * corporation, or similar entity (hereafter, 'person').
+  *
+  * atomPersonConstruct =
+  *    atomCommonAttributes,
+  *    (element atom:name { text } {% \equiv %} [`Name]
+  *     & element atom:uri { atomUri }? {% \equiv %} [`URI]
+  *     & element atom:email { atomEmailAddress }? {% \equiv %} [`Email]
+  *     & extensionElement* )
+  *
+  * This specification assigns no significance to the order of appearance
+  * of the child elements in a Person construct.  Person constructs allow
+  * extension Metadata elements (see Section 6.4).
+  *
+  * {C See RFC 4287 § 4.2.1}
+  * The "atom:author" element is a Person construct that indicates the
+  * author of the entry or feed.
+  *
+  * atomAuthor = element atom:author { atomPersonConstruct }
+  *
+  * If an atom:entry element does not contain atom:author elements, then
+  * the atom:author elements of the contained atom:source element are
+  * considered to apply.  In an Atom Feed Document, the atom:author
+  * elements of the containing atom:feed element are considered to apply
+  * to the entry if there are no atom:author elements in the locations
+  * described above.
+  *)
 
 type author' = [
-  | `AuthorName of string
-  | `AuthorURI of Uri.t
-  | `AuthorEmail of string
+  | `Name of string
+  | `URI of Uri.t
+  | `Email of string
 ]
 
 let make_author (l : [< author'] list) =
-  let name = match find (function `AuthorName _ -> true | _ -> false) l with
-    | Some (`AuthorName s) -> s
+  (** element atom:name { text } *)
+  let name = match find (function `Name _ -> true | _ -> false) l with
+    | Some (`Name s) -> s
     | _ -> Error.raise_expectation (Error.Tag "name") (Error.Tag "author")
   in
-  let uri = match find (function `AuthorURI _ -> true | _ -> false) l with
-    | Some (`AuthorURI u) -> Some u
+  (** element atom:uri { atomUri }? *)
+  let uri = match find (function `URI _ -> true | _ -> false) l with
+    | Some (`URI u) -> Some u
     | _ -> None
   in
-  let email = match find (function `AuthorEmail _ -> true | _ -> false) l with
-    | Some (`AuthorEmail e) -> Some e
+  (** element atom:email { atomEmailAddress }? *)
+  let email = match find (function `Email _ -> true | _ -> false) l with
+    | Some (`Email e) -> Some e
     | _ -> None
   in
   ({ name; uri; email; } : author)
 
 let author_name_of_xml (tag, datas) =
   try get_leaf datas
-  with _ -> "" (* mandatory ? *)
+  with Error.Expected_Leaf -> "" (* mandatory ? *)
 
 let author_uri_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf -> Error.raise_expectation Error.Data (Error.Tag "author/uri")
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "author/uri")
 
 let author_email_of_xml (tag, datas) =
   try get_leaf datas
-  with _ -> "" (* mandatory ? *)
+  with Error.Expected_Leaf -> "" (* mandatory ? *)
 
-let author_of_xml =
+(** Safe generator, Unsafe generator *)
+
+let author_of_xml, author_of_xml' =
   let data_producer = [
-    ("name", (fun ctx a -> `AuthorName (author_name_of_xml a)));
-    ("uri", (fun ctx a -> `AuthorURI (author_uri_of_xml a)));
-    ("email", (fun ctx a -> `AuthorEmail (author_email_of_xml a)));
+    ("name", (fun ctx a -> `Name (author_name_of_xml a)));
+    ("uri", (fun ctx a -> `URI (author_uri_of_xml a)));
+    ("email", (fun ctx a -> `Email (author_email_of_xml a)));
   ] in
-  generate_catcher ~data_producer make_author
+  generate_catcher ~data_producer make_author,
+  generate_catcher ~data_producer (fun x -> x)
+
 
 (* RFC Compliant (or raise error) *)
 
