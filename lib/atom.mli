@@ -62,6 +62,9 @@ type category' = [
 val category_of_xml : Xmlm.tag * Common.XML.tree list -> category
 val category_of_xml' : Xmlm.tag * Common.XML.tree list -> [> category' ] list
 
+val contributor_of_xml : Xmlm.tag * Common.XML.tree list -> author
+val contributor_of_xml' : Xmlm.tag * Common.XML.tree list -> [> author' ] list
+
 type generator = {
   version : string option;
   uri : Uri.t option;

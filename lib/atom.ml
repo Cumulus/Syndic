@@ -247,6 +247,17 @@ let author_of_xml, author_of_xml' =
   * The "term" attribute is a string that identifies the category to
   * which the entry or feed belongs.  Category elements MUST have a
   * "term" attribute.
+  *
+  * {C See RFC 4287 § 4.2.2.2 }
+  * The "scheme" attribute is an IRI that identifies a categorization
+  * scheme.  Category elements MAY have a "scheme" attribute.
+  *
+  * {C See RFC 4287 § 4.2.2.3 }
+  * The "label" attribute provides a human-readable label for display in
+  * end-user applications.  The content of the "label" attribute is
+  * Language-Sensitive.  Entities such as "&amp;" and "&lt;" represent
+  * their corresponding characters ("&" and "<", respectively), not
+  * markup.  Category elements MAY have a "label" attribute.
   *)
 
 type category' = [
@@ -285,10 +296,16 @@ let category_of_xml, category_of_xml' =
   generate_catcher ~attr_producer make_category,
   generate_catcher ~attr_producer (fun x -> x)
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.3 }
+  * The "atom:contributor" element is a Person construct that indicates a
+  * person or other entity who contributed to the entry or feed.
+  *
+  * atomContributor = element atom:contributor { atomPersonConstruct }
+  *)
 
 let make_contributor = make_author
 let contributor_of_xml = author_of_xml
+let contributor_of_xml' = author_of_xml'
 
 (* RFC Compliant (or raise error) *)
 
