@@ -65,10 +65,20 @@ val category_of_xml' : Xmlm.tag * Common.XML.tree list -> [> category' ] list
 val contributor_of_xml : Xmlm.tag * Common.XML.tree list -> author
 val contributor_of_xml' : Xmlm.tag * Common.XML.tree list -> [> author' ] list
 
-type generator = {
-  version : string option;
-  uri : Uri.t option;
-}
+type generator =
+  {
+    version : string option;
+    uri : Uri.t option;
+  }
+
+type generator' = [
+  | `URI of Uri.t
+  | `Version of string
+  | `Content of string
+]
+
+val generator_of_xml : Xmlm.tag * Common.XML.tree list -> generator
+val generator_of_xml' : Xmlm.tag * Common.XML.tree list -> [> generator' ] list
 
 type link = {
   href : Uri.t;

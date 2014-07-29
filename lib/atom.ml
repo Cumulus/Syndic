@@ -307,34 +307,64 @@ let make_contributor = make_author
 let contributor_of_xml = author_of_xml
 let contributor_of_xml' = author_of_xml'
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.4 }
+ * The "atom:generator" element's content identifies the agent used to
+ * generate a feed, for debugging and other purposes.
+ *
+ * atomGenerator = element atom:generator {
+ *    atomCommonAttributes,
+ *    attribute uri { atomUri }?, {% \equiv %} [`URI]
+ *    attribute version { text }?, {% \equiv %} [`Version]
+ *    text {% \equiv %} [`Content]
+ * }
+ *
+ * The content of this element, when present, MUST be a string that is a
+ * human-readable name for the generating agent.  Entities such as
+ * "&amp;" and "&lt;" represent their corresponding characters ("&" and
+ * "<" respectively), not markup.
+ *
+ * The atom:generator element MAY have a "uri" attribute whose value
+ * MUST be an IRI reference [RFC3987].  When dereferenced, the resulting
+ * URI (mapped from an IRI, if necessary) SHOULD produce a
+ * representation that is relevant to that agent.
+ *
+ * The atom:generator element MAY have a "version" attribute that
+ * indicates the version of the generating agent.
+ *)
 
 type generator' = [
-  | `GeneratorURI of Uri.t
-  | `GeneratorVersion of string
-  | `GeneratorContent of string
+  | `URI of Uri.t
+  | `Version of string
+  | `Content of string
 ]
 
 let make_generator (l : [< generator'] list) =
-  let content = match find (function `GeneratorContent _ -> true | _ -> false) l with
-    | Some ((`GeneratorContent c)) -> c
+  (** text *)
+  let content = match find (function `Content _ -> true | _ -> false) l with
+    | Some ((`Content c)) -> c
     | _ -> Error.raise_expectation Error.Data (Error.Tag "generator")
   in
-  let version = match find (function `GeneratorVersion _ -> true | _ -> false) l with
-    | Some ((`GeneratorVersion v)) -> Some v
+  (** attribute version { text }? *)
+  let version = match find (function `Version _ -> true | _ -> false) l with
+    | Some ((`Version v)) -> Some v
     | _ -> None
   in
-  let uri = match find (function `GeneratorURI _ -> true | _ -> false) l with
-    | Some ((`GeneratorURI u)) -> Some u
+  (** attribute uri { atomUri }? *)
+  let uri = match find (function `URI _ -> true | _ -> false) l with
+    | Some ((`URI u)) -> Some u
     | _ -> None
   in ({ version; uri; } : generator), content
 
-let generator_of_xml =
+(** Safe generator, Unsafe generator *)
+
+let generator_of_xml, generator_of_xml' =
   let attr_producer = [
-    ("version", (fun ctx a -> `GeneratorVersion a));
-    ("uri", (fun ctx a -> `GeneratorURI (Uri.of_string a)));
+    ("version", (fun ctx a -> `Version a));
+    ("uri", (fun ctx a -> `URI (Uri.of_string a)));
   ] in
-  generate_catcher ~attr_producer make_generator
+  let leaf_producer ctx data = `Content data in
+  generate_catcher ~attr_producer ~leaf_producer make_generator,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 (* RFC Compliant (or raise error) *)
 
