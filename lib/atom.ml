@@ -171,7 +171,7 @@ let author_name_of_xml (tag, datas) =
 
 let author_uri_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.ExpectedLeaf -> Error.raise_expectation Error.Data (Error.Tag "author/uri")
+  with Error.Expected_Leaf -> Error.raise_expectation Error.Data (Error.Tag "author/uri")
 
 let author_email_of_xml (tag, datas) =
   try get_leaf datas

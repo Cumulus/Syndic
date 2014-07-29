@@ -1,3 +1,13 @@
+module Error : sig
+  type expected_type
+
+  exception Expected of expected_type * expected_type
+  exception Expected_Leaf
+  exception Malformed_URL of string
+
+  val string_of_expectation : expected_type * expected_type -> string
+end
+
 type image = {
   url: Uri.t;
   title: string;

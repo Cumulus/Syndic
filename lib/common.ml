@@ -49,7 +49,7 @@ module Error = struct
     | Root
 
   exception Expected of expected_type * expected_type
-  exception ExpectedLeaf
+  exception Expected_Leaf
 
   let string_of_expectation (a, b) =
     let string_of_expected_type = function
@@ -95,7 +95,7 @@ module Util = struct
   let datas_has_leaf = List.exists (function | XML.Leaf _ -> true | _ -> false)
   let get_leaf l  = match find (function XML.Leaf _ -> true | _ -> false) l with
     | Some (XML.Leaf s) -> s
-    | _ -> raise Error.ExpectedLeaf
+    | _ -> raise Error.Expected_Leaf
   let get_attrs ((_, attrs) : Xmlm.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name

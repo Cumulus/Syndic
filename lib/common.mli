@@ -18,7 +18,7 @@ module Error : sig
     | Root
 
   exception Expected of expected_type * expected_type
-  exception ExpectedLeaf
+  exception Expected_Leaf
 
   val string_of_expectation : expected_type * expected_type -> string
   val raise_expectation : expected_type -> expected_type -> 'a

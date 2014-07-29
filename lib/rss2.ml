@@ -157,17 +157,17 @@ let make_image (l : [< image'] list) =
 
 let image_url_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "image/url")
 
 let image_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "image/title")
 
 let image_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "image/link")
 
 let image_size_of_xml ~max (tag, datas) =
@@ -175,7 +175,7 @@ let image_size_of_xml ~max (tag, datas) =
     if size > max
     then Error.raise_size_exceeded (get_tag_name tag) size max
     else size
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag ("image/" ^ (get_tag_name tag)))
 
 let image_width_of_xml = image_size_of_xml ~max:144
@@ -183,7 +183,7 @@ let image_height_of_xml = image_size_of_xml ~max:400
 
 let image_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "image/description")
 
 let image_of_xml =
@@ -272,22 +272,22 @@ let make_textinput (l : [< textinput'] list) =
 
 let textinput_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/title")
 
 let textinput_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/description")
 
 let textinput_name_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/name")
 
 let textinput_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/link")
 
 let textinput_of_xml =
@@ -464,32 +464,32 @@ let make_item (l : [< item'] list) =
 
 let item_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/title")
 
 let item_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/description")
 
 let item_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/link")
 
 let item_author_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/author")
 
 let item_comments_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/comments")
 
 let item_pubdate_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.ExpectedLeaf ->
+  with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/pubDate")
 
 let item_of_xml =

@@ -2,7 +2,7 @@ module Error : sig
   type expected_type
 
   exception Expected of expected_type * expected_type
-  exception ExpectedLeaf
+  exception Expected_Leaf
   exception Malformed_URL of string
 
   val string_of_expectation : expected_type * expected_type -> string
@@ -26,7 +26,7 @@ type image = {
 }
 
 type item = {
-  about: Uri.t;
+  about: Uri.t; (* about and link are same *)
   title: string;
   link: Uri.t;
   description: string option;

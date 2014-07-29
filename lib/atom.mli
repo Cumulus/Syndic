@@ -2,7 +2,7 @@ module Error : sig
   type expected_type
 
   exception Expected of expected_type * expected_type
-  exception ExpectedLeaf
+  exception Expected_Leaf
   exception Malformed_URL of string
   exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
 
