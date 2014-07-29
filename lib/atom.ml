@@ -229,36 +229,61 @@ let author_of_xml, author_of_xml' =
   generate_catcher ~data_producer (fun x -> x)
 
 
-(* RFC Compliant (or raise error) *)
+(** {C See RFC 4287 § 4.2.2 }
+  * The "atom:category" element conveys information about a category
+  * associated with an entry or feed.  This specification assigns no
+  * meaning to the content (if any) of this element.
+  *
+  * atomCategory =
+  *    element atom:category {
+  *       atomCommonAttributes,
+  *       attribute term { text }, {% \equiv %} [`Term]
+  *       attribute scheme { atomUri }?, {% \equiv %} [`Scheme]
+  *       attribute label { text }?, {% \equiv %} [`Label]
+  *       undefinedContent
+  *    }
+  *
+  * {C See RFC 4287 § 4.2.2.1 }
+  * The "term" attribute is a string that identifies the category to
+  * which the entry or feed belongs.  Category elements MUST have a
+  * "term" attribute.
+  *)
 
 type category' = [
-  | `CategoryTerm of string
-  | `CategoryScheme of Uri.t
-  | `CategoryLabel of string
+  | `Term of string
+  | `Scheme of Uri.t
+  | `Label of string
 ]
 
 let make_category (l : [< category'] list) =
-  let term = match find (function `CategoryTerm _ -> true | _ -> false) l with
-    | Some (`CategoryTerm t) -> t
+  (** attribute term { text } *)
+  let term = match find (function `Term _ -> true | _ -> false) l with
+    | Some (`Term t) -> t
     | _ -> Error.raise_expectation (Error.Attr "term") (Error.Tag "category")
   in
-  let scheme = match find (function `CategoryScheme _ -> true | _ -> false) l with
-    | Some (`CategoryScheme u) -> Some u
+  (** attribute scheme { atomUri }? *)
+  let scheme =
+    match find (function `Scheme _ -> true | _ -> false) l with
+    | Some (`Scheme u) -> Some u
     | _ -> None
   in
-  let label = match find (function `CategoryLabel _ -> true | _ -> false) l with
-    | Some (`CategoryLabel l) -> Some l
+  (** attribute label { text }? *)
+  let label = match find (function `Label _ -> true | _ -> false) l with
+    | Some (`Label l) -> Some l
     | _ -> None
   in
   ({ term; scheme; label; } : category)
 
-let category_of_xml =
+(** Safe generator, Unsafe generator *)
+
+let category_of_xml, category_of_xml' =
   let attr_producer = [
-    ("term", (fun ctx a -> `CategoryTerm a));
-    ("scheme", (fun ctx a -> `CategoryScheme (Uri.of_string a)));
-    ("label", (fun ctx a -> `CategoryLabel a))
+    ("term", (fun ctx a -> `Term a));
+    ("scheme", (fun ctx a -> `Scheme (Uri.of_string a)));
+    ("label", (fun ctx a -> `Label a))
   ] in
-  generate_catcher ~attr_producer make_category
+  generate_catcher ~attr_producer make_category,
+  generate_catcher ~attr_producer (fun x -> x)
 
 (* RFC Compliant (or raise error) *)
 

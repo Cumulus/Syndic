@@ -46,11 +46,21 @@ type author' = [
 val author_of_xml : Xmlm.tag * Common.XML.tree list -> author
 val author_of_xml' : Xmlm.tag * Common.XML.tree list -> [> author' ] list
 
-type category = {
-  term : string;
-  scheme : Uri.t option;
-  label : string option;
-}
+type category =
+  {
+    term : string;
+    scheme : Uri.t option;
+    label : string option;
+  }
+
+type category' = [
+  | `Term of string
+  | `Scheme of Uri.t
+  | `Label of string
+]
+
+val category_of_xml : Xmlm.tag * Common.XML.tree list -> category
+val category_of_xml' : Xmlm.tag * Common.XML.tree list -> [> category' ] list
 
 type generator = {
   version : string option;
