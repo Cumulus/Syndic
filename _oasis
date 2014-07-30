@@ -1,24 +1,34 @@
-OASISFormat:     0.4
-Name:            syndic
-Version:         0.1
-Synopsis:        RSS and Atom feed parsing
-Authors:         Romain Calascibetta
-Maintainers:     Romain Calascibetta <romain.calascibetta@gmail.com>
-Homepage:        https://github.com/Cumulus/Syndic
-License:         MIT
-Plugins:         META (0.3), DevFiles (0.3)
-BuildTools:      ocamlbuild
-OCamlVersion:    >= 4.01
+OASISFormat:            0.4
+Name:                   syndic
+Version:                0.1
+Synopsis:               RSS and Atom feed parsing
+Authors:                Romain Calascibetta
+Maintainers:            Romain Calascibetta <romain.calascibetta@gmail.com>
+Homepage:               https://github.com/Cumulus/Syndic
+License:                MIT
+Plugins:                META (0.3), DevFiles (0.3)
+BuildTools:             ocamlbuild
+OCamlVersion:           >= 4.01
+AlphaFeatures:          ocamlbuild_more_args
 
 Library syndic
-  Path:          lib
-  BuildDepends:  xmlm, uri, netstring
-  Modules:       Syndic, Rss1, Rss2, Atom
-  InternalModules: Common
+  Path:                 lib
+  BuildDepends:         xmlm, uri, netstring
+  Modules:              Syndic, Rss1, Rss2, Atom, Common
 
-Executable tsyndic
-  Install: false
-  Path: src
-  MainIs: main.ml
-  BuildDepends: syndic
-  CompiledObject: best
+Document "Syndic"
+  Type:                 ocamlbuild (0.4)
+  BuildTools:           ocamldoc
+  Title:                "Syndic"
+  PostCommand:          cp doc/style.css Syndic.docdir/style.css
+  XOCamlbuildPath:      lib
+  XOCamlbuildLibraries: syndic
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -keep-code -charset utf-8'"
+
+Executable main
+  Install:              false
+  Path:                 bin
+  MainIs:               main.ml
+  BuildDepends:         syndic
+  CompiledObject:       best

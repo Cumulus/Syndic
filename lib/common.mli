@@ -22,8 +22,6 @@ module Error : sig
 
   val string_of_expectation : expected_type * expected_type -> string
   val raise_expectation : expected_type -> expected_type -> 'a
-
-  exception Malformed_URL of string
 end
 
 module Util : sig

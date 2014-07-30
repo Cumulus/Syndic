@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 1d576951cc36dc0ca9a8e3728910cea3)
+# DO NOT EDIT (digest: c7f29e4a67e63ab7a757423b81108b6e)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -18,13 +18,13 @@
 <lib/*.ml{,i}>: package(netstring)
 <lib/*.ml{,i}>: package(uri)
 <lib/*.ml{,i}>: package(xmlm)
-# Executable tsyndic
-<src/main.{native,byte}>: package(netstring)
-<src/main.{native,byte}>: package(uri)
-<src/main.{native,byte}>: package(xmlm)
-<src/main.{native,byte}>: use_syndic
-<src/*.ml{,i}>: package(netstring)
-<src/*.ml{,i}>: package(uri)
-<src/*.ml{,i}>: package(xmlm)
-<src/*.ml{,i}>: use_syndic
+# Executable main
+<bin/main.{native,byte}>: package(netstring)
+<bin/main.{native,byte}>: package(uri)
+<bin/main.{native,byte}>: package(xmlm)
+<bin/main.{native,byte}>: use_syndic
+<bin/*.ml{,i}>: package(netstring)
+<bin/*.ml{,i}>: package(uri)
+<bin/*.ml{,i}>: package(xmlm)
+<bin/*.ml{,i}>: use_syndic
 # OASIS_STOP

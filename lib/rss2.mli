@@ -1,11 +1,5 @@
 module Error : sig
-  type expected_type
-
-  exception Expected of expected_type * expected_type
-  exception Expected_Leaf
-  exception Malformed_URL of string
-
-  val string_of_expectation : expected_type * expected_type -> string
+  include (module type of Common.Error)
 end
 
 type image = {
