@@ -732,6 +732,7 @@ type feed =
 
 val analyze : Xmlm.input -> feed
 
+(** Analysis without verification, enjoy ! *)
 val unsafe : Xmlm.input ->
   [> `Feed of
        [> `Author of
