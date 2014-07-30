@@ -50,13 +50,13 @@ let author_email_of_xml (tag, datas) =
   with Common.Error.Expected_Leaf -> "" (* mandatory ? *)
 
 let author_uri_of_xml' =
-  let leaf_producer ctx data = `URI (Uri.of_string data) in
+  let leaf_producer ctx data = `URI data in
   generate_catcher ~leaf_producer (fun x -> List.hd x)
 let author_name_of_xml' =
-  let leaf_producer ctx data = `Name (Uri.of_string data) in
+  let leaf_producer ctx data = `Name data in
   generate_catcher ~leaf_producer (fun x -> List.hd x)
 let author_email_of_xml' =
-  let leaf_producer ctx data = `Email (Uri.of_string data) in
+  let leaf_producer ctx data = `Email data in
   generate_catcher ~leaf_producer (fun x -> List.hd x)
 
 let author_of_xml =
@@ -84,7 +84,7 @@ type category =
 
 type category' = [
   | `Term of string
-  | `Scheme of Uri.t
+  | `Scheme of string
   | `Label of string
 ]
 
@@ -99,7 +99,7 @@ let make_category (l : [< category'] list) =
   (* attribute scheme { atomUri }? *)
   let scheme =
     match find (function `Scheme _ -> true | _ -> false) l with
-    | Some (`Scheme u) -> Some u
+    | Some (`Scheme u) -> Some (Uri.of_string u)
     | _ -> None
   in
   (* attribute label { text }? *)
@@ -112,7 +112,7 @@ let make_category (l : [< category'] list) =
 let category_of_xml, category_of_xml' =
   let attr_producer = [
     ("term", (fun ctx a -> `Term a));
-    ("scheme", (fun ctx a -> `Scheme (Uri.of_string a)));
+    ("scheme", (fun ctx a -> `Scheme a));
     ("label", (fun ctx a -> `Label a))
   ] in
   generate_catcher ~attr_producer make_category,
@@ -130,7 +130,7 @@ type generator =
   }
 
 type generator' = [
-  | `URI of Uri.t
+  | `URI of string
   | `Version of string
   | `Content of string
 ]
@@ -150,50 +150,50 @@ let make_generator (l : [< generator'] list) =
   in
   (* attribute uri { atomUri }? *)
   let uri = match find (function `URI _ -> true | _ -> false) l with
-    | Some ((`URI u)) -> Some u
+    | Some ((`URI u)) -> Some (Uri.of_string u)
     | _ -> None
   in ({ version; uri; content; } : generator)
 
 let generator_of_xml, generator_of_xml' =
   let attr_producer = [
     ("version", (fun ctx a -> `Version a));
-    ("uri", (fun ctx a -> `URI (Uri.of_string a)));
+    ("uri", (fun ctx a -> `URI a));
   ] in
   let leaf_producer ctx data = `Content data in
   generate_catcher ~attr_producer ~leaf_producer make_generator,
   generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type icon = Uri.t
-type icon' = [ `URI of Uri.t ]
+type icon' = [ `URI of string ]
 
 let make_icon (l : [< icon'] list) =
   (** (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
-    | Some (`URI u) -> u
+    | Some (`URI u) -> (Uri.of_string u)
     | _ -> Common.Error.raise_expectation
              Common.Error.Data
              (Common.Error.Tag "icon")
   in uri
 
 let icon_of_xml, icon_of_xml' =
-  let leaf_producer ctx data = `URI (Uri.of_string data) in
+  let leaf_producer ctx data = `URI data in
   generate_catcher ~leaf_producer make_icon,
   generate_catcher ~leaf_producer (fun x -> x)
 
 type id = Uri.t
-type id' = [ `URI of Uri.t ]
+type id' = [ `URI of string ]
 
 let make_id (l : [< id'] list) =
   (* (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
-    | Some (`URI u) -> u
+    | Some (`URI u) -> (Uri.of_string u)
     | _ -> Common.Error.raise_expectation
              Common.Error.Data
              (Common.Error.Tag "id")
   in uri
 
 let id_of_xml, id_of_xml' =
-  let leaf_producer ctx data = `URI (Uri.of_string data) in
+  let leaf_producer ctx data = `URI data in
   generate_catcher ~leaf_producer make_id,
   generate_catcher ~leaf_producer (fun x -> x)
 
@@ -216,25 +216,33 @@ type link =
   }
 
 type link' = [
-  | `HREF of Uri.t
-  | `Rel of rel
+  | `HREF of string
+  | `Rel of string
   | `Type of string
   | `HREFLang of string
   | `Title of string
-  | `Length of int
+  | `Length of string
 ]
+
+let rel_of_string s = match String.lowercase (String.trim s) with
+  | "alternate" -> Alternate
+  | "related" -> Related
+  | "self" -> Self
+  | "enclosure" -> Enclosure
+  | "via" -> Via
+  | uri -> Link (Uri.of_string uri) (* RFC 4287 § 4.2.7.2 *)
 
 let make_link (l : [< link'] list) =
   (* attribute href { atomUri } *)
   let href = match find (function `HREF _ -> true | _ -> false) l with
-    | Some (`HREF u) -> u
+    | Some (`HREF u) -> (Uri.of_string u)
     | _ -> Common.Error.raise_expectation
              (Common.Error.Attr "href")
              (Common.Error.Tag "link")
   in
   (* attribute rel { atomNCName | atomUri }? *)
   let rel = match find (function `Rel _ -> true | _ -> false) l with
-    | Some (`Rel r) -> r
+    | Some (`Rel r) -> rel_of_string r
     | _ -> Alternate (* cf. RFC 4287 § 4.2.7.2 *)
   in
   (* attribute type { atomMediaType }? *)
@@ -255,62 +263,54 @@ let make_link (l : [< link'] list) =
   in
   (* attribute length { text }? *)
   let length = match find (function `Length _ -> true | _ -> false) l with
-    | Some (`Length i) -> Some i
+    | Some (`Length i) -> Some (int_of_string i)
     | _ -> None
   in
   ({ href; rel; type_media; hreflang; title; length; } : link)
 
-let rel_of_string s = match String.lowercase (String.trim s) with
-  | "alternate" -> Alternate
-  | "related" -> Related
-  | "self" -> Self
-  | "enclosure" -> Enclosure
-  | "via" -> Via
-  | uri -> Link (Uri.of_string uri) (* RFC 4287 § 4.2.7.2 *)
-
 let link_of_xml, link_of_xml' =
   let attr_producer = [
-    ("href", (fun ctx a -> `HREF (Uri.of_string a)));
-    ("rel", (fun ctx a -> `Rel (rel_of_string a)));
+    ("href", (fun ctx a -> `HREF a));
+    ("rel", (fun ctx a -> `Rel a));
     ("type", (fun ctx a -> `Type a));
     ("hreflang", (fun ctx a -> `HREFLang a));
     ("title", (fun ctx a -> `Title a));
-    ("length", (fun ctx a -> `Length (int_of_string a)));
+    ("length", (fun ctx a -> `Length a));
   ] in
   generate_catcher ~attr_producer make_link,
   generate_catcher ~attr_producer (fun x -> x)
 
 type logo = Uri.t
-type logo' = [ `URI of Uri.t ]
+type logo' = [ `URI of string ]
 
 let make_logo (l : [< logo'] list) =
   (* (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
-    | Some (`URI u) -> u
+    | Some (`URI u) -> (Uri.of_string u)
     | _ -> Common.Error.raise_expectation
              Common.Error.Data
              (Common.Error.Tag "logo")
   in uri
 
 let logo_of_xml, logo_of_xml' =
-  let leaf_producer ctx data = `URI (Uri.of_string data) in
+  let leaf_producer ctx data = `URI data in
   generate_catcher ~leaf_producer make_logo,
   generate_catcher ~leaf_producer (fun x -> x)
 
 type published = Netdate.t
-type published' = [ `Date of Netdate.t ]
+type published' = [ `Date of string ]
 
 let make_published (l : [< published'] list) =
   (* atom:published { atomDateConstruct } *)
   let date = match find (fun (`Date _) -> true) l with
-    | Some (`Date d) -> d
+    | Some (`Date d) -> Netdate.parse d
     | _ -> Common.Error.raise_expectation
              Common.Error.Data
              (Common.Error.Tag "published")
   in date
 
 let published_of_xml, published_of_xml' =
-  let leaf_producer ctx data = `Date (Netdate.parse data) in
+  let leaf_producer ctx data = `Date data in
   generate_catcher ~leaf_producer make_published,
   generate_catcher ~leaf_producer (fun x -> x)
 
@@ -366,19 +366,19 @@ let subtitle_of_xml, subtitle_of_xml' =
   generate_catcher ~leaf_producer (fun x -> x)
 
 type updated = Netdate.t
-type updated' = [ `Date of Netdate.t ]
+type updated' = [ `Date of string ]
 
 let make_updated (l : [< updated'] list) =
   (* atom:updated { atomDateConstruct } *)
   let updated = match find (fun (`Date _) -> true) l with
-    | Some (`Date d) -> d
+    | Some (`Date d) -> Netdate.parse d
     | _ -> Common.Error.raise_expectation
              Common.Error.Data
              (Common.Error.Tag "updated")
   in updated
 
 let updated_of_xml, updated_of_xml' =
-  let leaf_producer ctx data = `Date (Netdate.parse data) in
+  let leaf_producer ctx data = `Date data in
   generate_catcher ~leaf_producer make_updated,
   generate_catcher ~leaf_producer (fun x -> x)
 
@@ -556,8 +556,8 @@ type content =
   }
 
 type content' = [
-  | `Type of type_content
-  | `SRC of Uri.t
+  | `Type of string
+  | `SRC of string
   | `Data of string
 ]
 
@@ -568,13 +568,13 @@ let make_content (l : [< content'] list) =
    *  | attribute type { "xhtml" }
    *  | attribute type { atomMediaType }? *)
   let ty = match find (function `Type _ -> true | _ -> false) l with
-    | Some (`Type ty) -> ty
+    | Some (`Type ty) -> type_content_of_string ty
     | _ -> Text
   in
   (* attribute src { atomUri }
    *  | none *)
   let src = match find (function `SRC _ -> true | _ -> false) l with
-    | Some (`SRC s) -> Some s
+    | Some (`SRC s) -> Some (Uri.of_string s)
     | _ -> None
   in
   (* (text)*
@@ -589,8 +589,8 @@ let make_content (l : [< content'] list) =
 
 let content_of_xml, content_of_xml' =
   let attr_producer = [
-    ("type", (fun ctx a -> `Type (type_content_of_string a)));
-    ("src", (fun ctx a -> `SRC (Uri.of_string a)));
+    ("type", (fun ctx a -> `Type a));
+    ("src", (fun ctx a -> `SRC a));
   ] in
   let leaf_producer ctx data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_content,
@@ -973,4 +973,14 @@ let analyze input =
   let aux = function
     | Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
     | _ -> Error.raise_expectation (Error.Tag "feed") Error.Root
+  in aux tree
+
+let unsafe input =
+  let el tag datas = Node (tag, datas) in
+  let data data = Leaf data in
+  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
+  let aux = function
+    | Node (tag, datas) when tag_is tag "feed" ->
+      `Feed (feed_of_xml' (tag, datas))
+    | _ -> `Feed []
   in aux tree
