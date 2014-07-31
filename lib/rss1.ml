@@ -157,8 +157,8 @@ let make_textinput (l : [< channel_textinput' ] list) =
   let url = match find (function `URI _ -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
     | _ -> Error.raise_expectation
-      (Error.Attr "resource")
-      (Error.Tag "textinput")
+             (Error.Attr "resource")
+             (Error.Tag "textinput")
   in url
 
 let channel_textinput_of_xml, channel_textinput_of_xml' =
@@ -203,16 +203,16 @@ let make_channel (l : [< channel' ] list) =
     match find (function `Description _ -> true | _ -> false) l with
     | Some (`Description s) -> s
     | _ -> Error.raise_expectation
-        (Error.Tag "description")
-        (Error.Tag "channel")
+             (Error.Tag "description")
+             (Error.Tag "channel")
   in let image = match find (function `Image _ -> true | _ -> false) l with
     | Some (`Image i) -> Some i
     | _ -> None
   in let items = match find (function `Items _ -> true | _ -> false) l with
     | Some (`Items l) -> l
     | _ -> Error.raise_expectation
-        (Error.Tag "items")
-        (Error.Tag "channel")
+             (Error.Tag "items")
+             (Error.Tag "channel")
   in let textinput =
     match find (function `TextInput _ -> true | _ -> false) l with
     | Some (`TextInput u) -> Some u
@@ -377,8 +377,8 @@ let make_textinput (l : [< textinput' ] list) =
     match find (function `Description _ -> true | _ -> false) l with
     | Some (`Description s) -> s
     | _ -> Error.raise_expectation
-        (Error.Tag "description")
-        (Error.Tag "textinput")
+             (Error.Tag "description")
+             (Error.Tag "textinput")
   in let name = match find (function `Name _ -> true | _ -> false) l with
     | Some (`Name n) -> n
     | _ -> Error.raise_expectation (Error.Tag "name") (Error.Tag "textinput")
