@@ -1,93 +1,6 @@
 open Common.XML
 open Common.Util
 
-type image = {
-  url: Uri.t;
-  title: string;
-  link: Uri.t;
-  width: int; (* default 88 *)
-  height: int; (* default 31 *)
-  description: string option;
-}
-
-type cloud = {
-  domain: Uri.t;
-  port: int;
-  path: string;
-  registerProcedure: string;
-  protocol: string;
-}
-
-type textinput = {
-  title: string;
-  description: string;
-  name: string;
-  link: Uri.t;
-}
-
-type category = {
-  data: string;
-  domain: Uri.t option;
-}
-
-type enclosure = {
-  url: Uri.t;
-  length: int;
-  mime: string;
-}
-
-type guid = {
-  data: Uri.t; (* must be uniq *)
-  permalink: bool; (* default true *)
-}
-
-type source = {
-  data: string;
-  url: Uri.t;
-}
-
-(* must have title or description *)
-
-type story =
-  | All of string * string
-  | Title of string
-  | Description of string
-
-type item = {
-  story: story;
-  link: Uri.t option;
-  author:  string option; (* e-mail *)
-  category: category option;
-  comments: Uri.t option;
-  enclosure: enclosure option;
-  guid: guid option;
-  pubDate: string option; (* date *)
-  source: source option;
-}
-
-type channel = {
-  title: string;
-  link: Uri.t;
-  description: string;
-  language: string option;
-  copyright: string option;
-  managingEditor: string option; (* e-mail *)
-  webMaster: string option; (* e-mail *)
-  pubDate: string option; (* date *)
-  lastBuildDate: string option; (* date *)
-  category: string option;
-  generator: string option;
-  docs: Uri.t option;
-  cloud: cloud option; (* lol *)
-  ttl: int option;
-  image: image option;
-  rating: int option; (* lol *)
-  textInput: textinput option;
-  skipHours: int option;
-  skipDays: int option;
-  items: item list;
-}
-
 module Error = struct
   include Common.Error
 
@@ -116,41 +29,49 @@ module Error = struct
     "Item expected <title> or <description> tag"
 end
 
-(* RFC RSS 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#ltimagegtSubelementOfLtchannelgt *)
+type image =
+  {
+    url: Uri.t;
+    title: string;
+    link: Uri.t;
+    width: int; (* default 88 *)
+    height: int; (* default 31 *)
+    description: string option;
+  }
 
 type image' = [
-  | `ImageURL of Uri.t
-  | `ImageTitle of string
-  | `ImageLink of Uri.t
-  | `ImageWidth of int
-  | `ImageHeight of int
-  | `ImageDescription of string
+  | `URL of Uri.t
+  | `Title of string
+  | `Link of Uri.t
+  | `Width of int
+  | `Height of int
+  | `Description of string
 ]
 
-let make_image (l : [< image'] list) =
-  let url = match find (function `ImageURL _ -> true | _ -> false) l with
-    | Some (`ImageURL u) -> u
+let make_image (l : [< image' ] list) =
+  let url = match find (function `URL _ -> true | _ -> false) l with
+    | Some (`URL u) -> u
     | _ -> Error.raise_expectation (Error.Tag "url") (Error.Tag "image")
   in
-  let title = match find (function `ImageTitle _ -> true | _ -> false) l with
-    | Some (`ImageTitle t) -> t
+  let title = match find (function `Title _ -> true | _ -> false) l with
+    | Some (`Title t) -> t
     | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "image")
   in
-  let link = match find (function `ImageLink _ -> true | _ -> false) l with
-    | Some (`ImageLink l) -> l
+  let link = match find (function `Link _ -> true | _ -> false) l with
+    | Some (`Link l) -> l
     | _ -> Error.raise_expectation (Error.Tag "link") (Error.Tag "image")
   in
-  let width = match find (function `ImageWidth _ -> true | _ -> false) l with
-    | Some (`ImageWidth w) -> w
+  let width = match find (function `Width _ -> true | _ -> false) l with
+    | Some (`Width w) -> w
     | _ -> 88 (* cf. RFC *)
   in
-  let height = match find (function `ImageHeight _ -> true | _ -> false) l with
-    | Some (`ImageHeight h) -> h
+  let height = match find (function `Height _ -> true | _ -> false) l with
+    | Some (`Height h) -> h
     | _ -> 31 (* cf. RFC *)
   in
-  let description = match find (function `ImageDescription _ -> true | _ -> false) l with
-    | Some (`ImageDescription s) -> Some s
+  let description =
+    match find (function `Description _ -> true | _ -> false) l with
+    | Some (`Description s) -> Some s
     | _ -> None
   in
   ({ url; title; link; width; height; description } : image)
@@ -176,7 +97,9 @@ let image_size_of_xml ~max (tag, datas) =
     then Error.raise_size_exceeded (get_tag_name tag) size max
     else size
   with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag ("image/" ^ (get_tag_name tag)))
+    Error.raise_expectation
+      Error.Data
+      (Error.Tag ("image/" ^ (get_tag_name tag)))
 
 let image_width_of_xml = image_size_of_xml ~max:144
 let image_height_of_xml = image_size_of_xml ~max:400
@@ -184,88 +107,118 @@ let image_height_of_xml = image_size_of_xml ~max:400
 let image_description_of_xml (tag, datas) =
   try get_leaf datas
   with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "image/description")
+    Error.raise_expectation
+      Error.Data
+      (Error.Tag "image/description")
 
 let image_of_xml =
   let data_producer = [
-    ("url", (fun ctx a -> `ImageURL (image_url_of_xml a)));
-    ("title", (fun ctx a -> `ImageTitle (image_title_of_xml a)));
-    ("link", (fun ctx a -> `ImageLink (image_link_of_xml a)));
-    ("width", (fun ctx a -> `ImageWidth (image_width_of_xml a)));
-    ("height", (fun ctx a -> `ImageHeight (image_height_of_xml a)));
-    ("description", (fun ctx a -> `ImageDescription (image_description_of_xml a)));
+    ("url", (fun ctx a -> `URL (image_url_of_xml a)));
+    ("title", (fun ctx a -> `Title (image_title_of_xml a)));
+    ("link", (fun ctx a -> `Link (image_link_of_xml a)));
+    ("width", (fun ctx a -> `Width (image_width_of_xml a)));
+    ("height", (fun ctx a -> `Height (image_height_of_xml a)));
+    ("description", (fun ctx a -> `Description (image_description_of_xml a)));
   ] in
   generate_catcher ~data_producer make_image
 
-(* RFC RSS 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#ltcloudgtSubelementOfLtchannelgt *)
+let image_of_xml' =
+  let data_producer = [
+    ("url", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `URL a)));
+    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("width", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Width a)));
+    ("height", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Height a)));
+    ("description", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
+  ] in
+  generate_catcher ~data_producer (fun x -> x)
+
+type cloud = {
+  domain: Uri.t;
+  port: int;
+  path: string;
+  registerProcedure: string;
+  protocol: string;
+}
 
 type cloud' = [
-  | `CloudDomain of Uri.t
-  | `CloudPort of int
-  | `CloudPath of string
-  | `CloudRegisterProcedure of string
-  | `CloudProtocol of string
+  | `Domain of string
+  | `Port of string
+  | `Path of string
+  | `RegisterProcedure of string
+  | `Protocol of string
 ]
 
-let make_cloud (l : [< cloud'] list) =
-  let domain = match find (function `CloudDomain _ -> true | _ -> false) l with
-    | Some (`CloudDomain u) -> u
+let make_cloud (l : [< cloud' ] list) =
+  let domain = match find (function `Domain _ -> true | _ -> false) l with
+    | Some (`Domain u) -> (Uri.of_string u)
     | _ -> Error.raise_expectation (Error.Attr "domain") (Error.Tag "cloud")
   in
-  let port = match find (function `CloudPort _ -> true | _ -> false) l with
-    | Some (`CloudPort p) -> p
+  let port = match find (function `Port _ -> true | _ -> false) l with
+    | Some (`Port p) -> (int_of_string p)
     | _ -> Error.raise_expectation (Error.Attr "port") (Error.Tag "cloud")
   in
-  let path = match find (function `CloudPath _ -> true | _ -> false) l with
-    | Some (`CloudPath p) -> p
+  let path = match find (function `Path _ -> true | _ -> false) l with
+    | Some (`Path p) -> p
     | _ -> Error.raise_expectation (Error.Attr "path") (Error.Tag "cloud")
   in
-  let registerProcedure = match find (function `CloudRegisterProcedure _ -> true | _ -> false) l with
-    | Some (`CloudRegisterProcedure r) -> r
-    | _ -> Error.raise_expectation (Error.Attr "registerProcedure") (Error.Tag "cloud")
+  let registerProcedure =
+    match find (function `RegisterProcedure _ -> true | _ -> false) l with
+    | Some (`RegisterProcedure r) -> r
+    | _ -> Error.raise_expectation
+             (Error.Attr "registerProcedure")
+             (Error.Tag "cloud")
   in
-  let protocol = match find (function `CloudProtocol _ -> true | _ -> false) l with
-    | Some (`CloudProtocol p) -> p
+  let protocol = match find (function `Protocol _ -> true | _ -> false) l with
+    | Some (`Protocol p) -> p
     | _ -> Error.raise_expectation (Error.Attr "protocol") (Error.Tag "cloud")
   in
   ({ domain; port; path; registerProcedure; protocol; } : cloud)
 
-let cloud_of_xml =
+let cloud_of_xml, cloud_of_xml' =
   let attr_producer = [
-    ("domain", (fun ctx a -> `CloudDomain (Uri.of_string a)));
-    ("port", (fun ctx a -> `CloudPort (int_of_string a)));
-    ("path", (fun ctx a -> `CloudPath a)); (* it's RFC compliant ? *)
-    ("registerProcedure", (fun ctx a -> `CloudRegisterProcedure a));
-    ("protocol", (fun ctx a -> `CloudProtocol a));
+    ("domain", (fun ctx a -> `Domain a));
+    ("port", (fun ctx a -> `Port a));
+    ("path", (fun ctx a -> `Path a)); (* XXX: it's RFC compliant ? *)
+    ("registerProcedure", (fun ctx a -> `RegisterProcedure a));
+    ("protocol", (fun ctx a -> `Protocol a));
   ] in
-  generate_catcher ~attr_producer make_cloud
+  generate_catcher ~attr_producer make_cloud,
+  generate_catcher ~attr_producer (fun x -> x)
 
-(* RFC RSS 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#lttextinputgtSubelementOfLtchannelgt *)
+type textinput =
+  {
+    title: string;
+    description: string;
+    name: string;
+    link: Uri.t;
+  }
 
 type textinput' = [
-  | `TextinputTitle of string
-  | `TextinputDescription of string
-  | `TextinputName of string
-  | `TextinputLink of Uri.t
+  | `Title of string
+  | `Description of string
+  | `Name of string
+  | `Link of Uri.t
 ]
 
 let make_textinput (l : [< textinput'] list) =
-  let title = match find (function `TextinputTitle _ -> true | _ -> false) l with
-    | Some (`TextinputTitle t) -> t
+  let title = match find (function `Title _ -> true | _ -> false) l with
+    | Some (`Title t) -> t
     | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "textinput")
   in
-  let description = match find (function `TextinputDescription _ -> true | _ -> false) l with
-    | Some (`TextinputDescription s) -> s
-    | _ -> Error.raise_expectation (Error.Tag "description") (Error.Tag "textinput")
+  let description =
+    match find (function `Description _ -> true | _ -> false) l with
+    | Some (`Description s) -> s
+    | _ -> Error.raise_expectation
+             (Error.Tag "description")
+             (Error.Tag "textinput")
   in
-  let name = match find (function `TextinputName _ -> true | _ -> false) l with
-    | Some (`TextinputName s) -> s
+  let name = match find (function `Name _ -> true | _ -> false) l with
+    | Some (`Name s) -> s
     | _ -> Error.raise_expectation (Error.Tag "name") (Error.Tag "textinput")
   in
-  let link = match find (function `TextinputLink _ -> true | _ -> false) l with
-    | Some (`TextinputLink u) -> u
+  let link = match find (function `Link _ -> true | _ -> false) l with
+    | Some (`Link u) -> u
     | _ -> Error.raise_expectation (Error.Tag "link") (Error.Tag "textinput")
   in
   ({ title; description; name; link; } : textinput)
@@ -292,175 +245,226 @@ let textinput_link_of_xml (tag, datas) =
 
 let textinput_of_xml =
   let data_producer = [
-    ("title", (fun ctx a -> `TextinputTitle (textinput_title_of_xml a)));
-    ("description", (fun ctx a -> `TextinputDescription (textinput_description_of_xml a)));
-    ("name", (fun ctx a -> `TextinputName (textinput_name_of_xml a)));
-    ("link", (fun ctx a -> `TextinputLink (textinput_link_of_xml a)));
+    ("title", (fun ctx a -> `Title (textinput_title_of_xml a)));
+    ("description",
+     (fun ctx a -> `Description (textinput_description_of_xml a)));
+    ("name", (fun ctx a -> `Name (textinput_name_of_xml a)));
+    ("link", (fun ctx a -> `Link (textinput_link_of_xml a)));
   ] in
   generate_catcher ~data_producer make_textinput
 
-(* RFC RSS 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#ltcategorygtSubelementOfLtitemgt *)
+let textinput_of_xml' =
+  let data_producer = [
+    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("description",
+     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("name", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Name a)));
+    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
+  ] in
+  generate_catcher ~data_producer (fun x -> x)
+
+type category =
+  {
+    data: string;
+    domain: Uri.t option;
+  }
 
 type category' = [
-  | `CategoryData of string
-  | `CategoryDomain of Uri.t
+  | `Data of string
+  | `Domain of string
 ]
 
-let make_category (l : [< category'] list) =
-  let data = match find (function `CategoryData _ -> true | _ -> false) l with
-    | Some (`CategoryData s)-> s
+let make_category (l : [< category' ] list) =
+  let data = match find (function `Data _ -> true | _ -> false) l with
+    | Some (`Data s)-> s
     | _ -> Error.raise_expectation Error.Data (Error.Tag "category")
-  in let domain = match find (function `CategoryDomain _ -> true | _ -> false) l with
-    | Some (`CategoryDomain d) -> Some d
+  in let domain = match find (function `Domain _ -> true | _ -> false) l with
+    | Some (`Domain d) -> Some (Uri.of_string d)
     | _ -> None
   in
   ({ data; domain; } : category )
 
-let category_of_xml =
-  let attr_producer = [ ("domain", (fun ctx a -> `CategoryDomain (Uri.of_string a))); ] in
-  let leaf_producer ctx data = `CategoryData data in
-  generate_catcher ~attr_producer ~leaf_producer make_category
+let category_of_xml, category_of_xml' =
+  let attr_producer = [ ("domain", (fun ctx a -> `Domain a)); ] in
+  let leaf_producer ctx data = `Data data in
+  generate_catcher ~attr_producer ~leaf_producer make_category,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
-(* RFC RSS 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#ltenclosuregtSubelementOfLtitemgt *)
+type enclosure =
+  {
+    url: Uri.t;
+    length: int;
+    mime: string;
+  }
 
 type enclosure' = [
-  | `EnclosureURL of Uri.t
-  | `EnclosureLength of int
-  | `EnclosureMime of string
+  | `URL of string
+  | `Length of string
+  | `Mime of string
 ]
 
-let make_enclosure (l : [< enclosure'] list) =
-  let url = match find (function `EnclosureURL _ -> true | _ -> false) l with
-    | Some (`EnclosureURL u) -> u
+let make_enclosure (l : [< enclosure' ] list) =
+  let url = match find (function `URL _ -> true | _ -> false) l with
+    | Some (`URL u) -> Uri.of_string u
     | _ -> Error.raise_expectation (Error.Attr "url") (Error.Tag "enclosure")
   in
-  let length = match find (function `EnclosureLength _ -> true | _ -> false) l with
-    | Some (`EnclosureLength l) -> l
+  let length = match find (function `Length _ -> true | _ -> false) l with
+    | Some (`Length l) -> int_of_string l
     | _ -> Error.raise_expectation (Error.Attr "length") (Error.Tag "enclosure")
   in
-  let mime = match find (function `EnclosureMime _ -> true | _ -> false) l with
-    | Some (`EnclosureMime m) -> m
+  let mime = match find (function `Mime _ -> true | _ -> false) l with
+    | Some (`Mime m) -> m
     | _ -> Error.raise_expectation (Error.Attr "type") (Error.Tag "enclosure")
   in
   ({ url; length; mime; } : enclosure)
 
-let enclosure_of_xml =
+let enclosure_of_xml, enclosure_of_xml' =
   let attr_producer = [
-    ("url", (fun ctx a -> `EnclosureURL (Uri.of_string a)));
-    ("length", (fun ctx a -> `EnclosureLength (int_of_string a)));
-    ("type", (fun ctx a -> `EnclosureMime a));
+    ("url", (fun ctx a -> `URL a));
+    ("length", (fun ctx a -> `Length a));
+    ("type", (fun ctx a -> `Mime a));
   ] in
-  generate_catcher ~attr_producer make_enclosure
+  generate_catcher ~attr_producer make_enclosure,
+  generate_catcher ~attr_producer (fun x -> x)
 
-(* RFC RSS 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#ltguidgtSubelementOfLtitemgt *)
+type guid =
+  {
+    data: Uri.t; (* must be uniq *)
+    permalink: bool; (* default true *)
+  }
 
 type guid' = [
-  | `GuidData of Uri.t
-  | `GuidPermalink of bool
+  | `Data of string
+  | `Permalink of string
 ]
 
-let make_guid (l : [< guid'] list) =
-  let data = match find (function `GuidData _ -> true | _ -> false) l with
-    | Some (`GuidData u) -> u
+let make_guid (l : [< guid' ] list) =
+  let data = match find (function `Data _ -> true | _ -> false) l with
+    | Some (`Data u) -> Uri.of_string u
     | _ -> Error.raise_expectation Error.Data (Error.Tag "guid")
   in
-  let permalink = match find (function `GuidPermalink _ -> true | _ -> false) l with
-    | Some (`GuidPermalink b) -> b
+  let permalink = match find (function `Permalink _ -> true | _ -> false) l with
+    | Some (`Permalink b) -> bool_of_string b
     | _ -> true (* cf. RFC *)
   in
   ({ data; permalink; } : guid)
 
-let guid_of_xml =
-  let attr_producer = [ ("isPermalink", (fun ctx a -> `GuidPermalink (bool_of_string a))); ] in
-  let leaf_producer ctx data = `GuidData (Uri.of_string data) in
-  generate_catcher ~attr_producer ~leaf_producer make_guid
+let guid_of_xml, guid_of_xml' =
+  let attr_producer = [ ("isPermalink", (fun ctx a -> `Permalink a)); ] in
+  let leaf_producer ctx data = `Data data in
+  generate_catcher ~attr_producer ~leaf_producer make_guid,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
-(* RFC RSS 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#ltsourcegtSubelementOfLtitemgt *)
+type source =
+  {
+    data: string;
+    url: Uri.t;
+  }
 
 type source' = [
-  | `SourceData of string
-  | `SourceURL of Uri.t
+  | `Data of string
+  | `URL of string
 ]
 
-let make_source (l : [< source'] list) =
-  let data = match find (function `SourceData _ -> true | _ -> false) l with
-    | Some (`SourceData s) -> s
+let make_source (l : [< source' ] list) =
+  let data = match find (function `Data _ -> true | _ -> false) l with
+    | Some (`Data s) -> s
     | _ -> Error.raise_expectation Error.Data (Error.Tag "source")
   in
-  let url = match find (function `SourceURL _ -> true | _ -> false) l with
-    | Some (`SourceURL u) -> u
+  let url = match find (function `URL _ -> true | _ -> false) l with
+    | Some (`URL u) -> Uri.of_string u
     | _ -> Error.raise_expectation (Error.Attr "url") (Error.Tag "source")
   in
   ({ data; url; } : source)
 
-let source_of_xml =
-  let attr_producer = [ ("url", (fun ctx a -> `SourceURL (Uri.of_string a))); ] in
-  let leaf_producer ctx data = `SourceData data in
-  generate_catcher ~attr_producer ~leaf_producer make_source
+let source_of_xml, source_of_xml' =
+  let attr_producer = [ ("url", (fun ctx a -> `URL a)); ] in
+  let leaf_producer ctx data = `Data data in
+  generate_catcher ~attr_producer ~leaf_producer make_source,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
-(* RFC RSS 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#hrelementsOfLtitemgt *)
+type story =
+  | All of string * string
+  | Title of string
+  | Description of string
+
+type item =
+  {
+    story: story;
+    link: Uri.t option;
+    author:  string option; (* e-mail *)
+    category: category option;
+    comments: Uri.t option;
+    enclosure: enclosure option;
+    guid: guid option;
+    pubDate: Netdate.t option; (* date *)
+    source: source option;
+  }
 
 type item' = [
-  | `ItemTitle of string
-  | `ItemDescription of string
-  | `ItemLink of Uri.t
-  | `ItemAuthor of string (* e-mail *)
-  | `ItemCategory of category
-  | `ItemComments of Uri.t
-  | `ItemEnclosure of enclosure
-  | `ItemGuid of guid
-  | `ItemPubDate of string
-  | `ItemSource of source
+  | `Title of string
+  | `Description of string
+  | `Link of Uri.t
+  | `Author of string (* e-mail *)
+  | `Category of category
+  | `Comments of Uri.t
+  | `Enclosure of enclosure
+  | `Guid of guid
+  | `PubDate of Netdate.t
+  | `Source of source
 ]
 
-let make_item (l : [< item'] list) =
+let make_item (l : [< item' ] list) =
   let story = match
-      find (function `ItemTitle _ -> true | _ -> false) l,
-      find (function `ItemDescription _ -> true | _ -> false) l
+      find (function `Title _ -> true | _ -> false) l,
+      find (function `Description _ -> true | _ -> false) l
     with
-    | Some (`ItemTitle t), Some (`ItemDescription d) -> All (t, d)
-    | Some (`ItemTitle t), _ -> Title t
-    | _, Some (`ItemDescription d) -> Description d
+    | Some (`Title t), Some (`Description d) -> All (t, d)
+    | Some (`Title t), _ -> Title t
+    | _, Some (`Description d) -> Description d
     | _, _ -> Error.raise_item_exceptation
   in
-  let link = match find (function `ItemLink _ -> true | _ -> false) l with
-    | Some (`ItemLink l) -> Some l
+  let link = match find (function `Link _ -> true | _ -> false) l with
+    | Some (`Link l) -> Some l
     | _ -> None
   in
-  let author = match find (function `ItemAuthor _ -> true | _ -> false) l with
-    | Some (`ItemAuthor a) -> Some a
+  let author = match find (function `Author _ -> true | _ -> false) l with
+    | Some (`Author a) -> Some a
     | _ -> None
   in
-  let category = match find (function `ItemCategory _ -> true | _ -> false) l with
-    | Some (`ItemCategory c) -> Some c
+  let category = match find (function `Category _ -> true | _ -> false) l with
+    | Some (`Category c) -> Some c
     | _ -> None
   in
-  let comments = match find (function `ItemComments _ -> true | _ -> false) l with
-    | Some (`ItemComments c) -> Some c
+  let comments = match find (function `Comments _ -> true | _ -> false) l with
+    | Some (`Comments c) -> Some c
     | _ -> None
   in
-  let enclosure = match find (function `ItemEnclosure _ -> true | _ -> false) l with
-    | Some (`ItemEnclosure e) -> Some e
+  let enclosure = match find (function `Enclosure _ -> true | _ -> false) l with
+    | Some (`Enclosure e) -> Some e
     | _ -> None
   in
-  let guid = match find (function `ItemGuid _ -> true | _ -> false) l with
-    | Some (`ItemGuid g) -> Some g
+  let guid = match find (function `Guid _ -> true | _ -> false) l with
+    | Some (`Guid g) -> Some g
     | _ -> None
   in
-  let pubDate = match find (function `ItemPubDate _ -> true | _ -> false) l with
-    | Some (`ItemPubDate p) -> Some p
+  let pubDate = match find (function `PubDate _ -> true | _ -> false) l with
+    | Some (`PubDate p) -> Some p
     | _ -> None
   in
-  let source = match find (function `ItemSource _ -> true | _ -> false) l with
-    | Some (`ItemSource s) -> Some s
+  let source = match find (function `Source _ -> true | _ -> false) l with
+    | Some (`Source s) -> Some s
     | _ -> None
   in
-  ({ story; link; author; category; comments; enclosure; guid; pubDate; source; } : item)
+  ({ story;
+     link;
+     author;
+     category;
+     comments;
+     enclosure;
+     guid;
+     pubDate;
+     source; } : item)
 
 let item_title_of_xml (tag, datas) =
   try get_leaf datas
@@ -488,47 +492,342 @@ let item_comments_of_xml (tag, datas) =
     Error.raise_expectation Error.Data (Error.Tag "item/comments")
 
 let item_pubdate_of_xml (tag, datas) =
-  try get_leaf datas
+  try Netdate.parse (get_leaf datas)
   with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/pubDate")
 
 let item_of_xml =
   let data_producer = [
-    ("title", (fun ctx a -> `ItemTitle (item_title_of_xml a)));
-    ("description", (fun ctx a -> `ItemDescription (item_description_of_xml a)));
-    ("link", (fun ctx a -> `ItemLink (item_link_of_xml a)));
-    ("author", (fun ctx a -> `ItemAuthor (item_author_of_xml a)));
-    ("category", (fun ctx a -> `ItemCategory (category_of_xml a)));
-    ("comments", (fun ctx a -> `ItemComments (item_comments_of_xml a)));
-    ("enclosure", (fun ctx a -> `ItemEnclosure (enclosure_of_xml a)));
-    ("guid", (fun ctx a -> `ItemGuid (guid_of_xml a)));
-    ("pubDate", (fun ctx a -> `ItemPubDate (item_pubdate_of_xml a)));
-    ("source", (fun ctx a -> `ItemSource (source_of_xml a)));
+    ("title", (fun ctx a -> `Title (item_title_of_xml a)));
+    ("description", (fun ctx a -> `Description (item_description_of_xml a)));
+    ("link", (fun ctx a -> `Link (item_link_of_xml a)));
+    ("author", (fun ctx a -> `Author (item_author_of_xml a)));
+    ("category", (fun ctx a -> `Category (category_of_xml a)));
+    ("comments", (fun ctx a -> `Comments (item_comments_of_xml a)));
+    ("enclosure", (fun ctx a -> `Enclosure (enclosure_of_xml a)));
+    ("guid", (fun ctx a -> `Guid (guid_of_xml a)));
+    ("pubDate", (fun ctx a -> `PubDate (item_pubdate_of_xml a)));
+    ("source", (fun ctx a -> `Source (source_of_xml a)));
   ] in
   generate_catcher ~data_producer make_item
 
-(* RFC 2.0 -
- * http://cyber.law.harvard.edu/rss/rss.html#hrelementsOfLtitemgt *)
+let item_of_xml' =
+  let data_producer = [
+    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("description",
+     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("author", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Author a)));
+    ("category", (fun ctx a -> `Category (category_of_xml' a)));
+    ("comments", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Comments a)));
+    ("enclosure", (fun ctx a -> `Enclosure (enclosure_of_xml' a)));
+    ("guid", (fun ctx a -> `Guid (guid_of_xml' a)));
+    ("pubdate", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `PubDate a)));
+    ("source", (fun ctx a -> `Source (source_of_xml' a)));
+  ] in
+  generate_catcher ~data_producer (fun x -> x)
+
+type channel =
+  {
+    title: string;
+    link: Uri.t;
+    description: string;
+    language: string option;
+    copyright: string option;
+    managingEditor: string option;
+    webMaster: string option;
+    pubDate: Netdate.t option;
+    lastBuildDate: Netdate.t option;
+    category: string option;
+    generator: string option;
+    docs: Uri.t option;
+    cloud: cloud option;
+    ttl: int option;
+    image: image option;
+    rating: int option;
+    textInput: textinput option;
+    skipHours: int option;
+    skipDays: int option;
+    items: item list;
+  }
 
 type channel' = [
-  | `ChannelTitle of string
-  | `ChannelLink of Uri.t
-  | `ChannelDescription of string
-  | `ChannelLanguage of string
-  | `ChannelCopyright of string
-  | `ChannelManagingEditor of string (* e-mail *)
-  | `ChannelWebMaster of string (* e-mail *)
-  | `ChannelPubDate of string (* date *)
-  | `ChannelLastBuildDate of string (* date *)
-  | `ChannelCategory of string
-  | `ChannelGenerator of string
-  | `ChannelDocs of Uri.t
-  | `ChannelCloud of cloud
-  | `ChannelTTL of int
-  | `ChannelImage of image
-  | `ChannelRatng of int
-  | `ChannelTextinput of textinput
-  | `ChannelSkipHours of int
-  | `ChannelSkipDays of int
-  | `ChannelItem of item
+  | `Title of string
+  | `Link of Uri.t
+  | `Description of string
+  | `Language of string
+  | `Copyright of string
+  | `ManagingEditor of string
+  | `WebMaster of string
+  | `PubDate of Netdate.t
+  | `LastBuildDate of Netdate.t
+  | `Category of string
+  | `Generator of string
+  | `Docs of Uri.t
+  | `Cloud of cloud
+  | `TTL of int
+  | `Image of image
+  | `Rating of int
+  | `TextInput of textinput
+  | `SkipHours of int
+  | `SkipDays of int
+  | `Item of item
 ]
+
+let make_channel (l : [< channel' ] list) =
+  let title = match find (function `Title _ -> true | _ -> false) l with
+    | Some (`Title t) -> t
+    | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "channel")
+  in
+  let link = match find (function `Link _ -> true | _ -> false) l with
+    | Some (`Link l) -> l
+    | _ -> Error.raise_expectation (Error.Tag "link") (Error.Tag "channel")
+  in
+  let description =
+    match find (function `Description _ -> true | _ -> false) l with
+    | Some (`Description l) -> l
+    | _ -> Error.raise_expectation
+             (Error.Tag "description")
+             (Error.Tag "channel")
+  in
+  let language = match find (function `Language _ -> true | _ -> false) l with
+    | Some (`Language a) -> Some a
+    | _ -> None
+  in
+  let copyright = match find (function `Copyright _ -> true | _ -> false) l with
+    | Some (`Copyright a) -> Some a
+    | _ -> None
+  in
+  let managingEditor =
+    match find (function `ManagingEditor _ -> true | _ -> false) l with
+    | Some (`ManagingEditor a) -> Some a
+    | _ -> None
+  in
+  let webMaster = match find (function `WebMaster _ -> true | _ -> false) l with
+    | Some (`WebMaster a) -> Some a
+    | _ -> None
+  in
+  let pubDate = match find (function `PubDate _ -> true | _ -> false) l with
+    | Some (`PubDate a) -> Some a
+    | _ -> None
+  in
+  let lastBuildDate =
+    match find (function `LastBuildDate _ -> true | _ -> false) l with
+    | Some (`LastBuildDate a) -> Some a
+    | _ -> None
+  in
+  let category = match find (function `Category _ -> true | _ -> false) l with
+    | Some (`Category a) -> Some a
+    | _ -> None
+  in
+  let generator = match find (function `Generator _ -> true | _ -> false) l with
+    | Some (`Generator a) -> Some a
+    | _ -> None
+  in
+  let docs = match find (function `Docs _ -> true | _ -> false) l with
+    | Some (`Docs a) -> Some a
+    | _ -> None
+  in
+  let cloud = match find (function `Cloud _ -> true | _ -> false) l with
+    | Some (`Cloud a) -> Some a
+    | _ -> None
+  in
+  let ttl = match find (function `TTL _ -> true | _ -> false) l with
+    | Some (`TTL a) -> Some a
+    | _ -> None
+  in
+  let image = match find (function `Image _ -> true | _ -> false) l with
+    | Some (`Image a) -> Some a
+    | _ -> None
+  in
+  let rating = match find (function `Rating _ -> true | _ -> false) l with
+    | Some (`Rating a) -> Some a
+    | _ -> None
+  in
+  let textInput = match find (function `TextInput _ -> true | _ -> false) l with
+    | Some (`TextInput a) -> Some a
+    | _ -> None
+  in
+  let skipHours = match find (function `SkipHours _ -> true | _ -> false) l with
+    | Some (`SkipHours a) -> Some a
+    | _ -> None
+  in
+  let skipDays = match find (function `SkipDays _ -> true | _ -> false) l with
+    | Some (`SkipDays a) -> Some a
+    | _ -> None
+  in
+  let items = List.fold_left
+      (fun acc -> function `Item x -> x :: acc | _ -> acc) [] l in
+  ({ title;
+     link;
+     description;
+     language;
+     copyright;
+     managingEditor;
+     webMaster;
+     pubDate;
+     lastBuildDate;
+     category;
+     generator;
+     docs;
+     cloud;
+     ttl;
+     image;
+     rating;
+     textInput;
+     skipHours;
+     skipDays;
+     items; } : channel)
+
+let channel_title_of_xml (tag, datas) =
+  try get_leaf datas
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/title")
+
+let channel_description_of_xml (tag, datas) =
+  try get_leaf datas
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/description")
+
+let channel_link_of_xml (tag, datas) =
+  try Uri.of_string (get_leaf datas)
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/link")
+
+let channel_language_of_xml (tag, datas) =
+  try get_leaf datas
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/language")
+
+let channel_copyright_of_xml (tag, datas) =
+  try get_leaf datas
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/copyright")
+
+let channel_managingeditor_of_xml (tag, datas) =
+  try get_leaf datas
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/managingEditor")
+
+let channel_webmaster_of_xml (tag, datas) =
+  try get_leaf datas
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/webMaster")
+
+let channel_pubdate_of_xml (tag, datas) =
+  try Netdate.parse (get_leaf datas)
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/pubDate")
+
+let channel_lastbuilddate_of_xml (tag, datas) =
+  try Netdate.parse (get_leaf datas)
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/lastBuildDate")
+
+let channel_category_of_xml (tag, datas) =
+  try get_leaf datas
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/category")
+
+let channel_generator_of_xml (tag, datas) =
+  try get_leaf datas
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/generator")
+
+let channel_docs_of_xml (tag, datas) =
+  try Uri.of_string (get_leaf datas)
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/docs")
+
+let channel_ttl_of_xml (tag, datas) =
+  try int_of_string (get_leaf datas)
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/ttl")
+
+let channel_rating_of_xml (tag, datas) =
+  try int_of_string (get_leaf datas)
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/rating")
+
+let channel_skipHours_of_xml (tag, datas) =
+  try int_of_string (get_leaf datas)
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/skipHours")
+
+let channel_skipDays_of_xml (tag, datas) =
+  try int_of_string (get_leaf datas)
+  with Error.Expected_Leaf ->
+    Error.raise_expectation Error.Data (Error.Tag "channel/skipDays")
+
+let channel_of_xml =
+  let data_producer = [
+    ("title", (fun ctx a -> `Title (channel_title_of_xml a)));
+    ("link", (fun ctx a -> `Link (channel_link_of_xml a)));
+    ("description", (fun ctx a -> `Description (channel_description_of_xml a)));
+    ("Language", (fun ctx a -> `Language (channel_language_of_xml a)));
+    ("copyright", (fun ctx a -> `Copyright (channel_copyright_of_xml a)));
+    ("managingeditor",
+     (fun ctx a -> `ManagingEditor (channel_managingeditor_of_xml a)));
+    ("webmaster", (fun ctx a -> `WebMaster (channel_webmaster_of_xml a)));
+    ("pubdate", (fun ctx a -> `PubDate (channel_pubdate_of_xml a)));
+    ("lastbuilddate",
+     (fun ctx a -> `LastBuildDate (channel_lastbuilddate_of_xml a)));
+    ("category", (fun ctx a -> `Category (channel_category_of_xml a)));
+    ("generator", (fun ctx a -> `Generator (channel_generator_of_xml a)));
+    ("docs", (fun ctx a -> `Docs (channel_docs_of_xml a)));
+    ("cloud", (fun ctx a -> `Cloud (cloud_of_xml a)));
+    ("ttl", (fun ctx a -> `TTL (channel_ttl_of_xml a)));
+    ("image", (fun ctx a -> `Image (image_of_xml a)));
+    ("rating", (fun ctx a -> `Rating (channel_rating_of_xml a)));
+    ("textinput", (fun ctx a -> `TextInput (textinput_of_xml a)));
+    ("skiphours", (fun ctx a -> `SkipHours (channel_skipHours_of_xml a)));
+    ("skipdays", (fun ctx a -> `SkipDays (channel_skipDays_of_xml a)));
+    ("item", (fun ctx a -> `Item (item_of_xml a)));
+  ] in
+  generate_catcher ~data_producer make_channel
+
+let channel_of_xml' =
+  let data_producer = [
+    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("description", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("Language", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Language a)));
+    ("copyright", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Copyright a)));
+    ("managingeditor",
+     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `ManagingEditor a)));
+    ("webmaster", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `WebMaster a)));
+    ("pubdate", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `PubDate a)));
+    ("lastbuilddate",
+     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `LastBuildDate a)));
+    ("category", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Category a)));
+    ("generator", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Generator a)));
+    ("docs", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Docs a)));
+    ("cloud", (fun ctx a -> `Cloud (cloud_of_xml' a)));
+    ("ttl", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `TTL a)));
+    ("image", (fun ctx a -> `Image (image_of_xml' a)));
+    ("rating", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Rating a)));
+    ("textinput", (fun ctx a -> `TextInput (textinput_of_xml' a)));
+    ("skiphours", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `SkipHours a)));
+    ("skipdays", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `SkipDays a)));
+    ("item", (fun ctx a -> `Item (item_of_xml' a)));
+  ] in
+  generate_catcher ~data_producer (fun x -> x)
+
+let analyze input =
+  let el tag datas = Node (tag, datas) in
+  let data data = Leaf data in
+  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
+  let aux = function
+    | Node (tag, datas) when tag_is tag "channel" -> channel_of_xml (tag, datas)
+    | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
+  in aux tree
+
+let unsafe input =
+  let el tag datas = Node (tag, datas) in
+  let data data = Leaf data in
+  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
+  let aux = function
+    | Node (tag, datas) when tag_is tag "channel" ->
+      `Channel (channel_of_xml' (tag, datas))
+    | _ -> `Channel []
+  in aux tree
