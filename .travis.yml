@@ -1,5 +1,5 @@
 env:
   global:
-  - secure: "EEmf/HIIQGLec/VSWAH3Li8vRu2HGqirWyxDexv1r2w8qh2Ggxa/DONLUtTIkUU+xYCHZKuL/+9cNAyITMaOdce438IyjR+6lGi/EZLfyDOemZzmHMWCUpyZfX2NmceBllKVzgxE5MGAoN64uwmlLku66NtfDclgfj8D8j4xBgI="
+  - secure: "mv/uFbJc/hh1hfhnn1HxkL2ryTXvqgiqzCsAVNUhKofQMvZSTi2SiuGB+rMg7cC4NkvCMFiL/7xLdLb6dUHx3BKNsur0kLlUINlg45ZQbz/QjZT9+/t49+UNQv7AcTxsU6JpoA9RFrXv14oRhQjPNYApRmO+HaA4mcOJBC930nI="
 language: c
 script: bash -ex .travis-ci.sh

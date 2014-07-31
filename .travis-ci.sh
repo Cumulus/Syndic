@@ -16,8 +16,8 @@ if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
 
   echo -e "Publishing ocamldoc...\n"
 
-  git config --global user.email "${GIT_EMAIL}"
-  git config --global user.name "${GIT_NAME}"
+  git config --global user.email "travis@travis-ci.org"
+  git config --global user.name "travis-ci"
   git clone https://${GH_TOKEN}@github.com/Cumulus/Syndic .documentation
 
   cd .documentation
