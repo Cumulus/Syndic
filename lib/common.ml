@@ -37,6 +37,11 @@ module XML = struct
     let generate (tag, datas) =
       maker (catch_attr (catch_datas [] datas) (get_attrs tag))
     in generate
+
+  let dummy_of_xml ~ctor =
+    let leaf_producer ctx data = ctor data in
+    generate_catcher ~leaf_producer (function [] -> (ctor "") | x :: r -> x)
+
 end
 
 (* Exception *)

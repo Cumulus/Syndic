@@ -8,6 +8,9 @@ module XML : sig
     ?data_producer:(string * ('a list -> Xmlm.tag * tree list -> 'a)) list ->
     ?leaf_producer:('a list -> string -> 'a) ->
     ('a list -> 'b) -> Xmlm.tag * tree list -> 'b
+
+  val dummy_of_xml : ctor:(string -> 'a) ->
+    Xmlm.tag * tree list -> 'a
 end
 
 module Error : sig
