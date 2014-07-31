@@ -6,7 +6,7 @@ RSS and Atom feed parsing
 Documentation
 =============
 
-You can find it [here](http://cumulus.github.io/Syndic/doc)
+You can find it [here](http://cumulus.github.io/Syndic/doc).
 
 Build Requirements
 ==================
