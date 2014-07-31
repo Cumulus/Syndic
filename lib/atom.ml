@@ -49,16 +49,6 @@ let author_email_of_xml (tag, datas) =
   try get_leaf datas
   with Common.Error.Expected_Leaf -> "" (* mandatory ? *)
 
-let author_uri_of_xml' =
-  let leaf_producer ctx data = `URI data in
-  generate_catcher ~leaf_producer (fun x -> List.hd x)
-let author_name_of_xml' =
-  let leaf_producer ctx data = `Name data in
-  generate_catcher ~leaf_producer (fun x -> List.hd x)
-let author_email_of_xml' =
-  let leaf_producer ctx data = `Email data in
-  generate_catcher ~leaf_producer (fun x -> List.hd x)
-
 let author_of_xml =
   let data_producer = [
     ("name", (fun ctx a -> `Name (author_name_of_xml a)));
@@ -69,9 +59,9 @@ let author_of_xml =
 
 let author_of_xml' =
   let data_producer = [
-    ("name", (fun ctx a -> author_name_of_xml' a));
-    ("uri", (fun ctx a -> author_uri_of_xml' a));
-    ("email", (fun ctx a -> author_email_of_xml' a));
+    ("name", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Name a)));
+    ("uri", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `URI a)));
+    ("email", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Email a)));
   ] in
   generate_catcher ~data_producer (fun x -> x)
 
