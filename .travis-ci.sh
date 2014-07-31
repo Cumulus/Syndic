@@ -24,7 +24,7 @@ if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
 
   git add -f doc/
 
-  if [ -n $(git status --untracked-files=no --porcelain) ]; then
+  if [ -n "$(git status --untracked-files=no --porcelain)" ]; then
     git commit -m "Lastest ocamldoc on successful travis build $TRAVIS_BUILD_NUMBER auto-pushed to gh-pages"
     git push -fq origin gh-pages
   fi
