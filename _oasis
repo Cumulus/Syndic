@@ -20,7 +20,7 @@ Document "Syndic"
   Type:                 ocamlbuild (0.4)
   BuildTools:           ocamldoc
   Title:                "Syndic"
-  PostCommand:          cp Syndic.docdir/* doc/
+  PostCommand:          cp Syndic.docdir/*.html doc/
   XOCamlbuildPath:      lib
   XOCamlbuildLibraries: syndic
   XOCamlbuildExtraArgs:
