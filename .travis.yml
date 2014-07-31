@@ -1,2 +1,5 @@
+env:
+  global:
+  - secure: "EEmf/HIIQGLec/VSWAH3Li8vRu2HGqirWyxDexv1r2w8qh2Ggxa/DONLUtTIkUU+xYCHZKuL/+9cNAyITMaOdce438IyjR+6lGi/EZLfyDOemZzmHMWCUpyZfX2NmceBllKVzgxE5MGAoN64uwmlLku66NtfDclgfj8D8j4xBgI="
 language: c
 script: bash -ex .travis-ci.sh
