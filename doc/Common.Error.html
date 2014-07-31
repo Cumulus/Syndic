@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Common.XML.html">
+<link rel="next" href="Common.Util.html">
+<link rel="Up" href="Common.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Rss1" rel="Chapter" href="Rss1.html">
+<link title="Rss2" rel="Chapter" href="Rss2.html">
+<link title="Atom" rel="Chapter" href="Atom.html">
+<link title="Common" rel="Chapter" href="Common.html"><title>Common.Error</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Common.XML.html" title="Common.XML">Previous</a>
+&nbsp;<a class="up" href="Common.html" title="Common">Up</a>
+&nbsp;<a class="post" href="Common.Util.html" title="Common.Util">Next</a>
+</div>
+<h1>Module <a href="type_Common.Error.html">Common.Error</a></h1>
+
+<pre><span class="keyword">module</span> Error: <code class="code"><span class="keyword">sig</span></code> <a href="Common.Error.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+
+<pre><code><span id="TYPEexpected_type"><span class="keyword">type</span> <code class="type"></code>expected_type</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpected_type.Attr"><span class="constructor">Attr</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpected_type.Tag"><span class="constructor">Tag</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpected_type.Data"><span class="constructor">Data</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpected_type.Root"><span class="constructor">Root</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="EXCEPTIONExpected"><span class="keyword">exception</span> Expected</span> <span class="keyword">of</span> <code class="type"><a href="Common.Error.html#TYPEexpected_type">expected_type</a> * <a href="Common.Error.html#TYPEexpected_type">expected_type</a></code></pre>
+
+<pre><span id="EXCEPTIONExpected_Leaf"><span class="keyword">exception</span> Expected_Leaf</span></pre>
+
+<pre><span id="VALstring_of_expectation"><span class="keyword">val</span> string_of_expectation</span> : <code class="type"><a href="Common.Error.html#TYPEexpected_type">expected_type</a> * <a href="Common.Error.html#TYPEexpected_type">expected_type</a> -> string</code></pre>
+<pre><span id="VALraise_expectation"><span class="keyword">val</span> raise_expectation</span> : <code class="type"><a href="Common.Error.html#TYPEexpected_type">expected_type</a> -> <a href="Common.Error.html#TYPEexpected_type">expected_type</a> -> 'a</code></pre></body></html>

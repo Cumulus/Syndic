@@ -1,0 +1,759 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Rss1.html">
+<link rel="next" href="Atom.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Rss1" rel="Chapter" href="Rss1.html">
+<link title="Rss2" rel="Chapter" href="Rss2.html">
+<link title="Atom" rel="Chapter" href="Atom.html">
+<link title="Common" rel="Chapter" href="Common.html"><title>Rss2</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Rss1.html" title="Rss1">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Atom.html" title="Atom">Next</a>
+</div>
+<h1>Module <a href="type_Rss2.html">Rss2</a></h1>
+
+<pre><span class="keyword">module</span> Rss2: <code class="code"><span class="keyword">sig</span></code> <a href="Rss2.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+Compliant with <a href=" http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt"> RSS 2.0 </a><br>
+</div>
+<hr width="100%">
+
+<pre><span class="keyword">module</span> <a href="Rss2.Error.html">Error</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Rss2.Error.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>
+<pre><code><span id="TYPEimage"><span class="keyword">type</span> <code class="type"></code>image</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.url">url</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.title">title</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.link">link</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.width">width</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.height">height</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.description">description</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#ltimagegtSubelementOfLtchannelgt"> See RSS 2.0 about &lt;image&gt; </a>
+<p>
+
+&lt;image&gt; is an optional sub-element  of &lt;channel&gt;,  which contains three required
+and three optional sub-elements.
+<p>
+
+&lt;url&gt; is the URL of a GIF, JPEG or PNG image that represents the channel.
+<p>
+
+&lt;title&gt; describes the  image,  it's used in the ALT attribute  of the HTML &lt;img&gt;
+tag when the channel is rendered in HTML.
+<p>
+
+&lt;link&gt; is the URL of the site, when the channel is rendered, the image is a link
+to the site.  (Note,  in  practice the image &lt;title&gt; and  &lt;link&gt; should have the
+same value as the channel's &lt;title&gt; and &lt;link&gt;.
+<p>
+
+Optional elements include &lt;width&gt;  and &lt;height&gt;,  numbers,  indicating the width
+and height of the image in pixels.  &lt;description&gt; contains text that is included
+in  the  TITLE attribute  of  the link  formed  around  the  image  in  the HTML
+rendering.
+<p>
+
+Maximum value for width is 144, default value is 88.
+<p>
+
+Maximum value for height is 400, default value is 31.<br>
+</div>
+
+
+<pre><code><span id="TYPEcloud"><span class="keyword">type</span> <code class="type"></code>cloud</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcloud.domain">domain</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcloud.port">port</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcloud.path">path</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcloud.registerProcedure">registerProcedure</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcloud.protocol">protocol</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt"> See RSS 2.0 about &lt;cloud&gt; </a>
+<p>
+
+&lt;cloud&gt; is an optional sub-element of &lt;channel&gt;.
+<p>
+
+It specifies  a web service  that supports the  rssCloud interface which  can be
+implemented in HTTP-POST, XML-RPC or SOAP 1.1.
+<p>
+
+Its purpose  is to allow  processes to register with  a cloud to  be notified of
+updates to  the channel,  implementing a  lightweight publish-subscribe protocol
+for RSS feeds.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&lt;cloud&nbsp;domain=<span class="string">"rpc.sys.com"</span>&nbsp;port=<span class="string">"80"</span>&nbsp;path=<span class="string">"/RPC2"</span>&nbsp;registerProcedure=<span class="string">"myCloud.rssPleaseNotify"</span>&nbsp;protocol=<span class="string">"xml-rpc"</span>&nbsp;/&gt;&nbsp;</code></pre>
+<p>
+
+In this example, to request notification on the channel it appears in, you would
+send an XML-RPC  message to rpc.sys.com on port 80,  with  a path of /RPC2.  The
+procedure to call is myCloud.rssPleaseNotify.<br>
+</div>
+
+
+<pre><code><span id="TYPEtextinput"><span class="keyword">type</span> <code class="type"></code>textinput</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.title">title</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.description">description</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.name">name</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.link">link</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#lttextinputgtSubelementOfLtchannelgt"> See RSS 2.0 about &lt;textinput&gt; </a>
+<p>
+
+A channel may optionally contain a &lt;textInput&gt; sub-element,  which contains four
+required sub-elements.
+<p>
+
+&lt;title&gt; -- The label of the Submit button in the text input area.
+<p>
+
+&lt;description&gt; -- Explains the text input area.
+<p>
+
+&lt;name&gt; -- The name of the text object in the text input area.
+<p>
+
+&lt;link&gt; -- The URL of the CGI script that processes text input requests.
+<p>
+
+The purpose of the &lt;textInput&gt; element is something of a mystery. You can use it
+to specify a search engine box.  Or to allow a reader to provide feedback.  Most
+aggregators ignore it.<br>
+</div>
+
+
+<pre><code><span id="TYPEcategory"><span class="keyword">type</span> <code class="type"></code>category</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcategory.data">data</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcategory.domain">domain</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#ltcategorygtSubelementOfLtitemgt"> See RSS 2.0 about &lt;category&gt; </a>
+<p>
+
+&lt;category&gt; is an optional sub-element of &lt;item&gt;.
+<p>
+
+It has one optional attribute, domain, a string that identifies a categorization
+taxonomy.
+<p>
+
+The value of  the element is a forward-slash-separated  string that identifies a
+hierarchic  location  in  the  indicated  taxonomy.   Processors  may  establish
+conventions  for the  interpretation of  categories.  Two examples  are provided
+below:
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&lt;category&gt;<span class="constructor">Grateful</span>&nbsp;<span class="constructor">Dead</span>&lt;/category&gt;&nbsp;</code></pre>
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&lt;category&nbsp;domain=<span class="string">"http://www.fool.com/cusips"</span>&gt;<span class="constructor">MSFT</span>&lt;/category&gt;&nbsp;</code></pre>
+<p>
+
+You may include as many category elements as you need to, for different domains,
+and to have an item cross-referenced in different parts of the same domain.<br>
+</div>
+
+
+<pre><code><span id="TYPEenclosure"><span class="keyword">type</span> <code class="type"></code>enclosure</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenclosure.url">url</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenclosure.length">length</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenclosure.mime">mime</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#ltenclosuregtSubelementOfLtitemgt"> See RSS 2.0 about &lt;enclosure&gt; </a>
+<p>
+
+&lt;enclosure&gt; is an optional sub-element of &lt;item&gt;.
+<p>
+
+It  has three  required attributes.  url  says where  the enclosure  is located,
+length says how big it is in bytes,  and type says what its type is,  a standard
+MIME type.
+<p>
+
+The url must be an http url.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&lt;enclosure&nbsp;url=<span class="string">"http://www.scripting.com/mp3s/weatherReportSuite.mp3"</span>&nbsp;length=<span class="string">"12216320"</span>&nbsp;<span class="keyword">type</span>=<span class="string">"audio/mpeg"</span>&nbsp;/&gt;&nbsp;</code></pre><br>
+</div>
+
+
+<pre><code><span id="TYPEguid"><span class="keyword">type</span> <code class="type"></code>guid</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTguid.data">data</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTguid.permalink">permalink</span>&nbsp;: <code class="type">bool</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#ltguidgtSubelementOfLtitemgt"> See RSS 2.0 about &lt;guid&gt; </a>
+<p>
+
+&lt;guid&gt; is an optional sub-element of &lt;item&gt;.
+<p>
+
+guid  stands  for  globally  unique  identifier.  It's  a  string  that uniquely
+identifies the item.  When present,  an aggregator may choose to use this string
+to determine if an item is new.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&lt;guid&gt;http://some.server.com/weblogItem3207&lt;/guid&gt;&nbsp;</code></pre>
+<p>
+
+There are no  rules for the syntax  of a guid.  Aggregators must view  them as a
+string.  It's up to  the source of the  feed to establish the  uniqueness of the
+string.
+<p>
+
+If the guid element has an attribute named isPermaLink with a value of true, the
+reader may assume that it is a permalink to the item, that is, a url that can be
+opened in a Web  browser,  that points to the full item  described by the &lt;item&gt;
+element. An example:
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&lt;guid&nbsp;isPermaLink=<span class="string">"true"</span>&gt;http://inessential.com/2002/09/01.php<span class="keywordsign">#</span>a2&lt;/guid&gt;&nbsp;</code></pre>
+<p>
+
+isPermaLink is optional,  its default value is true.  If its value is false, the
+guid may not be assumed to be a url, or a url to anything in particular.<br>
+</div>
+
+
+<pre><code><span id="TYPEsource"><span class="keyword">type</span> <code class="type"></code>source</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.data">data</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.url">url</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#ltsourcegtSubelementOfLtitemgt"> See RSS 2.0 about &lt;source&gt; </a>
+<p>
+
+&lt;source&gt; is an optional sub-element of &lt;item&gt;.
+<p>
+
+Its value is the name of the  RSS channel that the item came from,  derived from
+its &lt;title&gt;.  It has one required attribute,  url, which links to the XMLization
+of the source.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&lt;source&nbsp;url=<span class="string">"http://www.tomalak.org/links2.xml"</span>&gt;<span class="constructor">Tomalak's</span>&nbsp;<span class="constructor">Realm</span>&lt;/source&gt;&nbsp;</code></pre>
+<p>
+
+The purpose of this element is  to propagate credit for links,  to publicize the
+sources of news items.  It can be used in the Post command of an aggregator.  It
+should be generated automatically when forwarding  an item from an aggregator to
+a weblog authoring tool.<br>
+</div>
+
+
+<pre><code><span id="TYPEstory"><span class="keyword">type</span> <code class="type"></code>story</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstory.All"><span class="constructor">All</span></span> <span class="keyword">of</span> <code class="type">string * string</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstory.Title"><span class="constructor">Title</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTstory.Description"><span class="constructor">Description</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEitem"><span class="keyword">type</span> <code class="type"></code>item</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.story">story</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEstory">story</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.link">link</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.author">author</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.category">category</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEcategory">category</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.comments">comments</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.enclosure">enclosure</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEenclosure">enclosure</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.guid">guid</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEguid">guid</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.pubDate">pubDate</span>&nbsp;: <code class="type">Netdate.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.source">source</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEsource">source</a> option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#hrelementsOfLtitemgt"> See RSS 2.0 about &lt;item&gt; </a>
+<p>
+
+A channel may contain any number of &lt;item&gt;s.  An item may represent a "story" --
+much like a story  in  a  newspaper  or  magazine;  if  so  its description is a
+synopsis of the story,  and the link points to the full story.  An item may also
+be complete in itself,  if so, the description contains the text (entity-encoded
+HTML is  allowed;  see examples),  and the  link and title  may be omitted.  All
+elements  of  an  item  are optional,  <b> however  at  least  one  of  title or
+description must be present.</b>
+<p>
+
+<ul>
+<li>title       : The title of the item. </li>
+<li>link        : The URL of the item. </li>
+<li>description : The item synopsis. </li>
+<li>author      : Email address of the author of the item. </li>
+<li>category    : Includes the item in one or more categories. </li>
+<li>comments    : URL of a page for comments relating to the item. </li>
+<li>enclosure   : Describes a media object that is attached to the item. </li>
+<li>guid        : A string that uniquely identifies the item. </li>
+<li>pubDate     : Indicates when the item was published. </li>
+<li>source      : The RSS channel that the item came from. </li>
+</ul>
+<br>
+</div>
+
+
+<pre><code><span id="TYPEchannel"><span class="keyword">type</span> <code class="type"></code>channel</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.title">title</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.link">link</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.description">description</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.language">language</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.copyright">copyright</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.managingEditor">managingEditor</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.webMaster">webMaster</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.pubDate">pubDate</span>&nbsp;: <code class="type">Netdate.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.lastBuildDate">lastBuildDate</span>&nbsp;: <code class="type">Netdate.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.category">category</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.generator">generator</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.docs">docs</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.cloud">cloud</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEcloud">cloud</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.ttl">ttl</span>&nbsp;: <code class="type">int option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><a href="
+      http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt"> See RSS 2.0 about &lt;ttl&gt; </a></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.image">image</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEimage">image</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.rating">rating</span>&nbsp;: <code class="type">int option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.textInput">textInput</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEtextinput">textinput</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.skipHours">skipHours</span>&nbsp;: <code class="type">int option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.skipDays">skipDays</span>&nbsp;: <code class="type">int option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.items">items</span>&nbsp;: <code class="type"><a href="Rss2.html#TYPEitem">item</a> list</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://www.rssboard.org/rss-specification#requiredChannelElements"> See RSS 2.0 about &lt;channel&gt; </a>
+<p>
+
+Here's a list of the required  channel elements,  each with a brief description,
+an example, and where available, a pointer to a more complete description.
+<p>
+
+<ul>
+<li>title       : The name of the channel. It's how people refer to your service.
+If you have an HTML website that contains the same information as your RSS file,
+the title of your channel should be the same as the title of your website. </li>
+<li>link        : The URL to the HTML website corresponding to the channel. </li>
+<li>description : Phrase or sentence describing the channel. </li>
+</ul>
+
+<p>
+
+Here's a list of optional channel elements.
+<p>
+
+<ul>
+<li>language :
+The language  the channel is written  in.  This allows aggregators  to group all
+Italian language  sites,  for example,  on a  single page.  A list  of allowable
+values for this  element,  as provided by Netscape,  is here.  You  may also use
+values defined by the W3C. </li>
+<li>copyright :
+Copyright notice for content in the channel. </li>
+<li>managingEditor :
+Email address  for person responsible for editorial content. </li>
+<li> webMaster :
+Email address for person responsible for technical issues relating to channel. </li>
+<li>pubDate :
+The publication date for the content in the channel.  For example,  the New York
+Times publishes  on a  daily basis,  the  publication date  flips once  every 24
+hours.  That's when the  pubDate of the channel changes.  All  date-times in RSS
+conform to the Date and Time  Specification of RFC 822,  with the exception that
+the  year  may  be  expressed  with  two  characters  or  four  characters (four
+preferred). </li>
+<li>lastBuildDate :
+The last time the content of the channel changed. </li>
+<li>category :
+Specify one  or more categories that  the channel belongs  to.  Follows the same
+rules as the &lt;item&gt;-level category element. More info. </li>
+<li>generator :
+A string indicating the program used to generate the channel. </li>
+<li>docs :
+A URL that points to the documentation for the format used in the RSS file. It's
+probably a pointer to this page. It's for people who might stumble across an RSS
+file on a Web server 25 years from now and wonder what it is. </li>
+<li>cloud :
+Allows processes  to register  with a  cloud to  be notified  of updates  to the
+channel,  implementing a  lightweight publish-subscribe protocol  for RSS feeds.
+More info here. </li>
+<li>ttl :
+ttl stands for time to live.  It's a number of minutes that indicates how long a
+channel can be cached before refreshing from the source. More info here. </li>
+<li>image :
+Specifies a GIF, JPEG or PNG image that can be displayed with the channel.  More
+info here. </li>
+<li>rating :
+The PICS rating for the channel. </li>
+<li>textInput :
+Specifies  a  text  input  box  that  can  be displayed with the
+channel. More info here. </li>
+<li>skipHours :
+A hint  for aggregators telling them  which hours  they can  skip.  This element
+contains up to 24 &lt;hour&gt; sub-elements whose  value is a number between 0 and 23,
+representing a time in GMT,  when aggregators,  if they support the feature, may
+not read the  channel  on  hours  listed  in  the &lt;skipHours&gt; element.  The hour
+beginning at midnight is hour zero. </li>
+<li>skipDays :
+A hint  for aggregators  telling them  which days  they can  skip.  This element
+contains  up  to  seven  &lt;day&gt;  sub-elements  whose  value  is Monday,  Tuesday,
+Wednesday,  Thursday,  Friday, Saturday or Sunday.  Aggregators may not read the
+channel during days listed in the &lt;skipDays&gt; element. </li>
+</ul>
+<br>
+</div>
+
+
+<pre><span id="VALanalyze"><span class="keyword">val</span> analyze</span> : <code class="type">Xmlm.input -> <a href="Rss2.html#TYPEchannel">channel</a></code></pre>
+<pre><span id="VALunsafe"><span class="keyword">val</span> unsafe</span> : <code class="type">Xmlm.input -><br>       [> `Channel of<br>            [> `Category of string<br>             | `Cloud of<br>                 [> `Domain of string<br>                  | `Path of string<br>                  | `Port of string<br>                  | `Protocol of string<br>                  | `RegisterProcedure of string ]<br>                 list<br>             | `Copyright of string<br>             | `Description of string<br>             | `Docs of string<br>             | `Generator of string<br>             | `Image of<br>                 [> `Description of string<br>                  | `Height of string<br>                  | `Link of string<br>                  | `Title of string<br>                  | `URL of string<br>                  | `Width of string ]<br>                 list<br>             | `Item of<br>                 [> `Author of string<br>                  | `Category of [> `Data of string | `Domain of string ] list<br>                  | `Comments of string<br>                  | `Description of string<br>                  | `Enclosure of<br>                      [> `Length of string | `Mime of string | `URL of string ] list<br>                  | `Guid of [> `Data of string | `Permalink of string ] list<br>                  | `Link of string<br>                  | `PubDate of string<br>                  | `Source of [> `Data of string | `URL of string ] list<br>                  | `Title of string ]<br>                 list<br>             | `Language of string<br>             | `LastBuildDate of string<br>             | `Link of string<br>             | `ManagingEditor of string<br>             | `PubDate of string<br>             | `Rating of string<br>             | `SkipDays of string<br>             | `SkipHours of string<br>             | `TTL of string<br>             | `TextInput of<br>                 [> `Description of string<br>                  | `Link of string<br>                  | `Name of string<br>                  | `Title of string ]<br>                 list<br>             | `Title of string<br>             | `WebMaster of string ]<br>            list ]</code></pre><div class="info ">
+Analysis without verification, enjoy !<br>
+</div>
+</body></html>

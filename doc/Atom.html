@@ -1,0 +1,1173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Rss2.html">
+<link rel="next" href="Common.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Rss1" rel="Chapter" href="Rss1.html">
+<link title="Rss2" rel="Chapter" href="Rss2.html">
+<link title="Atom" rel="Chapter" href="Atom.html">
+<link title="Common" rel="Chapter" href="Common.html"><title>Atom</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Rss2.html" title="Rss2">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Common.html" title="Common">Next</a>
+</div>
+<h1>Module <a href="type_Atom.html">Atom</a></h1>
+
+<pre><span class="keyword">module</span> Atom: <code class="code"><span class="keyword">sig</span></code> <a href="Atom.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+<a href=" http://tools.ietf.org/html/rfc4287"> RFC 4287</a> Compliant<br>
+</div>
+<hr width="100%">
+
+<pre><span class="keyword">module</span> <a href="Atom.Error.html">Error</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Atom.Error.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>
+<pre><code><span id="TYPEauthor"><span class="keyword">type</span> <code class="type"></code>author</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTauthor.name">name</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTauthor.uri">uri</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTauthor.email">email</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-3.2"> See RFC 4287 § 3.2</a>
+<p>
+
+A Person construct  is  an  element  that  describes a person,  corporation,  or
+similar entity (hereafter, 'person').
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomPersonConstruct&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(element&nbsp;atom:name&nbsp;{&nbsp;text&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;element&nbsp;atom:uri&nbsp;{&nbsp;atomUri&nbsp;}?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;element&nbsp;atom:email&nbsp;{&nbsp;atomEmailAddress&nbsp;}?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;extensionElement&nbsp;*&nbsp;)<br>
+</code></pre>
+<p>
+
+This specification  assigns no significance to  the order  of appearance  of the
+child elements in a Person construct. Person constructs allow extension Metadata
+elements (see Section 6.4).
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.1"> See RFC 4287 § 4.2.1</a>
+<p>
+
+The "atom:author" element is a Person construct that indicates the author of the
+entry or feed.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;atomAuthor&nbsp;=&nbsp;element&nbsp;atom:author&nbsp;{&nbsp;atomPersonConstruct&nbsp;}&nbsp;</code></pre>
+<p>
+
+If  an  atom:entry element  does  not  contain  atom:author  elements,  then the
+atom:author elements of  the  contained  atom:source  element  are considered to
+apply.  In an  Atom Feed Document,  the  atom:author elements of  the containing
+atom:feed  element  are  considered  to apply  to  the  entry  if  there  are no
+atom:author elements in the locations described above.<br>
+</div>
+
+
+<pre><code><span id="TYPEcategory"><span class="keyword">type</span> <code class="type"></code>category</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcategory.term">term</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcategory.scheme">scheme</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcategory.label">label</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.2"> See RFC 4287 § 4.2.2 </a>
+<p>
+
+The "atom:category" element conveys information about a category associated with
+an entry or feed.  This specification assigns no meaning to the content (if any)
+of this element.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomCategory&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:category&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;term&nbsp;{&nbsp;text&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;scheme&nbsp;{&nbsp;atomUri&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;label&nbsp;{&nbsp;text&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;undefinedContent<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.2.1"> See RFC 4287 § 4.2.2.1 </a>
+<p>
+
+The "term" attribute is a string that identifies the category to which the entry
+or feed belongs. Category elements MUST have a "term" attribute.
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.2.2"> See RFC 4287 § 4.2.2.2 </a>
+<p>
+
+The  "scheme" attribute  is an  IRI  that  identifies  a  categorization scheme.
+Category elements MAY have a "scheme" attribute.
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.2.3"> See RFC 4287 § 4.2.2.3 </a>
+<p>
+
+The "label"  attribute provides a  human-readable label for  display in end-user
+applications.  The  content  of  the  "label"  attribute  is Language-Sensitive.
+Entities such  as "&amp;amp;"  and "&amp;lt;"  represent their  corresponding characters
+("&amp;" and "&lt;",  respectively),  not markup.  Category elements MAY have a "label"
+attribute.<br>
+</div>
+
+
+<pre><code><span id="TYPEgenerator"><span class="keyword">type</span> <code class="type"></code>generator</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTgenerator.version">version</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTgenerator.uri">uri</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTgenerator.content">content</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.4"> See RFC 4287 § 4.2.4 </a>
+<p>
+
+The "atom:generator" element's  content identifies the agent used  to generate a
+feed, for debugging and other purposes.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomGenerator&nbsp;=&nbsp;element&nbsp;atom:generator&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;uri&nbsp;{&nbsp;atomUri&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;version&nbsp;{&nbsp;text&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;text<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+The  content  of  this element,  when  present,  MUST  be  a  string  that  is a
+human-readable name for  the  generating  agent.  Entities  such  as "&amp;amp;" and
+"&amp;lt;" represent their corresponding characters ("&amp;" and "&lt;" respectively),  not
+markup.
+<p>
+
+The atom:generator element MAY have a "uri" attribute whose value MUST be an IRI
+reference <code class="code"><span class="constructor">RFC3987</span></code>.  When dereferenced,  the resulting URI (mapped from an IRI,
+if necessary) SHOULD produce a representation that is relevant to that agent.
+<p>
+
+The atom:generator  element MAY  have a "version"  attribute that  indicates the
+version of the generating agent.<br>
+</div>
+
+
+<pre><span id="TYPEicon"><span class="keyword">type</span> <code class="type"></code>icon</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.5"> See RFC 4287 § 4.2.5 </a>
+<p>
+
+The "atom:icon" element's content is  an IRI reference <code class="code"><span class="constructor">RFC3987</span></code> that identifies
+an image that provides iconic visual identification for a feed.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomIcon&nbsp;=&nbsp;element&nbsp;atom:icon&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+The image SHOULD have an aspect ratio  of one (horizontal) to one (vertical) and
+SHOULD be suitable for presentation at a small size.<br>
+</div>
+
+
+<pre><span id="TYPEid"><span class="keyword">type</span> <code class="type"></code>id</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.6"> See RFC 4287 § 4.2.6 </a>
+<p>
+
+The "atom:id" element conveys a permanent,  universally unique identifier for an
+entry or feed.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomId&nbsp;=&nbsp;element&nbsp;atom:id&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(atomUri)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+Its content MUST be an IRI, as defined by <code class="code"><span class="constructor">RFC3987</span></code>. Note that the definition of
+"IRI" excludes relative  references.  Though the IRI might  use a dereferencable
+scheme, Atom Processors MUST NOT assume it can be dereferenced.
+<p>
+
+There is more information in the RFC but they are not necessary here,  at least,
+they can not be checked here.<br>
+</div>
+
+
+<pre><code><span id="TYPErel"><span class="keyword">type</span> <code class="type"></code>rel</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Alternate"><span class="constructor">Alternate</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Related"><span class="constructor">Related</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Self"><span class="constructor">Self</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Enclosure"><span class="constructor">Enclosure</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Via"><span class="constructor">Via</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Link"><span class="constructor">Link</span></span> <span class="keyword">of</span> <code class="type">Uri.t</code></code></td>
+
+</tr></table>
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.2"> See RFC 4287 § 4.2.7.2 </a>
+<p>
+
+atom:link elements MAY  have a "rel" attribute that  indicates the link relation
+type.  <b>If the  "rel"  attribute  is  not  present,  the  link element MUST be
+interpreted as if the link relation type is "alternate".</b>
+<p>
+
+<b>The value of "rel" MUST be a  string that is non-empty and matches either the
+"isegment-nz-nc" or the  "IRI"  production  in  <code class="code"><span class="constructor">RFC3987</span></code>.</b>  Note  that use of a
+relative reference other than a simple name is not allowed.<br>
+</div>
+
+
+<pre><code><span id="TYPElink"><span class="keyword">type</span> <code class="type"></code>link</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.href">href</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.rel">rel</span>&nbsp;: <code class="type"><a href="Atom.html#TYPErel">rel</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.type_media">type_media</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.hreflang">hreflang</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.title">title</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.length">length</span>&nbsp;: <code class="type">int option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7"> See RFC 4287 § 4.2.7 </a>
+<p>
+
+The "atom:link"  element defines  a reference  from an  entry or  feed to  a Web
+resource.  This specification assigns no meaning to the content (if any) of this
+element.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomLink&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:link&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;href&nbsp;{&nbsp;atomUri&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;rel&nbsp;{&nbsp;atomNCName&nbsp;<span class="keywordsign">|</span>&nbsp;atomUri&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;<span class="keyword">type</span>&nbsp;{&nbsp;atomMediaType&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;hreflang&nbsp;{&nbsp;atomLanguageTag&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;title&nbsp;{&nbsp;text&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;length&nbsp;{&nbsp;text&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;undefinedContent<br>
+&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.1"> See RFC 4287 § 4.2.7.1 </a>
+<p>
+
+The "href" attribute  contains the link's IRI.  atom:link elements  MUST have an
+href attribute, whose value MUST be a IRI reference <code class="code"><span class="constructor">RFC3987</span></code>.
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.3"> See RFC 4287 § 4.2.7.3 </a>
+<p>
+
+On the link element,  the "type" attribute's value is an advisory media type: it
+is a hint about  the type of the representation that is  expected to be returned
+when the value  of  the  href  attribute  is  dereferenced.  Note  that the type
+attribute  does   not  override  the   actual  media  type   returned  with  the
+representation.  Link elements  MAY  have  a  type  attribute,  whose value MUST
+conform to the syntax of a MIME media type <code class="code"><span class="constructor">MIMEREG</span></code>.
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.4"> See RFC 4287 § 4.2.7.4 </a>
+<p>
+
+The  "hreflang"  attribute's content  describes  the  language  of  the resource
+pointed to by the href  attribute.  When used together with the rel="alternate",
+it implies a translated version of the entry. Link elements MAY have an hreflang
+attribute, whose value MUST be a language tag <code class="code"><span class="constructor">RFC3066</span></code>.
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.5"> See RFC 4287 § 4.2.7.5 </a>
+<p>
+
+The "title"  attribute conveys human-readable  information about  the link.  The
+content of the "title" attribute is Language-Sensitive. Entities such as "&amp;amp;"
+and "&amp;lt;" represent their corresponding characters ("&amp;" and "&lt;", respectively),
+not markup. Link elements MAY have a title attribute.
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.6"> See RFC 4287 § 4.2.7.6 </a>
+<p>
+
+The "length"  attribute indicates an advisory  length of  the linked  content in
+octets;  it is  a hint about the  content length of  the representation returned
+when the IRI  in the href attribute  is mapped to a  URI and dereferenced.  Note
+that the  length attribute does  not override the  actual content length  of the
+representation as reported by the underlying protocol.  Link elements MAY have a
+length attribute.<br>
+</div>
+
+
+<pre><span id="TYPElogo"><span class="keyword">type</span> <code class="type"></code>logo</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.8"> See RFC 4287 § 4.2.8 </a>
+<p>
+
+The "atom:logo" element's content is  an IRI reference <code class="code"><span class="constructor">RFC3987</span></code> that identifies
+an image that provides visual identification for a feed.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomLogo&nbsp;=&nbsp;element&nbsp;atom:logo&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(atomUri)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+The image SHOULD have an aspect ratio of 2 (horizontal) to 1 (vertical).<br>
+</div>
+
+
+<pre><span id="TYPEpublished"><span class="keyword">type</span> <code class="type"></code>published</span> = <code class="type">Netdate.t</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.9"> See RFC 4287 § 4.2.9 </a>
+<p>
+
+The "atom:published" element  is a Date construct indicating  an instant in time
+associated with an event early in the life cycle of the entry.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;atomPublished&nbsp;=&nbsp;element&nbsp;atom:published&nbsp;{&nbsp;atomDateConstruct&nbsp;}&nbsp;</code></pre>
+<p>
+
+Typically,  atom:published will be associated with the initial creation or first
+availability of the resource.<br>
+</div>
+
+
+<pre><span id="TYPErights"><span class="keyword">type</span> <code class="type"></code>rights</span> = <code class="type">string</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.10"> See RFC 4287 § 4.2.10 </a>
+<p>
+
+The "atom:rights"  element is  a Text construct  that conveys  information about
+rights held in and over an entry or feed.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;atomRights&nbsp;=&nbsp;element&nbsp;atom:rights&nbsp;{&nbsp;atomTextConstruct&nbsp;}&nbsp;</code></pre>
+<p>
+
+The atom:rights element SHOULD NOT  be used to convey machine-readable licensing
+information.
+<p>
+
+If  an atom:entry  element does  not contain  an atom:rights  element,  then the
+atom:rights  element  of  the  containing  atom:feed  element,  if  present,  is
+considered to apply to the entry.<br>
+</div>
+
+
+<pre><span id="TYPEtitle"><span class="keyword">type</span> <code class="type"></code>title</span> = <code class="type">string</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.14"> See RFC 4287 § 4.2.14 </a>
+<p>
+
+The "atom:title"  element is  a Text  construct that  conveys a  human- readable
+title for an entry or feed.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;atomTitle&nbsp;=&nbsp;element&nbsp;atom:title&nbsp;{&nbsp;atomTextConstruct&nbsp;}&nbsp;</code></pre><br>
+</div>
+
+
+<pre><span id="TYPEsubtitle"><span class="keyword">type</span> <code class="type"></code>subtitle</span> = <code class="type">string</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.12"> See RFC 4287 § 4.2.12 </a>
+<p>
+
+The "atom:subtitle" element  is a Text construct that  conveys a human- readable
+description or subtitle for a feed.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;atomSubtitle&nbsp;=&nbsp;element&nbsp;atom:subtitle&nbsp;{&nbsp;atomTextConstruct&nbsp;}&nbsp;</code></pre><br>
+</div>
+
+
+<pre><span id="TYPEupdated"><span class="keyword">type</span> <code class="type"></code>updated</span> = <code class="type">Netdate.t</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.15"> See RFC 4287 § 4.2.15 </a>
+<p>
+
+The  "atom:updated" element  is a  Date  construct  indicating  the  most recent
+instant  in time  when an  entry or  feed was  modified in  a way  the publisher
+considers significant.  Therefore, not all modifications necessarily result in a
+changed atom:updated value.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;atomUpdated&nbsp;=&nbsp;element&nbsp;atom:updated&nbsp;{&nbsp;atomDateConstruct&nbsp;}&nbsp;</code></pre>
+<p>
+
+Publishers MAY change the value of this element over time.<br>
+</div>
+
+
+<pre><code><span id="TYPEsource"><span class="keyword">type</span> <code class="type"></code>source</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.authors">authors</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEauthor">author</a> * <a href="Atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.categories">categories</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEcategory">category</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.contributors">contributors</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEauthor">author</a> list</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><a href=" http://tools.ietf.org/html/rfc4287#section-4.2.3"> See RFC 4287 § 4.2.3 </a></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.generator">generator</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEgenerator">generator</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.icon">icon</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEicon">icon</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.id">id</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEid">id</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.links">links</span>&nbsp;: <code class="type"><a href="Atom.html#TYPElink">link</a> * <a href="Atom.html#TYPElink">link</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.logo">logo</span>&nbsp;: <code class="type"><a href="Atom.html#TYPElogo">logo</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.rights">rights</span>&nbsp;: <code class="type"><a href="Atom.html#TYPErights">rights</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.subtitle">subtitle</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEsubtitle">subtitle</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.title">title</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.updated">updated</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEupdated">updated</a> option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.11"> See RFC 4287 § 4.2.11 </a>
+<p>
+
+If an  atom:entry is copied  from one feed  into another feed,  then  the source
+atom:feed's metadata (all child elements  of atom:feed other than the atom:entry
+elements) MAY  be preserved  within the  copied entry  by adding  an atom:source
+child element,  if it is not already present in the entry, and including some or
+all  of  the  source  feed's  Metadata  elements  as  the  atom:source element's
+children. Such metadata SHOULD be preserved if the source atom:feed contains any
+of   the  child   elements  atom:author,   atom:contributor,   atom:rights,   or
+atom:category and those child elements are not present in the source atom:entry.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomSource&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:source&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(atomAuthor*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomCategory*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomContributor*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomGenerator?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomIcon?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomId?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomLink*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomLogo?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomRights?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomSubtitle?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomTitle?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomUpdated?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;extensionElement&nbsp;*&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+The atom:source  element is designed to  allow the  aggregation of  entries from
+different feeds while  retaining information about an  entry's source feed.  For
+this reason, Atom Processors that are performing such aggregation SHOULD include
+at least  the required feed-level  Metadata elements (atom:id,  atom:title,  and
+atom:updated) in the atom:source element.
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.1.2"> See RFC 4287 § 4.1.2 for
+more details.</a><br>
+</div>
+
+
+<pre><code><span id="TYPEtype_content"><span class="keyword">type</span> <code class="type"></code>type_content</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_content.Html"><span class="constructor">Html</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_content.Text"><span class="constructor">Text</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_content.Xhtml"><span class="constructor">Xhtml</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_content.Mime"><span class="constructor">Mime</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
+
+</tr></table>
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-3.1.1"> See RFC 4287 § 3.1.1 </a>
+<p>
+
+Text constructs MAY have a "type" attribute. When present, the value MUST be one
+of <code class="code"><span class="constructor">Text</span></code>,  <code class="code"><span class="constructor">Html</span></code>,  or <code class="code"><span class="constructor">Xhtml</span></code>.  If the "type" attribute is not provided,  Atom
+Processors MUST behave as though it were present with a value of "text".  Unlike
+the atom:content element  defined in Section 4.1.3,  MIME  media types <code class="code"><span class="constructor">MIMEREG</span></code>
+MUST NOT be used as values for the "type" attribute on Text constructs.
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.1.3.1"> See RFC 4287 § 4.1.3.1 </a>
+<p>
+
+On the  atom:content element,  the value of  the "type" attribute MAY  be one of
+"text",  "html",  or "xhtml".  Failing that,  it MUST conform to the syntax of a
+MIME  media type,  but  MUST NOT  be a  composite  type  (see  Section  4.2.6 of
+<code class="code"><span class="constructor">MIMEREG</span></code>).  If neither  the type attribute  nor the src  attribute is provided,
+Atom Processors  MUST behave as  though the type  attribute were present  with a
+value of "text".<br>
+</div>
+
+
+<pre><code><span id="TYPEcontent"><span class="keyword">type</span> <code class="type"></code>content</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontent.ty">ty</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEtype_content">type_content</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontent.src">src</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontent.data">data</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.1.3"> See RFC 4287 § 4.1.3 </a>
+<p>
+
+The "atom:content" element either contains or links to the content of the entry.
+The content of atom:content is Language-Sensitive.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomInlineTextContent&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:content&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;<span class="keyword">type</span>&nbsp;{&nbsp;<span class="string">"text"</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="string">"html"</span>&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(text)*<br>
+&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;atomInlineXHTMLContent&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:content&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;<span class="keyword">type</span>&nbsp;{&nbsp;<span class="string">"xhtml"</span>&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xhtmlDiv<br>
+&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;atomInlineOtherContent&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:content&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;<span class="keyword">type</span>&nbsp;{&nbsp;atomMediaType&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(text<span class="keywordsign">|</span>anyElement)*<br>
+&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;atomOutOfLineContent&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:content&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;<span class="keyword">type</span>&nbsp;{&nbsp;atomMediaType&nbsp;}?,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attribute&nbsp;src&nbsp;{&nbsp;atomUri&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;empty<br>
+&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;atomContent&nbsp;=&nbsp;atomInlineTextContent<br>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;atomInlineXHTMLContent<br>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;atomInlineOtherContent<br>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;atomOutOfLineContent<br>
+</code></pre>
+<p>
+
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.1.3.2"> See RFC 4287 § 4.1.3.2 </a>
+<p>
+
+atom:content MAY have  a "src" attribute,  whose value MUST  be an IRI reference
+<code class="code"><span class="constructor">RFC3987</span></code>.  If the "src" attribute is present, atom:content MUST be empty.  Atom
+Processors MAY  use the IRI  to retrieve the  content and  MAY choose  to ignore
+remote content or to present it in a different manner than local content.
+<p>
+
+If the "src" attribute is present,  the  "type" attribute SHOULD be provided and
+MUST be a MIME media type <code class="code"><span class="constructor">MIMEREG</span></code>, rather than "text", "html", or "xhtml". The
+value is advisory;  that is to say,  when  the corresponding URI (mapped from an
+IRI,  if necessary) is dereferenced,  if the  server providing that content also
+provides a media type, the server-provided media type is authoritative.<br>
+</div>
+
+
+<pre><span id="TYPEsummary"><span class="keyword">type</span> <code class="type"></code>summary</span> = <code class="type">string</code> </pre>
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.13"> See RFC 4287 § 4.2.13 </a>
+<p>
+
+The "atom:summary"  element is a Text  construct that  conveys a  short summary,
+abstract, or excerpt of an entry.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;atomSummary&nbsp;=&nbsp;element&nbsp;atom:summary&nbsp;{&nbsp;atomTextConstruct&nbsp;}&nbsp;</code></pre>
+<p>
+
+It is  not advisable  for the  atom:summary element  to duplicate  atom:title or
+atom:content because Atom Processors might assume there is a useful summary when
+there is none.<br>
+</div>
+
+
+<pre><code><span id="TYPEentry"><span class="keyword">type</span> <code class="type"></code>entry</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.authors">authors</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEauthor">author</a> * <a href="Atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.categories">categories</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEcategory">category</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.content">content</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEcontent">content</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.contributors">contributors</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.id">id</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEid">id</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.links">links</span>&nbsp;: <code class="type"><a href="Atom.html#TYPElink">link</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.published">published</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEpublished">published</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.rights">rights</span>&nbsp;: <code class="type"><a href="Atom.html#TYPErights">rights</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.sources">sources</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEsource">source</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.summary">summary</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEsummary">summary</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.title">title</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.updated">updated</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEupdated">updated</a></code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.1.2"> See RFC 4287 § 4.1.2 </a>
+<p>
+
+The "atom:entry" element represents an  individual entry,  acting as a container
+for metadata and  data associated with the entry.  This element  can appear as a
+child  of the  atom:feed element,  or  it  can  appear  as  the  document (i.e.,
+top-level) element of a stand-alone Atom Entry Document.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomEntry&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:entry&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(atomAuthor*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomCategory*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomContent?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomContributor*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomId<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomLink*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomPublished?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomRights?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomSource?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomSummary?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomTitle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomUpdated<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;extensionElement&nbsp;*&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+This specification  assigns no significance to  the order  of appearance  of the
+child elements of atom:entry.
+<p>
+
+The following  child elements are defined  by this  specification (note  that it
+requires the presence of some of these elements):
+<p>
+
+<ul>
+<li><b>atom:entry elements MUST contain one or more atom:author elements,  unless
+the atom:entry contains  an  atom:source  element  that  contains an atom:author
+element  or,  in  an Atom  Feed  Document,  the  atom:feed  element  contains an
+atom:author element itself.</b></li>
+<li>atom:entry elements MAY contain any number of atom:category
+elements.</li>
+<li>atom:entry elements MUST NOT contain more than one atom:content element.</li>
+<li>atom:entry elements MAY contain any number of atom:contributor elements.</li>
+<li>atom:entry elements MUST contain exactly one atom:id element.</li>
+<li> <b>atom:entry  elements that  contain  no  child  atom:content  element MUST
+contain  at  least  one  atom:link  element   with  a  rel  attribute  value  of
+"alternate".</b></li>
+<li><b>atom:entry elements MUST NOT  contain more than one atom:link element with
+a rel attribute value  of "alternate" that has the same  combination of type and
+hreflang attribute values.</b></li>
+<li>atom:entry  elements MAY contain  additional atom:link elements  beyond those
+described above.</li>
+<li>atom:entry elements MUST NOT contain more than one atom:published element.</li>
+<li>atom:entry elements MUST NOT contain more than one atom:rights element.</li>
+<li>atom:entry elements MUST NOT contain more than one atom:source element.</li>
+<li>atom:entry  elements MUST contain an  atom:summary element  in either  of the
+following cases:
+  <ul>
+<li>the atom:entry contains an atom:content  that has a "src" attribute (and is
+  thus empty).</li>
+<li>the atom:entry contains content that is encoded in Base64; i.e., the "type"
+  attribute of atom:content  is a MIME media type <code class="code"><span class="constructor">MIMEREG</span></code>,  but  is not an XML
+  media type  <code class="code"><span class="constructor">RFC3023</span></code>,  does not  begin with "text/",  and  does not  end with
+  "/xml" or "+xml".</li>
+</ul>
+</li>
+<li>atom:entry elements MUST NOT contain more than one atom:summary element.</li>
+<li>atom:entry elements MUST contain exactly one atom:title element.</li>
+<li>atom:entry elements MUST contain exactly one atom:updated element.</li>
+</ul>
+<br>
+</div>
+
+
+<pre><code><span id="TYPEfeed"><span class="keyword">type</span> <code class="type"></code>feed</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.authors">authors</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.categories">categories</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEcategory">category</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.contributors">contributors</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.generator">generator</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEgenerator">generator</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.icon">icon</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEicon">icon</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.id">id</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEid">id</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.links">links</span>&nbsp;: <code class="type"><a href="Atom.html#TYPElink">link</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.logo">logo</span>&nbsp;: <code class="type"><a href="Atom.html#TYPElogo">logo</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.rights">rights</span>&nbsp;: <code class="type"><a href="Atom.html#TYPErights">rights</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.subtitle">subtitle</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEsubtitle">subtitle</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.title">title</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.updated">updated</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEupdated">updated</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.entries">entries</span>&nbsp;: <code class="type"><a href="Atom.html#TYPEentry">entry</a> list</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.1.1"> See RFC 4287 § 4.1.1 </a>
+<p>
+
+The "atom:feed"  element is the  document (i.e.,  top-level) element  of an Atom
+Feed Document,  acting as a container for  metadata and data associated with the
+feed. Its element children consist of metadata elements followed by zero or more
+atom:entry child elements.
+<p>
+
+<pre class="codepre"><code class="code">&nbsp;&nbsp;atomFeed&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;atom:feed&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomCommonAttributes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(atomAuthor*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomCategory*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomContributor*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomGenerator?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomIcon?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomId<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomLink*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomLogo?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomRights?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomSubtitle?<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomTitle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;atomUpdated<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">&amp;</span>&nbsp;extensionElement&nbsp;*&nbsp;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;atomEntry*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+</code></pre>
+<p>
+
+This specification assigns  no significance to the order  of atom:entry elements
+within the feed.
+<p>
+
+The following  child elements are defined  by this specification  (note that the
+presence of some of these elements is required):
+<p>
+
+<ul>
+<li>atom:feed elements MUST contain one or more atom:author elements,  unless all
+of  the atom:feed  element's child  atom:entry  elements  contain  at  least one
+atom:author element.</li>
+<li>atom:feed elements MAY contain any number of atom:category elements.</li>
+<li>atom:feed elements MAY contain any number of atom:contributor elements.</li>
+<li>atom:feed elements MUST NOT contain more than one atom:generator element.</li>
+<li>atom:feed elements MUST NOT contain more than one atom:icon element.</li>
+<li>atom:feed elements MUST NOT contain more than one atom:logo element.</li>
+<li>atom:feed elements MUST contain exactly one atom:id element.</li>
+<li>atom:feed elements SHOULD contain one  atom:link element with a rel attribute
+value of "self".  This  is the preferred URI for  retrieving Atom Feed Documents
+representing this Atom feed.</li>
+<li>atom:feed  elements MUST NOT contain  more than one atom:link  element with a
+rel attribute  value of "alternate"  that has the  same combination of  type and
+hreflang attribute values.</li>
+<li>atom:feed  elements MAY  contain additional  atom:link elements  beyond those
+described above.</li>
+<li>atom:feed elements MUST NOT contain more than one atom:rights element.</li>
+<li>atom:feed elements MUST NOT contain more than one atom:subtitle element.</li>
+<li>atom:feed elements MUST contain exactly one atom:title element.</li>
+<li>atom:feed elements MUST contain exactly one atom:updated element.</li>
+</ul>
+
+<p>
+
+If multiple  atom:entry elements with the  same atom:id value appear  in an Atom
+Feed Document,  they  represent the  same entry.  Their  atom:updated timestamps
+SHOULD be different. If an Atom Feed Document contains multiple entries with the
+same atom:id,  Atom Processors MAY choose to  display all of them or some subset
+of them. One typical behavior would be to display only the entry with the latest
+atom:updated timestamp.<br>
+</div>
+
+
+<pre><span id="VALanalyze"><span class="keyword">val</span> analyze</span> : <code class="type">Xmlm.input -> <a href="Atom.html#TYPEfeed">feed</a></code></pre>
+<pre><span id="VALunsafe"><span class="keyword">val</span> unsafe</span> : <code class="type">Xmlm.input -><br>       [> `Feed of<br>            [> `Author of<br>                 [> `Email of string | `Name of string | `URI of string ] list<br>             | `Category of<br>                 [> `Label of string | `Scheme of string | `Term of string ] list<br>             | `Contributor of<br>                 [> `Email of string | `Name of string | `URI of string ] list<br>             | `Entry of<br>                 [> `Author of<br>                      [> `Email of string | `Name of string | `URI of string ] list<br>                  | `Category of<br>                      [> `Label of string | `Scheme of string | `Term of string ]<br>                      list<br>                  | `Content of<br>                      [> `Data of string | `SRC of string | `Type of string ] list<br>                  | `Contributor of<br>                      [> `Email of string | `Name of string | `URI of string ] list<br>                  | `ID of [> `URI of string ] list<br>                  | `Link of<br>                      [> `HREF of string<br>                       | `HREFLang of string<br>                       | `Length of string<br>                       | `Rel of string<br>                       | `Title of string<br>                       | `Type of string ]<br>                      list<br>                  | `Published of [> `Date of string ] list<br>                  | `Rights of [> `Data of string ] list<br>                  | `Source of<br>                      [> `Author of<br>                           [> `Email of string | `Name of string | `URI of string ]<br>                           list<br>                       | `Category of<br>                           [> `Label of string | `Scheme of string | `Term of string ]<br>                           list<br>                       | `Contributor of<br>                           [> `Email of string | `Name of string | `URI of string ]<br>                           list<br>                       | `Generator of<br>                           [> `Content of string<br>                            | `URI of string<br>                            | `Version of string ]<br>                           list<br>                       | `ID of [> `URI of string ] list<br>                       | `Icon of [> `URI of string ] list<br>                       | `Link of<br>                           [> `HREF of string<br>                            | `HREFLang of string<br>                            | `Length of string<br>                            | `Rel of string<br>                            | `Title of string<br>                            | `Type of string ]<br>                           list<br>                       | `Logo of [> `URI of string ] list<br>                       | `Rights of [> `Data of string ] list<br>                       | `Subtitle of [> `Data of string ] list<br>                       | `Title of [> `Data of string ] list<br>                       | `Updated of [> `Date of string ] list ]<br>                      list<br>                  | `Summary of [> `Data of string ] list<br>                  | `Title of [> `Data of string ] list<br>                  | `Updated of [> `Date of string ] list ]<br>                 list<br>             | `Generator of<br>                 [> `Content of string | `URI of string | `Version of string ] list<br>             | `ID of [> `URI of string ] list<br>             | `Icon of [> `URI of string ] list<br>             | `Link of<br>                 [> `HREF of string<br>                  | `HREFLang of string<br>                  | `Length of string<br>                  | `Rel of string<br>                  | `Title of string<br>                  | `Type of string ]<br>                 list<br>             | `Logo of [> `URI of string ] list<br>             | `Rights of [> `Data of string ] list<br>             | `Subtitle of [> `Data of string ] list<br>             | `Title of [> `Data of string ] list<br>             | `Updated of [> `Date of string ] list ]<br>            list ]</code></pre><div class="info ">
+Analysis without verification, enjoy !<br>
+</div>
+</body></html>

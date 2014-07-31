@@ -1,0 +1,22 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Rss1" rel="Chapter" href="Rss1.html">
+<link title="Rss2" rel="Chapter" href="Rss2.html">
+<link title="Atom" rel="Chapter" href="Atom.html">
+<link title="Common" rel="Chapter" href="Common.html"><title>Rss1.Error</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;expected_type&nbsp;=&nbsp;<span class="constructor">Attr</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Tag</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Data</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Root</span><br>
+&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Expected</span>&nbsp;<span class="keyword">of</span>&nbsp;expected_type&nbsp;*&nbsp;expected_type<br>
+&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Expected_Leaf</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_expectation&nbsp;:&nbsp;expected_type&nbsp;*&nbsp;expected_type&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;raise_expectation&nbsp;:&nbsp;expected_type&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;expected_type&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a<br>
+<span class="keyword">end</span></code></body></html>
