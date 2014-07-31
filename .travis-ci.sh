@@ -16,13 +16,13 @@ if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
 
   echo -e "Publishing ocamldoc...\n"
 
-  git config --global user.email "romain.calascibetta@gmail.com"
-  git config --global user.name "dinosaure"
-  git clone --quiet --branch=gh-pages \
-    https://${GH_TOKEN}@github.com/Cumulus/Syndic .documentation
+  git config --global user.email "${GIT_EMAIL}"
+  git config --global user.name "${GIT_NAME}"
+  git clone https://${GH_TOKEN}@github.com/Cumulus/Syndic .documentation
 
   cd .documentation
   git fetch
+  git checkout gh-pages
   git merge master
 
   ./configure
