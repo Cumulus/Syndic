@@ -71,8 +71,6 @@ module Error = struct
     Buffer.contents buffer
 
   let raise_expectation data in_data = raise (Expected (data, in_data))
-
-  exception Malformed_URL of string
 end
 
 (* Util *)
