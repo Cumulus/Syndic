@@ -10,15 +10,27 @@ module Error : sig
     (Uri.t * string * string) * (string * string) -> string
 end
 
-(**
+type author =
+  {
+    name : string;
+    uri : Uri.t option;
+    email : string option;
+  }
+(** Describes a person, corporation, or similar entity (hereafter,
+    'person') that indicates the author of the entry or feed.
 
-{{: http://tools.ietf.org/html/rfc4287#section-3.2} See RFC 4287 § 3.2}
+    If an atom:entry element does not contain atom:author elements, then
+    the atom:author elements of the contained atom:source element are
+    considered to apply.  In an Atom Feed Document, the atom:author
+    elements of the containing atom:feed element are considered to apply
+    to the entry if there are no atom:author elements in the locations
+    described above.
 
-A Person construct  is  an  element  that  describes a person,  corporation,  or
-similar entity (hereafter, 'person').
+    {[  atomAuthor = element atom:author { atomPersonConstruct } ]}
 
-{[
-  atomPersonConstruct =
+    where
+
+{[atomPersonConstruct =
     atomCommonAttributes,
     (element atom:name { text }
      & element atom:uri { atomUri }?
@@ -26,38 +38,39 @@ similar entity (hereafter, 'person').
      & extensionElement * )
 ]}
 
-This specification  assigns no significance to  the order  of appearance  of the
-child elements in a Person construct. Person constructs allow extension Metadata
-elements (see Section 6.4).
+   {{: http://tools.ietf.org/html/rfc4287#section-3.2} See RFC 4287 § 3.2}
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.1} See RFC 4287 § 4.2.1}
+   This specification assigns no significance to the order of
+   appearance of the child elements in a Person construct. Person
+   constructs allow extension Metadata elements (see Section 6.4).
 
-The "atom:author" element is a Person construct that indicates the author of the
-entry or feed.
+   {{: http://tools.ietf.org/html/rfc4287#section-4.2.1} See RFC 4287 § 4.2.1}
+ *)
 
-{[ atomAuthor = element atom:author { atomPersonConstruct } ]}
-
-If  an  atom:entry element  does  not  contain  atom:author  elements,  then the
-atom:author elements of  the  contained  atom:source  element  are considered to
-apply.  In an  Atom Feed Document,  the  atom:author elements of  the containing
-atom:feed  element  are  considered  to apply  to  the  entry  if  there  are no
-atom:author elements in the locations described above.
-
-*)
-type author =
+type category =
   {
-    name : string;
-    uri : Uri.t option;
-    email : string option;
+    term : string;
+    scheme : Uri.t option;
+    label : string option;
   }
+(** The [category] element conveys information about a category
+    associated with an entry or feed.  This specification assigns no
+    meaning to the content (if any) of this element.
+    {{:http://tools.ietf.org/html/rfc4287#section-4.2.2} See RFC 4287 § 4.2.2}
 
-(**
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.2} See RFC 4287 § 4.2.2 }
-
-The "atom:category" element conveys information about a category associated with
-an entry or feed.  This specification assigns no meaning to the content (if any)
-of this element.
+    - [term] is a string that identifies the category to
+      which the entry or feed belongs.
+      {{: http://tools.ietf.org/html/rfc4287#section-4.2.2.2}
+      See RFC 4287 § 4.2.2.2}
+    - [scheme], if present, is an IRI that identifies a categorization
+      scheme.
+      {{: http://tools.ietf.org/html/rfc4287#section-4.2.2.3}
+      See RFC 4287 § 4.2.2.3}
+    - [label], if present, is a human-readable label for display in
+      end-user applications.  The content of the "label" attribute is
+      Language-Sensitive.  Entities such as "&amp;" and "&lt;"
+      represent their corresponding characters ("&" and "<",
+      respectively), not markup.
 
 {[
   atomCategory =
@@ -70,38 +83,29 @@ of this element.
       }
 ]}
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.2.1} See RFC 4287 § 4.2.2.1 }
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.2.1} See RFC 4287 § 4.2.2.1 }
+ *)
 
-The "term" attribute is a string that identifies the category to which the entry
-or feed belongs. Category elements MUST have a "term" attribute.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.2.2} See RFC 4287 § 4.2.2.2 }
-
-The  "scheme" attribute  is an  IRI  that  identifies  a  categorization scheme.
-Category elements MAY have a "scheme" attribute.
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.2.3} See RFC 4287 § 4.2.2.3 }
-
-The "label"  attribute provides a  human-readable label for  display in end-user
-applications.  The  content  of  the  "label"  attribute  is Language-Sensitive.
-Entities such  as "&amp;"  and "&lt;"  represent their  corresponding characters
-("&" and "<",  respectively),  not markup.  Category elements MAY have a "label"
-attribute.
-
-*)
-type category =
+type generator =
   {
-    term : string;
-    scheme : Uri.t option;
-    label : string option;
+    version : string option;
+    uri : Uri.t option;
+    content : string;
   }
+(** The [generator] element's content identifies the agent used to
+    generate a feed, for debugging and other purposes.
+    - [content] is a human-readable name for the generating agent.
+      Entities such as "&amp;" and "&lt;" represent their corresponding
+      characters ("&" and "<" respectively), not markup.
+    - [uri], if present, MUST be an IRI reference [RFC3987].  When
+      dereferenced, the resulting URI (mapped from an IRI, if
+      necessary) SHOULD produce a representation that is relevant to
+      that agent.
+    - [version], if present, indicates the version of the generating
+      agent.
 
-(**
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.4} See RFC 4287 § 4.2.4 }
-
-The "atom:generator" element's  content identifies the agent used  to generate a
-feed, for debugging and other purposes.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.4} See RFC 4287 § 4.2.4 }
 
 {[
   atomGenerator = element atom:generator {
@@ -111,52 +115,39 @@ feed, for debugging and other purposes.
       text
     }
 ]}
+ *)
 
-The  content  of  this element,  when  present,  MUST  be  a  string  that  is a
-human-readable name for  the  generating  agent.  Entities  such  as "&amp;" and
-"&lt;" represent their corresponding characters ("&" and "<" respectively),  not
-markup.
+type icon = Uri.t
+(** The [icon] element's content is an IRI reference [RFC3987] that
+    identifies an image that provides iconic visual identification for
+    a feed.
 
-The atom:generator element MAY have a "uri" attribute whose value MUST be an IRI
-reference [RFC3987].  When dereferenced,  the resulting URI (mapped from an IRI,
-if necessary) SHOULD produce a representation that is relevant to that agent.
+    The image SHOULD have an aspect ratio of one (horizontal) to one
+    (vertical) and SHOULD be suitable for presentation at a small
+    size.
 
-The atom:generator  element MAY  have a "version"  attribute that  indicates the
-version of the generating agent.
-
-*)
-type generator =
-  {
-    version : string option;
-    uri : Uri.t option;
-    content : string;
-  }
-
-(**
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.5} See RFC 4287 § 4.2.5 }
-
-The "atom:icon" element's content is  an IRI reference [RFC3987] that identifies
-an image that provides iconic visual identification for a feed.
+    {{:http://tools.ietf.org/html/rfc4287#section-4.2.5} See RFC 4287 § 4.2.5}
 
 {[
   atomIcon = element atom:icon {
       atomCommonAttributes,
     }
 ]}
+ *)
 
-The image SHOULD have an aspect ratio  of one (horizontal) to one (vertical) and
-SHOULD be suitable for presentation at a small size.
+type id = Uri.t
+(** The [id] element conveys a permanent, universally unique
+    identifier for an entry or feed.
 
-*)
-type icon = Uri.t
+    Its content MUST be an IRI, as defined by [RFC3987]. Note that the
+    definition of "IRI" excludes relative references.  Though the IRI
+    might use a dereferencable scheme, Atom Processors MUST NOT assume
+    it can be dereferenced.
 
-(**
+    There is more information in the RFC but they are not necessary
+    here, at least, they can not be checked here.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.6} See RFC 4287 § 4.2.6 }
-
-The "atom:id" element conveys a permanent,  universally unique identifier for an
-entry or feed.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.6} See RFC 4287 § 4.2.6 }
 
 {[
   atomId = element atom:id {
@@ -164,30 +155,22 @@ entry or feed.
       (atomUri)
     }
 ]}
+ *)
 
-Its content MUST be an IRI, as defined by [RFC3987]. Note that the definition of
-"IRI" excludes relative  references.  Though the IRI might  use a dereferencable
-scheme, Atom Processors MUST NOT assume it can be dereferenced.
 
-There is more information in the RFC but they are not necessary here,  at least,
-they can not be checked here.
+(** {!link} elements MAY have a "rel" attribute that indicates the
+    link relation type.  {b If the "rel" attribute is not present, the
+    link element MUST be interpreted as if the link relation type is
+    "alternate".}
 
-*)
-type id = Uri.t
+    {b The value of "rel" MUST be a string that is non-empty and
+    matches either the "isegment-nz-nc" or the "IRI" production in
+    [RFC3987].}  Note that use of a relative reference other than a
+    simple name is not allowed.
 
-(**
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.7.2} See RFC 4287 § 4.2.7.2 }
-
-atom:link elements MAY  have a "rel" attribute that  indicates the link relation
-type.  {b If the  "rel"  attribute  is  not  present,  the  link element MUST be
-interpreted as if the link relation type is "alternate".}
-
-{b The value of "rel" MUST be a  string that is non-empty and matches either the
-"isegment-nz-nc" or the  "IRI"  production  in  [RFC3987].}  Note  that use of a
-relative reference other than a simple name is not allowed.
-
-*)
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.2}
+    See RFC 4287 § 4.2.7.2 }
+ *)
 type rel =
   | Alternate
   | Related
@@ -196,13 +179,56 @@ type rel =
   | Via
   | Link of Uri.t
 
-(**
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.7} See RFC 4287 § 4.2.7 }
+type link =
+  {
+    href : Uri.t;
+    rel : rel;
+    type_media : string option;
+    hreflang : string option;
+    title : string option;
+    length : int option;
+  }
+(** [link] defines a reference from an entry or feed to a Web
+    resource.  This specification assigns no meaning to the content
+    (if any) of this element.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.7}
+    See RFC 4287 § 4.2.7 }
 
-The "atom:link"  element defines  a reference  from an  entry or  feed to  a Web
-resource.  This specification assigns no meaning to the content (if any) of this
-element.
+    - [href] contains the link's IRI.  The value MUST be a IRI
+      reference [RFC3987].
+      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.3}
+      See RFC 4287 § 4.2.7.3 }
+    - [type_media] is an advisory media type: it is a hint about the
+      type of the representation that is expected to be returned when
+      the value of the href attribute is dereferenced.  Note that the
+      type attribute does not override the actual media type returned
+      with the representation.  Link elements MAY have a type
+      attribute, whose value MUST conform to the syntax of a MIME
+      media type [MIMEREG].
+      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.4}
+      See RFC 4287 § 4.2.7.4 }
+    - [hreflang] describes the language of the resource pointed to by
+      the href attribute.  When used together with the
+      rel="alternate", it implies a translated version of the
+      entry. Link elements MAY have an hreflang attribute, whose value
+      MUST be a language tag [RFC3066].
+      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.5}
+      See RFC 4287 § 4.2.7.5 }
+    - [title] conveys human-readable information about the link.  The
+      content of the "title" attribute is Language-Sensitive. Entities
+      such as "&amp;" and "&lt;" represent their corresponding
+      characters ("&" and "<", respectively), not markup. Link
+      elements MAY have a title attribute.
+      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.6}
+      See RFC 4287 § 4.2.7.6 }
+    - [length] indicates an advisory length of the linked content in
+      octets; it is a hint about the content length of the
+      representation returned when the IRI in the href attribute is
+      mapped to a URI and dereferenced.  Note that the length
+      attribute does not override the actual content length of the
+      representation as reported by the underlying protocol.  Link
+      elements MAY have a length attribute.
 
 {[
   atomLink =
@@ -218,60 +244,17 @@ element.
   }
 ]}
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.7.1} See RFC 4287 § 4.2.7.1 }
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.1}
+    See RFC 4287 § 4.2.7.1 }
+ *)
 
-The "href" attribute  contains the link's IRI.  atom:link elements  MUST have an
-href attribute, whose value MUST be a IRI reference [RFC3987].
+type logo = Uri.t
+(** [logo] is an IRI reference [RFC3987] that identifies an image that
+    provides visual identification for a feed.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.7.3} See RFC 4287 § 4.2.7.3 }
+    The image SHOULD have an aspect ratio of 2 (horizontal) to 1 (vertical).
 
-On the link element,  the "type" attribute's value is an advisory media type: it
-is a hint about  the type of the representation that is  expected to be returned
-when the value  of  the  href  attribute  is  dereferenced.  Note  that the type
-attribute  does   not  override  the   actual  media  type   returned  with  the
-representation.  Link elements  MAY  have  a  type  attribute,  whose value MUST
-conform to the syntax of a MIME media type [MIMEREG].
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.7.4} See RFC 4287 § 4.2.7.4 }
-
-The  "hreflang"  attribute's content  describes  the  language  of  the resource
-pointed to by the href  attribute.  When used together with the rel="alternate",
-it implies a translated version of the entry. Link elements MAY have an hreflang
-attribute, whose value MUST be a language tag [RFC3066].
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.7.5} See RFC 4287 § 4.2.7.5 }
-
-The "title"  attribute conveys human-readable  information about  the link.  The
-content of the "title" attribute is Language-Sensitive. Entities such as "&amp;"
-and "&lt;" represent their corresponding characters ("&" and "<", respectively),
-not markup. Link elements MAY have a title attribute.
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.7.6} See RFC 4287 § 4.2.7.6 }
-
-The "length"  attribute indicates an advisory  length of  the linked  content in
-octets;  it is  a hint about the  content length of  the representation returned
-when the IRI  in the href attribute  is mapped to a  URI and dereferenced.  Note
-that the  length attribute does  not override the  actual content length  of the
-representation as reported by the underlying protocol.  Link elements MAY have a
-length attribute.
-
-*)
-type link =
-  {
-    href : Uri.t;
-    rel : rel;
-    type_media : string option;
-    hreflang : string option;
-    title : string option;
-    length : int option;
-  }
-
-(**
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.8} See RFC 4287 § 4.2.8 }
-
-The "atom:logo" element's content is  an IRI reference [RFC3987] that identifies
-an image that provides visual identification for a feed.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.8} See RFC 4287 § 4.2.8}
 
 {[
   atomLogo = element atom:logo {
@@ -279,98 +262,109 @@ an image that provides visual identification for a feed.
       (atomUri)
     }
 ]}
+ *)
 
-The image SHOULD have an aspect ratio of 2 (horizontal) to 1 (vertical).
-
-*)
-type logo = Uri.t
-
-(**
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.9} See RFC 4287 § 4.2.9 }
-
-The "atom:published" element  is a Date construct indicating  an instant in time
-associated with an event early in the life cycle of the entry.
-
-{[ atomPublished = element atom:published { atomDateConstruct } ]}
-
-Typically,  atom:published will be associated with the initial creation or first
-availability of the resource.
-
-*)
 type published = CalendarLib.Calendar.t
+(** [published] is a Date construct indicating an instant in time
+    associated with an event early in the life cycle of the entry.
 
-(**
+    Typically, [published] will be associated with the initial
+    creation or first availability of the resource.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.10} See RFC 4287 § 4.2.10 }
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.9} See RFC 4287 § 4.2.9}
 
-The "atom:rights"  element is  a Text construct  that conveys  information about
-rights held in and over an entry or feed.
+    {[ atomPublished = element atom:published { atomDateConstruct } ]}
+ *)
 
-{[ atomRights = element atom:rights { atomTextConstruct } ]}
-
-The atom:rights element SHOULD NOT  be used to convey machine-readable licensing
-information.
-
-If  an atom:entry  element does  not contain  an atom:rights  element,  then the
-atom:rights  element  of  the  containing  atom:feed  element,  if  present,  is
-considered to apply to the entry.
-
-*)
 type rights = string
+(** [rights] is a Text construct that conveys information about rights
+    held in and over an entry or feed.
 
-(**
+    The [rights] element SHOULD NOT be used to convey machine-readable
+    licensing information.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.14} See RFC 4287 § 4.2.14 }
+    If an atom:entry element does not contain an atom:rights element,
+    then the atom:rights element of the containing atom:feed element,
+    if present, is considered to apply to the entry.
 
-The "atom:title"  element is  a Text  construct that  conveys a  human- readable
-title for an entry or feed.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.10}
+    See RFC 4287 § 4.2.10 }
 
-{[ atomTitle = element atom:title { atomTextConstruct } ]}
+    {[ atomRights = element atom:rights { atomTextConstruct } ]}
+ *)
 
-*)
 type title = string
+(** [title] is a Text construct that conveys a human-readable title
+    for an entry or feed.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.14}
+    See RFC 4287 § 4.2.14 }
 
-(**
+    {[ atomTitle = element atom:title { atomTextConstruct } ]}
+ *)
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.12} See RFC 4287 § 4.2.12 }
-
-The "atom:subtitle" element  is a Text construct that  conveys a human- readable
-description or subtitle for a feed.
-
-{[ atomSubtitle = element atom:subtitle { atomTextConstruct } ]}
-
-*)
 type subtitle = string
+(** [subtitle] is a Text construct that conveys a human-readable
+    description or subtitle for a feed.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.12}
+    See RFC 4287 § 4.2.12 }
 
-(**
+    {[ atomSubtitle = element atom:subtitle { atomTextConstruct } ]}
+ *)
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.15} See RFC 4287 § 4.2.15 }
-
-The  "atom:updated" element  is a  Date  construct  indicating  the  most recent
-instant  in time  when an  entry or  feed was  modified in  a way  the publisher
-considers significant.  Therefore, not all modifications necessarily result in a
-changed atom:updated value.
-
-{[ atomUpdated = element atom:updated { atomDateConstruct } ]}
-
-Publishers MAY change the value of this element over time.
-
-*)
 type updated = CalendarLib.Calendar.t
+(** [updated] is a Date construct indicating the most recent instant
+    in time when an entry or feed was modified in a way the publisher
+    considers significant.  Therefore, not all modifications
+    necessarily result in a changed [updated] value.
 
-(**
+    Publishers MAY change the value of this element over time.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.11} See RFC 4287 § 4.2.11 }
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.15}
+    See RFC 4287 § 4.2.15 }
 
-If an  atom:entry is copied  from one feed  into another feed,  then  the source
-atom:feed's metadata (all child elements  of atom:feed other than the atom:entry
-elements) MAY  be preserved  within the  copied entry  by adding  an atom:source
-child element,  if it is not already present in the entry, and including some or
-all  of  the  source  feed's  Metadata  elements  as  the  atom:source element's
-children. Such metadata SHOULD be preserved if the source atom:feed contains any
-of   the  child   elements  atom:author,   atom:contributor,   atom:rights,   or
-atom:category and those child elements are not present in the source atom:entry.
+    {[ atomUpdated = element atom:updated { atomDateConstruct } ]}
+ *)
+
+type source =
+  {
+    authors: author * author list;
+    categories: category list;
+    contributors: author list;
+    (** {{: http://tools.ietf.org/html/rfc4287#section-4.2.3}
+        See RFC 4287 § 4.2.3 } *)
+    generator: generator option;
+    icon: icon option;
+    id: id;
+    links: link * link list;
+    logo: logo option;
+    rights: rights option;
+    subtitle: subtitle option;
+    title: title;
+    updated: updated option;
+  }
+(** If an atom:entry is copied from one feed into another feed, then
+    the source atom:feed's metadata (all child elements of atom:feed
+    other than the atom:entry elements) MAY be preserved within the
+    copied entry by adding an atom:source child element, if it is not
+    already present in the entry, and including some or all of the
+    source feed's Metadata elements as the atom:source element's
+    children. Such metadata SHOULD be preserved if the source
+    atom:feed contains any of the child elements atom:author,
+    atom:contributor, atom:rights, or atom:category and those child
+    elements are not present in the source atom:entry.
+
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.11}
+    See RFC 4287 § 4.2.11 }
+
+    The atom:source element is designed to allow the aggregation of
+    entries from different feeds while retaining information about an
+    entry's source feed.  For this reason, Atom Processors that are
+    performing such aggregation SHOULD include at least the required
+    feed-level Metadata elements (atom:id, atom:title, and
+    atom:updated) in the atom:source element.
+
+    {{: http://tools.ietf.org/html/rfc4287#section-4.1.2}
+    See RFC 4287 § 4.1.2 for more details.}
 
 {[
   atomSource =
@@ -391,66 +385,53 @@ atom:category and those child elements are not present in the source atom:entry.
          & extensionElement * )
       }
 ]}
+ *)
 
-The atom:source  element is designed to  allow the  aggregation of  entries from
-different feeds while  retaining information about an  entry's source feed.  For
-this reason, Atom Processors that are performing such aggregation SHOULD include
-at least  the required feed-level  Metadata elements (atom:id,  atom:title,  and
-atom:updated) in the atom:source element.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.1.2} See RFC 4287 § 4.1.2 for
-more details.}
+(** Text ({!content}) constructs have a [type_content] attribute. When
+    present, the value MUST be one of [Text], [Html], or [Xhtml].
+    When the Atom feed contains no indication, [Text] is used.
 
-*)
-type source =
-  {
-    authors: author * author list;
-    categories: category list;
-    contributors: author list; (**
-                                  {{: http://tools.ietf.org/html/rfc4287#section-4.2.3} See RFC 4287 § 4.2.3 } *)
-    generator: generator option;
-    icon: icon option;
-    id: id;
-    links: link * link list;
-    logo: logo option;
-    rights: rights option;
-    subtitle: subtitle option;
-    title: title;
-    updated: updated option;
-  }
+    {{: http://tools.ietf.org/html/rfc4287#section-3.1.1} See RFC 4287 § 3.1.1}
 
-(**
+    When the value is [Mime m], [m] MUST conform to the syntax of a
+    MIME media type, but MUST NOT be a composite type (see Section
+    4.2.6 of [MIMEREG]).
 
-{{: http://tools.ietf.org/html/rfc4287#section-3.1.1} See RFC 4287 § 3.1.1 }
-
-Text constructs MAY have a "type" attribute. When present, the value MUST be one
-of [Text],  [Html],  or [Xhtml].  If the "type" attribute is not provided,  Atom
-Processors MUST behave as though it were present with a value of "text".  Unlike
-the atom:content element  defined in Section 4.1.3,  MIME  media types [MIMEREG]
-MUST NOT be used as values for the "type" attribute on Text constructs.
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.1.3.1} See RFC 4287 § 4.1.3.1 }
-
-On the  atom:content element,  the value of  the "type" attribute MAY  be one of
-"text",  "html",  or "xhtml".  Failing that,  it MUST conform to the syntax of a
-MIME  media type,  but  MUST NOT  be a  composite  type  (see  Section  4.2.6 of
-[MIMEREG]).  If neither  the type attribute  nor the src  attribute is provided,
-Atom Processors  MUST behave as  though the type  attribute were present  with a
-value of "text".
-
-*)
+    {{: http://tools.ietf.org/html/rfc4287#section-4.1.3.1}
+    See RFC 4287 § 4.1.3.1 }
+ *)
 type type_content =
   | Html
   | Text
   | Xhtml
   | Mime of string
 
-(**
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.1.3} See RFC 4287 § 4.1.3 }
+type content =
+  {
+    ty : type_content;
+    src : Uri.t option;
+    data : string;
+  }
+(** [content] either contains or links to the content of the entry.
+    The value of [content] is Language-Sensitive.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.1.3} See RFC 4287 § 4.1.3}
 
-The "atom:content" element either contains or links to the content of the entry.
-The content of atom:content is Language-Sensitive.
+    - [src], if present, MUST be an IRI reference [RFC3987].  If [src]
+      is present, [data] MUST be empty.  Atom Processors MAY use the
+      IRI to retrieve the content and MAY choose to ignore remote
+      content or to present it in a different manner than local
+      content.
+    - If [src] is present, [ty] attribute SHOULD be provided and MUST
+      be a MIME media type [MIMEREG], rather than [Text], [Html], or
+      [Xhtml].  The value is advisory; that is to say, when the
+      corresponding URI (mapped from an IRI, if necessary) is
+      dereferenced, if the server providing that content also provides
+      a media type, the server-provided media type is authoritative.
+
+    {{: http://tools.ietf.org/html/rfc4287#section-4.1.3.2}
+    See RFC 4287 § 4.1.3.2 }
 
 {[
   atomInlineTextContent =
@@ -487,52 +468,71 @@ The content of atom:content is Language-Sensitive.
   | atomInlineOtherContent
   | atomOutOfLineContent
 ]}
+ *)
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.1.3.2} See RFC 4287 § 4.1.3.2 }
-
-atom:content MAY have  a "src" attribute,  whose value MUST  be an IRI reference
-[RFC3987].  If the "src" attribute is present, atom:content MUST be empty.  Atom
-Processors MAY  use the IRI  to retrieve the  content and  MAY choose  to ignore
-remote content or to present it in a different manner than local content.
-
-If the "src" attribute is present,  the  "type" attribute SHOULD be provided and
-MUST be a MIME media type [MIMEREG], rather than "text", "html", or "xhtml". The
-value is advisory;  that is to say,  when  the corresponding URI (mapped from an
-IRI,  if necessary) is dereferenced,  if the  server providing that content also
-provides a media type, the server-provided media type is authoritative.
-
-*)
-type content =
-  {
-    ty : type_content;
-    src : Uri.t option;
-    data : string;
-  }
-
-(**
-
-{{: http://tools.ietf.org/html/rfc4287#section-4.2.13} See RFC 4287 § 4.2.13 }
-
-The "atom:summary"  element is a Text  construct that  conveys a  short summary,
-abstract, or excerpt of an entry.
-
-{[ atomSummary = element atom:summary { atomTextConstruct } ]}
-
-It is  not advisable  for the  atom:summary element  to duplicate  atom:title or
-atom:content because Atom Processors might assume there is a useful summary when
-there is none.
-
-*)
 type summary = string
+(** [summary] is a Text construct that conveys a short summary,
+    abstract, or excerpt of an entry.
 
-(**
+    It is not advisable for [summary] to duplicate {!title} or
+    {!content} because Atom Processors might assume there is a
+    useful summary when there is none.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.1.2} See RFC 4287 § 4.1.2 }
+    {{: http://tools.ietf.org/html/rfc4287#section-4.2.13}
+    See RFC 4287 § 4.2.13 }
 
-The "atom:entry" element represents an  individual entry,  acting as a container
-for metadata and  data associated with the entry.  This element  can appear as a
-child  of the  atom:feed element,  or  it  can  appear  as  the  document (i.e.,
-top-level) element of a stand-alone Atom Entry Document.
+    {[ atomSummary = element atom:summary { atomTextConstruct } ]}
+ *)
+
+type entry =
+  {
+    authors: author * author list;
+    categories: category list;
+    content: content option;
+    contributors: author list;
+    id: id;
+    links: link list;
+    published: published option;
+    rights: rights option;
+    sources: source list;
+    summary: summary option;
+    title: title;
+    updated: updated;
+  }
+(** [entry] represents an individual entry, acting as a container for
+    metadata and data associated with the entry.  This element can
+    appear as a child of the atom:feed element, or it can appear as
+    the document (i.e., top-level) element of a stand-alone Atom Entry
+    Document.
+
+    This specification assigns no significance to the order of
+    appearance of the child elements of atom:entry.
+    
+    The following child elements are defined by this specification
+    (note that it requires the presence of some of these elements):
+    
+    - [entry] MUST contain one or more [author], unless the [entry]
+      contains a [sources] element that contains an [author] or, in an
+      Atom Feed Document, the {!feed} element contains an [author]
+      element itself.
+    - if [content = None], then [links] MUST contain at least one
+      element with a rel attribute value of [Alternate].
+    - There MUST NOT be more than one element of [links] with a rel
+      attribute value of [Alternate] that has the same combination of
+      type and hreflang attribute values.
+    - There MAY be additional elements of [links] beyond those
+      described above.
+    - There MUST be an [summary] in either of the following cases:
+      {ul
+      {- the atom:entry contains an atom:content that has a "src"
+         attribute (and is thus empty).}
+      {- the atom:entry contains content that is encoded in Base64;
+         i.e., the "type" attribute of atom:content is a MIME media
+         type [MIMEREG], but is not an XML media type [RFC3023], does
+         not begin with "text/", and does not end with "/xml" or
+         "+xml".}}
+
+    {{: http://tools.ietf.org/html/rfc4287#section-4.1.2} See RFC 4287 § 4.1.2}
 
 {[
   atomEntry =
@@ -553,73 +553,51 @@ top-level) element of a stand-alone Atom Entry Document.
          & extensionElement * )
       }
 ]}
+ *)
 
-This specification  assigns no significance to  the order  of appearance  of the
-child elements of atom:entry.
 
-The following  child elements are defined  by this  specification (note  that it
-requires the presence of some of these elements):
-
-{ul
-{- {b atom:entry elements MUST contain one or more atom:author elements,  unless
-the atom:entry contains  an  atom:source  element  that  contains an atom:author
-element  or,  in  an Atom  Feed  Document,  the  atom:feed  element  contains an
-atom:author element itself.}}
-{- atom:entry elements MAY contain any number of atom:category
-elements.}
-{- atom:entry elements MUST NOT contain more than one atom:content element.}
-{- atom:entry elements MAY contain any number of atom:contributor elements.}
-{- atom:entry elements MUST contain exactly one atom:id element.}
-{-  {b atom:entry  elements that  contain  no  child  atom:content  element MUST
-contain  at  least  one  atom:link  element   with  a  rel  attribute  value  of
-"alternate".}}
-{- {b atom:entry elements MUST NOT  contain more than one atom:link element with
-a rel attribute value  of "alternate" that has the same  combination of type and
-hreflang attribute values.}}
-{- atom:entry  elements MAY contain  additional atom:link elements  beyond those
-described above.}
-{- atom:entry elements MUST NOT contain more than one atom:published element.}
-{- atom:entry elements MUST NOT contain more than one atom:rights element.}
-{- atom:entry elements MUST NOT contain more than one atom:source element.}
-{- atom:entry  elements MUST contain an  atom:summary element  in either  of the
-following cases:
-  {ul
-  {- the atom:entry contains an atom:content  that has a "src" attribute (and is
-  thus empty).}
-  {- the atom:entry contains content that is encoded in Base64; i.e., the "type"
-  attribute of atom:content  is a MIME media type [MIMEREG],  but  is not an XML
-  media type  [RFC3023],  does not  begin with "text/",  and  does not  end with
-  "/xml" or "+xml".}}}
-{- atom:entry elements MUST NOT contain more than one atom:summary element.}
-{- atom:entry elements MUST contain exactly one atom:title element.}
-{- atom:entry elements MUST contain exactly one atom:updated element.}
-}
-
-*)
-type entry =
+type feed =
   {
-    authors: author * author list;
-    categories: category list;
-    content: content option;
-    contributors: author list;
-    id: id;
-    links: link list;
-    published: published option;
-    rights: rights option;
-    sources: source list;
-    summary: summary option;
-    title: title;
-    updated: updated;
+    authors : author list;
+    categories : category list;
+    contributors : author list;
+    generator : generator option;
+    icon : icon option;
+    id : id;
+    links : link list;
+    logo : logo option;
+    rights : rights option;
+    subtitle : subtitle option;
+    title : title;
+    updated : updated;
+    entries : entry list;
   }
+(** [feed] is the document (i.e., top-level) element of an Atom Feed
+    Document, acting as a container for metadata and data associated
+    with the feed. Its element children consist of metadata elements
+    followed by zero or more atom:entry child elements.
 
-(**
+    - [feed] MUST contain one or more [author], unless all of the
+      {!entry} elements of [entries] contain at least one [author]
+      element.
+    - one of the [links] SHOULD have a [rel] attribute value of
+      [Self].  This is the preferred URI for retrieving Atom Feed
+      Documents representing this Atom feed.
+    - There MUST NOT be more than one element of [links] with a rel
+      attribute value of [Alternate] that has the same combination of
+      type and hreflang attribute values.
+    - There may be additional elements in [links] beyond those
+      described above.
+    
+    If multiple {!entry} elements with the same {!id} value appear
+    in an Atom Feed Document, they represent the same entry.  Their
+    {!updated} timestamps SHOULD be different.  If an Atom Feed
+    Document contains multiple entries with the same {!id}, Atom
+    Processors MAY choose to display all of them or some subset of
+    them. One typical behavior would be to display only the entry with
+    the latest {!updated} timestamp.
 
-{{: http://tools.ietf.org/html/rfc4287#section-4.1.1} See RFC 4287 § 4.1.1 }
-
-The "atom:feed"  element is the  document (i.e.,  top-level) element  of an Atom
-Feed Document,  acting as a container for  metadata and data associated with the
-feed. Its element children consist of metadata elements followed by zero or more
-atom:entry child elements.
+    {{: http://tools.ietf.org/html/rfc4287#section-4.1.1} See RFC 4287 § 4.1.1}
 
 {[
   atomFeed =
@@ -641,63 +619,16 @@ atom:entry child elements.
         atomEntry*
       }
 ]}
-
-This specification assigns  no significance to the order  of atom:entry elements
-within the feed.
-
-The following  child elements are defined  by this specification  (note that the
-presence of some of these elements is required):
-
-{ul
-{- atom:feed elements MUST contain one or more atom:author elements,  unless all
-of  the atom:feed  element's child  atom:entry  elements  contain  at  least one
-atom:author element.}
-{- atom:feed elements MAY contain any number of atom:category elements.}
-{- atom:feed elements MAY contain any number of atom:contributor elements.}
-{- atom:feed elements MUST NOT contain more than one atom:generator element.}
-{- atom:feed elements MUST NOT contain more than one atom:icon element.}
-{- atom:feed elements MUST NOT contain more than one atom:logo element.}
-{- atom:feed elements MUST contain exactly one atom:id element.}
-{- atom:feed elements SHOULD contain one  atom:link element with a rel attribute
-value of "self".  This  is the preferred URI for  retrieving Atom Feed Documents
-representing this Atom feed.}
-{- atom:feed  elements MUST NOT contain  more than one atom:link  element with a
-rel attribute  value of "alternate"  that has the  same combination of  type and
-hreflang attribute values.}
-{- atom:feed  elements MAY  contain additional  atom:link elements  beyond those
-described above.}
-{- atom:feed elements MUST NOT contain more than one atom:rights element.}
-{- atom:feed elements MUST NOT contain more than one atom:subtitle element.}
-{- atom:feed elements MUST contain exactly one atom:title element.}
-{- atom:feed elements MUST contain exactly one atom:updated element.}
-}
-
-If multiple  atom:entry elements with the  same atom:id value appear  in an Atom
-Feed Document,  they  represent the  same entry.  Their  atom:updated timestamps
-SHOULD be different. If an Atom Feed Document contains multiple entries with the
-same atom:id,  Atom Processors MAY choose to  display all of them or some subset
-of them. One typical behavior would be to display only the entry with the latest
-atom:updated timestamp.
-
-*)
-type feed =
-  {
-    authors : author list;
-    categories : category list;
-    contributors : author list;
-    generator : generator option;
-    icon : icon option;
-    id : id;
-    links : link list;
-    logo : logo option;
-    rights : rights option;
-    subtitle : subtitle option;
-    title : title;
-    updated : updated;
-    entries : entry list;
-  }
+ *)
 
 val analyze : Xmlm.input -> feed
+(** [analyze xml] parse [xml].
+
+    @raise Error.raise_expectation if [xml] is not a valid RSS2
+    document. *)
+
+
+(**/**)
 
 (** Analysis without verification, enjoy ! *)
 val unsafe : Xmlm.input ->

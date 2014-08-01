@@ -100,11 +100,7 @@ Model: (#PCDATA)
 ]}
  *)
 
-type li = Uri.t
-
-type seq = li list
-
-type items = seq
+type items = Uri.t list
 (** An RDF table of contents, associating the document's items [5.5]
     with this particular RSS channel.  Each item's rdf:resource
     {item_uri} must be the same as the associated item element's

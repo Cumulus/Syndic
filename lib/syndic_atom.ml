@@ -538,6 +538,9 @@ let type_content_of_string s = match String.lowercase (String.trim s) with
   | "xhtml" -> Xhtml
   | mime -> Mime mime
 
+(* FIXME: src <> None => data = ""
+          enforce using a variant?  A better representation of the
+          constraints is possible. *)
 type content =
   {
     ty : type_content;
