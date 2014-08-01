@@ -45,34 +45,6 @@ module XML = struct
 
 end
 
-(* Exception *)
-
-module Error = struct
-  type expected_type =
-    | Attr of string
-    | Tag of string
-    | Data
-    | Root
-
-  exception Expected of expected_type * expected_type
-  exception Expected_Leaf
-
-  let string_of_expectation (a, b) =
-    let string_of_expected_type = function
-      | Attr a -> a ^ "="
-      | Tag a -> "<" ^ a ^ ">"
-      | Data -> "data"
-      | Root -> "root"
-    in let buffer = Buffer.create 16 in
-    Buffer.add_string buffer "Expected ";
-    Buffer.add_string buffer (string_of_expected_type a);
-    Buffer.add_string buffer " in ";
-    Buffer.add_string buffer (string_of_expected_type b);
-    Buffer.contents buffer
-
-  let raise_expectation data in_data = raise (Expected (data, in_data))
-end
-
 (* Util *)
 
 module Util = struct
@@ -83,7 +55,7 @@ module Util = struct
   let datas_has_leaf = List.exists (function | XML.Leaf _ -> true | _ -> false)
   let get_leaf l  = match find (function XML.Leaf _ -> true | _ -> false) l with
     | Some (XML.Leaf s) -> s
-    | _ -> raise Error.Expected_Leaf
+    | _ -> raise Syndic_error.Expected_Leaf
   let get_attrs ((_, attrs) : Xmlm.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name

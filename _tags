@@ -28,3 +28,4 @@
 <bin/*.ml{,i}>: package(xmlm)
 <bin/*.ml{,i}>: use_syndic
 # OASIS_STOP
+true: annot

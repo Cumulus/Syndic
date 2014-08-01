@@ -2,9 +2,9 @@
     compliant. *)
 
 module Error : sig
-  include Syndic_error.T
+  include module type of Syndic_error
 
-  exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
+  exception Duplicate_Link of (Uri.t * string * string) * (string * string)
 
   val string_of_duplicate_exception :
     (Uri.t * string * string) * (string * string) -> string

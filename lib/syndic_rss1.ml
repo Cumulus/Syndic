@@ -1,9 +1,7 @@
 open Syndic_common.XML
 open Syndic_common.Util
 
-module Error = struct
-  include Syndic_common.Error
-end
+module Error = Syndic_error
 
 type title = string
 type title' = [ `Data of string ]

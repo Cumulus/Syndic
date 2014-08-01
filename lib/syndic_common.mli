@@ -13,8 +13,6 @@ module XML : sig
     Xmlm.tag * tree list -> 'a
 end
 
-module Error : Syndic_error.T
-
 module Util : sig
   val find : ('a -> bool) -> 'a list -> 'a option
 
