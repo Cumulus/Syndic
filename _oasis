@@ -13,7 +13,7 @@ AlphaFeatures:          ocamlbuild_more_args
 
 Library syndic
   Path:                 lib
-  BuildDepends:         xmlm, uri, netstring
+  BuildDepends:         xmlm (>= 1.2.0), uri (>= 1.3.13), netstring (>= 3.7.3)
   Modules:              Syndic, Rss1, Rss2, Atom, Common
 
 Document "Syndic"
