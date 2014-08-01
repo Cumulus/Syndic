@@ -13,7 +13,7 @@ AlphaFeatures:          ocamlbuild_more_args
 
 Library syndic
   Path:                 lib
-  BuildDepends:         xmlm (>= 1.2.0), uri (>= 1.3.13), netstring (>= 3.7.3)
+  BuildDepends:         xmlm (>= 1.2.0), uri (>= 1.3.13), calendar (>= 2.03.2)
   Modules:              Syndic, Syndic_rss1, Syndic_rss2, Syndic_atom,
                         Syndic_error
   InternalModules:      Syndic_common
@@ -33,4 +33,3 @@ Executable main
   Path:                 bin
   MainIs:               main.ml
   BuildDepends:         syndic
-  CompiledObject:       best

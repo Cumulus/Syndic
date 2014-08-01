@@ -287,13 +287,13 @@ let logo_of_xml, logo_of_xml' =
   generate_catcher ~leaf_producer make_logo,
   generate_catcher ~leaf_producer (fun x -> x)
 
-type published = Netdate.t
+type published = CalendarLib.Calendar.t
 type published' = [ `Date of string ]
 
 let make_published (l : [< published'] list) =
   (* atom:published { atomDateConstruct } *)
   let date = match find (fun (`Date _) -> true) l with
-    | Some (`Date d) -> Netdate.parse d
+    | Some (`Date d) -> Syndic_common.Date.of_string d
     | _ -> Syndic_common.Error.raise_expectation
              Syndic_common.Error.Data
              (Syndic_common.Error.Tag "published")
@@ -355,13 +355,13 @@ let subtitle_of_xml, subtitle_of_xml' =
   generate_catcher ~leaf_producer make_subtitle,
   generate_catcher ~leaf_producer (fun x -> x)
 
-type updated = Netdate.t
+type updated = CalendarLib.Calendar.t
 type updated' = [ `Date of string ]
 
 let make_updated (l : [< updated'] list) =
   (* atom:updated { atomDateConstruct } *)
   let updated = match find (fun (`Date _) -> true) l with
-    | Some (`Date d) -> Netdate.parse d
+    | Some (`Date d) -> Syndic_common.Date.of_string d
     | _ -> Syndic_common.Error.raise_expectation
              Syndic_common.Error.Data
              (Syndic_common.Error.Tag "updated")

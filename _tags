@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: c7f29e4a67e63ab7a757423b81108b6e)
+# DO NOT EDIT (digest: 97fa97d865d032e52f348ac2c72e5896)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -15,15 +15,15 @@
 "_darcs": not_hygienic
 # Library syndic
 "lib/syndic.cmxs": use_syndic
-<lib/*.ml{,i}>: package(netstring)
+<lib/*.ml{,i}>: package(calendar)
 <lib/*.ml{,i}>: package(uri)
 <lib/*.ml{,i}>: package(xmlm)
 # Executable main
-<bin/main.{native,byte}>: package(netstring)
-<bin/main.{native,byte}>: package(uri)
-<bin/main.{native,byte}>: package(xmlm)
-<bin/main.{native,byte}>: use_syndic
-<bin/*.ml{,i}>: package(netstring)
+"bin/main.byte": package(calendar)
+"bin/main.byte": package(uri)
+"bin/main.byte": package(xmlm)
+"bin/main.byte": use_syndic
+<bin/*.ml{,i}>: package(calendar)
 <bin/*.ml{,i}>: package(uri)
 <bin/*.ml{,i}>: package(xmlm)
 <bin/*.ml{,i}>: use_syndic

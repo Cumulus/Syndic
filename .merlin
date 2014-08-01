@@ -4,4 +4,4 @@ S src
 B _build/lib
 B _build/src
 
-PKG xmlm uri netstring
+PKG xmlm uri calendar

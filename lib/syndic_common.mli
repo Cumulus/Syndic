@@ -28,5 +28,8 @@ module Util : sig
   val get_value : Xmlm.attribute -> string
   val get_attr_name : Xmlm.attribute -> string
   val get_tag_name : Xmlm.tag -> string
+end
 
+module Date : sig
+  val of_string : string -> CalendarLib.Calendar.t
 end
