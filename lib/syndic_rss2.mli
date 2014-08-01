@@ -1,7 +1,15 @@
 (** [Syndic.Rss2]: compliant with
     {{: http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt} RSS 2.0}. *)
 
-module Error : Syndic_error.T
+module Error : sig
+  include Syndic_error.T
+
+  exception Size_Exceeded of string * int * int
+  exception Item_expectation
+
+  val string_of_size_exceeded : string * int * int -> string
+  val string_of_item_exceptation : string
+end
 
 (**
 
