@@ -1,7 +1,8 @@
-(** Compliant with {{: http://web.resource.org/rss/1.0/spec} RSS 1.0 } *)
+(** [Syndic.Rss1]: compliant with
+    {{: http://web.resource.org/rss/1.0/spec} RSS 1.0}. *)
 
 module Error : sig
-  include (module type of Common.Error)
+  include (module type of Syndic_common.Error)
 end
 
 (**

@@ -1,8 +1,8 @@
-open Common.XML
-open Common.Util
+open Syndic_common.XML
+open Syndic_common.Util
 
 module Error = struct
-  include Common.Error
+  include Syndic_common.Error
 
   exception Size_Exceeded of string * int * int
 

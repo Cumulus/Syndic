@@ -1,8 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: 12ce647a6a489d9e9b660f9fe564fcd4)
+# DO NOT EDIT (digest: 408a96420358a9039816900f7ac5288e)
 Syndic
-Rss1
-Rss2
-Atom
-Common
+Syndic_rss1
+Syndic_rss2
+Syndic_atom
 # OASIS_STOP

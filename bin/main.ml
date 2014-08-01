@@ -1,3 +1,5 @@
+open Syndic
+
 let () =
   try let _ = Atom.analyze (Xmlm.make_input (`Channel stdin)) in ()
   with

@@ -1,5 +1,5 @@
-open Common.XML
-open Common.Util
+open Syndic_common.XML
+open Syndic_common.Util
 
 type author =
   {
@@ -18,9 +18,9 @@ let make_author (l : [< author'] list) =
   (* element atom:name { text } *)
   let name = match find (function `Name _ -> true | _ -> false) l with
     | Some (`Name s) -> s
-    | _ -> Common.Error.raise_expectation
-             (Common.Error.Tag "name")
-             (Common.Error.Tag "author")
+    | _ -> Syndic_common.Error.raise_expectation
+             (Syndic_common.Error.Tag "name")
+             (Syndic_common.Error.Tag "author")
   in
   (* element atom:uri { atomUri }? *)
   let uri = match find (function `URI _ -> true | _ -> false) l with
@@ -36,18 +36,18 @@ let make_author (l : [< author'] list) =
 
 let author_name_of_xml (tag, datas) =
   try get_leaf datas
-  with Common.Error.Expected_Leaf -> "" (* mandatory ? *)
+  with Syndic_common.Error.Expected_Leaf -> "" (* mandatory ? *)
 
 let author_uri_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Common.Error.Expected_Leaf ->
-    Common.Error.raise_expectation
-      Common.Error.Data
-      (Common.Error.Tag "author/uri")
+  with Syndic_common.Error.Expected_Leaf ->
+    Syndic_common.Error.raise_expectation
+      Syndic_common.Error.Data
+      (Syndic_common.Error.Tag "author/uri")
 
 let author_email_of_xml (tag, datas) =
   try get_leaf datas
-  with Common.Error.Expected_Leaf -> "" (* mandatory ? *)
+  with Syndic_common.Error.Expected_Leaf -> "" (* mandatory ? *)
 
 let author_of_xml =
   let data_producer = [
@@ -82,9 +82,9 @@ let make_category (l : [< category'] list) =
   (* attribute term { text } *)
   let term = match find (function `Term _ -> true | _ -> false) l with
     | Some (`Term t) -> t
-    | _ -> Common.Error.raise_expectation
-             (Common.Error.Attr "term")
-             (Common.Error.Tag "category")
+    | _ -> Syndic_common.Error.raise_expectation
+             (Syndic_common.Error.Attr "term")
+             (Syndic_common.Error.Tag "category")
   in
   (* attribute scheme { atomUri }? *)
   let scheme =
@@ -129,9 +129,9 @@ let make_generator (l : [< generator'] list) =
   (* text *)
   let content = match find (function `Content _ -> true | _ -> false) l with
     | Some ((`Content c)) -> c
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "generator")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "generator")
   in
   (* attribute version { text }? *)
   let version = match find (function `Version _ -> true | _ -> false) l with
@@ -160,9 +160,9 @@ let make_icon (l : [< icon'] list) =
   (** (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "icon")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "icon")
   in uri
 
 let icon_of_xml, icon_of_xml' =
@@ -177,9 +177,9 @@ let make_id (l : [< id'] list) =
   (* (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "id")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "id")
   in uri
 
 let id_of_xml, id_of_xml' =
@@ -226,9 +226,9 @@ let make_link (l : [< link'] list) =
   (* attribute href { atomUri } *)
   let href = match find (function `HREF _ -> true | _ -> false) l with
     | Some (`HREF u) -> (Uri.of_string u)
-    | _ -> Common.Error.raise_expectation
-             (Common.Error.Attr "href")
-             (Common.Error.Tag "link")
+    | _ -> Syndic_common.Error.raise_expectation
+             (Syndic_common.Error.Attr "href")
+             (Syndic_common.Error.Tag "link")
   in
   (* attribute rel { atomNCName | atomUri }? *)
   let rel = match find (function `Rel _ -> true | _ -> false) l with
@@ -277,9 +277,9 @@ let make_logo (l : [< logo'] list) =
   (* (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "logo")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "logo")
   in uri
 
 let logo_of_xml, logo_of_xml' =
@@ -294,9 +294,9 @@ let make_published (l : [< published'] list) =
   (* atom:published { atomDateConstruct } *)
   let date = match find (fun (`Date _) -> true) l with
     | Some (`Date d) -> Netdate.parse d
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "published")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "published")
   in date
 
 let published_of_xml, published_of_xml' =
@@ -312,9 +312,9 @@ let make_rights (l : [< rights'] list) =
   (* element atom:rights { atomTextConstruct } *)
   let rights = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "rights")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "rights")
   in rights
 
 let rights_of_xml, rights_of_xml' =
@@ -329,9 +329,9 @@ let make_title (l : [< title'] list) =
   (* element atom:title { atomTextConstruct } *)
   let title = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "title")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "title")
   in title
 
 let title_of_xml, title_of_xml' =
@@ -345,9 +345,9 @@ type subtitle' = [ `Data of string ]
 let make_subtitle (l : [< subtitle'] list) =
   let subtitle = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "subtitle")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "subtitle")
   in subtitle
 
 let subtitle_of_xml, subtitle_of_xml' =
@@ -362,9 +362,9 @@ let make_updated (l : [< updated'] list) =
   (* atom:updated { atomDateConstruct } *)
   let updated = match find (fun (`Date _) -> true) l with
     | Some (`Date d) -> Netdate.parse d
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "updated")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "updated")
   in updated
 
 let updated_of_xml, updated_of_xml' =
@@ -407,9 +407,9 @@ let make_source (l : [< source'] list) =
   (* atomAuthor* *)
   let authors =
     (function
-      | [] -> Common.Error.raise_expectation
-                (Common.Error.Tag "author")
-                (Common.Error.Tag "source")
+      | [] -> Syndic_common.Error.raise_expectation
+                (Syndic_common.Error.Tag "author")
+                (Syndic_common.Error.Tag "source")
       | x :: r -> x, r)
       (List.fold_left
          (fun acc -> function `Author x -> x :: acc | _ -> acc)
@@ -439,16 +439,16 @@ let make_source (l : [< source'] list) =
   (* atomId? *)
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
-    | _ -> Common.Error.raise_expectation
-             (Common.Error.Tag "id")
-             (Common.Error.Tag "source")
+    | _ -> Syndic_common.Error.raise_expectation
+             (Syndic_common.Error.Tag "id")
+             (Syndic_common.Error.Tag "source")
   in
   (* atomLink* *)
   let links =
     (function
-      | [] -> Common.Error.raise_expectation
-                (Common.Error.Tag "link")
-                (Common.Error.Tag "source")
+      | [] -> Syndic_common.Error.raise_expectation
+                (Syndic_common.Error.Tag "link")
+                (Syndic_common.Error.Tag "source")
       | x :: r -> (x, r))
       (List.fold_left (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l)
   in
@@ -470,9 +470,9 @@ let make_source (l : [< source'] list) =
   (* atomTitle? *)
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title s) -> s
-    | _ -> Common.Error.raise_expectation
-             (Common.Error.Tag "title")
-             (Common.Error.Tag "source")
+    | _ -> Syndic_common.Error.raise_expectation
+             (Syndic_common.Error.Tag "title")
+             (Syndic_common.Error.Tag "source")
   in
   (* atomUpdated? *)
   let updated = match find (function `Updated _ -> true | _ -> false) l with
@@ -593,9 +593,9 @@ let make_summary (l : [< summary'] list) =
   (* element atom:summaru { atomTextConstruct } *)
   let data = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
-    | _ -> Common.Error.raise_expectation
-             Common.Error.Data
-             (Common.Error.Tag "summary")
+    | _ -> Syndic_common.Error.raise_expectation
+             Syndic_common.Error.Data
+             (Syndic_common.Error.Tag "summary")
   in data
 
 let summary_of_xml, summary_of_xml' =
@@ -635,7 +635,7 @@ type entry' = [
 ]
 
 module Error = struct
-  include Common.Error
+  include Syndic_common.Error
 
   exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
 

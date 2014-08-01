@@ -1,3 +1,3 @@
-module Rss1 = Rss1
-module Rss2 = Rss2
-module Atom = Atom
+module Rss1 = Syndic_rss1
+module Rss2 = Syndic_rss2
+module Atom = Syndic_atom
