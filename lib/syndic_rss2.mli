@@ -1,9 +1,7 @@
 (** [Syndic.Rss2] compliant with
     {{: http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt} RSS 2.0}. *)
 
-module Error : sig
-  include (module type of Syndic_common.Error)
-end
+module Error : Syndic_error.T
 
 (**
 

@@ -2,7 +2,7 @@
     compliant. *)
 
 module Error : sig
-  include (module type of Syndic_common.Error)
+  include Syndic_error.T
 
   exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
 
