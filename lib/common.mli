@@ -28,18 +28,7 @@ module Error : sig
 end
 
 module Util : sig
-(*
-  type opts_neturl = {
-    schemes : (string, Neturl.url_syntax) Hashtbl.t;
-    base_syntax : Neturl.url_syntax;
-    accept_8bits : bool;
-    enable_fragment : bool;
-  }
-*)
-
   val find : ('a -> bool) -> 'a list -> 'a option
-
-  (* val url_of_string : opts_neturl -> string -> Neturl.url *)
 
   val tag_is : Xmlm.tag -> string -> bool
   val attr_is : Xmlm.attribute -> string -> bool
@@ -52,12 +41,4 @@ module Util : sig
   val get_attr_name : Xmlm.attribute -> string
   val get_tag_name : Xmlm.tag -> string
 
-  (*
-  val make_opts_neturl :
-    ?schemes:(string, Neturl.url_syntax) Hashtbl.t ->
-    ?base_syntax:Neturl.url_syntax ->
-    ?accept_8bits:bool -> ?enable_fragment:bool -> unit -> opts_neturl
-  *)
 end
-
-

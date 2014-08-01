@@ -18,7 +18,8 @@ module XML = struct
       with _ -> None
     in
     let rec catch_attr acc = function
-      | attr :: r -> begin match get_producer (get_attr_name attr) attr_producer with
+      | attr :: r -> begin
+          match get_producer (get_attr_name attr) attr_producer with
           | Some f -> catch_attr ((f acc (get_attr_value attr)) :: acc) r
           | None -> catch_attr acc r end
       | [] -> acc
@@ -77,27 +78,7 @@ end
 (* Util *)
 
 module Util = struct
-  (*
-  type opts_neturl = {
-    schemes: (string, Neturl.url_syntax) Hashtbl.t;
-    base_syntax: Neturl.url_syntax;
-    accept_8bits: bool;
-    enable_fragment: bool;
-  }
-  *)
-
   let find f l = try Some (List.find f l) with Not_found -> None
-
-  (*
-  let url_of_string opts_neturl str =
-    try Neturl.parse_url
-          ~schemes:opts_neturl.schemes
-          ~base_syntax:opts_neturl.base_syntax
-          ~accept_8bits:opts_neturl.accept_8bits
-          ~enable_fragment:opts_neturl.enable_fragment
-          str
-    with Neturl.Malformed_URL -> raise (Error.Malformed_URL str)
-  *)
 
   let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
@@ -109,18 +90,4 @@ module Util = struct
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
   let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
-
-  (*
-  let make_opts_neturl
-      ?(schemes = Neturl.common_url_syntax)
-      ?(base_syntax = Hashtbl.find Neturl.common_url_syntax "http")
-      ?(accept_8bits = true)
-      ?(enable_fragment = true) () =
-    {
-      schemes;
-      base_syntax;
-      accept_8bits;
-      enable_fragment;
-    }
-  *)
 end
