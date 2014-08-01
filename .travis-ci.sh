@@ -23,7 +23,7 @@ if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
   cd .documentation
   git fetch
   git checkout gh-pages
-  git merge master
+  git merge master --commit -m "Merge master into gh-pages"
 
   ./configure
   make doc
@@ -31,7 +31,7 @@ if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
   git add -f doc/
 
   if [ -n "$(git status --untracked-files=no --porcelain)" ]; then
-    git commit -m "Lastest ocamldoc on successful travis build $TRAVIS_BUILD_NUMBER auto-pushed to gh-pages"
+    git commit -m "Update documentation $TRAVIS_BUILD_NUMBER"
     git push -fq origin gh-pages
   fi
 
