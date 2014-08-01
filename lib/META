@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 69eeb9bced589f5f5b55bcbf9836ff89)
-version = "0.1"
+# DO NOT EDIT (digest: a164aa2f1545c9ac99f40180ecda7bad)
+version = "1.0"
 description = "RSS and Atom feed parsing"
 requires = "xmlm uri netstring"
 archive(byte) = "syndic.cma"
