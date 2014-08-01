@@ -1,7 +1,7 @@
 _build
 setup.data
 setup.log
-doc/
+doc/*.html
 *.native
 *.byte
 *.docdir
