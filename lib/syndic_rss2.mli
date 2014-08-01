@@ -1,4 +1,4 @@
-(** [Syndic.Rss2] compliant with
+(** [Syndic.Rss2]: compliant with
     {{: http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt} RSS 2.0}. *)
 
 module Error : Syndic_error.T
