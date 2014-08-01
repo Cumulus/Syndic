@@ -89,3 +89,9 @@ module Util = struct
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
   let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
 end
+
+open CalendarLib
+
+module Date = struct
+  let of_string = Printer.Calendar.from_fstring "%Y-%m-%dT%H:%M:%S%:z"
+end

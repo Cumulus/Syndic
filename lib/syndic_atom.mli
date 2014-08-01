@@ -298,7 +298,7 @@ Typically,  atom:published will be associated with the initial creation or first
 availability of the resource.
 
 *)
-type published = Netdate.t
+type published = CalendarLib.Calendar.t
 
 (**
 
@@ -357,7 +357,7 @@ changed atom:updated value.
 Publishers MAY change the value of this element over time.
 
 *)
-type updated = Netdate.t
+type updated = CalendarLib.Calendar.t
 
 (**
 

@@ -22,7 +22,7 @@ module Error = struct
 
   exception Item_expectation
 
-  let raise_item_exceptation =
+  let raise_item_exceptation () =
     raise Item_expectation
 
   let string_of_item_exceptation =
@@ -397,7 +397,7 @@ type item =
     comments: Uri.t option;
     enclosure: enclosure option;
     guid: guid option;
-    pubDate: Netdate.t option; (* date *)
+    pubDate: CalendarLib.Calendar.t option; (* date *)
     source: source option;
   }
 
@@ -410,7 +410,7 @@ type item' = [
   | `Comments of Uri.t
   | `Enclosure of enclosure
   | `Guid of guid
-  | `PubDate of Netdate.t
+  | `PubDate of CalendarLib.Calendar.t
   | `Source of source
 ]
 
@@ -422,7 +422,7 @@ let make_item (l : [< item' ] list) =
     | Some (`Title t), Some (`Description d) -> All (t, d)
     | Some (`Title t), _ -> Title t
     | _, Some (`Description d) -> Description d
-    | _, _ -> Error.raise_item_exceptation
+    | _, _ -> Error.raise_item_exceptation ()
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link l) -> Some l
@@ -492,7 +492,7 @@ let item_comments_of_xml (tag, datas) =
     Error.raise_expectation Error.Data (Error.Tag "item/comments")
 
 let item_pubdate_of_xml (tag, datas) =
-  try Netdate.parse (get_leaf datas)
+  try Syndic_common.Date.of_string (get_leaf datas)
   with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/pubDate")
 
@@ -536,8 +536,8 @@ type channel =
     copyright: string option;
     managingEditor: string option;
     webMaster: string option;
-    pubDate: Netdate.t option;
-    lastBuildDate: Netdate.t option;
+    pubDate: CalendarLib.Calendar.t option;
+    lastBuildDate: CalendarLib.Calendar.t option;
     category: string option;
     generator: string option;
     docs: Uri.t option;
@@ -559,8 +559,8 @@ type channel' = [
   | `Copyright of string
   | `ManagingEditor of string
   | `WebMaster of string
-  | `PubDate of Netdate.t
-  | `LastBuildDate of Netdate.t
+  | `PubDate of CalendarLib.Calendar.t
+  | `LastBuildDate of CalendarLib.Calendar.t
   | `Category of string
   | `Generator of string
   | `Docs of Uri.t
@@ -715,12 +715,12 @@ let channel_webmaster_of_xml (tag, datas) =
     Error.raise_expectation Error.Data (Error.Tag "channel/webMaster")
 
 let channel_pubdate_of_xml (tag, datas) =
-  try Netdate.parse (get_leaf datas)
+  try Syndic_common.Date.of_string (get_leaf datas)
   with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "channel/pubDate")
 
 let channel_lastbuilddate_of_xml (tag, datas) =
-  try Netdate.parse (get_leaf datas)
+  try Syndic_common.Date.of_string (get_leaf datas)
   with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "channel/lastBuildDate")
 

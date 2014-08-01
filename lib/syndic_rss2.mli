@@ -238,12 +238,12 @@ type item =
   {
     story: story;
     link: Uri.t option;
-    author:  string option; (* e-mail *)
+    author:  string option;
     category: category option;
     comments: Uri.t option;
     enclosure: enclosure option;
     guid: guid option;
-    pubDate: Netdate.t option; (* date *)
+    pubDate: CalendarLib.Calendar.t option;
     source: source option;
   }
 
@@ -332,8 +332,8 @@ type channel =
     copyright: string option;
     managingEditor: string option;
     webMaster: string option;
-    pubDate: Netdate.t option;
-    lastBuildDate: Netdate.t option;
+    pubDate: CalendarLib.Calendar.t option;
+    lastBuildDate: CalendarLib.Calendar.t option;
     category: string option;
     generator: string option;
     docs: Uri.t option;

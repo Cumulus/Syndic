@@ -4,7 +4,7 @@ sudo apt-get install ocaml ocaml-native-compilers camlp4-extra opam opam
 
 export OPAMYES=1
 opam init
-opam install oasis ocamlfind ocamlnet xmlm uri
+opam install oasis ocamlfind calendar xmlm uri
 eval `opam config env`
 
 ./configure
