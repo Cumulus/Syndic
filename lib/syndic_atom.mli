@@ -1,7 +1,8 @@
-(** {{: http://tools.ietf.org/html/rfc4287} RFC 4287} Compliant *)
+(** [Syndic.Atom]: {{: http://tools.ietf.org/html/rfc4287} RFC 4287}
+    compliant. *)
 
 module Error : sig
-  include (module type of Common.Error)
+  include Syndic_error.T
 
   exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
 
