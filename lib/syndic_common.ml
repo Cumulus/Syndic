@@ -5,6 +5,12 @@ module XML = struct
     | Node of Xmlm.tag * tree list
     | Leaf of string
 
+  let tree input =
+    let el tag datas = Node (tag, datas) in
+    let data data = Leaf data in
+    let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
+    tree
+
   let generate_catcher
       ?(attr_producer=[])
       ?(data_producer=[])

@@ -921,18 +921,12 @@ let feed_of_xml' =
   generate_catcher ~data_producer (fun x -> x)
 
 let analyze input =
-  let el tag datas = Node (tag, datas) in
-  let data data = Leaf data in
-  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
-  match tree with
+  match tree input with
   | Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "feed") Error.Root
 
 let unsafe input =
-  let el tag datas = Node (tag, datas) in
-  let data data = Leaf data in
-  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
-  match tree with
+  match tree input with
   | Node (tag, datas) when tag_is tag "feed" ->
      `Feed (feed_of_xml' (tag, datas))
   | _ -> `Feed []
