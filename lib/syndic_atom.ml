@@ -406,15 +406,14 @@ type source' = [
   | `Updated of updated
 ]
 
-let make_source (l : [< source'] list) =
+let make_source ~entry_authors (l : [< source'] list) =
   (* atomAuthor* *)
   let authors =
-    (function
-      | [] -> Error.raise_expectation (Error.Tag "author") (Error.Tag "source")
-      | x :: r -> x, r)
-      (List.fold_left
-         (fun acc -> function `Author x -> x :: acc | _ -> acc)
-         [] l)
+    List.fold_left (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
+  let authors = match authors, entry_authors with
+    | x :: r, _ -> x, r
+    | [], x :: r -> x, r
+    | [], [] -> Error.raise_expectation (Error.Tag "author") (Error.Tag "source")
   in
   (* atomCategory* *)
   let categories =
@@ -502,7 +501,8 @@ let source_of_xml =
     ("title", (fun ctx a -> `Title (title_of_xml a)));
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
   ] in
-  XML.generate_catcher ~data_producer make_source
+  fun ~entry_authors ->
+  XML.generate_catcher ~data_producer (make_source ~entry_authors)
 
 let source_of_xml' =
   let data_producer = [
@@ -688,24 +688,29 @@ type feed' = [
   | `Entry of entry
 ]
 
-let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
-  let feed_author =
-    match find (function `Author _ -> true | _ -> false) feed with
-    | Some (`Author a) -> Some a
-    | _ -> None
-    (* (atomAuthor* *)
-  in let authors =
+
+let make_entry ~(feed_authors: author list) l =
+  let authors =
+    List.fold_left (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
+  let authors = match authors with
     (* default author is feed/author, see RFC 4287 § 4.1.2 *)
-    (function
-      | None, [] ->
-        Error.raise_expectation (Error.Tag "author") (Error.Tag "entry")
-      | Some a, [] -> a, []
-      | _, x :: r -> x, r)
-      (feed_author,
-       List.fold_left
-         (fun acc -> function `Author x -> x :: acc | _ -> acc)
-         [] l)
-      (* atomCategory* *)
+    | [] -> feed_authors
+    | _ -> authors in
+  (* atomSource? (pass the authors known so far) *)
+  let sources = List.fold_left
+                  (fun acc -> function `Source x -> x :: acc | _ -> acc) [] l in
+  let sources = List.map (source_of_xml ~entry_authors:authors) sources in
+  let authors = match authors, sources with
+    | a0 :: a, _ -> a0, a
+    | [], s :: src ->
+       (* Collect authors given in [sources] *)
+       let a0, a1 = s.authors in
+       let a2 =
+         List.map (fun (s: source) -> let a1, a = s.authors in a1 :: a) src in
+       a0, List.concat (a1 :: a2)
+    | [], [] ->
+       Error.raise_expectation (Error.Tag "author") (Error.Tag "entry")
+  (* atomCategory* *)
   in let categories = List.fold_left
       (fun acc -> function `Category x -> x :: acc | _ -> acc) [] l
       (* atomContributor* *)
@@ -726,10 +731,7 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
   (* atomRights? *)
   let rights = match find (function `Rights _ -> true | _ -> false) l with
     | Some (`Rights r) -> Some r
-    | _ -> None
-    (* atomSource? *)
-  in let sources = List.fold_left
-      (fun acc -> function `Source x -> x :: acc | _ -> acc) [] l in
+    | _ -> None in
   (* atomContent? *)
   let content = match find (function `Content _ -> true | _ -> false) l with
     | Some (`Content c) -> Some c
@@ -763,7 +765,7 @@ let make_entry (feed : [< feed'] list) (l : [< entry'] list) =
      title;
      updated; } : entry)
 
-let entry_of_xml feed =
+let entry_of_xml =
   let data_producer = [
     ("author", (fun ctx a -> `Author (author_of_xml a)));
     ("category", (fun ctx a -> `Category (category_of_xml a)));
@@ -772,13 +774,14 @@ let entry_of_xml feed =
     ("link", (fun ctx a -> `Link (link_of_xml a)));
     ("published", (fun ctx a -> `Published (published_of_xml a)));
     ("rights", (fun ctx a -> `Rights (rights_of_xml a)));
-    ("source", (fun ctx a -> `Source (source_of_xml a)));
+    ("source", (fun ctx a -> `Source a));
     ("content", (fun ctx a -> `Content (content_of_xml a)));
     ("summary", (fun ctx a -> `Summary (summary_of_xml a)));
     ("title", (fun ctx a -> `Title (title_of_xml a)));
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
   ] in
-  XML.generate_catcher ~data_producer (make_entry feed)
+  fun ~feed_authors ->
+  XML.generate_catcher ~data_producer (make_entry ~feed_authors)
 
 let entry_of_xml' =
   let data_producer = [
@@ -814,7 +817,7 @@ type feed =
     entries: entry list;
   }
 
-let make_feed (l : [< feed'] list) =
+let make_feed (l : _ list) =
   (* atomAuthor* *)
   let authors = List.fold_left
       (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
@@ -868,8 +871,10 @@ let make_feed (l : [< feed'] list) =
     | _ -> Error.raise_expectation (Error.Tag "updated") (Error.Tag "feed")
   in
   (* atomEntry* *)
-  let entries = List.fold_left
-      (fun acc -> function `Entry x -> x :: acc | _ -> acc) [] l in
+  let entries =
+    List.fold_left
+      (fun acc -> function `Entry x -> entry_of_xml ~feed_authors:authors x :: acc
+                      | _ -> acc) [] l in
   ({ authors;
      categories;
      contributors;
@@ -898,7 +903,7 @@ let feed_of_xml =
     ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml a)));
     ("title", (fun ctx a -> `Title (title_of_xml a)));
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
-    ("entry", (fun ctx a -> `Entry (entry_of_xml ctx a)));
+    ("entry", (fun ctx a -> `Entry a));
   ] in
   XML.generate_catcher ~data_producer make_feed
 
@@ -924,6 +929,7 @@ let analyze input =
   match XML.tree input with
   | XML.Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "feed") Error.Root
+(* FIXME: the spec says that an entry can appear as the top-level element *)
 
 let unsafe input =
   match XML.tree input with
