@@ -70,12 +70,14 @@ type author' = [
   | `Email of string
 ]
 
-let make_author (l : [< author'] list) =
+let make_author datas (l : [< author'] list) =
   (* element atom:name { text } *)
   let name = match find (function `Name _ -> true | _ -> false) l with
     | Some (`Name s) -> s
-    | _ -> Error.raise_expectation (Error.Tag "name") (Error.Tag "author")
-  in
+    | _ ->
+       (* The spec mandates that <author><name>name</name></author>
+          but severay feed just do <author>name</author> *)
+       get_leaf datas in
   (* element atom:uri { atomUri }? *)
   let uri = match find (function `URI _ -> true | _ -> false) l with
     | Some (`URI u) -> Some u
@@ -107,7 +109,8 @@ let author_of_xml =
     ("uri", (fun ctx a -> `URI (author_uri_of_xml a)));
     ("email", (fun ctx a -> `Email (author_email_of_xml a)));
   ] in
-  XML.generate_catcher ~data_producer make_author
+  fun ((_, datas) as xml) ->
+  XML.generate_catcher ~data_producer (make_author datas) xml
 
 let author_of_xml' =
   let data_producer = [

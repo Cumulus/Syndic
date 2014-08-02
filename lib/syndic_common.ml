@@ -31,11 +31,11 @@ module XML = struct
       | [] -> acc
     in
     let rec catch_datas acc = function
-      | (Node (tag, datas)) :: r ->
+      | Node (tag, datas) :: r ->
         begin match get_producer (get_tag_name tag) data_producer with
           | Some f -> catch_datas ((f acc (tag, datas)) :: acc) r
           | None -> catch_datas acc r end
-      | (Leaf str) :: r ->
+      | Leaf str :: r ->
         begin match leaf_producer with
           | Some f -> catch_datas ((f acc str) :: acc) r
           | None -> catch_datas acc r end
