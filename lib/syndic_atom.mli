@@ -622,7 +622,9 @@ type feed =
  *)
 
 val analyze : Xmlm.input -> feed
-(** [analyze xml] parse [xml].
+(** [analyze xml] parse [xml].  Beware that [xml] is mutable, so when
+    the parsing fails, one have to create a new copy of [xml] to use
+    it with another function.
 
     @raise Error.raise_expectation if [xml] is not a valid RSS2
     document. *)
