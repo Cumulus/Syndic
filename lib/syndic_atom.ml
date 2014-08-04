@@ -551,27 +551,15 @@ let source_of_xml' =
   ] in
   generate_catcher ~data_producer (fun x -> x)
 
-type type_content =
-  | Html
-  | Text
-  | Xhtml
-  | Mime of string
 
-let type_content_of_string s = match String.lowercase (String.trim s) with
-  | "html" -> Html
-  | "text" -> Text
-  | "xhtml" -> Xhtml
-  | mime -> Mime mime
+type mime = string
 
-(* FIXME: src <> None => data = ""
-          enforce using a variant?  A better representation of the
-          constraints is possible. *)
 type content =
-  {
-    ty : type_content;
-    src : Uri.t option;
-    data : string;
-  }
+  | Text of string
+  | Html of Syndic_xml.t list
+  | Xhtml of Syndic_xml.t list
+  | Mime of mime * string
+  | Src of mime option * Uri.t
 
 type content' = [
   | `Type of string
@@ -579,39 +567,50 @@ type content' = [
   | `Data of string
 ]
 
+
+(* The actual content is supposed to be inside a <div> which is NOT
+   part of the content. *)
+(* FIXME: beware for output! Must pust the <div> back (with namespace ?) *)
+let rec get_xml_content xml0 = function
+  | XML.Leaf s :: tl -> if only_whitespace s then get_xml_content xml0 tl
+                       else xml0 (* unexpected *)
+  | XML.Node(tag, data) :: tl when tag_is tag "div" ->
+     let is_space =
+       List.for_all (function XML.Leaf s -> only_whitespace s | _ -> false) tl in
+     if is_space then data else xml0
+  | _ -> xml0
+
 (* TODO: see RFC *)
+let content_of_xml (((tag, attr), data): Xmlm.tag * t list) : content =
+  (* MIME ::= attribute type { "text" | "html" }?
+              | attribute type { "xhtml" }
+              | attribute type { atomMediaType }? *)
+  (* attribute src { atomUri } | none
+     If src s present, [data] MUST be empty. *)
+  match find (fun a -> attr_is a "src") attr with
+  | Some (_, src) ->
+     let mime = match find (fun a -> attr_is a "type") attr with
+       | Some(_, ty) -> Some ty
+       | None -> None in
+     Src(mime, Uri.of_string src)
+  | None ->
+     (* (text)*
+      *  | xhtmlDiv
+      *  | (text|anyElement)*
+      *  | none *)
+     match find (fun a -> attr_is a "type") attr with
+     | Some (_, "text") | None -> Text(get_leaf data)
+     | Some (_, "html") -> Html(get_xml_content data data)
+     | Some (_, "xhtml") -> Xhtml(get_xml_content data data)
+     | Some (_, mime) -> Mime(mime, get_leaf data)
 
-let make_content (l : [< content'] list) =
-  (* attribute type { "text" | "html" }?
-   *  | attribute type { "xhtml" }
-   *  | attribute type { atomMediaType }? *)
-  let ty = match find (function `Type _ -> true | _ -> false) l with
-    | Some (`Type ty) -> type_content_of_string ty
-    | _ -> Text
-  in
-  (* attribute src { atomUri }
-   *  | none *)
-  let src = match find (function `SRC _ -> true | _ -> false) l with
-    | Some (`SRC s) -> Some (Uri.of_string s)
-    | _ -> None
-  in
-  (* (text)*
-   *  | xhtmlDiv
-   *  | (text|anyElement)*
-   *  | none *)
-  let data = match find (function `Data _ -> true | _ -> false) l with
-    | Some (`Data d) -> d
-    | _ -> ""
-  in
-  ({ ty; src; data; } : content)
-
-let content_of_xml, content_of_xml' =
+let content_of_xml' =
   let attr_producer = [
     ("type", (fun ctx a -> `Type a));
     ("src", (fun ctx a -> `SRC a));
   ] in
+  (* FIXME: this will not capture the data *)
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~attr_producer ~leaf_producer make_content,
   generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type summary = string

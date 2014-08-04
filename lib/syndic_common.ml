@@ -65,4 +65,12 @@ module Util = struct
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
   let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
+
+  let is_space c = c = ' ' || c = '\t' || c = '\n' || c = '\r'
+
+  let only_whitespace s =
+    let r = ref true in
+    let i = ref 0 and len = String.length s in
+    while !r && !i < len do r := is_space s.[!i]; incr i done;
+    !r
 end
