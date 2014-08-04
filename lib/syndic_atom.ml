@@ -1,6 +1,32 @@
 module XML = Syndic_common.XML
 open Syndic_common.Util
 
+module Date = struct
+  open CalendarLib
+  open Printf
+  open Scanf
+
+  (* RFC3339 date *)
+  let of_string s =
+    let make_date year month day h m s z =
+      let date = Calendar.Date.make year month day in
+      let t = Calendar.Time.(make h m (Second.from_float s)) in
+      if z = "" || z.[0] = 'Z' then
+        Calendar.(create date t)
+      else
+        let tz =
+          let open Calendar.Time in
+          sscanf z "%i:%i" (fun h m -> Period.make h m (Second.from_int 0)) in
+        Calendar.(create date (Time.add t tz))
+    in
+    (* Sometimes, the seconds have a decimal point
+       See https://forge.ocamlcore.org/tracker/index.php?func=detail&aid=1414&group_id=83&atid=418 *)
+    try sscanf s "%i-%i-%iT%i:%i:%f%s" make_date
+    with Scanf.Scan_failure _ ->
+      invalid_arg(sprintf "Syndic.Atom.Date.of_string: cannot parse %S" s)
+end
+
+
 type rel =
   | Alternate
   | Related
@@ -309,7 +335,7 @@ type published' = [ `Date of string ]
 let make_published (l : [< published'] list) =
   (* atom:published { atomDateConstruct } *)
   let date = match find (fun (`Date _) -> true) l with
-    | Some (`Date d) -> Syndic_common.Date.of_string d
+    | Some (`Date d) -> Date.of_string d
     | _ -> Error.raise_expectation Error.Data (Error.Tag "published")
   in date
 
@@ -369,7 +395,7 @@ type updated' = [ `Date of string ]
 let make_updated (l : [< updated'] list) =
   (* atom:updated { atomDateConstruct } *)
   let updated = match find (fun (`Date _) -> true) l with
-    | Some (`Date d) -> Syndic_common.Date.of_string d
+    | Some (`Date d) -> Date.of_string d
     | _ -> Error.raise_expectation Error.Data (Error.Tag "updated")
   in updated
 
