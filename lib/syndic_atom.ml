@@ -564,7 +564,7 @@ type content =
 type content' = [
   | `Type of string
   | `SRC of string
-  | `Data of string
+  | `Data of Syndic_xml.t list
 ]
 
 
@@ -604,14 +604,14 @@ let content_of_xml (((tag, attr), data): Xmlm.tag * t list) : content =
      | Some (_, "xhtml") -> Xhtml(get_xml_content data data)
      | Some (_, mime) -> Mime(mime, get_leaf data)
 
-let content_of_xml' =
-  let attr_producer = [
-    ("type", (fun ctx a -> `Type a));
-    ("src", (fun ctx a -> `SRC a));
-  ] in
-  (* FIXME: this will not capture the data *)
-  let leaf_producer ctx data = `Data data in
-  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+let content_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+  let l = match find (fun a -> attr_is a "src") attr with
+    | Some(_, src) -> [`SRC src]
+    | None -> [] in
+  let l = match find (fun a -> attr_is a "type") attr with
+    | Some(_, ty) -> `Type ty :: l
+    | None -> l in
+  `Data data :: l
 
 type summary = string
 type summary' = [ `Data of string ]
