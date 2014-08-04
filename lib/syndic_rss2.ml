@@ -724,8 +724,7 @@ let channel_title_of_xml (tag, datas) =
 
 let channel_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "channel/description")
+  with Error.Expected_Leaf -> ""
 
 let channel_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
