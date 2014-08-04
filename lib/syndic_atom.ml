@@ -613,20 +613,18 @@ let content_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
     | None -> l in
   `Data data :: l
 
-type summary = string
-type summary' = [ `Data of string ]
+type summary =
+  | Text of string
+  | Xhtml of Syndic_xml.t list
+type summary' = [ `Data of Syndic_xml.t list ]
 
-let make_summary (l : [< summary'] list) =
-  (* element atom:summaru { atomTextConstruct } *)
-  let data = match find (fun (`Data _) -> true) l with
-    | Some (`Data d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "summary")
-  in data
+let summary_of_xml (((tag, attr), data): Xmlm.tag * t list) : summary =
+  match find (fun a -> attr_is a "type") attr with
+  | Some(_, "xhtml") -> Xhtml(get_xml_content data data)
+  | _ -> Text(get_leaf data)
 
-let summary_of_xml, summary_of_xml' =
-  let leaf_producer ctx data = `Data data in
-  generate_catcher ~leaf_producer make_summary,
-  generate_catcher ~leaf_producer (fun x -> x)
+let summary_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+  `Data data
 
 type entry =
   {
