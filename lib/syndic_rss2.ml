@@ -1,8 +1,8 @@
-open Syndic_common.XML
+module XML = Syndic_common.XML
 open Syndic_common.Util
 
 module Error = struct
-  include Syndic_common.Error
+  include Syndic_error
 
   exception Size_Exceeded of string * int * int
 
@@ -120,18 +120,18 @@ let image_of_xml =
     ("height", (fun ctx a -> `Height (image_height_of_xml a)));
     ("description", (fun ctx a -> `Description (image_description_of_xml a)));
   ] in
-  generate_catcher ~data_producer make_image
+  XML.generate_catcher ~data_producer make_image
 
 let image_of_xml' =
   let data_producer = [
-    ("url", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `URL a)));
-    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
-    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
-    ("width", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Width a)));
-    ("height", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Height a)));
-    ("description", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("url", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `URL a)));
+    ("title", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("link", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("width", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Width a)));
+    ("height", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Height a)));
+    ("description", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Description a)));
   ] in
-  generate_catcher ~data_producer (fun x -> x)
+  XML.generate_catcher ~data_producer (fun x -> x)
 
 type cloud = {
   domain: Uri.t;
@@ -183,8 +183,8 @@ let cloud_of_xml, cloud_of_xml' =
     ("registerProcedure", (fun ctx a -> `RegisterProcedure a));
     ("protocol", (fun ctx a -> `Protocol a));
   ] in
-  generate_catcher ~attr_producer make_cloud,
-  generate_catcher ~attr_producer (fun x -> x)
+  XML.generate_catcher ~attr_producer make_cloud,
+  XML.generate_catcher ~attr_producer (fun x -> x)
 
 type textinput =
   {
@@ -251,17 +251,17 @@ let textinput_of_xml =
     ("name", (fun ctx a -> `Name (textinput_name_of_xml a)));
     ("link", (fun ctx a -> `Link (textinput_link_of_xml a)));
   ] in
-  generate_catcher ~data_producer make_textinput
+  XML.generate_catcher ~data_producer make_textinput
 
 let textinput_of_xml' =
   let data_producer = [
-    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("title", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Title a)));
     ("description",
-     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
-    ("name", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Name a)));
-    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
+     (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("name", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Name a)));
+    ("link", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Link a)));
   ] in
-  generate_catcher ~data_producer (fun x -> x)
+  XML.generate_catcher ~data_producer (fun x -> x)
 
 type category =
   {
@@ -287,8 +287,8 @@ let make_category (l : [< category' ] list) =
 let category_of_xml, category_of_xml' =
   let attr_producer = [ ("domain", (fun ctx a -> `Domain a)); ] in
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~attr_producer ~leaf_producer make_category,
-  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  XML.generate_catcher ~attr_producer ~leaf_producer make_category,
+  XML.generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type enclosure =
   {
@@ -324,8 +324,8 @@ let enclosure_of_xml, enclosure_of_xml' =
     ("length", (fun ctx a -> `Length a));
     ("type", (fun ctx a -> `Mime a));
   ] in
-  generate_catcher ~attr_producer make_enclosure,
-  generate_catcher ~attr_producer (fun x -> x)
+  XML.generate_catcher ~attr_producer make_enclosure,
+  XML.generate_catcher ~attr_producer (fun x -> x)
 
 type guid =
   {
@@ -352,8 +352,8 @@ let make_guid (l : [< guid' ] list) =
 let guid_of_xml, guid_of_xml' =
   let attr_producer = [ ("isPermalink", (fun ctx a -> `Permalink a)); ] in
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~attr_producer ~leaf_producer make_guid,
-  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  XML.generate_catcher ~attr_producer ~leaf_producer make_guid,
+  XML.generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type source =
   {
@@ -380,8 +380,8 @@ let make_source (l : [< source' ] list) =
 let source_of_xml, source_of_xml' =
   let attr_producer = [ ("url", (fun ctx a -> `URL a)); ] in
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~attr_producer ~leaf_producer make_source,
-  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  XML.generate_catcher ~attr_producer ~leaf_producer make_source,
+  XML.generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type story =
   | All of string * string
@@ -509,23 +509,23 @@ let item_of_xml =
     ("pubDate", (fun ctx a -> `PubDate (item_pubdate_of_xml a)));
     ("source", (fun ctx a -> `Source (source_of_xml a)));
   ] in
-  generate_catcher ~data_producer make_item
+  XML.generate_catcher ~data_producer make_item
 
 let item_of_xml' =
   let data_producer = [
-    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("title", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Title a)));
     ("description",
-     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
-    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
-    ("author", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Author a)));
+     (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("link", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("author", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Author a)));
     ("category", (fun ctx a -> `Category (category_of_xml' a)));
-    ("comments", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Comments a)));
+    ("comments", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Comments a)));
     ("enclosure", (fun ctx a -> `Enclosure (enclosure_of_xml' a)));
     ("guid", (fun ctx a -> `Guid (guid_of_xml' a)));
-    ("pubdate", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `PubDate a)));
+    ("pubdate", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `PubDate a)));
     ("source", (fun ctx a -> `Source (source_of_xml' a)));
   ] in
-  generate_catcher ~data_producer (fun x -> x)
+  XML.generate_catcher ~data_producer (fun x -> x)
 
 type channel =
   {
@@ -784,50 +784,43 @@ let channel_of_xml =
     ("skipdays", (fun ctx a -> `SkipDays (channel_skipDays_of_xml a)));
     ("item", (fun ctx a -> `Item (item_of_xml a)));
   ] in
-  generate_catcher ~data_producer make_channel
+  XML.generate_catcher ~data_producer make_channel
 
 let channel_of_xml' =
   let data_producer = [
-    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
-    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
-    ("description", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
-    ("Language", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Language a)));
-    ("copyright", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Copyright a)));
+    ("title", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("link", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("description", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("Language", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Language a)));
+    ("copyright", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Copyright a)));
     ("managingeditor",
-     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `ManagingEditor a)));
-    ("webmaster", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `WebMaster a)));
-    ("pubdate", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `PubDate a)));
+     (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `ManagingEditor a)));
+    ("webmaster", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `WebMaster a)));
+    ("pubdate", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `PubDate a)));
     ("lastbuilddate",
-     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `LastBuildDate a)));
-    ("category", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Category a)));
-    ("generator", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Generator a)));
-    ("docs", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Docs a)));
+     (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `LastBuildDate a)));
+    ("category", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Category a)));
+    ("generator", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Generator a)));
+    ("docs", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Docs a)));
     ("cloud", (fun ctx a -> `Cloud (cloud_of_xml' a)));
-    ("ttl", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `TTL a)));
+    ("ttl", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `TTL a)));
     ("image", (fun ctx a -> `Image (image_of_xml' a)));
-    ("rating", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Rating a)));
+    ("rating", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Rating a)));
     ("textinput", (fun ctx a -> `TextInput (textinput_of_xml' a)));
-    ("skiphours", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `SkipHours a)));
-    ("skipdays", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `SkipDays a)));
+    ("skiphours", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `SkipHours a)));
+    ("skipdays", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `SkipDays a)));
     ("item", (fun ctx a -> `Item (item_of_xml' a)));
   ] in
-  generate_catcher ~data_producer (fun x -> x)
+  XML.generate_catcher ~data_producer (fun x -> x)
 
 let analyze input =
-  let el tag datas = Node (tag, datas) in
-  let data data = Leaf data in
-  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
-  let aux = function
-    | Node (tag, datas) when tag_is tag "channel" -> channel_of_xml (tag, datas)
-    | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
-  in aux tree
+  match XML.tree input with
+  | XML.Node (tag, datas) when tag_is tag "channel" ->
+     channel_of_xml (tag, datas)
+  | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
-  let el tag datas = Node (tag, datas) in
-  let data data = Leaf data in
-  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
-  let aux = function
-    | Node (tag, datas) when tag_is tag "channel" ->
-      `Channel (channel_of_xml' (tag, datas))
-    | _ -> `Channel []
-  in aux tree
+  match XML.tree input with
+  | Node (tag, datas) when tag_is tag "channel" ->
+     `Channel (channel_of_xml' (tag, datas))
+  | _ -> `Channel []

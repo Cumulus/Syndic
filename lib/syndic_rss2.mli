@@ -2,7 +2,7 @@
     {{: http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt} RSS 2.0}. *)
 
 module Error : sig
-  include Syndic_error.T
+  include module type of Syndic_error
 
   exception Size_Exceeded of string * int * int
   exception Item_expectation

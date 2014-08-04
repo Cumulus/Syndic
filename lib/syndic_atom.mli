@@ -2,9 +2,9 @@
     compliant. *)
 
 module Error : sig
-  include Syndic_error.T
+  include module type of Syndic_error
 
-  exception Duplicate_Link of ((Uri.t * string * string) * (string * string))
+  exception Duplicate_Link of (Uri.t * string * string) * (string * string)
 
   val string_of_duplicate_exception :
     (Uri.t * string * string) * (string * string) -> string
@@ -342,8 +342,8 @@ type source =
     title: title;
     updated: updated option;
   }
-(** If an atom:entry is copied from one feed into another feed, then
-    the source atom:feed's metadata (all child elements of atom:feed
+(** If an {!entry} is copied from one feed into another feed, then
+    the source {!feed}'s metadata (all child elements of atom:feed
     other than the atom:entry elements) MAY be preserved within the
     copied entry by adding an atom:source child element, if it is not
     already present in the entry, and including some or all of the
@@ -360,8 +360,8 @@ type source =
     entries from different feeds while retaining information about an
     entry's source feed.  For this reason, Atom Processors that are
     performing such aggregation SHOULD include at least the required
-    feed-level Metadata elements (atom:id, atom:title, and
-    atom:updated) in the atom:source element.
+    feed-level Metadata fields ([id], [title], and [updated]) in the
+    [source] element.
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.2}
     See RFC 4287 § 4.1.2 for more details.}
@@ -505,16 +505,14 @@ type entry =
     the document (i.e., top-level) element of a stand-alone Atom Entry
     Document.
 
-    This specification assigns no significance to the order of
-    appearance of the child elements of atom:entry.
+    The specification mandates that each entry contains an author
+    unless it contains some sources or the feed contains an author
+    element.  This library ensures that the authors are properly
+    dispatched to all locations.
     
     The following child elements are defined by this specification
     (note that it requires the presence of some of these elements):
     
-    - [entry] MUST contain one or more [author], unless the [entry]
-      contains a [sources] element that contains an [author] or, in an
-      Atom Feed Document, the {!feed} element contains an [author]
-      element itself.
     - if [content = None], then [links] MUST contain at least one
       element with a rel attribute value of [Alternate].
     - There MUST NOT be more than one element of [links] with a rel
@@ -622,7 +620,9 @@ type feed =
  *)
 
 val analyze : Xmlm.input -> feed
-(** [analyze xml] parse [xml].
+(** [analyze xml] parse [xml].  Beware that [xml] is mutable, so when
+    the parsing fails, one have to create a new copy of [xml] to use
+    it with another function.
 
     @raise Error.raise_expectation if [xml] is not a valid RSS2
     document. *)

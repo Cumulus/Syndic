@@ -1,7 +1,7 @@
 (** [Syndic.Rss1]: compliant with
     {{: http://web.resource.org/rss/1.0/spec} RSS 1.0}. *)
 
-module Error : Syndic_error.T
+module Error : module type of Syndic_error
 
 type title = string
 (** A descriptive title for the channel, image, item and textinput.
