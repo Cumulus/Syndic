@@ -848,12 +848,14 @@ let channel_of_xml' =
 
 let analyze input =
   match XML.tree input with
+  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
   | XML.Node (tag, datas) when tag_is tag "channel" ->
      channel_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
   match XML.tree input with
-  | Node (tag, datas) when tag_is tag "channel" ->
+  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
+  | XML.Node (tag, datas) when tag_is tag "channel" ->
      `Channel (channel_of_xml' (tag, datas))
   | _ -> `Channel []
