@@ -624,8 +624,8 @@ val analyze : Xmlm.input -> feed
     the parsing fails, one have to create a new copy of [xml] to use
     it with another function.
 
-    @raise Error.raise_expectation if [xml] is not a valid RSS2
-    document. *)
+    Raise [Error.Expected], [Expected_Leaf] or [Error.Duplicate_Link]
+    if [xml] is not a valid Atom document. *)
 
 
 (**/**)

@@ -1,6 +1,39 @@
 module XML = Syndic_common.XML
 open Syndic_common.Util
 
+module Date = struct
+  open CalendarLib
+  open Printf
+  open Scanf
+
+  let month_to_int = Hashtbl.create 12
+  let () =
+    let add m i = Hashtbl.add month_to_int m i in
+    add "Jan" 1;  add "Feb" 2;   add "Mar" 3;  add "Apr" 4;
+    add "May" 5;  add "Jun" 6;   add "Jul" 7;  add "Aug" 8;
+    add "Sep" 9;  add "Oct" 10;  add "Nov" 11; add "Dec" 12
+
+  (* Format: http://www.rssboard.org/rss-specification#ltpubdategtSubelementOfLtitemgt
+     Examples: Sun, 19 May 2002 15:21:36 GMT
+               Sat, 25 Sep 2010 08:01:00 -0700 *)
+  let of_string s =
+    let make_date day month year h m s z =
+      let month = Hashtbl.find month_to_int month in
+      let date = Calendar.Date.make year month day in
+      let t = Calendar.Time.(make h m (Second.from_float s)) in
+      if z = "" || z = "GMT" then
+        Calendar.(create date t)
+      else
+        let zh = int_of_string(String.sub z 0 3)
+        and zm = int_of_string(String.sub z 3 2) in
+        let tz = Calendar.Time.(Period.make zh zm (Second.from_int 0)) in
+        Calendar.(create date (Time.add t tz))
+    in
+    try sscanf s "%_s %i %s %i %i:%i:%f %s" make_date
+    with Scanf.Scan_failure _ ->
+      invalid_arg(sprintf "Syndic.Rss2.Date.of_string: cannot parse %S" s)
+end
+
 module Error = struct
   include Syndic_error
 
@@ -492,7 +525,7 @@ let item_comments_of_xml (tag, datas) =
     Error.raise_expectation Error.Data (Error.Tag "item/comments")
 
 let item_pubdate_of_xml (tag, datas) =
-  try Syndic_common.Date.of_string (get_leaf datas)
+  try Date.of_string (get_leaf datas)
   with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "item/pubDate")
 
@@ -715,12 +748,12 @@ let channel_webmaster_of_xml (tag, datas) =
     Error.raise_expectation Error.Data (Error.Tag "channel/webMaster")
 
 let channel_pubdate_of_xml (tag, datas) =
-  try Syndic_common.Date.of_string (get_leaf datas)
+  try Date.of_string (get_leaf datas)
   with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "channel/pubDate")
 
 let channel_lastbuilddate_of_xml (tag, datas) =
-  try Syndic_common.Date.of_string (get_leaf datas)
+  try Date.of_string (get_leaf datas)
   with Error.Expected_Leaf ->
     Error.raise_expectation Error.Data (Error.Tag "channel/lastBuildDate")
 
@@ -815,12 +848,14 @@ let channel_of_xml' =
 
 let analyze input =
   match XML.tree input with
+  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
   | XML.Node (tag, datas) when tag_is tag "channel" ->
      channel_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
   match XML.tree input with
-  | Node (tag, datas) when tag_is tag "channel" ->
+  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
+  | XML.Node (tag, datas) when tag_is tag "channel" ->
      `Channel (channel_of_xml' (tag, datas))
   | _ -> `Channel []
