@@ -313,7 +313,7 @@ type channel =
 
 
 val parse : Xmlm.input -> channel
-(** [analyze xml] parse [xml].
+(** [parse xml] returns the channel corresponding to [xml].
 
     Raise [Error.Expected], [Error.Size_Exceeded] or
     [Error.Item_expectation] if [xml] is not a valid RSS2 document. *)

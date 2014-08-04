@@ -283,7 +283,7 @@ Model: (channel, image?, item+, textinput?)
  *)
 
 val parse : Xmlm.input -> rdf
-(** [analyze xml] parse [xml].
+(** [parse xml] returns the RDF corresponding to [xml].
 
     @raise Error.raise_expectation if [xml] is not a valid RSS1
     document. *)
