@@ -954,7 +954,7 @@ let feed_of_xml' =
   ] in
   XML.generate_catcher ~data_producer (fun x -> x)
 
-let analyze input =
+let parse input =
   match XML.tree input with
   | XML.Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "feed") Error.Root

@@ -509,10 +509,10 @@ type entry =
     unless it contains some sources or the feed contains an author
     element.  This library ensures that the authors are properly
     dispatched to all locations.
-    
+
     The following child elements are defined by this specification
     (note that it requires the presence of some of these elements):
-    
+
     - if [content = None], then [links] MUST contain at least one
       element with a rel attribute value of [Alternate].
     - There MUST NOT be more than one element of [links] with a rel
@@ -586,7 +586,7 @@ type feed =
       type and hreflang attribute values.
     - There may be additional elements in [links] beyond those
       described above.
-    
+
     If multiple {!entry} elements with the same {!id} value appear
     in an Atom Feed Document, they represent the same entry.  Their
     {!updated} timestamps SHOULD be different.  If an Atom Feed
@@ -619,7 +619,7 @@ type feed =
 ]}
  *)
 
-val analyze : Xmlm.input -> feed
+val parse : Xmlm.input -> feed
 (** [analyze xml] parse [xml].  Beware that [xml] is mutable, so when
     the parsing fails, one have to create a new copy of [xml] to use
     it with another function.

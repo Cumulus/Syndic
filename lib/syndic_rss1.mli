@@ -268,7 +268,7 @@ type rdf =
     element.  The opening RDF tag assocaties the rdf: namespace prefix
     with the RDF syntax schema and establishes the RSS 1.0 schema as
     the default namespace for the document.
-    
+
     While any valid namespace prefix may be used, document creators
     are advised to consider "rdf:" normative. Those wishing to be
     strictly backward-compatible with RSS 0.9 must use "rdf:".
@@ -282,7 +282,7 @@ Model: (channel, image?, item+, textinput?)
 ]}
  *)
 
-val analyze : Xmlm.input -> rdf
+val parse : Xmlm.input -> rdf
 (** [analyze xml] parse [xml].
 
     @raise Error.raise_expectation if [xml] is not a valid RSS1

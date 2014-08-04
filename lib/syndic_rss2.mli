@@ -312,7 +312,7 @@ type channel =
  *)
 
 
-val analyze : Xmlm.input -> channel
+val parse : Xmlm.input -> channel
 (** [analyze xml] parse [xml].
 
     Raise [Error.Expected], [Error.Size_Exceeded] or

@@ -846,7 +846,7 @@ let channel_of_xml' =
   ] in
   XML.generate_catcher ~data_producer (fun x -> x)
 
-let analyze input =
+let parse input =
   match XML.tree input with
   | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
   | XML.Node (tag, datas) when tag_is tag "channel" ->
