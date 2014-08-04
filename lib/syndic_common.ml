@@ -56,6 +56,13 @@ end
 module Util = struct
   let find f l = try Some (List.find f l) with Not_found -> None
 
+  let rec filter_map l f =
+    match l with
+    | [] -> []
+    | x :: tl -> match f x with
+                | None -> filter_map tl f
+                | Some x -> x :: filter_map tl f
+
   let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
   let datas_has_leaf = List.exists (function | XML.Leaf _ -> true | _ -> false)

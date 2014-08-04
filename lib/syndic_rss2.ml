@@ -15,7 +15,8 @@ module Date = struct
 
   (* Format: http://www.rssboard.org/rss-specification#ltpubdategtSubelementOfLtitemgt
      Examples: Sun, 19 May 2002 15:21:36 GMT
-               Sat, 25 Sep 2010 08:01:00 -0700 *)
+               Sat, 25 Sep 2010 08:01:00 -0700
+               20 Mar 2013 03:47:14 +0000 *)
   let of_string s =
     let make_date day month year h m s z =
       let month = Hashtbl.find month_to_int month in
@@ -24,13 +25,17 @@ module Date = struct
       if z = "" || z = "GMT" then
         Calendar.(create date t)
       else
-        let zh = int_of_string(String.sub z 0 3)
-        and zm = int_of_string(String.sub z 3 2) in
+        (* FIXME: this should be made more robust. *)
+        let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i)
+        and zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
         let tz = Calendar.Time.(Period.make zh zm (Second.from_int 0)) in
         Calendar.(create date (Time.add t tz))
     in
-    try sscanf s "%_s %i %s %i %i:%i:%f %s" make_date
-    with Scanf.Scan_failure _ ->
+    try
+      if 'A' <= s.[0] && s.[0] <= 'Z' then
+        sscanf s "%_s %i %s %i %i:%i:%f %s" make_date
+      else sscanf s "%i %s %i %i:%i:%f %s" make_date
+    with _ ->
       invalid_arg(sprintf "Syndic.Rss2.Date.of_string: cannot parse %S" s)
 end
 
@@ -719,8 +724,7 @@ let channel_title_of_xml (tag, datas) =
 
 let channel_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "channel/description")
+  with Error.Expected_Leaf -> ""
 
 let channel_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
@@ -846,16 +850,38 @@ let channel_of_xml' =
   ] in
   XML.generate_catcher ~data_producer (fun x -> x)
 
+
+(* Some RSS2 generators (such as "wordpress") will add tags like
+   <atom:link> which will confuse the parser because it ignores
+   prefixes.  Remove the problematic tags. *)
+let rec filter_out_prefixed = function
+  | XML.Node((((prefix, _), _) as ta), sub) ->
+     if prefix = "" then
+       Some(XML.Node(ta, filter_map sub filter_out_prefixed))
+     else None
+  | XML.Leaf _ as l -> Some l
+
+let find_channel l =
+  find (function XML.Node(tag, data) -> tag_is tag "channel"
+                | XML.Leaf _ -> false) l
+
 let parse input =
-  match XML.tree input with
-  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
-  | XML.Node (tag, datas) when tag_is tag "channel" ->
-     channel_of_xml (tag, datas)
+  match filter_out_prefixed(XML.tree input) with
+  | Some(XML.Node(tag, data)) ->
+     if tag_is tag "channel" then
+       channel_of_xml (tag, data)
+     else (
+       match find_channel data with
+       | Some(XML.Node(t, d)) -> channel_of_xml (t, d)
+       | Some(XML.Leaf _)
+       | None -> Error.raise_expectation (Error.Tag "channel") Error.Root)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
-  match XML.tree input with
-  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
-  | XML.Node (tag, datas) when tag_is tag "channel" ->
-     `Channel (channel_of_xml' (tag, datas))
+  match filter_out_prefixed(XML.tree input) with
+  | Some(XML.Node (tag, data)) ->
+     if tag_is tag "channel" then `Channel (channel_of_xml' (tag, data))
+     else (match find_channel data with
+           | Some(XML.Node(t, d)) -> `Channel (channel_of_xml' (t, d))
+           | Some(XML.Leaf _) | None -> `Channel [])
   | _ -> `Channel []
