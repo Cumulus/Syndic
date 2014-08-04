@@ -459,7 +459,9 @@ type content =
 ]}
  *)
 
-type summary = string
+type summary =
+  | Text of string
+  | Xhtml of Syndic_xml.t list
 (** [summary] is a Text construct that conveys a short summary,
     abstract, or excerpt of an entry.
 
@@ -686,7 +688,7 @@ val unsafe : Xmlm.input ->
                  | `Title of [> `Data of string ] list
                  | `Updated of [> `Date of string ] list ]
                    list
-            | `Summary of [> `Data of string ] list
+            | `Summary of [> `Data of Syndic_xml.t list ]
             | `Title of [> `Data of string ] list
             | `Updated of [> `Date of string ] list ]
               list
