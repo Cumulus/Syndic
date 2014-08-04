@@ -381,7 +381,7 @@ type subtitle' = [ `Data of string ]
 let make_subtitle (l : [< subtitle'] list) =
   let subtitle = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "subtitle")
+    | None -> "" (* <subtitle></subtitle> indicates no subtitle *)
   in subtitle
 
 let subtitle_of_xml, subtitle_of_xml' =
