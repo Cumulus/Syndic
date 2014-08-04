@@ -3,7 +3,7 @@ module XML : sig
     | Node of Xmlm.tag * tree list
     | Leaf of string
 
-  val tree : Xmlm.input -> tree
+  val tree : Xmlm.input -> (Xmlm.dtd * tree)
 
   val generate_catcher :
     ?attr_producer:(string * ('a list -> string -> 'a)) list ->

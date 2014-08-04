@@ -847,14 +847,14 @@ let channel_of_xml' =
   XML.generate_catcher ~data_producer (fun x -> x)
 
 let parse input =
-  match XML.tree input with
+  match XML.tree input |> snd with
   | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
   | XML.Node (tag, datas) when tag_is tag "channel" ->
      channel_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
-  match XML.tree input with
+  match XML.tree input |> snd with
   | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
   | XML.Node (tag, datas) when tag_is tag "channel" ->
      `Channel (channel_of_xml' (tag, datas))
