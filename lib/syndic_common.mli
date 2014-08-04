@@ -25,4 +25,6 @@ module Util : sig
   val get_value : Xmlm.attribute -> string
   val get_attr_name : Xmlm.attribute -> string
   val get_tag_name : Xmlm.tag -> string
+
+  val only_whitespace : string -> bool
 end
