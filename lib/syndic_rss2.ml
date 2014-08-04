@@ -846,13 +846,24 @@ let channel_of_xml' =
   ] in
   XML.generate_catcher ~data_producer (fun x -> x)
 
+
+(* Some RSS2 generators (such as "wordpress") will add tags like
+   <atom:link> which will confuse the parser because it ignores
+   prefixes.  Remove the problematic tags. *)
+let rec filter_out_prefixed = function
+  | XML.Node((((prefix, _), _) as ta), sub) ->
+     if prefix = "" then
+       Some(XML.Node(ta, filter_map sub filter_out_prefixed))
+     else None
+  | XML.Leaf _ as l -> Some l
+
 let find_channel l =
   find (function XML.Node(tag, data) -> tag_is tag "channel"
                 | XML.Leaf _ -> false) l
 
 let parse input =
-  match XML.tree input with
-  | XML.Node(tag, data) ->
+  match filter_out_prefixed(XML.tree input) with
+  | Some(XML.Node(tag, data)) ->
      if tag_is tag "channel" then
        channel_of_xml (tag, data)
      else (
@@ -863,8 +874,8 @@ let parse input =
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
-  match XML.tree input with
-  | XML.Node (tag, data) ->
+  match filter_out_prefixed(XML.tree input) with
+  | Some(XML.Node (tag, data)) ->
      if tag_is tag "channel" then `Channel (channel_of_xml' (tag, data))
      else (match find_channel data with
            | Some(XML.Node(t, d)) -> `Channel (channel_of_xml' (t, d))
