@@ -315,8 +315,8 @@ type channel =
 val analyze : Xmlm.input -> channel
 (** [analyze xml] parse [xml].
 
-    @raise Error.raise_expectation if [xml] is not a valid RSS2
-    document. *)
+    Raise [Error.Expected], [Error.Size_Exceeded] or
+    [Error.Item_expectation] if [xml] is not a valid RSS2 document. *)
 
 
 (**/**)
