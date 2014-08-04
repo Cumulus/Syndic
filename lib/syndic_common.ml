@@ -1,15 +1,7 @@
 (* XML *)
 
 module XML = struct
-  type tree =
-    | Node of Xmlm.tag * tree list
-    | Leaf of string
-
-  let tree input =
-    let el tag datas = Node (tag, datas) in
-    let data data = Leaf data in
-    let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
-    tree
+  include Syndic_xml
 
   let generate_catcher
       ?(attr_producer=[])
