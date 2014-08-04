@@ -71,5 +71,16 @@ end
 open CalendarLib
 
 module Date = struct
-  let of_string = Printer.Calendar.from_fstring "%Y-%m-%dT%H:%M:%S%:z"
+  let of_string s =
+    try Printer.Calendar.from_fstring "%Y-%m-%dT%H:%M:%S%:z" s
+    with Invalid_argument _ ->
+      (* Sometimes, the seconds have a decimal point
+         See https://forge.ocamlcore.org/tracker/index.php?func=detail&aid=1414&group_id=83&atid=418*)
+      Scanf.sscanf
+        s "%i-%i-%iT%i:%i:%f%i:%i"
+        (fun y m d h m s zh zm ->
+         let date = Calendar.Date.make y m d in
+         let t = Calendar.Time.(make h m (Second.from_float s)) in
+         let tz = Calendar.Time.(Period.make h m (Second.from_int 0)) in
+         Calendar.(create date (Time.add t tz)))
 end
