@@ -636,8 +636,9 @@ val unsafe : Xmlm.input ->
                  [> `Label of string | `Scheme of string | `Term of string ]
                    list
             | `Content of
-                 [> `Data of string | `SRC of string | `Type of string ]
-                   list
+                 [> `Data of Syndic_xml.t list | `SRC of string
+                  | `Type of string
+                 ] list
             | `Contributor of
                  [> `Email of string | `Name of string | `URI of string ]
                    list
