@@ -30,7 +30,7 @@ module Date = struct
         Calendar.(create date (Time.add t tz))
     in
     try sscanf s "%_s %i %s %i %i:%i:%f %s" make_date
-    with Scanf.Scan_failure _ ->
+    with _ ->
       invalid_arg(sprintf "Syndic.Rss2.Date.of_string: cannot parse %S" s)
 end
 
@@ -846,16 +846,27 @@ let channel_of_xml' =
   ] in
   XML.generate_catcher ~data_producer (fun x -> x)
 
+let find_channel l =
+  find (function XML.Node(tag, data) -> tag_is tag "channel"
+                | XML.Leaf _ -> false) l
+
 let parse input =
   match XML.tree input |> snd with
-  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
-  | XML.Node (tag, datas) when tag_is tag "channel" ->
-     channel_of_xml (tag, datas)
+  | XML.Node(tag, data) ->
+     if tag_is tag "channel" then
+       channel_of_xml (tag, data)
+     else (
+       match find_channel data with
+       | Some(XML.Node(t, d)) -> channel_of_xml (t, d)
+       | Some(XML.Leaf _)
+       | None -> Error.raise_expectation (Error.Tag "channel") Error.Root)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
   match XML.tree input |> snd with
-  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
-  | XML.Node (tag, datas) when tag_is tag "channel" ->
-     `Channel (channel_of_xml' (tag, datas))
+  | XML.Node (tag, data) ->
+     if tag_is tag "channel" then `Channel (channel_of_xml' (tag, data))
+     else (match find_channel data with
+           | Some(XML.Node(t, d)) -> `Channel (channel_of_xml' (t, d))
+           | Some(XML.Leaf _) | None -> `Channel [])
   | _ -> `Channel []
