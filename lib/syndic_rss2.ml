@@ -24,8 +24,9 @@ module Date = struct
       if z = "" || z = "GMT" then
         Calendar.(create date t)
       else
-        let zh = int_of_string(String.sub z 0 3)
-        and zm = int_of_string(String.sub z 3 2) in
+        (* FIXME: this should be made more robust. *)
+        let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i)
+        and zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
         let tz = Calendar.Time.(Period.make zh zm (Second.from_int 0)) in
         Calendar.(create date (Time.add t tz))
     in
