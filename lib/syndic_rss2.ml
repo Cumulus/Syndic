@@ -15,7 +15,8 @@ module Date = struct
 
   (* Format: http://www.rssboard.org/rss-specification#ltpubdategtSubelementOfLtitemgt
      Examples: Sun, 19 May 2002 15:21:36 GMT
-               Sat, 25 Sep 2010 08:01:00 -0700 *)
+               Sat, 25 Sep 2010 08:01:00 -0700
+               20 Mar 2013 03:47:14 +0000 *)
   let of_string s =
     let make_date day month year h m s z =
       let month = Hashtbl.find month_to_int month in
@@ -30,7 +31,10 @@ module Date = struct
         let tz = Calendar.Time.(Period.make zh zm (Second.from_int 0)) in
         Calendar.(create date (Time.add t tz))
     in
-    try sscanf s "%_s %i %s %i %i:%i:%f %s" make_date
+    try
+      if 'A' <= s.[0] && s.[0] <= 'Z' then
+        sscanf s "%_s %i %s %i %i:%i:%f %s" make_date
+      else sscanf s "%i %s %i %i:%i:%f %s" make_date
     with _ ->
       invalid_arg(sprintf "Syndic.Rss2.Date.of_string: cannot parse %S" s)
 end
