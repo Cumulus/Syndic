@@ -4,7 +4,8 @@ module XML = Syndic_xml
 
 module Error = Syndic_error
 
-let namespace = "http://purl.org/rss/1.0/"
+let namespaces = [ "http://purl.org/rss/1.0/";
+                   "http://www.w3.org/1999/02/22-rdf-syntax-ns#" ]
 
 type title = string
 type title' = [ `Data of string ]
@@ -17,8 +18,8 @@ let make_title (l : [< title' ] list) =
 
 let title_of_xml, title_of_xml' =
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~namespace ~leaf_producer make_title,
-  generate_catcher ~namespace ~leaf_producer (fun x -> x)
+  generate_catcher ~namespaces ~leaf_producer make_title,
+  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
 
 type name = string
 type name' = [`Data of string]
@@ -31,8 +32,8 @@ let make_name (l : [< name' ] list) =
 
 let name_of_xml, name_of_xml' =
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~namespace ~leaf_producer make_name,
-  generate_catcher ~namespace ~leaf_producer (fun x -> x)
+  generate_catcher ~namespaces ~leaf_producer make_name,
+  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
 
 type description = string
 type description' = [ `Data of string ]
@@ -45,8 +46,8 @@ let make_description (l : [< description' ] list) =
 
 let description_of_xml, description_of_xml' =
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~namespace ~leaf_producer make_description,
-  generate_catcher ~namespace ~leaf_producer (fun x -> x)
+  generate_catcher ~namespaces ~leaf_producer make_description,
+  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
 
 type channel_image = Uri.t
 type channel_image' = [ `URI of string ]
@@ -61,8 +62,8 @@ let channel_image_of_xml, channel_image_of_xml' =
   let attr_producer = [
     ("resource", (fun ctx a -> `URI a));
   ] in
-  generate_catcher ~namespace ~attr_producer make_channel_image,
-  generate_catcher ~namespace ~attr_producer (fun x -> x)
+  generate_catcher ~namespaces ~attr_producer make_channel_image,
+  generate_catcher ~namespaces ~attr_producer (fun x -> x)
 
 type link = Uri.t
 type link' = [ `URI of string ]
@@ -75,8 +76,8 @@ let make_link (l : [< link' ] list) =
 
 let link_of_xml, link_of_xml' =
   let leaf_producer ctx data = `URI data in
-  generate_catcher ~namespace ~leaf_producer make_link,
-  generate_catcher ~namespace ~leaf_producer (fun x -> x)
+  generate_catcher ~namespaces ~leaf_producer make_link,
+  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
 
 type url = Uri.t
 type url' = [ `URI of string ]
@@ -89,8 +90,8 @@ let make_url (l : [< url' ] list) =
 
 let url_of_xml, url_of_xml' =
   let leaf_producer ctx data = `URI data in
-  generate_catcher ~namespace ~leaf_producer make_url,
-  generate_catcher ~namespace ~leaf_producer (fun x -> x)
+  generate_catcher ~namespaces ~leaf_producer make_url,
+  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
 
 type li = Uri.t
 type li' = [ `URI of string ]
@@ -105,8 +106,12 @@ let li_of_xml, li_of_xml' =
   let attr_producer = [
     ("resource", (fun ctx a -> `URI a));
   ] in
-  generate_catcher ~namespace ~attr_producer make_li,
-  generate_catcher ~namespace ~attr_producer (fun x -> x)
+  generate_catcher
+      ~namespaces
+      ~attr_producer make_li,
+  generate_catcher
+      ~namespaces
+      ~attr_producer (fun x -> x)
 
 type seq = li list
 type seq' = [ `Li of li ]
@@ -119,13 +124,17 @@ let seq_of_xml =
   let data_producer = [
     ("li", (fun ctx a -> `Li (li_of_xml a)));
   ] in
-  generate_catcher ~namespace ~data_producer make_seq
+  generate_catcher
+      ~namespaces
+      ~data_producer make_seq
 
 let seq_of_xml' =
   let data_producer = [
     ("li", (fun ctx a -> `Li (li_of_xml' a)));
   ] in
-  generate_catcher ~namespace ~data_producer (fun x -> x)
+  generate_catcher
+      ~namespaces
+      ~data_producer (fun x -> x)
 
 type items = seq
 type items' = [ `Seq of seq ]
@@ -143,13 +152,17 @@ let items_of_xml =
   let data_producer = [
     ("Seq", (fun ctx a -> `Seq (seq_of_xml a)));
   ] in
-  generate_catcher ~namespace ~data_producer make_items
+  generate_catcher
+      ~namespaces
+      ~data_producer make_items
 
 let items_of_xml' =
   let data_producer = [
     ("Seq", (fun ctx a -> `Seq (seq_of_xml' a)));
   ] in
-  generate_catcher ~namespace ~data_producer (fun x -> x)
+  generate_catcher
+      ~namespaces
+      ~data_producer (fun x -> x)
 
 type channel_textinput = Uri.t
 type channel_textinput' = [ `URI of string ]
@@ -166,8 +179,8 @@ let channel_textinput_of_xml, channel_textinput_of_xml' =
   let attr_producer = [
     ("resource", (fun ctx a -> `URI a));
   ] in
-  generate_catcher ~namespace ~attr_producer make_textinput,
-  generate_catcher ~namespace ~attr_producer (fun x -> x)
+  generate_catcher ~namespaces ~attr_producer make_textinput,
+  generate_catcher ~namespaces ~attr_producer (fun x -> x)
 
 type channel =
   {
@@ -232,7 +245,7 @@ let channel_of_xml =
   let attr_producer = [
     ("about", (fun ctx a -> `About a));
   ] in
-  generate_catcher ~namespace ~attr_producer ~data_producer make_channel
+  generate_catcher ~namespaces ~attr_producer ~data_producer make_channel
 
 let channel_of_xml' =
   let data_producer = [
@@ -246,7 +259,7 @@ let channel_of_xml' =
   let attr_producer = [
     ("about", (fun ctx a -> `About a));
   ] in
-  generate_catcher ~namespace ~attr_producer ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~attr_producer ~data_producer (fun x -> x)
 
 type image =
   {
@@ -287,7 +300,7 @@ let image_of_xml =
   let attr_producer = [
     ("about", (fun ctx a -> `About a));
   ] in
-  generate_catcher ~namespace ~attr_producer ~data_producer make_image
+  generate_catcher ~namespaces ~attr_producer ~data_producer make_image
 
 let image_of_xml' =
   let data_producer = [
@@ -298,7 +311,7 @@ let image_of_xml' =
   let attr_producer = [
     ("about", (fun ctx a -> `About a));
   ] in
-  generate_catcher ~namespace ~attr_producer ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~attr_producer ~data_producer (fun x -> x)
 
 type item =
   {
@@ -340,7 +353,7 @@ let item_of_xml =
   let attr_producer = [
     ("about", (fun ctx a -> `About a));
   ] in
-  generate_catcher ~namespace ~attr_producer ~data_producer make_item
+  generate_catcher ~namespaces ~attr_producer ~data_producer make_item
 
 let item_of_xml' =
   let data_producer = [
@@ -351,7 +364,7 @@ let item_of_xml' =
   let attr_producer = [
     ("about", (fun ctx a -> `About a));
   ] in
-  generate_catcher ~namespace ~attr_producer ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~attr_producer ~data_producer (fun x -> x)
 
 type textinput =
   {
@@ -401,7 +414,7 @@ let textinput_of_xml =
   let attr_producer = [
     ("about", (fun ctx a -> `About a))
   ] in
-  generate_catcher ~namespace ~attr_producer ~data_producer make_textinput
+  generate_catcher ~namespaces ~attr_producer ~data_producer make_textinput
 
 let textinput_of_xml' =
   let data_producer = [
@@ -413,7 +426,7 @@ let textinput_of_xml' =
   let attr_producer = [
     ("about", (fun ctx a -> `About a))
   ] in
-  generate_catcher ~namespace ~attr_producer ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~attr_producer ~data_producer (fun x -> x)
 
 type rdf =
   {
@@ -450,7 +463,7 @@ let rdf_of_xml =
     ("item", (fun ctx a -> `Item (item_of_xml a)));
     ("textinput", (fun ctx a -> `TextInput (textinput_of_xml a)))
   ] in
-  generate_catcher ~namespace ~data_producer make_rdf
+  generate_catcher ~namespaces ~data_producer make_rdf
 
 let rdf_of_xml' =
   let data_producer = [
@@ -459,7 +472,7 @@ let rdf_of_xml' =
     ("item", (fun ctx a -> `Item (item_of_xml' a)));
     ("textinput", (fun ctx a -> `TextInput (textinput_of_xml' a)))
   ] in
-  generate_catcher ~namespace ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~data_producer (fun x -> x)
 
 let parse input =
   match XML.of_xmlm input |> snd with

@@ -2,7 +2,7 @@ module XML : sig
   type t = Syndic_xml.t
 
   val generate_catcher :
-    ?namespace:string ->
+    ?namespaces:string list ->
     ?attr_producer:(string * ('a list -> string -> 'a)) list ->
     ?data_producer:(string * ('a list -> Xmlm.tag * t list -> 'a)) list ->
     ?leaf_producer:('a list -> string -> 'a) ->

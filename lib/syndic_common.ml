@@ -6,19 +6,21 @@ module XML = struct
   exception Ignore_namespace
 
   let generate_catcher
-      ?(namespace="")
+      ?(namespaces=[])
       ?(attr_producer=[])
       ?(data_producer=[])
       ?leaf_producer maker =
     let get_attr_name (((prefix, name), _) : Xmlm.attribute) =
-      if prefix = namespace || prefix = ""
+      if List.exists ((=) prefix) namespaces
       then name
-      else raise Ignore_namespace in
+      else begin print_endline ("Ignore_namespace: "^prefix^" for "^name); raise
+      Ignore_namespace end in
     let get_attr_value ((_, value) : Xmlm.attribute) = value in
     let get_tag_name (((prefix, name), _) : Xmlm.tag) =
-      if prefix = namespace || prefix = ""
+      if List.exists ((=) prefix) namespaces
       then name
-      else raise Ignore_namespace in
+      else begin print_endline ("Ignore_namespace: "^prefix^" for "^name); raise
+      Ignore_namespace end in
     let get_attrs ((_, attrs) : Xmlm.tag) = attrs in
     let get_producer getter element map =
       try Some (List.assoc (getter element) map)
