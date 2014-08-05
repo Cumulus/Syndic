@@ -3,28 +3,37 @@
 module XML = struct
   include Syndic_xml
 
+  exception Invalid_namespace
+
   let generate_catcher
+      ?(namespace="")
       ?(attr_producer=[])
       ?(data_producer=[])
       ?leaf_producer maker =
-    let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name in
+    let get_attr_name (((prefix, name), _) : Xmlm.attribute) =
+      if prefix = namespace || prefix = ""
+      then name
+      else raise Invalid_namespace in
     let get_attr_value ((_, value) : Xmlm.attribute) = value in
-    let get_tag_name (((prefix, name), _) : Xmlm.tag) = name in
+    let get_tag_name (((prefix, name), _) : Xmlm.tag) =
+      if prefix = namespace || prefix = ""
+      then name
+      else raise Invalid_namespace in
     let get_attrs ((_, attrs) : Xmlm.tag) = attrs in
-    let get_producer name map =
-      try Some (List.assoc name map)
+    let get_producer getter element map =
+      try Some (List.assoc (getter element) map)
       with _ -> None
     in
     let rec catch_attr acc = function
       | attr :: r -> begin
-          match get_producer (get_attr_name attr) attr_producer with
+          match get_producer get_attr_name attr attr_producer with
           | Some f -> catch_attr ((f acc (get_attr_value attr)) :: acc) r
           | None -> catch_attr acc r end
       | [] -> acc
     in
     let rec catch_datas acc = function
       | Node (tag, datas) :: r ->
-        begin match get_producer (get_tag_name tag) data_producer with
+        begin match get_producer get_tag_name tag data_producer with
           | Some f -> catch_datas ((f acc (tag, datas)) :: acc) r
           | None -> catch_datas acc r end
       | Leaf str :: r ->
