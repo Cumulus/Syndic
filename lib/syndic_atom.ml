@@ -131,6 +131,18 @@ let author_email_of_xml (tag, datas) =
   try get_leaf datas
   with Error.Expected_Leaf -> "" (* mandatory ? *)
 
+(* {[  atomAuthor = element atom:author { atomPersonConstruct } ]}
+   where
+
+    atomPersonConstruct =
+        atomCommonAttributes,
+        (element atom:name { text }
+         & element atom:uri { atomUri }?
+         & element atom:email { atomEmailAddress }?
+         & extensionElement * )
+
+   This specification assigns no significance to the order of
+   appearance of the child elements in a Person construct.  *)
 let author_of_xml =
   let data_producer = [
     ("name", (fun ctx a -> `Name (author_name_of_xml a)));
@@ -180,14 +192,24 @@ let make_category (l : [< category'] list) =
   in
   ({ term; scheme; label; } : category)
 
+
+(* atomCategory =
+     element atom:category {
+        atomCommonAttributes,
+        attribute term { text },
+        attribute scheme { atomUri }?,
+        attribute label { text }?,
+        undefinedContent
+     }
+ *)
 let category_of_xml, category_of_xml' =
   let attr_producer = [
     ("term", (fun ctx a -> `Term a));
     ("scheme", (fun ctx a -> `Scheme a));
     ("label", (fun ctx a -> `Label a))
   ] in
-  generate_catcher ~namespaces ~attr_producer make_category,
-  generate_catcher ~namespaces ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_category,
+  generate_catcher ~attr_producer (fun x -> x)
 
 let make_contributor = make_author
 let contributor_of_xml = author_of_xml
@@ -223,14 +245,21 @@ let make_generator (l : [< generator'] list) =
     | _ -> None
   in ({ version; uri; content; } : generator)
 
+(* atomGenerator = element atom:generator {
+      atomCommonAttributes,
+      attribute uri { atomUri }?,
+      attribute version { text }?,
+      text
+    }
+ *)
 let generator_of_xml, generator_of_xml' =
   let attr_producer = [
     ("version", (fun ctx a -> `Version a));
     ("uri", (fun ctx a -> `URI a));
   ] in
   let leaf_producer ctx data = `Content data in
-  generate_catcher ~namespaces ~attr_producer ~leaf_producer make_generator,
-  generate_catcher ~namespaces ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer make_generator,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type icon = Uri.t
 type icon' = [ `URI of string ]
@@ -242,10 +271,14 @@ let make_icon (l : [< icon'] list) =
     | _ -> Error.raise_expectation Error.Data (Error.Tag "icon")
   in uri
 
+(* atomIcon = element atom:icon {
+      atomCommonAttributes,
+    }
+ *)
 let icon_of_xml, icon_of_xml' =
   let leaf_producer ctx data = `URI data in
-  generate_catcher ~namespaces ~leaf_producer make_icon,
-  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_icon,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type id = Uri.t
 type id' = [ `URI of string ]
@@ -257,10 +290,15 @@ let make_id (l : [< id'] list) =
     | _ -> Error.raise_expectation Error.Data (Error.Tag "id")
   in uri
 
+(* atomId = element atom:id {
+      atomCommonAttributes,
+      (atomUri)
+    }
+ *)
 let id_of_xml, id_of_xml' =
   let leaf_producer ctx data = `URI data in
-  generate_catcher ~namespaces ~leaf_producer make_id,
-  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_id,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 let rel_of_string s = match String.lowercase (String.trim s) with
   | "alternate" -> Alternate
@@ -304,6 +342,18 @@ let make_link (l : [< link'] list) =
   in
   ({ href; rel; type_media; hreflang; title; length; } : link)
 
+(* atomLink =
+    element atom:link {
+        atomCommonAttributes,
+        attribute href { atomUri },
+        attribute rel { atomNCName | atomUri }?,
+        attribute type { atomMediaType }?,
+        attribute hreflang { atomLanguageTag }?,
+        attribute title { text }?,
+        attribute length { text }?,
+        undefinedContent
+  }
+ *)
 let link_of_xml, link_of_xml' =
   let attr_producer = [
     ("href", (fun ctx a -> `HREF a));
@@ -313,8 +363,8 @@ let link_of_xml, link_of_xml' =
     ("title", (fun ctx a -> `Title a));
     ("length", (fun ctx a -> `Length a));
   ] in
-  generate_catcher ~namespaces ~attr_producer make_link,
-  generate_catcher ~namespaces ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_link,
+  generate_catcher ~attr_producer (fun x -> x)
 
 type logo = Uri.t
 type logo' = [ `URI of string ]
@@ -326,10 +376,15 @@ let make_logo (l : [< logo'] list) =
     | _ -> Error.raise_expectation Error.Data (Error.Tag "logo")
   in uri
 
+(* atomLogo = element atom:logo {
+      atomCommonAttributes,
+      (atomUri)
+    }
+ *)
 let logo_of_xml, logo_of_xml' =
   let leaf_producer ctx data = `URI data in
-  generate_catcher ~namespaces ~leaf_producer make_logo,
-  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_logo,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type published = CalendarLib.Calendar.t
 type published' = [ `Date of string ]
@@ -341,10 +396,11 @@ let make_published (l : [< published'] list) =
     | _ -> Error.raise_expectation Error.Data (Error.Tag "published")
   in date
 
+(* atomPublished = element atom:published { atomDateConstruct } *)
 let published_of_xml, published_of_xml' =
   let leaf_producer ctx data = `Date data in
-  generate_catcher ~namespaces ~leaf_producer make_published,
-  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_published,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 
 type rights = string
@@ -357,10 +413,11 @@ let make_rights (l : [< rights'] list) =
     | _ -> Error.raise_expectation Error.Data (Error.Tag "rights")
   in rights
 
+(* atomRights = element atom:rights { atomTextConstruct } *)
 let rights_of_xml, rights_of_xml' =
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~namespaces ~leaf_producer make_rights,
-  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_rights,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type title = string
 type title' = [ `Data of string ]
@@ -372,10 +429,11 @@ let make_title (l : [< title'] list) =
     | _ -> Error.raise_expectation Error.Data (Error.Tag "title")
   in title
 
+(* atomTitle = element atom:title { atomTextConstruct } *)
 let title_of_xml, title_of_xml' =
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~namespaces ~leaf_producer make_title,
-  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_title,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type subtitle = string
 type subtitle' = [ `Data of string ]
@@ -386,10 +444,11 @@ let make_subtitle (l : [< subtitle'] list) =
     | None -> "" (* <subtitle></subtitle> indicates no subtitle *)
   in subtitle
 
+(* atomSubtitle = element atom:subtitle { atomTextConstruct } *)
 let subtitle_of_xml, subtitle_of_xml' =
   let leaf_producer ctx data = `Data data in
-  generate_catcher ~namespaces ~leaf_producer make_subtitle,
-  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_subtitle,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type updated = CalendarLib.Calendar.t
 type updated' = [ `Date of string ]
@@ -401,10 +460,11 @@ let make_updated (l : [< updated'] list) =
     | _ -> Error.raise_expectation Error.Data (Error.Tag "updated")
   in updated
 
+(* atomUpdated = element atom:updated { atomDateConstruct } *)
 let updated_of_xml, updated_of_xml' =
   let leaf_producer ctx data = `Date data in
-  generate_catcher ~namespaces ~leaf_producer make_updated,
-  generate_catcher ~namespaces ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_updated,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type source =
   {
@@ -517,6 +577,24 @@ let make_source ~entry_authors (l : [< source'] list) =
      title;
      updated; } : source)
 
+(* atomSource =
+    element atom:source {
+        atomCommonAttributes,
+        (atomAuthor*
+         & atomCategory*
+         & atomContributor*
+         & atomGenerator?
+         & atomIcon?
+         & atomId?
+         & atomLink*
+         & atomLogo?
+         & atomRights?
+         & atomSubtitle?
+         & atomTitle?
+         & atomUpdated?
+         & extensionElement * )
+      }
+ *)
 let source_of_xml =
   let data_producer = [
     ("author", (fun ctx a -> `Author (author_of_xml a)));
@@ -581,7 +659,40 @@ let rec get_xml_content xml0 = function
      if is_space then data else xml0
   | _ -> xml0
 
-(* TODO: see RFC *)
+(*  atomInlineTextContent =
+      element atom:content {
+          atomCommonAttributes,
+          attribute type { "text" | "html" }?,
+          (text)*
+    }
+
+    atomInlineXHTMLContent =
+      element atom:content {
+          atomCommonAttributes,
+          attribute type { "xhtml" },
+          xhtmlDiv
+    }
+
+    atomInlineOtherContent =
+      element atom:content {
+          atomCommonAttributes,
+          attribute type { atomMediaType }?,
+          (text|anyElement)*
+    }
+
+    atomOutOfLineContent =
+      element atom:content {
+          atomCommonAttributes,
+          attribute type { atomMediaType }?,
+          attribute src { atomUri },
+          empty
+    }
+
+    atomContent = atomInlineTextContent
+    | atomInlineXHTMLContent
+    | atomInlineOtherContent
+    | atomOutOfLineContent
+ *)
 let content_of_xml (((tag, attr), data): Xmlm.tag * t list) : content =
   (* MIME ::= attribute type { "text" | "html" }?
               | attribute type { "xhtml" }
@@ -793,6 +904,24 @@ let make_entry ~(feed_authors: author list) l =
      title;
      updated; } : entry)
 
+(* atomEntry =
+     element atom:entry {
+        atomCommonAttributes,
+        (atomAuthor*
+         & atomCategory*
+         & atomContent?
+         & atomContributor*
+         & atomId
+         & atomLink*
+         & atomPublished?
+         & atomRights?
+         & atomSource?
+         & atomSummary?
+         & atomTitle
+         & atomUpdated
+         & extensionElement * )
+      }
+ *)
 let entry_of_xml =
   let data_producer = [
     ("author", (fun ctx a -> `Author (author_of_xml a)));
@@ -917,6 +1046,25 @@ let make_feed (l : _ list) =
      updated;
      entries; } : feed)
 
+(* atomFeed =
+     element atom:feed {
+        atomCommonAttributes,
+        (atomAuthor*
+         & atomCategory*
+         & atomContributor*
+         & atomGenerator?
+         & atomIcon?
+         & atomId
+         & atomLink*
+         & atomLogo?
+         & atomRights?
+         & atomSubtitle?
+         & atomTitle
+         & atomUpdated
+         & extensionElement * ),
+        atomEntry*
+      }
+ *)
 let feed_of_xml =
   let data_producer = [
     ("author", (fun ctx a -> `Author (author_of_xml a)));
