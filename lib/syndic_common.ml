@@ -6,7 +6,7 @@ module XML = struct
   exception Ignore_namespace
 
   let generate_catcher
-      ?(namespaces=[])
+      ?(namespaces=[""])
       ?(attr_producer=[])
       ?(data_producer=[])
       ?leaf_producer maker =
