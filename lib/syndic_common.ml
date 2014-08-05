@@ -10,32 +10,29 @@ module XML = struct
       ?(attr_producer=[])
       ?(data_producer=[])
       ?leaf_producer maker =
-    let get_attr_name (((prefix, name), _) : Xmlm.attribute) =
-      if List.mem prefix namespaces
-      then name
-      else raise Ignore_namespace in
+    let in_namespaces ((prefix, _), _) = List.mem prefix namespaces in
+    let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name in
     let get_attr_value ((_, value) : Xmlm.attribute) = value in
-    let get_tag_name (((prefix, name), _) : Xmlm.tag) =
-      if List.mem prefix namespaces
-      then name
-      else raise Ignore_namespace in
+    let get_tag_name (((prefix, name), _) : Xmlm.tag) = name in
     let get_attrs ((_, attrs) : Xmlm.tag) = attrs in
-    let get_producer getter element map =
-      try Some (List.assoc (getter element) map)
+    let get_producer name map =
+      try Some (List.assoc name map)
       with _ -> None
     in
     let rec catch_attr acc = function
       | attr :: r -> begin
-          match get_producer get_attr_name attr attr_producer with
-          | Some f -> catch_attr ((f acc (get_attr_value attr)) :: acc) r
-          | None -> catch_attr acc r end
+          match get_producer (get_attr_name attr) attr_producer with
+          | Some f when in_namespaces attr ->
+              catch_attr ((f acc (get_attr_value attr)) :: acc) r
+          | _ -> catch_attr acc r end
       | [] -> acc
     in
     let rec catch_datas acc = function
       | Node (tag, datas) :: r ->
-        begin match get_producer get_tag_name tag data_producer with
-          | Some f -> catch_datas ((f acc (tag, datas)) :: acc) r
-          | None -> catch_datas acc r end
+        begin match get_producer (get_tag_name tag) data_producer with
+          | Some f when in_namespaces tag ->
+              catch_datas ((f acc (tag, datas)) :: acc) r
+          | _ -> catch_datas acc r end
       | Leaf str :: r ->
         begin match leaf_producer with
           | Some f -> catch_datas ((f acc str) :: acc) r
