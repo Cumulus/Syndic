@@ -1,5 +1,6 @@
-module XML = Syndic_common.XML
+open Syndic_common.XML
 open Syndic_common.Util
+module XML = Syndic_xml
 
 module Date = struct
   open CalendarLib
@@ -136,15 +137,15 @@ let author_of_xml =
     ("email", (fun ctx a -> `Email (author_email_of_xml a)));
   ] in
   fun ((_, datas) as xml) ->
-  XML.generate_catcher ~data_producer (make_author datas) xml
+  generate_catcher ~data_producer (make_author datas) xml
 
 let author_of_xml' =
   let data_producer = [
-    ("name", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Name a)));
-    ("uri", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `URI a)));
-    ("email", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Email a)));
+    ("name", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Name a)));
+    ("uri", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `URI a)));
+    ("email", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Email a)));
   ] in
-  XML.generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun x -> x)
 
 type category =
   {
@@ -184,8 +185,8 @@ let category_of_xml, category_of_xml' =
     ("scheme", (fun ctx a -> `Scheme a));
     ("label", (fun ctx a -> `Label a))
   ] in
-  XML.generate_catcher ~attr_producer make_category,
-  XML.generate_catcher ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_category,
+  generate_catcher ~attr_producer (fun x -> x)
 
 let make_contributor = make_author
 let contributor_of_xml = author_of_xml
@@ -227,8 +228,8 @@ let generator_of_xml, generator_of_xml' =
     ("uri", (fun ctx a -> `URI a));
   ] in
   let leaf_producer ctx data = `Content data in
-  XML.generate_catcher ~attr_producer ~leaf_producer make_generator,
-  XML.generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer make_generator,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type icon = Uri.t
 type icon' = [ `URI of string ]
@@ -242,8 +243,8 @@ let make_icon (l : [< icon'] list) =
 
 let icon_of_xml, icon_of_xml' =
   let leaf_producer ctx data = `URI data in
-  XML.generate_catcher ~leaf_producer make_icon,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_icon,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type id = Uri.t
 type id' = [ `URI of string ]
@@ -257,8 +258,8 @@ let make_id (l : [< id'] list) =
 
 let id_of_xml, id_of_xml' =
   let leaf_producer ctx data = `URI data in
-  XML.generate_catcher ~leaf_producer make_id,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_id,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 let rel_of_string s = match String.lowercase (String.trim s) with
   | "alternate" -> Alternate
@@ -311,8 +312,8 @@ let link_of_xml, link_of_xml' =
     ("title", (fun ctx a -> `Title a));
     ("length", (fun ctx a -> `Length a));
   ] in
-  XML.generate_catcher ~attr_producer make_link,
-  XML.generate_catcher ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_link,
+  generate_catcher ~attr_producer (fun x -> x)
 
 type logo = Uri.t
 type logo' = [ `URI of string ]
@@ -326,8 +327,8 @@ let make_logo (l : [< logo'] list) =
 
 let logo_of_xml, logo_of_xml' =
   let leaf_producer ctx data = `URI data in
-  XML.generate_catcher ~leaf_producer make_logo,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_logo,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type published = CalendarLib.Calendar.t
 type published' = [ `Date of string ]
@@ -341,8 +342,8 @@ let make_published (l : [< published'] list) =
 
 let published_of_xml, published_of_xml' =
   let leaf_producer ctx data = `Date data in
-  XML.generate_catcher ~leaf_producer make_published,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_published,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 
 type rights = string
@@ -357,8 +358,8 @@ let make_rights (l : [< rights'] list) =
 
 let rights_of_xml, rights_of_xml' =
   let leaf_producer ctx data = `Data data in
-  XML.generate_catcher ~leaf_producer make_rights,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_rights,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type title = string
 type title' = [ `Data of string ]
@@ -372,8 +373,8 @@ let make_title (l : [< title'] list) =
 
 let title_of_xml, title_of_xml' =
   let leaf_producer ctx data = `Data data in
-  XML.generate_catcher ~leaf_producer make_title,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_title,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type subtitle = string
 type subtitle' = [ `Data of string ]
@@ -381,13 +382,13 @@ type subtitle' = [ `Data of string ]
 let make_subtitle (l : [< subtitle'] list) =
   let subtitle = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "subtitle")
+    | None -> "" (* <subtitle></subtitle> indicates no subtitle *)
   in subtitle
 
 let subtitle_of_xml, subtitle_of_xml' =
   let leaf_producer ctx data = `Data data in
-  XML.generate_catcher ~leaf_producer make_subtitle,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_subtitle,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type updated = CalendarLib.Calendar.t
 type updated' = [ `Date of string ]
@@ -401,8 +402,8 @@ let make_updated (l : [< updated'] list) =
 
 let updated_of_xml, updated_of_xml' =
   let leaf_producer ctx data = `Date data in
-  XML.generate_catcher ~leaf_producer make_updated,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_updated,
+  generate_catcher ~leaf_producer (fun x -> x)
 
 type source =
   {
@@ -531,7 +532,7 @@ let source_of_xml =
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
   ] in
   fun ~entry_authors ->
-  XML.generate_catcher ~data_producer (make_source ~entry_authors)
+  generate_catcher ~data_producer (make_source ~entry_authors)
 
 let source_of_xml' =
   let data_producer = [
@@ -548,85 +549,82 @@ let source_of_xml' =
     ("title", (fun ctx a -> `Title (title_of_xml' a)));
     ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
   ] in
-  XML.generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun x -> x)
 
-type type_content =
-  | Html
-  | Text
-  | Xhtml
-  | Mime of string
 
-let type_content_of_string s = match String.lowercase (String.trim s) with
-  | "html" -> Html
-  | "text" -> Text
-  | "xhtml" -> Xhtml
-  | mime -> Mime mime
+type mime = string
 
-(* FIXME: src <> None => data = ""
-          enforce using a variant?  A better representation of the
-          constraints is possible. *)
 type content =
-  {
-    ty : type_content;
-    src : Uri.t option;
-    data : string;
-  }
+  | Text of string
+  | Html of Syndic_xml.t list
+  | Xhtml of Syndic_xml.t list
+  | Mime of mime * string
+  | Src of mime option * Uri.t
 
 type content' = [
   | `Type of string
   | `SRC of string
-  | `Data of string
+  | `Data of Syndic_xml.t list
 ]
 
+
+(* The actual content is supposed to be inside a <div> which is NOT
+   part of the content. *)
+(* FIXME: beware for output! Must pust the <div> back (with namespace ?) *)
+let rec get_xml_content xml0 = function
+  | XML.Leaf s :: tl -> if only_whitespace s then get_xml_content xml0 tl
+                       else xml0 (* unexpected *)
+  | XML.Node(tag, data) :: tl when tag_is tag "div" ->
+     let is_space =
+       List.for_all (function XML.Leaf s -> only_whitespace s | _ -> false) tl in
+     if is_space then data else xml0
+  | _ -> xml0
+
 (* TODO: see RFC *)
+let content_of_xml (((tag, attr), data): Xmlm.tag * t list) : content =
+  (* MIME ::= attribute type { "text" | "html" }?
+              | attribute type { "xhtml" }
+              | attribute type { atomMediaType }? *)
+  (* attribute src { atomUri } | none
+     If src s present, [data] MUST be empty. *)
+  match find (fun a -> attr_is a "src") attr with
+  | Some (_, src) ->
+     let mime = match find (fun a -> attr_is a "type") attr with
+       | Some(_, ty) -> Some ty
+       | None -> None in
+     Src(mime, Uri.of_string src)
+  | None ->
+     (* (text)*
+      *  | xhtmlDiv
+      *  | (text|anyElement)*
+      *  | none *)
+     match find (fun a -> attr_is a "type") attr with
+     | Some (_, "text") | None -> Text(get_leaf data)
+     | Some (_, "html") -> Html(get_xml_content data data)
+     | Some (_, "xhtml") -> Xhtml(get_xml_content data data)
+     | Some (_, mime) -> Mime(mime, get_leaf data)
 
-let make_content (l : [< content'] list) =
-  (* attribute type { "text" | "html" }?
-   *  | attribute type { "xhtml" }
-   *  | attribute type { atomMediaType }? *)
-  let ty = match find (function `Type _ -> true | _ -> false) l with
-    | Some (`Type ty) -> type_content_of_string ty
-    | _ -> Text
-  in
-  (* attribute src { atomUri }
-   *  | none *)
-  let src = match find (function `SRC _ -> true | _ -> false) l with
-    | Some (`SRC s) -> Some (Uri.of_string s)
-    | _ -> None
-  in
-  (* (text)*
-   *  | xhtmlDiv
-   *  | (text|anyElement)*
-   *  | none *)
-  let data = match find (function `Data _ -> true | _ -> false) l with
-    | Some (`Data d) -> d
-    | _ -> ""
-  in
-  ({ ty; src; data; } : content)
+let content_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+  let l = match find (fun a -> attr_is a "src") attr with
+    | Some(_, src) -> [`SRC src]
+    | None -> [] in
+  let l = match find (fun a -> attr_is a "type") attr with
+    | Some(_, ty) -> `Type ty :: l
+    | None -> l in
+  `Data data :: l
 
-let content_of_xml, content_of_xml' =
-  let attr_producer = [
-    ("type", (fun ctx a -> `Type a));
-    ("src", (fun ctx a -> `SRC a));
-  ] in
-  let leaf_producer ctx data = `Data data in
-  XML.generate_catcher ~attr_producer ~leaf_producer make_content,
-  XML.generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+type summary =
+  | Text of string
+  | Xhtml of Syndic_xml.t list
+type summary' = [ `Data of Syndic_xml.t list ]
 
-type summary = string
-type summary' = [ `Data of string ]
+let summary_of_xml (((tag, attr), data): Xmlm.tag * t list) : summary =
+  match find (fun a -> attr_is a "type") attr with
+  | Some(_, "xhtml") -> Xhtml(get_xml_content data data)
+  | _ -> Text(get_leaf data)
 
-let make_summary (l : [< summary'] list) =
-  (* element atom:summaru { atomTextConstruct } *)
-  let data = match find (fun (`Data _) -> true) l with
-    | Some (`Data d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "summary")
-  in data
-
-let summary_of_xml, summary_of_xml' =
-  let leaf_producer ctx data = `Data data in
-  XML.generate_catcher ~leaf_producer make_summary,
-  XML.generate_catcher ~leaf_producer (fun x -> x)
+let summary_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+  `Data data
 
 type entry =
   {
@@ -810,7 +808,7 @@ let entry_of_xml =
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
   ] in
   fun ~feed_authors ->
-  XML.generate_catcher ~data_producer (make_entry ~feed_authors)
+  generate_catcher ~data_producer (make_entry ~feed_authors)
 
 let entry_of_xml' =
   let data_producer = [
@@ -827,7 +825,7 @@ let entry_of_xml' =
     ("title", (fun ctx a -> `Title (title_of_xml' a)));
     ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
   ] in
-  XML.generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun x -> x)
 
 type feed =
   {
@@ -934,7 +932,7 @@ let feed_of_xml =
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
     ("entry", (fun ctx a -> `Entry a));
   ] in
-  XML.generate_catcher ~data_producer make_feed
+  generate_catcher ~data_producer make_feed
 
 let feed_of_xml' =
   let data_producer = [
@@ -952,16 +950,16 @@ let feed_of_xml' =
     ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
     ("entry", (fun ctx a -> `Entry (entry_of_xml' a)));
   ] in
-  XML.generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun x -> x)
 
 let parse input =
-  match XML.tree input |> snd with
+  match XML.of_xmlm input with
   | XML.Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "feed") Error.Root
 (* FIXME: the spec says that an entry can appear as the top-level element *)
 
 let unsafe input =
-  match XML.tree input |> snd with
+  match XML.of_xmlm input with
   | XML.Node (tag, datas) when tag_is tag "feed" ->
      `Feed (feed_of_xml' (tag, datas))
   | _ -> `Feed []

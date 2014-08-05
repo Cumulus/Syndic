@@ -1,5 +1,6 @@
-module XML = Syndic_common.XML
+open Syndic_common.XML
 open Syndic_common.Util
+module XML = Syndic_xml
 
 module Date = struct
   open CalendarLib
@@ -15,22 +16,40 @@ module Date = struct
 
   (* Format: http://www.rssboard.org/rss-specification#ltpubdategtSubelementOfLtitemgt
      Examples: Sun, 19 May 2002 15:21:36 GMT
-               Sat, 25 Sep 2010 08:01:00 -0700 *)
+               Sat, 25 Sep 2010 08:01:00 -0700
+               20 Mar 2013 03:47:14 +0000 *)
   let of_string s =
-    let make_date day month year h m s z =
+    let make_date day month year h m maybe_s z =
+      let month = if String.length month <= 3 then month
+                  else String.sub month 0 3 in
       let month = Hashtbl.find month_to_int month in
       let date = Calendar.Date.make year month day in
+      let s =
+        if maybe_s <> "" && maybe_s.[0] = ':' then
+          float_of_string(String.sub maybe_s 1 (String.length maybe_s - 1))
+        else 0. in
       let t = Calendar.Time.(make h m (Second.from_float s)) in
-      if z = "" || z = "GMT" then
+      if z = "" || z = "GMT" || z = "UT" then
         Calendar.(create date t)
       else
-        let zh = int_of_string(String.sub z 0 3)
-        and zm = int_of_string(String.sub z 3 2) in
+        (* FIXME: this should be made more robust. *)
+        let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i)
+        and zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
         let tz = Calendar.Time.(Period.make zh zm (Second.from_int 0)) in
         Calendar.(create date (Time.add t tz))
     in
-    try sscanf s "%_s %i %s %i %i:%i:%f %s" make_date
-    with Scanf.Scan_failure _ ->
+    try
+      if 'A' <= s.[0] && s.[0] <= 'Z' then (
+        try sscanf s "%_s %i %s %i %i:%i%s %s" make_date
+        with _ ->
+          sscanf s "%_s %ist %s %i %i:%i%s %s" make_date
+      )
+      else (
+        try sscanf s "%i %s %i %i:%i%s %s" make_date
+        with _ ->
+          sscanf s "%i %s %i" (fun d m y -> make_date d m y 0 0 "" "UT")
+      )
+    with _ ->
       invalid_arg(sprintf "Syndic.Rss2.Date.of_string: cannot parse %S" s)
 end
 
@@ -116,8 +135,7 @@ let image_url_of_xml (tag, datas) =
 
 let image_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "image/title")
+  with Error.Expected_Leaf -> ""
 
 let image_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
@@ -153,18 +171,18 @@ let image_of_xml =
     ("height", (fun ctx a -> `Height (image_height_of_xml a)));
     ("description", (fun ctx a -> `Description (image_description_of_xml a)));
   ] in
-  XML.generate_catcher ~data_producer make_image
+  generate_catcher ~data_producer make_image
 
 let image_of_xml' =
   let data_producer = [
-    ("url", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `URL a)));
-    ("title", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Title a)));
-    ("link", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Link a)));
-    ("width", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Width a)));
-    ("height", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Height a)));
-    ("description", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("url", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `URL a)));
+    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("width", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Width a)));
+    ("height", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Height a)));
+    ("description", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
   ] in
-  XML.generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun x -> x)
 
 type cloud = {
   domain: Uri.t;
@@ -216,8 +234,8 @@ let cloud_of_xml, cloud_of_xml' =
     ("registerProcedure", (fun ctx a -> `RegisterProcedure a));
     ("protocol", (fun ctx a -> `Protocol a));
   ] in
-  XML.generate_catcher ~attr_producer make_cloud,
-  XML.generate_catcher ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_cloud,
+  generate_catcher ~attr_producer (fun x -> x)
 
 type textinput =
   {
@@ -284,17 +302,17 @@ let textinput_of_xml =
     ("name", (fun ctx a -> `Name (textinput_name_of_xml a)));
     ("link", (fun ctx a -> `Link (textinput_link_of_xml a)));
   ] in
-  XML.generate_catcher ~data_producer make_textinput
+  generate_catcher ~data_producer make_textinput
 
 let textinput_of_xml' =
   let data_producer = [
-    ("title", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
     ("description",
-     (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Description a)));
-    ("name", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Name a)));
-    ("link", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Link a)));
+     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("name", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Name a)));
+    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
   ] in
-  XML.generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun x -> x)
 
 type category =
   {
@@ -310,7 +328,7 @@ type category' = [
 let make_category (l : [< category' ] list) =
   let data = match find (function `Data _ -> true | _ -> false) l with
     | Some (`Data s)-> s
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "category")
+    | _ -> ""
   in let domain = match find (function `Domain _ -> true | _ -> false) l with
     | Some (`Domain d) -> Some (Uri.of_string d)
     | _ -> None
@@ -320,8 +338,8 @@ let make_category (l : [< category' ] list) =
 let category_of_xml, category_of_xml' =
   let attr_producer = [ ("domain", (fun ctx a -> `Domain a)); ] in
   let leaf_producer ctx data = `Data data in
-  XML.generate_catcher ~attr_producer ~leaf_producer make_category,
-  XML.generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer make_category,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type enclosure =
   {
@@ -357,8 +375,8 @@ let enclosure_of_xml, enclosure_of_xml' =
     ("length", (fun ctx a -> `Length a));
     ("type", (fun ctx a -> `Mime a));
   ] in
-  XML.generate_catcher ~attr_producer make_enclosure,
-  XML.generate_catcher ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_enclosure,
+  generate_catcher ~attr_producer (fun x -> x)
 
 type guid =
   {
@@ -371,22 +389,24 @@ type guid' = [
   | `Permalink of string
 ]
 
+(* Some RSS2 server output <guid isPermaLink="false"></guid> ! *)
 let make_guid (l : [< guid' ] list) =
   let data = match find (function `Data _ -> true | _ -> false) l with
-    | Some (`Data u) -> Uri.of_string u
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "guid")
+    | Some (`Data u) -> u
+    | _ -> ""
   in
   let permalink = match find (function `Permalink _ -> true | _ -> false) l with
     | Some (`Permalink b) -> bool_of_string b
     | _ -> true (* cf. RFC *)
   in
-  ({ data; permalink; } : guid)
+  if data = "" then None
+  else Some({ data = Uri.of_string data;  permalink } : guid)
 
 let guid_of_xml, guid_of_xml' =
   let attr_producer = [ ("isPermalink", (fun ctx a -> `Permalink a)); ] in
   let leaf_producer ctx data = `Data data in
-  XML.generate_catcher ~attr_producer ~leaf_producer make_guid,
-  XML.generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer make_guid,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type source =
   {
@@ -413,8 +433,8 @@ let make_source (l : [< source' ] list) =
 let source_of_xml, source_of_xml' =
   let attr_producer = [ ("url", (fun ctx a -> `URL a)); ] in
   let leaf_producer ctx data = `Data data in
-  XML.generate_catcher ~attr_producer ~leaf_producer make_source,
-  XML.generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer make_source,
+  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type story =
   | All of string * string
@@ -447,7 +467,7 @@ type item' = [
   | `Source of source
 ]
 
-let make_item (l : [< item' ] list) =
+let make_item (l : _ list) =
   let story = match
       find (function `Title _ -> true | _ -> false) l,
       find (function `Description _ -> true | _ -> false) l
@@ -458,7 +478,7 @@ let make_item (l : [< item' ] list) =
     | _, _ -> Error.raise_item_exceptation ()
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
-    | Some (`Link l) -> Some l
+    | Some (`Link l) -> l
     | _ -> None
   in
   let author = match find (function `Author _ -> true | _ -> false) l with
@@ -478,7 +498,7 @@ let make_item (l : [< item' ] list) =
     | _ -> None
   in
   let guid = match find (function `Guid _ -> true | _ -> false) l with
-    | Some (`Guid g) -> Some g
+    | Some (`Guid g) -> g
     | _ -> None
   in
   let pubDate = match find (function `PubDate _ -> true | _ -> false) l with
@@ -506,13 +526,11 @@ let item_title_of_xml (tag, datas) =
 
 let item_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "item/description")
+  with Error.Expected_Leaf -> ""
 
 let item_link_of_xml (tag, datas) =
-  try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "item/link")
+  try Some(Uri.of_string (get_leaf datas))
+  with Error.Expected_Leaf -> None
 
 let item_author_of_xml (tag, datas) =
   try get_leaf datas
@@ -542,23 +560,23 @@ let item_of_xml =
     ("pubDate", (fun ctx a -> `PubDate (item_pubdate_of_xml a)));
     ("source", (fun ctx a -> `Source (source_of_xml a)));
   ] in
-  XML.generate_catcher ~data_producer make_item
+  generate_catcher ~data_producer make_item
 
 let item_of_xml' =
   let data_producer = [
-    ("title", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
     ("description",
-     (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Description a)));
-    ("link", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Link a)));
-    ("author", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Author a)));
+     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("author", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Author a)));
     ("category", (fun ctx a -> `Category (category_of_xml' a)));
-    ("comments", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Comments a)));
+    ("comments", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Comments a)));
     ("enclosure", (fun ctx a -> `Enclosure (enclosure_of_xml' a)));
     ("guid", (fun ctx a -> `Guid (guid_of_xml' a)));
-    ("pubdate", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `PubDate a)));
+    ("pubdate", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `PubDate a)));
     ("source", (fun ctx a -> `Source (source_of_xml' a)));
   ] in
-  XML.generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun x -> x)
 
 type channel =
   {
@@ -719,8 +737,7 @@ let channel_title_of_xml (tag, datas) =
 
 let channel_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "channel/description")
+  with Error.Expected_Leaf -> ""
 
 let channel_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
@@ -817,45 +834,67 @@ let channel_of_xml =
     ("skipdays", (fun ctx a -> `SkipDays (channel_skipDays_of_xml a)));
     ("item", (fun ctx a -> `Item (item_of_xml a)));
   ] in
-  XML.generate_catcher ~data_producer make_channel
+  generate_catcher ~data_producer make_channel
 
 let channel_of_xml' =
   let data_producer = [
-    ("title", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Title a)));
-    ("link", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Link a)));
-    ("description", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Description a)));
-    ("Language", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Language a)));
-    ("copyright", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Copyright a)));
+    ("title", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Title a)));
+    ("link", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Link a)));
+    ("description", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Description a)));
+    ("Language", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Language a)));
+    ("copyright", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Copyright a)));
     ("managingeditor",
-     (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `ManagingEditor a)));
-    ("webmaster", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `WebMaster a)));
-    ("pubdate", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `PubDate a)));
+     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `ManagingEditor a)));
+    ("webmaster", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `WebMaster a)));
+    ("pubdate", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `PubDate a)));
     ("lastbuilddate",
-     (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `LastBuildDate a)));
-    ("category", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Category a)));
-    ("generator", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Generator a)));
-    ("docs", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Docs a)));
+     (fun ctx -> dummy_of_xml ~ctor:(fun a -> `LastBuildDate a)));
+    ("category", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Category a)));
+    ("generator", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Generator a)));
+    ("docs", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Docs a)));
     ("cloud", (fun ctx a -> `Cloud (cloud_of_xml' a)));
-    ("ttl", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `TTL a)));
+    ("ttl", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `TTL a)));
     ("image", (fun ctx a -> `Image (image_of_xml' a)));
-    ("rating", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `Rating a)));
+    ("rating", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Rating a)));
     ("textinput", (fun ctx a -> `TextInput (textinput_of_xml' a)));
-    ("skiphours", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `SkipHours a)));
-    ("skipdays", (fun ctx -> XML.dummy_of_xml ~ctor:(fun a -> `SkipDays a)));
+    ("skiphours", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `SkipHours a)));
+    ("skipdays", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `SkipDays a)));
     ("item", (fun ctx a -> `Item (item_of_xml' a)));
   ] in
-  XML.generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun x -> x)
+
+
+(* Some RSS2 generators (such as "wordpress") will add tags like
+   <atom:link> which will confuse the parser because it ignores
+   prefixes.  Remove the problematic tags. *)
+let rec filter_out_prefixed = function
+  | XML.Node((((prefix, _), _) as ta), sub) ->
+     if prefix = "" then
+       Some(XML.Node(ta, filter_map sub filter_out_prefixed))
+     else None
+  | XML.Leaf _ as l -> Some l
+
+let find_channel l =
+  find (function XML.Node(tag, data) -> tag_is tag "channel"
+                | XML.Leaf _ -> false) l
 
 let parse input =
-  match XML.tree input |> snd with
-  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
-  | XML.Node (tag, datas) when tag_is tag "channel" ->
-     channel_of_xml (tag, datas)
+  match filter_out_prefixed(XML.of_xmlm input) with
+  | Some(XML.Node(tag, data)) ->
+     if tag_is tag "channel" then
+       channel_of_xml (tag, data)
+     else (
+       match find_channel data with
+       | Some(XML.Node(t, d)) -> channel_of_xml (t, d)
+       | Some(XML.Leaf _)
+       | None -> Error.raise_expectation (Error.Tag "channel") Error.Root)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
-  match XML.tree input |> snd with
-  | XML.Node(_ (* rss *), [XML.Node(tag, datas)])
-  | XML.Node (tag, datas) when tag_is tag "channel" ->
-     `Channel (channel_of_xml' (tag, datas))
+  match filter_out_prefixed(XML.of_xmlm input) with
+  | Some(XML.Node (tag, data)) ->
+     if tag_is tag "channel" then `Channel (channel_of_xml' (tag, data))
+     else (match find_channel data with
+           | Some(XML.Node(t, d)) -> `Channel (channel_of_xml' (t, d))
+           | Some(XML.Leaf _) | None -> `Channel [])
   | _ -> `Channel []

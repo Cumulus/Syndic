@@ -1,14 +1,7 @@
 (* XML *)
 
 module XML = struct
-  type tree =
-    | Node of Xmlm.tag * tree list
-    | Leaf of string
-
-  let tree input =
-    let el tag datas = Node (tag, datas) in
-    let data data = Leaf data in
-    Xmlm.input_doc_tree ~el ~data input
+  include Syndic_xml
 
   let generate_catcher
       ?(attr_producer=[])
@@ -55,6 +48,13 @@ end
 module Util = struct
   let find f l = try Some (List.find f l) with Not_found -> None
 
+  let rec filter_map l f =
+    match l with
+    | [] -> []
+    | x :: tl -> match f x with
+                | None -> filter_map tl f
+                | Some x -> x :: filter_map tl f
+
   let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
   let datas_has_leaf = List.exists (function | XML.Leaf _ -> true | _ -> false)
@@ -65,4 +65,12 @@ module Util = struct
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
   let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
+
+  let is_space c = c = ' ' || c = '\t' || c = '\n' || c = '\r'
+
+  let only_whitespace s =
+    let r = ref true in
+    let i = ref 0 and len = String.length s in
+    while !r && !i < len do r := is_space s.[!i]; incr i done;
+    !r
 end
