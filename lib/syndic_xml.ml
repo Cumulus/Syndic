@@ -1,4 +1,3 @@
-
 type t =
   | Node of Xmlm.tag * t list
   | Leaf of string              (* FIXME: I prefer Data *)
@@ -6,9 +5,7 @@ type t =
 let of_xmlm input =
   let el tag datas = Node (tag, datas) in
   let data data = Leaf data in
-  let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
-  tree
-
+  Xmlm.input_doc_tree ~el ~data input
 
 let rec to_xmlm t output =
   match t with

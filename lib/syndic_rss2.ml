@@ -868,7 +868,7 @@ let find_channel l =
                 | XML.Leaf _ -> false) l
 
 let parse input =
-  match XML.of_xmlm input with
+  match XML.of_xmlm input |> snd with
   | XML.Node(tag, data) ->
      if tag_is tag "channel" then
        channel_of_xml (tag, data)
@@ -880,7 +880,7 @@ let parse input =
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
-  match XML.of_xmlm input with
+  match XML.of_xmlm input |> snd with
   | XML.Node (tag, data) ->
      if tag_is tag "channel" then `Channel (channel_of_xml' (tag, data))
      else (match find_channel data with

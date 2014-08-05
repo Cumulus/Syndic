@@ -460,12 +460,12 @@ let rdf_of_xml' =
   generate_catcher ~data_producer (fun x -> x)
 
 let parse input =
-  match XML.of_xmlm input with
+  match XML.of_xmlm input |> snd with
   | XML.Node (tag, datas) when tag_is tag "RDF" -> rdf_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "RDF") Error.Root
 
 let unsafe input =
-  match XML.of_xmlm input with
+  match XML.of_xmlm input |> snd with
   | XML.Node (tag, datas) when tag_is tag "RDF" ->
      `RDF(rdf_of_xml' (tag, datas))
   | _ -> `RDF []
