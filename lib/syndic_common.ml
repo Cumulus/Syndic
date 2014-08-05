@@ -3,7 +3,7 @@
 module XML = struct
   include Syndic_xml
 
-  exception Invalid_namespace
+  exception Ignore_namespace
 
   let generate_catcher
       ?(namespace="")
@@ -13,12 +13,12 @@ module XML = struct
     let get_attr_name (((prefix, name), _) : Xmlm.attribute) =
       if prefix = namespace || prefix = ""
       then name
-      else raise Invalid_namespace in
+      else raise Ignore_namespace in
     let get_attr_value ((_, value) : Xmlm.attribute) = value in
     let get_tag_name (((prefix, name), _) : Xmlm.tag) =
       if prefix = namespace || prefix = ""
       then name
-      else raise Invalid_namespace in
+      else raise Ignore_namespace in
     let get_attrs ((_, attrs) : Xmlm.tag) = attrs in
     let get_producer getter element map =
       try Some (List.assoc (getter element) map)
