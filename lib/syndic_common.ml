@@ -1,37 +1,39 @@
 (* XML *)
 
 module XML = struct
-  type tree =
-    | Node of Xmlm.tag * tree list
-    | Leaf of string
+  include Syndic_xml
 
-  let tree input =
-    let el tag datas = Node (tag, datas) in
-    let data data = Leaf data in
-    Xmlm.input_doc_tree ~el ~data input
+  exception Ignore_namespace
 
   let generate_catcher
+      ?(namespaces=[])
       ?(attr_producer=[])
       ?(data_producer=[])
       ?leaf_producer maker =
-    let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name in
+    let get_attr_name (((prefix, name), _) : Xmlm.attribute) =
+      if List.mem prefix namespaces
+      then name
+      else raise Ignore_namespace in
     let get_attr_value ((_, value) : Xmlm.attribute) = value in
-    let get_tag_name (((prefix, name), _) : Xmlm.tag) = name in
+    let get_tag_name (((prefix, name), _) : Xmlm.tag) =
+      if List.mem prefix namespaces
+      then name
+      else raise Ignore_namespace in
     let get_attrs ((_, attrs) : Xmlm.tag) = attrs in
-    let get_producer name map =
-      try Some (List.assoc name map)
+    let get_producer getter element map =
+      try Some (List.assoc (getter element) map)
       with _ -> None
     in
     let rec catch_attr acc = function
       | attr :: r -> begin
-          match get_producer (get_attr_name attr) attr_producer with
+          match get_producer get_attr_name attr attr_producer with
           | Some f -> catch_attr ((f acc (get_attr_value attr)) :: acc) r
           | None -> catch_attr acc r end
       | [] -> acc
     in
     let rec catch_datas acc = function
       | Node (tag, datas) :: r ->
-        begin match get_producer (get_tag_name tag) data_producer with
+        begin match get_producer get_tag_name tag data_producer with
           | Some f -> catch_datas ((f acc (tag, datas)) :: acc) r
           | None -> catch_datas acc r end
       | Leaf str :: r ->
@@ -55,6 +57,13 @@ end
 module Util = struct
   let find f l = try Some (List.find f l) with Not_found -> None
 
+  let rec filter_map l f =
+    match l with
+    | [] -> []
+    | x :: tl -> match f x with
+                | None -> filter_map tl f
+                | Some x -> x :: filter_map tl f
+
   let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
   let datas_has_leaf = List.exists (function | XML.Leaf _ -> true | _ -> false)
@@ -65,4 +74,12 @@ module Util = struct
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
   let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
+
+  let is_space c = c = ' ' || c = '\t' || c = '\n' || c = '\r'
+
+  let only_whitespace s =
+    let r = ref true in
+    let i = ref 0 and len = String.length s in
+    while !r && !i < len do r := is_space s.[!i]; incr i done;
+    !r
 end

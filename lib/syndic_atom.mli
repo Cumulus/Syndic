@@ -388,47 +388,36 @@ type source =
  *)
 
 
-(** Text ({!content}) constructs have a [type_content] attribute. When
-    present, the value MUST be one of [Text], [Html], or [Xhtml].
-    When the Atom feed contains no indication, [Text] is used.
-
-    {{: http://tools.ietf.org/html/rfc4287#section-3.1.1} See RFC 4287 § 3.1.1}
-
-    When the value is [Mime m], [m] MUST conform to the syntax of a
-    MIME media type, but MUST NOT be a composite type (see Section
-    4.2.6 of [MIMEREG]).
+type mime = string
+(** A MIME type that conform to the syntax of a MIME media type, but
+    MUST NOT be a composite type (see Section 4.2.6 of [MIMEREG]).
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.3.1}
     See RFC 4287 § 4.1.3.1 }
  *)
-type type_content =
-  | Html
-  | Text
-  | Xhtml
-  | Mime of string
-
 
 type content =
-  {
-    ty : type_content;
-    src : Uri.t option;
-    data : string;
-  }
+  | Text of string
+  | Html of Syndic_xml.t list
+  | Xhtml of Syndic_xml.t list
+  | Mime of mime * string
+  | Src of mime option * Uri.t
 (** [content] either contains or links to the content of the entry.
     The value of [content] is Language-Sensitive.
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.3} See RFC 4287 § 4.1.3}
 
-    - [src], if present, MUST be an IRI reference [RFC3987].  If [src]
-      is present, [data] MUST be empty.  Atom Processors MAY use the
-      IRI to retrieve the content and MAY choose to ignore remote
-      content or to present it in a different manner than local
-      content.
-    - If [src] is present, [ty] attribute SHOULD be provided and MUST
-      be a MIME media type [MIMEREG], rather than [Text], [Html], or
-      [Xhtml].  The value is advisory; that is to say, when the
-      corresponding URI (mapped from an IRI, if necessary) is
-      dereferenced, if the server providing that content also provides
-      a media type, the server-provided media type is authoritative.
+    - [Text], [Html], [Xhtml] or [Mime] means that the content was
+      part of the document and is provided as an argument.
+      {{:http://tools.ietf.org/html/rfc4287#section-3.1.1}
+      See RFC 4287 § 3.1.1}
+    - [Src(m, iri)] means that the content is to be found at [iri] and
+      has MIME type [m].  Atom Processors MAY use the IRI to retrieve
+      the content and MAY choose to ignore remote content or to
+      present it in a different manner than local content.  The value
+      of [m] is advisory; that is to say, when the corresponding URI
+      (mapped from an IRI, if necessary) is dereferenced, if the
+      server providing that content also provides a media type, the
+      server-provided media type is authoritative.
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.3.2}
     See RFC 4287 § 4.1.3.2 }
@@ -470,7 +459,9 @@ type content =
 ]}
  *)
 
-type summary = string
+type summary =
+  | Text of string
+  | Xhtml of Syndic_xml.t list
 (** [summary] is a Text construct that conveys a short summary,
     abstract, or excerpt of an entry.
 
@@ -620,9 +611,9 @@ type feed =
  *)
 
 val parse : Xmlm.input -> feed
-(** [analyze xml] parse [xml].  Beware that [xml] is mutable, so when
-    the parsing fails, one have to create a new copy of [xml] to use
-    it with another function.
+(** [parse xml] returns the feed corresponding to [xml].  Beware that
+    [xml] is mutable, so when the parsing fails, one have to create a
+    new copy of [xml] to use it with another function.
 
     Raise [Error.Expected], [Expected_Leaf] or [Error.Duplicate_Link]
     if [xml] is not a valid Atom document. *)
@@ -647,8 +638,9 @@ val unsafe : Xmlm.input ->
                  [> `Label of string | `Scheme of string | `Term of string ]
                    list
             | `Content of
-                 [> `Data of string | `SRC of string | `Type of string ]
-                   list
+                 [> `Data of Syndic_xml.t list | `SRC of string
+                  | `Type of string
+                 ] list
             | `Contributor of
                  [> `Email of string | `Name of string | `URI of string ]
                    list
@@ -696,7 +688,7 @@ val unsafe : Xmlm.input ->
                  | `Title of [> `Data of string ] list
                  | `Updated of [> `Date of string ] list ]
                    list
-            | `Summary of [> `Data of string ] list
+            | `Summary of [> `Data of Syndic_xml.t list ]
             | `Title of [> `Data of string ] list
             | `Updated of [> `Date of string ] list ]
               list
