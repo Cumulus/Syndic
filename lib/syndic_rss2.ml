@@ -19,11 +19,17 @@ module Date = struct
                Sat, 25 Sep 2010 08:01:00 -0700
                20 Mar 2013 03:47:14 +0000 *)
   let of_string s =
-    let make_date day month year h m s z =
+    let make_date day month year h m maybe_s z =
+      let month = if String.length month <= 3 then month
+                  else String.sub month 0 3 in
       let month = Hashtbl.find month_to_int month in
       let date = Calendar.Date.make year month day in
+      let s =
+        if maybe_s <> "" && maybe_s.[0] = ':' then
+          float_of_string(String.sub maybe_s 1 (String.length maybe_s - 1))
+        else 0. in
       let t = Calendar.Time.(make h m (Second.from_float s)) in
-      if z = "" || z = "GMT" then
+      if z = "" || z = "GMT" || z = "UT" then
         Calendar.(create date t)
       else
         (* FIXME: this should be made more robust. *)
@@ -33,9 +39,16 @@ module Date = struct
         Calendar.(create date (Time.add t tz))
     in
     try
-      if 'A' <= s.[0] && s.[0] <= 'Z' then
-        sscanf s "%_s %i %s %i %i:%i:%f %s" make_date
-      else sscanf s "%i %s %i %i:%i:%f %s" make_date
+      if 'A' <= s.[0] && s.[0] <= 'Z' then (
+        try sscanf s "%_s %i %s %i %i:%i%s %s" make_date
+        with _ ->
+          sscanf s "%_s %ist %s %i %i:%i%s %s" make_date
+      )
+      else (
+        try sscanf s "%i %s %i %i:%i%s %s" make_date
+        with _ ->
+          sscanf s "%i %s %i" (fun d m y -> make_date d m y 0 0 "" "UT")
+      )
     with _ ->
       invalid_arg(sprintf "Syndic.Rss2.Date.of_string: cannot parse %S" s)
 end
