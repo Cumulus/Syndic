@@ -122,8 +122,7 @@ let image_url_of_xml (tag, datas) =
 
 let image_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "image/title")
+  with Error.Expected_Leaf -> ""
 
 let image_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
@@ -316,7 +315,7 @@ type category' = [
 let make_category (l : [< category' ] list) =
   let data = match find (function `Data _ -> true | _ -> false) l with
     | Some (`Data s)-> s
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "category")
+    | _ -> ""
   in let domain = match find (function `Domain _ -> true | _ -> false) l with
     | Some (`Domain d) -> Some (Uri.of_string d)
     | _ -> None
@@ -377,16 +376,18 @@ type guid' = [
   | `Permalink of string
 ]
 
+(* Some RSS2 server output <guid isPermaLink="false"></guid> ! *)
 let make_guid (l : [< guid' ] list) =
   let data = match find (function `Data _ -> true | _ -> false) l with
-    | Some (`Data u) -> Uri.of_string u
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "guid")
+    | Some (`Data u) -> u
+    | _ -> ""
   in
   let permalink = match find (function `Permalink _ -> true | _ -> false) l with
     | Some (`Permalink b) -> bool_of_string b
     | _ -> true (* cf. RFC *)
   in
-  ({ data; permalink; } : guid)
+  if data = "" then None
+  else Some({ data = Uri.of_string data;  permalink } : guid)
 
 let guid_of_xml, guid_of_xml' =
   let attr_producer = [ ("isPermalink", (fun ctx a -> `Permalink a)); ] in
@@ -453,7 +454,7 @@ type item' = [
   | `Source of source
 ]
 
-let make_item (l : [< item' ] list) =
+let make_item (l : _ list) =
   let story = match
       find (function `Title _ -> true | _ -> false) l,
       find (function `Description _ -> true | _ -> false) l
@@ -464,7 +465,7 @@ let make_item (l : [< item' ] list) =
     | _, _ -> Error.raise_item_exceptation ()
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
-    | Some (`Link l) -> Some l
+    | Some (`Link l) -> l
     | _ -> None
   in
   let author = match find (function `Author _ -> true | _ -> false) l with
@@ -484,7 +485,7 @@ let make_item (l : [< item' ] list) =
     | _ -> None
   in
   let guid = match find (function `Guid _ -> true | _ -> false) l with
-    | Some (`Guid g) -> Some g
+    | Some (`Guid g) -> g
     | _ -> None
   in
   let pubDate = match find (function `PubDate _ -> true | _ -> false) l with
@@ -512,13 +513,11 @@ let item_title_of_xml (tag, datas) =
 
 let item_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "item/description")
+  with Error.Expected_Leaf -> ""
 
 let item_link_of_xml (tag, datas) =
-  try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
-    Error.raise_expectation Error.Data (Error.Tag "item/link")
+  try Some(Uri.of_string (get_leaf datas))
+  with Error.Expected_Leaf -> None
 
 let item_author_of_xml (tag, datas) =
   try get_leaf datas
