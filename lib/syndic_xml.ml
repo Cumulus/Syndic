@@ -34,8 +34,8 @@ and get_tag acc i =
 
 let preserve_entity s = Some("&" ^ s ^ ";")
 
-let of_html ?(entity=preserve_entity) html =
-  let i = Xmlm.make_input (`String(0, html)) ~entity in
+let of_html ?(enc=`UTF_8) ?(entity=preserve_entity) html =
+  let i = Xmlm.make_input (`String(0, html)) ~entity ~enc:(Some enc) in
   parse_html [] i
 
 
