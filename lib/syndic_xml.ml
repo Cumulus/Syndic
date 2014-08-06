@@ -13,7 +13,7 @@ type signal_or_error = [Xmlm.signal | `Error of Xmlm.error]
 
 let xmlm_input i =
   try (Xmlm.input i :> signal_or_error)
-  with Xmlm.Error(p, e) -> `Error e
+  with Xmlm.Error(p, (`Unexpected_eoi as e)) -> `Error e
 
 let rec parse_html acc i =
   match xmlm_input i with
