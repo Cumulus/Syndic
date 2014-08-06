@@ -732,6 +732,7 @@ type summary' = [ `Data of Syndic_xml.t list ]
 
 let summary_of_xml (((tag, attr), data): Xmlm.tag * t list) : summary =
   match find (fun a -> attr_is a "type") attr with
+  | Some(_, "html") (* some feed do this *)
   | Some(_, "xhtml") -> Xhtml(get_xml_content data data)
   | _ -> Text(get_leaf data)
 
