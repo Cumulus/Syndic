@@ -327,6 +327,7 @@ type content =
 
 type summary =
   | Text of string
+  | Html of Syndic_xml.t list
   | Xhtml of Syndic_xml.t list
 (** [summary] is a Text construct that conveys a short summary,
     abstract, or excerpt of an entry.
