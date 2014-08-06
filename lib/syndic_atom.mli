@@ -26,23 +26,9 @@ type author =
     to the entry if there are no atom:author elements in the locations
     described above.
 
-    {[  atomAuthor = element atom:author { atomPersonConstruct } ]}
-
-    where
-
-{[atomPersonConstruct =
-    atomCommonAttributes,
-    (element atom:name { text }
-     & element atom:uri { atomUri }?
-     & element atom:email { atomEmailAddress }?
-     & extensionElement * )
-]}
-
    {{: http://tools.ietf.org/html/rfc4287#section-3.2} See RFC 4287 § 3.2}
 
-   This specification assigns no significance to the order of
-   appearance of the child elements in a Person construct. Person
-   constructs allow extension Metadata elements (see Section 6.4).
+     Person constructs allow extension Metadata elements (see Section 6.4).
 
    {{: http://tools.ietf.org/html/rfc4287#section-4.2.1} See RFC 4287 § 4.2.1}
  *)
@@ -72,17 +58,6 @@ type category =
       represent their corresponding characters ("&" and "<",
       respectively), not markup.
 
-{[
-  atomCategory =
-    element atom:category {
-        atomCommonAttributes,
-        attribute term { text },
-        attribute scheme { atomUri }?,
-        attribute label { text }?,
-        undefinedContent
-      }
-]}
-
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.2.1} See RFC 4287 § 4.2.2.1 }
  *)
 
@@ -106,15 +81,6 @@ type generator =
       agent.
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.4} See RFC 4287 § 4.2.4 }
-
-{[
-  atomGenerator = element atom:generator {
-      atomCommonAttributes,
-      attribute uri { atomUri }?,
-      attribute version { text }?,
-      text
-    }
-]}
  *)
 
 type icon = Uri.t
@@ -127,12 +93,6 @@ type icon = Uri.t
     size.
 
     {{:http://tools.ietf.org/html/rfc4287#section-4.2.5} See RFC 4287 § 4.2.5}
-
-{[
-  atomIcon = element atom:icon {
-      atomCommonAttributes,
-    }
-]}
  *)
 
 type id = Uri.t
@@ -148,13 +108,6 @@ type id = Uri.t
     here, at least, they can not be checked here.
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.6} See RFC 4287 § 4.2.6 }
-
-{[
-  atomId = element atom:id {
-      atomCommonAttributes,
-      (atomUri)
-    }
-]}
  *)
 
 
@@ -230,20 +183,6 @@ type link =
       representation as reported by the underlying protocol.  Link
       elements MAY have a length attribute.
 
-{[
-  atomLink =
-    element atom:link {
-        atomCommonAttributes,
-        attribute href { atomUri },
-        attribute rel { atomNCName | atomUri }?,
-        attribute type { atomMediaType }?,
-        attribute hreflang { atomLanguageTag }?,
-        attribute title { text }?,
-        attribute length { text }?,
-        undefinedContent
-  }
-]}
-
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.1}
     See RFC 4287 § 4.2.7.1 }
  *)
@@ -255,13 +194,6 @@ type logo = Uri.t
     The image SHOULD have an aspect ratio of 2 (horizontal) to 1 (vertical).
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.8} See RFC 4287 § 4.2.8}
-
-{[
-  atomLogo = element atom:logo {
-      atomCommonAttributes,
-      (atomUri)
-    }
-]}
  *)
 
 type published = CalendarLib.Calendar.t
@@ -272,8 +204,6 @@ type published = CalendarLib.Calendar.t
     creation or first availability of the resource.
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.9} See RFC 4287 § 4.2.9}
-
-    {[ atomPublished = element atom:published { atomDateConstruct } ]}
  *)
 
 type rights = string
@@ -289,8 +219,6 @@ type rights = string
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.10}
     See RFC 4287 § 4.2.10 }
-
-    {[ atomRights = element atom:rights { atomTextConstruct } ]}
  *)
 
 type title = string
@@ -298,8 +226,6 @@ type title = string
     for an entry or feed.
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.14}
     See RFC 4287 § 4.2.14 }
-
-    {[ atomTitle = element atom:title { atomTextConstruct } ]}
  *)
 
 type subtitle = string
@@ -307,8 +233,6 @@ type subtitle = string
     description or subtitle for a feed.
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.12}
     See RFC 4287 § 4.2.12 }
-
-    {[ atomSubtitle = element atom:subtitle { atomTextConstruct } ]}
  *)
 
 type updated = CalendarLib.Calendar.t
@@ -321,8 +245,6 @@ type updated = CalendarLib.Calendar.t
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.15}
     See RFC 4287 § 4.2.15 }
-
-    {[ atomUpdated = element atom:updated { atomDateConstruct } ]}
  *)
 
 type source =
@@ -365,26 +287,6 @@ type source =
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.2}
     See RFC 4287 § 4.1.2 for more details.}
-
-{[
-  atomSource =
-    element atom:source {
-        atomCommonAttributes,
-        (atomAuthor*
-         & atomCategory*
-         & atomContributor*
-         & atomGenerator?
-         & atomIcon?
-         & atomId?
-         & atomLink*
-         & atomLogo?
-         & atomRights?
-         & atomSubtitle?
-         & atomTitle?
-         & atomUpdated?
-         & extensionElement * )
-      }
-]}
  *)
 
 
@@ -421,42 +323,6 @@ type content =
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.3.2}
     See RFC 4287 § 4.1.3.2 }
-
-{[
-  atomInlineTextContent =
-    element atom:content {
-        atomCommonAttributes,
-        attribute type { "text" | "html" }?,
-        (text)*
-  }
-
-  atomInlineXHTMLContent =
-    element atom:content {
-        atomCommonAttributes,
-        attribute type { "xhtml" },
-        xhtmlDiv
-  }
-
-  atomInlineOtherContent =
-    element atom:content {
-        atomCommonAttributes,
-        attribute type { atomMediaType }?,
-        (text|anyElement)*
-  }
-
-  atomOutOfLineContent =
-    element atom:content {
-        atomCommonAttributes,
-        attribute type { atomMediaType }?,
-        attribute src { atomUri },
-        empty
-  }
-
-  atomContent = atomInlineTextContent
-  | atomInlineXHTMLContent
-  | atomInlineOtherContent
-  | atomOutOfLineContent
-]}
  *)
 
 type summary =
@@ -522,26 +388,6 @@ type entry =
          "+xml".}}
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.2} See RFC 4287 § 4.1.2}
-
-{[
-  atomEntry =
-    element atom:entry {
-        atomCommonAttributes,
-        (atomAuthor*
-         & atomCategory*
-         & atomContent?
-         & atomContributor*
-         & atomId
-         & atomLink*
-         & atomPublished?
-         & atomRights?
-         & atomSource?
-         & atomSummary?
-         & atomTitle
-         & atomUpdated
-         & extensionElement * )
-      }
-]}
  *)
 
 
@@ -587,27 +433,6 @@ type feed =
     the latest {!updated} timestamp.
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.1} See RFC 4287 § 4.1.1}
-
-{[
-  atomFeed =
-    element atom:feed {
-        atomCommonAttributes,
-        (atomAuthor*
-         & atomCategory*
-         & atomContributor*
-         & atomGenerator?
-         & atomIcon?
-         & atomId
-         & atomLink*
-         & atomLogo?
-         & atomRights?
-         & atomSubtitle?
-         & atomTitle
-         & atomUpdated
-         & extensionElement * ),
-        atomEntry*
-      }
-]}
  *)
 
 val parse : Xmlm.input -> feed
