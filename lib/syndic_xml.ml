@@ -2,17 +2,17 @@ type dtd = string option
 
 type t =
   | Node of Xmlm.tag * t list
-  | Leaf of string              (* FIXME: I prefer Data *)
+  | Data of string              (* FIXME: I prefer Data *)
 
 let of_xmlm input =
   let el tag datas = Node (tag, datas) in
-  let data data = Leaf data in
+  let data data = Data data in
   Xmlm.input_doc_tree ~el ~data input
 
 
 let rec t_to_xmlm t output =
   match t with
-  | Leaf d -> Xmlm.output output (`Data d)
+  | Data d -> Xmlm.output output (`Data d)
   | Node(tag, t_sub) ->
      Xmlm.output output (`El_start tag);
      List.iter (fun t -> t_to_xmlm t output) t_sub;

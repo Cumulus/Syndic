@@ -130,16 +130,16 @@ let make_image (l : [< image' ] list) =
 
 let image_url_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "image/url")
 
 let image_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf -> ""
+  with Error.Expected_Data -> ""
 
 let image_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "image/link")
 
 let image_size_of_xml ~max (tag, datas) =
@@ -147,7 +147,7 @@ let image_size_of_xml ~max (tag, datas) =
     if size > max
     then Error.raise_size_exceeded (get_tag_name tag) size max
     else size
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation
       Error.Data
       (Error.Tag ("image/" ^ (get_tag_name tag)))
@@ -157,7 +157,7 @@ let image_height_of_xml = image_size_of_xml ~max:400
 
 let image_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation
       Error.Data
       (Error.Tag "image/description")
@@ -276,22 +276,22 @@ let make_textinput (l : [< textinput'] list) =
 
 let textinput_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/title")
 
 let textinput_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/description")
 
 let textinput_name_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/name")
 
 let textinput_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/link")
 
 let textinput_of_xml =
@@ -521,30 +521,30 @@ let make_item (l : _ list) =
 
 let item_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "item/title")
 
 let item_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf -> ""
+  with Error.Expected_Data -> ""
 
 let item_link_of_xml (tag, datas) =
   try Some(Uri.of_string (get_leaf datas))
-  with Error.Expected_Leaf -> None
+  with Error.Expected_Data -> None
 
 let item_author_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "item/author")
 
 let item_comments_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "item/comments")
 
 let item_pubdate_of_xml (tag, datas) =
   try Date.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "item/pubDate")
 
 let item_of_xml =
@@ -732,81 +732,81 @@ let make_channel (l : [< channel' ] list) =
 
 let channel_title_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/title")
 
 let channel_description_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf -> ""
+  with Error.Expected_Data -> ""
 
 let channel_link_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/link")
 
 let channel_language_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/language")
 
 let channel_copyright_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/copyright")
 
 let channel_managingeditor_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/managingEditor")
 
 let channel_webmaster_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/webMaster")
 
 let channel_pubdate_of_xml (tag, datas) =
   try Date.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/pubDate")
 
 let channel_lastbuilddate_of_xml (tag, datas) =
   try Date.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/lastBuildDate")
 
 let channel_category_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/category")
 
 let channel_generator_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/generator")
 
 let channel_docs_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/docs")
 
 let channel_ttl_of_xml (tag, datas) =
   try int_of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/ttl")
 
 let channel_rating_of_xml (tag, datas) =
   try int_of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/rating")
 
 let channel_skipHours_of_xml (tag, datas) =
   try int_of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/skipHours")
 
 let channel_skipDays_of_xml (tag, datas) =
   try int_of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/skipDays")
 
 let channel_of_xml =
@@ -865,7 +865,7 @@ let channel_of_xml' =
 
 let find_channel l =
   find (function XML.Node(tag, data) -> tag_is tag "channel"
-                | XML.Leaf _ -> false) l
+                | XML.Data _ -> false) l
 
 let parse input =
   match XML.of_xmlm input |> snd with
@@ -875,7 +875,7 @@ let parse input =
      else (
        match find_channel data with
        | Some(XML.Node(t, d)) -> channel_of_xml (t, d)
-       | Some(XML.Leaf _)
+       | Some(XML.Data _)
        | None -> Error.raise_expectation (Error.Tag "channel") Error.Root)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
@@ -885,5 +885,5 @@ let unsafe input =
      if tag_is tag "channel" then `Channel (channel_of_xml' (tag, data))
      else (match find_channel data with
            | Some(XML.Node(t, d)) -> `Channel (channel_of_xml' (t, d))
-           | Some(XML.Leaf _) | None -> `Channel [])
+           | Some(XML.Data _) | None -> `Channel [])
   | _ -> `Channel []

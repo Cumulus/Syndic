@@ -7,7 +7,7 @@ type expected =
   | Root
 
 exception Expected of expected * expected
-exception Expected_Leaf
+exception Expected_Data
 
 let string_of_expected () = function
   | Attr a -> a ^ "="
