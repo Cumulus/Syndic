@@ -635,7 +635,7 @@ type mime = string
 
 type content =
   | Text of string
-  | Html of Syndic_xml.t list
+  | Html of string
   | Xhtml of Syndic_xml.t list
   | Mime of mime * string
   | Src of mime option * Uri.t
@@ -659,13 +659,21 @@ let rec get_xml_content xml0 = function
      if is_space then data else xml0
   | _ -> xml0
 
-(* For HTML, some feeds wrap the whole content into <![CDATA[
-   (functionaljobs.com) or escape all HTML tahs (Github) so a single
-   data item is present.  Try to guess decode it into HTML. *)
+let no_namespace = Some ""
+let rm_namespace _ = no_namespace
+
+(* For HTML, the spec says the whole content needs to be escaped
+   http://tools.ietf.org/html/rfc4287#section-3.1.1.2 (some feeds use
+   <![CDATA[ ]]>) so a single data item should be present.
+   If not, assume the HTML was properly parsed and convert it back
+   to a string as it should. *)
 let get_html_content html =
   match get_xml_content html html with
-  | [XML.Leaf d] as h -> (try XML.of_html d with _ -> h)
-  | h -> h
+  | [XML.Leaf d] -> d
+  | h ->
+     (* It is likely that, when the HTML was parsed, the Atom
+        namespace was applied.  Remove it. *)
+     String.concat "" (List.map (XML.to_string ~ns_prefix:rm_namespace) h)
 
 
 (*  atomInlineTextContent =
@@ -734,18 +742,24 @@ let content_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
     | None -> l in
   `Data data :: l
 
-type summary =
+type text_construct =
   | Text of string
-  | Html of Syndic_xml.t list
+  | Html of string
   | Xhtml of Syndic_xml.t list
-type summary' = [ `Data of Syndic_xml.t list ]
 
-let summary_of_xml (((tag, attr), data): Xmlm.tag * t list) : summary =
+let text_construct_of_xml (((tag, attr), data): Xmlm.tag * t list) =
   match find (fun a -> attr_is a "type") attr with
   | Some(_, "html") -> Html(get_html_content data)
   | Some(_, "application/xhtml+xml")
   | Some(_, "xhtml") -> Xhtml(get_xml_content data data)
   | _ -> Text(get_leaf data)
+
+
+type summary = text_construct
+type summary' = [ `Data of Syndic_xml.t list ]
+
+(* atomSummary = element atom:summary { atomTextConstruct } *)
+let summary_of_xml = text_construct_of_xml
 
 let summary_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
   `Data data

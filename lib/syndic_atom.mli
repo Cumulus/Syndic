@@ -298,12 +298,6 @@ type mime = string
     See RFC 4287 § 4.1.3.1 }
  *)
 
-type content =
-  | Text of string
-  | Html of Syndic_xml.t list
-  | Xhtml of Syndic_xml.t list
-  | Mime of mime * string
-  | Src of mime option * Uri.t
 (** [content] either contains or links to the content of the entry.
     The value of [content] is Language-Sensitive.
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.3} See RFC 4287 § 4.1.3}
@@ -324,11 +318,20 @@ type content =
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.3.2}
     See RFC 4287 § 4.1.3.2 }
  *)
-
-type summary =
+type content =
   | Text of string
-  | Html of Syndic_xml.t list
+  | Html of string
   | Xhtml of Syndic_xml.t list
+  | Mime of mime * string
+  | Src of mime option * Uri.t
+
+(** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}. *)
+type text_construct =
+  | Text of string (** [Text(content)] *)
+  | Html of string (** [Html(content)] where the content is left unparsed. *)
+  | Xhtml of Syndic_xml.t list (** [Xhtml(content)] *)
+
+type summary = text_construct
 (** [summary] is a Text construct that conveys a short summary,
     abstract, or excerpt of an entry.
 
@@ -338,8 +341,6 @@ type summary =
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.13}
     See RFC 4287 § 4.2.13 }
-
-    {[ atomSummary = element atom:summary { atomTextConstruct } ]}
  *)
 
 type entry =

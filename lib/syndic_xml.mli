@@ -12,19 +12,9 @@ val of_xmlm : Xmlm.input -> (dtd * t)
 (** [of_xmlm doc] converts an XML document [doc] into a DTD and a
     tree representing the document. *)
 
-val of_html : ?enc:Xmlm.encoding -> ?entity:(string -> string option) ->
-              string -> t list
-(** [of_html s] tries to convert a sequence of HTML tags into a list
-    of trees.  This function tries to be permissive and is suitable
-    for excepts of HTML code.
 
-    @param enc gives the character encoding.  Default: [`UTF_8].
+val to_xmlm : ?dtd:string -> t -> Xmlm.output -> unit
 
-    @param entity how [Xmlm] unknown entities are transformed.  By
-    default, they are preserved in their original form. *)
+val to_string : ?ns_prefix:(string -> string option) -> t -> string
 
-val to_xmlm : t -> Xmlm.output -> unit
-
-val to_string : t -> string
-
-val to_buffer : t -> Buffer.t -> unit
+val to_buffer : ?ns_prefix:(string -> string option) -> t -> Buffer.t -> unit
