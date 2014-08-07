@@ -1,6 +1,7 @@
 open Syndic_common.XML
 open Syndic_common.Util
 module XML = Syndic_xml
+module Atom = Syndic_atom
 
 module Date = struct
   open CalendarLib
@@ -887,3 +888,134 @@ let unsafe input =
            | Some(XML.Node(t, d)) -> `Channel (channel_of_xml' (t, d))
            | Some(XML.Leaf _) | None -> `Channel [])
   | _ -> `Channel []
+
+
+(* Conversion to Atom
+ ***********************************************************************)
+
+let map_option o f = match o with
+  | None -> None
+  | Some v -> Some(f v)
+
+let cmp_date_opt d1 d2 = match d1, d2 with
+  | Some d1, Some d2 -> CalendarLib.Calendar.compare d1 d2
+  | Some _, None -> 1
+  | None, Some _ -> -1
+  | None, None -> 0
+
+let epoch = CalendarLib.Calendar.from_unixfloat 0. (* 1970-1-1 *)
+
+let entry_of_item (it: item) : Atom.entry =
+  let author = match it.author with
+    | Some a -> { Atom.name = a;  uri = None;  email = Some a }
+    | None -> { Atom.name = "";  uri = None;  email = None } in
+  let categories =
+    match it.category with
+    | Some c -> [ { Atom.term = c.data;
+                   scheme = map_option c.domain (fun d -> d);
+                   label = None } ]
+    | None -> [] in
+  let (title: Atom.title), content = match it.story with
+    | All(t, d) -> Atom.Text t, Some(Atom.Html d)
+    | Title t -> Atom.Text t, None
+    | Description d -> Atom.Text "", Some(Atom.Html d) in
+  let id = match it.guid with
+    | Some g -> g.data
+    | None -> match it.link with
+             | Some l -> l
+             | None ->
+                let s = match it.story with
+                  | All(t, d) -> t ^ d
+                  | Title t -> t
+                  | Description d -> d in
+                Uri.of_string (Digest.to_hex(Digest.string s)) in
+  let links = match it.link with
+    | Some l -> [ { Atom.href = l;  rel = Atom.Alternate;
+                   type_media = None;  hreflang = None;  title = None;
+                   length = None } ]
+    | None -> [] in
+  let links = match it.comments with
+    | Some l -> { Atom.href = l;  rel = Atom.Related;
+                 type_media = None;  hreflang = None;  title = None;
+                 length = None }
+               :: links
+    | None -> links in
+  let links = match it.enclosure with
+    | Some e -> { Atom.href = e.url;  rel = Atom.Enclosure;
+                 type_media = Some e.mime;
+                 hreflang = None;  title = None;  length = Some e.length }
+               :: links
+    | None -> links in
+  let sources = match it.source with
+    | Some s ->
+       [ { Atom.authors = (author, []); (* Best guess *)
+           categories = [];
+           contributors = [];
+           generator = None;
+           icon = None;
+           id;
+           links = ({ Atom.href = s.url;  rel = Atom.Related;
+                      type_media = None;  hreflang = None;  title = None;
+                      length = None}, []);
+           logo = None;
+           rights = None;
+           subtitle = None;
+           title = Atom.Text s.data;
+           updated = None } ]
+    | None -> [] in
+  { Atom.
+    authors = (author, []);
+    categories;
+    content;
+    contributors = [];
+    id;
+    links;
+    published = None;
+    rights = None;
+    sources;
+    summary = None;
+    title;
+    updated = (match it.pubDate with
+               | Some d -> d
+               | None -> epoch);
+  }
+
+
+let to_atom (ch: channel) : Atom.feed =
+  let contributors = match ch.webMaster with
+    | Some p -> [ { Atom.name = "Webmaster";  uri = None;  email = Some p } ]
+    | None -> [] in
+  let contributors = match ch.managingEditor with
+    | Some p -> { Atom.name = "Managing Editor";  uri = None;  email = Some p }
+               :: contributors
+    | None -> contributors in
+  let updated =
+    let d = List.map (fun (it: item) -> it.pubDate) ch.items in
+    let d = List.sort cmp_date_opt (ch.lastBuildDate :: d) in
+    match d with
+    | Some d :: _ -> d
+    | None :: _ -> epoch
+    | [] -> assert false in
+  { Atom.authors = [];
+    categories = (match ch.category with
+                  | None -> []
+                  | Some c -> [ { Atom.term =c;
+                                 scheme = None;  label = None} ]);
+    contributors;
+    generator = map_option ch.generator
+                           (fun g -> { Atom.content = g;
+                                    version = None;  uri = None });
+    icon = None;
+    id = ch.link; (* FIXME: Best we can do? *)
+    links = [ { Atom.href = ch.link;  rel = Atom.Related;
+                type_media = Some "text/html";  hreflang = None;
+                title = None;  length = None } ];
+    logo = map_option ch.image (fun i -> i.url);
+    rights = map_option ch.copyright (fun c -> (Atom.Text c: Atom.rights));
+    subtitle = None;
+    title = Atom.Text ch.title;
+    updated;
+    entries = List.map entry_of_item ch.items;
+  }
+
+;;
