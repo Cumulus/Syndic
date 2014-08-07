@@ -85,6 +85,48 @@ module Error = struct
     Buffer.contents buffer
 end
 
+
+(* The actual XML content is supposed to be inside a <div> which is NOT
+   part of the content. *)
+(* FIXME: beware for output! Must pust the <div> back (with namespace ?) *)
+let rec get_xml_content xml0 = function
+  | XML.Leaf s :: tl -> if only_whitespace s then get_xml_content xml0 tl
+                       else xml0 (* unexpected *)
+  | XML.Node(tag, data) :: tl when tag_is tag "div" ->
+     let is_space =
+       List.for_all (function XML.Leaf s -> only_whitespace s | _ -> false) tl in
+     if is_space then data else xml0
+  | _ -> xml0
+
+let no_namespace = Some ""
+let rm_namespace _ = no_namespace
+
+(* For HTML, the spec says the whole content needs to be escaped
+   http://tools.ietf.org/html/rfc4287#section-3.1.1.2 (some feeds use
+   <![CDATA[ ]]>) so a single data item should be present.
+   If not, assume the HTML was properly parsed and convert it back
+   to a string as it should. *)
+let get_html_content html =
+  match html with
+  | [XML.Leaf d] -> d
+  | h ->
+     (* It is likely that, when the HTML was parsed, the Atom
+        namespace was applied.  Remove it. *)
+     String.concat "" (List.map (XML.to_string ~ns_prefix:rm_namespace) h)
+
+type text_construct =
+  | Text of string
+  | Html of string
+  | Xhtml of Syndic_xml.t list
+
+let text_construct_of_xml (((tag, attr), data): Xmlm.tag * t list) =
+  match find (fun a -> attr_is a "type") attr with
+  | Some(_, "html") -> Html(get_html_content data)
+  | Some(_, "application/xhtml+xml")
+  | Some(_, "xhtml") -> Xhtml(get_xml_content data data)
+  | _ -> Text(get_leaf data)
+
+
 type author =
   {
     name: string;
@@ -403,52 +445,32 @@ let published_of_xml, published_of_xml' =
   generate_catcher ~leaf_producer (fun x -> x)
 
 
-type rights = string
-type rights' = [ `Data of string ]
+type rights = text_construct
+type rights' = [ `Data of Syndic_xml.t list ]
 
-let make_rights (l : [< rights'] list) =
-  (* element atom:rights { atomTextConstruct } *)
-  let rights = match find (fun (`Data _) -> true) l with
-    | Some (`Data d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "rights")
-  in rights
+let rights_of_xml = text_construct_of_xml
 
 (* atomRights = element atom:rights { atomTextConstruct } *)
-let rights_of_xml, rights_of_xml' =
-  let leaf_producer ctx data = `Data data in
-  generate_catcher ~leaf_producer make_rights,
-  generate_catcher ~leaf_producer (fun x -> x)
+let rights_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+  `Data data
 
-type title = string
-type title' = [ `Data of string ]
+type title = text_construct
+type title' = [ `Data of Syndic_xml.t list ]
 
-let make_title (l : [< title'] list) =
-  (* element atom:title { atomTextConstruct } *)
-  let title = match find (fun (`Data _) -> true) l with
-    | Some (`Data d) -> d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "title")
-  in title
+let title_of_xml = text_construct_of_xml
 
 (* atomTitle = element atom:title { atomTextConstruct } *)
-let title_of_xml, title_of_xml' =
-  let leaf_producer ctx data = `Data data in
-  generate_catcher ~leaf_producer make_title,
-  generate_catcher ~leaf_producer (fun x -> x)
+let title_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+  `Data data
 
-type subtitle = string
-type subtitle' = [ `Data of string ]
+type subtitle = text_construct
+type subtitle' = [ `Data of Syndic_xml.t list ]
 
-let make_subtitle (l : [< subtitle'] list) =
-  let subtitle = match find (fun (`Data _) -> true) l with
-    | Some (`Data d) -> d
-    | None -> "" (* <subtitle></subtitle> indicates no subtitle *)
-  in subtitle
+let subtitle_of_xml = text_construct_of_xml
 
 (* atomSubtitle = element atom:subtitle { atomTextConstruct } *)
-let subtitle_of_xml, subtitle_of_xml' =
-  let leaf_producer ctx data = `Data data in
-  generate_catcher ~leaf_producer make_subtitle,
-  generate_catcher ~leaf_producer (fun x -> x)
+let subtitle_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+  `Data data
 
 type updated = CalendarLib.Calendar.t
 type updated' = [ `Date of string ]
@@ -635,7 +657,7 @@ type mime = string
 
 type content =
   | Text of string
-  | Html of Syndic_xml.t list
+  | Html of string
   | Xhtml of Syndic_xml.t list
   | Mime of mime * string
   | Src of mime option * Uri.t
@@ -645,27 +667,6 @@ type content' = [
   | `SRC of string
   | `Data of Syndic_xml.t list
 ]
-
-
-(* The actual content is supposed to be inside a <div> which is NOT
-   part of the content. *)
-(* FIXME: beware for output! Must pust the <div> back (with namespace ?) *)
-let rec get_xml_content xml0 = function
-  | XML.Leaf s :: tl -> if only_whitespace s then get_xml_content xml0 tl
-                       else xml0 (* unexpected *)
-  | XML.Node(tag, data) :: tl when tag_is tag "div" ->
-     let is_space =
-       List.for_all (function XML.Leaf s -> only_whitespace s | _ -> false) tl in
-     if is_space then data else xml0
-  | _ -> xml0
-
-(* For HTML, some feeds wrap the whole content into <![CDATA[
-   (functionaljobs.com) or escape all HTML tahs (Github) so a single
-   data item is present.  Try to guess decode it into HTML. *)
-let get_html_content html =
-  match get_xml_content html html with
-  | [XML.Leaf d] as h -> (try XML.of_html d with _ -> h)
-  | h -> h
 
 
 (*  atomInlineTextContent =
@@ -734,18 +735,12 @@ let content_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
     | None -> l in
   `Data data :: l
 
-type summary =
-  | Text of string
-  | Html of Syndic_xml.t list
-  | Xhtml of Syndic_xml.t list
+
+type summary = text_construct
 type summary' = [ `Data of Syndic_xml.t list ]
 
-let summary_of_xml (((tag, attr), data): Xmlm.tag * t list) : summary =
-  match find (fun a -> attr_is a "type") attr with
-  | Some(_, "html") -> Html(get_html_content data)
-  | Some(_, "application/xhtml+xml")
-  | Some(_, "xhtml") -> Xhtml(get_xml_content data data)
-  | _ -> Text(get_leaf data)
+(* atomSummary = element atom:summary { atomTextConstruct } *)
+let summary_of_xml = text_construct_of_xml
 
 let summary_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
   `Data data
