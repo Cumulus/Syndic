@@ -10,6 +10,12 @@ module Error : sig
     (Uri.t * string * string) * (string * string) -> string
 end
 
+(** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}. *)
+type text_construct =
+  | Text of string (** [Text(content)] *)
+  | Html of string (** [Html(content)] where the content is left unparsed. *)
+  | Xhtml of Syndic_xml.t list (** [Xhtml(content)] *)
+
 type author =
   {
     name : string;
@@ -206,7 +212,7 @@ type published = CalendarLib.Calendar.t
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.9} See RFC 4287 § 4.2.9}
  *)
 
-type rights = string
+type rights = text_construct
 (** [rights] is a Text construct that conveys information about rights
     held in and over an entry or feed.
 
@@ -221,14 +227,14 @@ type rights = string
     See RFC 4287 § 4.2.10 }
  *)
 
-type title = string
+type title = text_construct
 (** [title] is a Text construct that conveys a human-readable title
     for an entry or feed.
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.14}
     See RFC 4287 § 4.2.14 }
  *)
 
-type subtitle = string
+type subtitle = text_construct
 (** [subtitle] is a Text construct that conveys a human-readable
     description or subtitle for a feed.
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.12}
@@ -324,12 +330,6 @@ type content =
   | Xhtml of Syndic_xml.t list
   | Mime of mime * string
   | Src of mime option * Uri.t
-
-(** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}. *)
-type text_construct =
-  | Text of string (** [Text(content)] *)
-  | Html of string (** [Html(content)] where the content is left unparsed. *)
-  | Xhtml of Syndic_xml.t list (** [Xhtml(content)] *)
 
 type summary = text_construct
 (** [summary] is a Text construct that conveys a short summary,
@@ -481,7 +481,7 @@ val unsafe : Xmlm.input ->
                  | `Type of string ]
                    list
             | `Published of [> `Date of string ] list
-            | `Rights of [> `Data of string ] list
+            | `Rights of [> `Data of Syndic_xml.t list ]
             | `Source of
                  [> `Author of
                       [> `Email of string | `Name of string | `URI of string ]
@@ -510,13 +510,13 @@ val unsafe : Xmlm.input ->
                       | `Type of string ]
                         list
                  | `Logo of [> `URI of string ] list
-                 | `Rights of [> `Data of string ] list
-                 | `Subtitle of [> `Data of string ] list
-                 | `Title of [> `Data of string ] list
+                 | `Rights of [> `Data of Syndic_xml.t list ]
+                 | `Subtitle of [> `Data of Syndic_xml.t list ]
+                 | `Title of [> `Data of Syndic_xml.t list ]
                  | `Updated of [> `Date of string ] list ]
                    list
             | `Summary of [> `Data of Syndic_xml.t list ]
-            | `Title of [> `Data of string ] list
+            | `Title of [> `Data of Syndic_xml.t  list ]
             | `Updated of [> `Date of string ] list ]
               list
        | `Generator of
@@ -533,8 +533,8 @@ val unsafe : Xmlm.input ->
             | `Type of string ]
               list
        | `Logo of [> `URI of string ] list
-       | `Rights of [> `Data of string ] list
-       | `Subtitle of [> `Data of string ] list
-       | `Title of [> `Data of string ] list
-       | `Updated of [> `Date of string ] list ]
-         list ]
+       | `Rights of [> `Data of Syndic_xml.t list ]
+       | `Subtitle of [> `Data of Syndic_xml.t list ]
+       | `Title of [> `Data of Syndic_xml.t list ]
+       | `Updated of [> `Date of string ] list
+       ] list ]
