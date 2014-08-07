@@ -659,6 +659,15 @@ let rec get_xml_content xml0 = function
      if is_space then data else xml0
   | _ -> xml0
 
+(* For HTML, some feeds wrap the whole content into <![CDATA[
+   (functionaljobs.com) or escape all HTML tahs (Github) so a single
+   data item is present.  Try to guess decode it into HTML. *)
+let get_html_content html =
+  match get_xml_content html html with
+  | [XML.Leaf d] as h -> (try XML.of_html d with _ -> h)
+  | h -> h
+
+
 (*  atomInlineTextContent =
       element atom:content {
           atomCommonAttributes,
@@ -712,7 +721,7 @@ let content_of_xml (((tag, attr), data): Xmlm.tag * t list) : content =
       *  | none *)
      match find (fun a -> attr_is a "type") attr with
      | Some (_, "text") | None -> Text(get_leaf data)
-     | Some (_, "html") -> Html(get_xml_content data data)
+     | Some (_, "html") -> Html(get_html_content data)
      | Some (_, "xhtml") -> Xhtml(get_xml_content data data)
      | Some (_, mime) -> Mime(mime, get_leaf data)
 
@@ -727,12 +736,13 @@ let content_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
 
 type summary =
   | Text of string
+  | Html of Syndic_xml.t list
   | Xhtml of Syndic_xml.t list
 type summary' = [ `Data of Syndic_xml.t list ]
 
 let summary_of_xml (((tag, attr), data): Xmlm.tag * t list) : summary =
   match find (fun a -> attr_is a "type") attr with
-  | Some(_, "html") (* some feed do this *)
+  | Some(_, "html") -> Html(get_html_content data)
   | Some(_, "application/xhtml+xml")
   | Some(_, "xhtml") -> Xhtml(get_xml_content data data)
   | _ -> Text(get_leaf data)
