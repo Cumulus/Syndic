@@ -79,4 +79,46 @@ module Util = struct
     let i = ref 0 and len = String.length s in
     while !r && !i < len do r := is_space s.[!i]; incr i done;
     !r
+
+
+  (* Output feeds to XML
+   ***********************************************************************)
+
+  let uri_to_string u = Uri.pct_decode (Uri.to_string u)
+
+  let add_attr name v_opt attr =
+    match v_opt with
+    | None -> attr
+    | Some v -> (name, v) :: attr
+
+  let add_attr_uri name v_opt attr =
+    match v_opt with
+    | None -> attr
+    | Some v -> (name, uri_to_string v) :: attr
+
+  let tag name = (("", name), [])
+
+  let node_data tag content = XML.Node(tag, [XML.Data content])
+
+  let node_uri tag uri = node_data tag (Uri.to_string uri)
+
+  let add_node_data tag c nodes =
+    match c with
+    | None -> nodes
+    | Some content -> node_data tag content :: nodes
+
+  let add_node_uri tag c nodes =
+    match c with
+    | None -> nodes
+    | Some uri -> node_data tag (uri_to_string uri) :: nodes
+
+  (* Add to [nodes] those coming from mapping [f] on [els] *)
+  let add_nodes_map f els nodes =
+    List.fold_left (fun nodes el -> f el :: nodes) nodes els
+
+  let add_node_option f op nodes =
+    match op with
+    | None -> nodes
+    | Some v -> f v :: nodes
+
 end

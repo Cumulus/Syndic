@@ -28,4 +28,30 @@ module Util : sig
   val get_tag_name : Xmlm.tag -> string
 
   val only_whitespace : string -> bool
+
+  (** {2 Helpers to output XML} *)
+
+  val uri_to_string : Uri.t -> string
+  (** [uri_to_string u] convert the URI to a string that is NOT
+      percent encoded.*)
+
+  val add_attr : Xmlm.name -> string option ->
+                 Xmlm.attribute list -> Xmlm.attribute list
+  val add_attr_uri : Xmlm.name -> Uri.t option ->
+                     Xmlm.attribute list -> Xmlm.attribute list
+
+  val tag : string -> Xmlm.tag
+  (** [tag n] returns a tag with name [n], no namespace, and no
+      attributes. *)
+
+  val node_data : Xmlm.tag -> string -> XML.t
+  (** [node_data name content] returns a node named [name] with data
+      set to [content]. *)
+
+  val node_uri : Xmlm.tag -> Uri.t -> XML.t
+
+  val add_node_data : Xmlm.tag -> string option -> XML.t list -> XML.t list
+  val add_node_uri : Xmlm.tag -> Uri.t option -> XML.t list -> XML.t list
+  val add_nodes_map : ('a -> XML.t) -> 'a list -> XML.t list -> XML.t list
+  val add_node_option : ('a -> XML.t) -> 'a option -> XML.t list -> XML.t list
 end
