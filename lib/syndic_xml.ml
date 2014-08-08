@@ -2,7 +2,7 @@ type dtd = string option
 
 type t =
   | Node of Xmlm.tag * t list
-  | Data of string              (* FIXME: I prefer Data *)
+  | Data of string
 
 let of_xmlm input =
   let el tag datas = Node (tag, datas) in
