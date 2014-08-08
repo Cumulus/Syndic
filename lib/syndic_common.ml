@@ -33,7 +33,7 @@ module XML = struct
           | Some f when in_namespaces tag ->
               catch_datas ((f acc (tag, datas)) :: acc) r
           | _ -> catch_datas acc r end
-      | Leaf str :: r ->
+      | Data str :: r ->
         begin match leaf_producer with
           | Some f -> catch_datas ((f acc str) :: acc) r
           | None -> catch_datas acc r end
@@ -63,10 +63,10 @@ module Util = struct
 
   let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
-  let datas_has_leaf = List.exists (function | XML.Leaf _ -> true | _ -> false)
-  let get_leaf l  = match find (function XML.Leaf _ -> true | _ -> false) l with
-    | Some (XML.Leaf s) -> s
-    | _ -> raise Syndic_error.Expected_Leaf
+  let datas_has_leaf = List.exists (function | XML.Data _ -> true | _ -> false)
+  let get_leaf l  = match find (function XML.Data _ -> true | _ -> false) l with
+    | Some (XML.Data s) -> s
+    | _ -> raise Syndic_error.Expected_Data
   let get_attrs ((_, attrs) : Xmlm.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name

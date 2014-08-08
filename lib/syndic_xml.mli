@@ -6,7 +6,7 @@ type dtd = string option
 (** A XML tree. *)
 type t =
   | Node of Xmlm.tag * t list
-  | Leaf of string
+  | Data of string
 
 val of_xmlm : Xmlm.input -> (dtd * t)
 (** [of_xmlm doc] converts an XML document [doc] into a DTD and a

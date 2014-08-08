@@ -8,7 +8,7 @@ type expected =
   | Root
 
 exception Expected of expected * expected
-exception Expected_Leaf
+exception Expected_Data
 
 val string_of_expectation : expected * expected -> string
 val raise_expectation : expected -> expected -> 'a

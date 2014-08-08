@@ -442,7 +442,7 @@ val parse : Xmlm.input -> feed
     [xml] is mutable, so when the parsing fails, one have to create a
     new copy of [xml] to use it with another function.
 
-    Raise [Error.Expected], [Expected_Leaf] or [Error.Duplicate_Link]
+    Raise [Error.Expected], [Expected_Data] or [Error.Duplicate_Link]
     if [xml] is not a valid Atom document. *)
 
 

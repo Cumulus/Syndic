@@ -90,11 +90,11 @@ end
    part of the content. *)
 (* FIXME: beware for output! Must pust the <div> back (with namespace ?) *)
 let rec get_xml_content xml0 = function
-  | XML.Leaf s :: tl -> if only_whitespace s then get_xml_content xml0 tl
+  | XML.Data s :: tl -> if only_whitespace s then get_xml_content xml0 tl
                        else xml0 (* unexpected *)
   | XML.Node(tag, data) :: tl when tag_is tag "div" ->
      let is_space =
-       List.for_all (function XML.Leaf s -> only_whitespace s | _ -> false) tl in
+       List.for_all (function XML.Data s -> only_whitespace s | _ -> false) tl in
      if is_space then data else xml0
   | _ -> xml0
 
@@ -108,7 +108,7 @@ let rm_namespace _ = no_namespace
    to a string as it should. *)
 let get_html_content html =
   match html with
-  | [XML.Leaf d] -> d
+  | [XML.Data d] -> d
   | h ->
      (* It is likely that, when the HTML was parsed, the Atom
         namespace was applied.  Remove it. *)
@@ -162,16 +162,16 @@ let make_author datas (l : [< author'] list) =
 
 let author_name_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf -> "" (* mandatory ? *)
+  with Error.Expected_Data -> "" (* mandatory ? *)
 
 let author_uri_of_xml (tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Leaf ->
+  with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "author/uri")
 
 let author_email_of_xml (tag, datas) =
   try get_leaf datas
-  with Error.Expected_Leaf -> "" (* mandatory ? *)
+  with Error.Expected_Data -> "" (* mandatory ? *)
 
 (* {[  atomAuthor = element atom:author { atomPersonConstruct } ]}
    where
