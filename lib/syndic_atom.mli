@@ -451,9 +451,10 @@ val parse : Xmlm.input -> feed
 
 
 val to_xml : feed -> Syndic_xml.t
+(** [to_xml f] converts the feed [f] to an XML tree. *)
 
-val output : ?ns_prefix:(string -> string option) ->
-             feed -> Xmlm.dest -> unit
+val output : feed -> Xmlm.dest -> unit
+(** [output f dest] writes the XML tree of the feed [f] to [dest]. *)
 
 
 (**/**)

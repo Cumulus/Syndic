@@ -1257,12 +1257,11 @@ let to_xml (f: feed) =
   XML.Node(((atom_ns, "feed"), [("", "xmlns"), atom_ns]), nodes)
 
 
-let output ?ns_prefix feed dest =
-  (* Atom and XHTML have been declared well in the above XML
-     representation.  One can remove them. *)
-  let ns_prefix = match ns_prefix with
-    | None -> (fun s -> if s = atom_ns || s = xhtml_ns then Some "" else None)
-    | Some f -> (fun s -> if s = atom_ns || s = xhtml_ns then Some "" else f s)
-  in
-  let o = Xmlm.make_output dest ~decl:true ~ns_prefix in
+(* Atom and XHTML have been declared well in the above XML
+   representation.  One can remove them. *)
+let output_ns_prefix s =
+  if s = atom_ns || s = xhtml_ns then Some "" else None
+
+let output feed dest =
+  let o = Xmlm.make_output dest ~decl:true ~ns_prefix:output_ns_prefix in
   XML.to_xmlm (to_xml feed) o
