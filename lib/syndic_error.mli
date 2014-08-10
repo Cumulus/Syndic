@@ -8,14 +8,13 @@ type expected =
   | Root
 
 type error = [
-  | `Expected_data of string
-  | `Expected_node of string
-  | `Expected_attr of string
+  | `Expected of string
 ]
 
 exception Expected of expected * expected
 exception Expected_Data
 exception Error of Xmlm.pos * error
 
+val to_string : exn -> string
 val string_of_expectation : expected * expected -> string
 val raise_expectation : expected -> expected -> 'a

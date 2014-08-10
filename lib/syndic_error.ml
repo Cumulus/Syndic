@@ -7,9 +7,7 @@ type expected =
   | Root
 
 type error = [
-  | `Expected_data of string
-  | `Expected_node of string
-  | `Expected_attr of string
+  | `Expected of string
 ]
 
 exception Expected of expected * expected
@@ -24,6 +22,11 @@ let string_of_expected () = function
 
 let string_of_expectation (a, b) =
   sprintf "Expected %a in %a" string_of_expected a string_of_expected b
+
+let to_string = function
+  | Error (pos, `Expected str) ->
+    sprintf "%s at l.%d" str (fst pos)
+  | exn -> Printexc.to_string exn
 
 let raise_expectation data in_data = raise (Expected (data, in_data))
 
