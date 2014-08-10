@@ -90,11 +90,13 @@ end
    part of the content. *)
 (* FIXME: beware for output! Must pust the <div> back (with namespace ?) *)
 let rec get_xml_content xml0 = function
-  | XML.Data s :: tl -> if only_whitespace s then get_xml_content xml0 tl
-                       else xml0 (* unexpected *)
-  | XML.Node(tag, data) :: tl when tag_is tag "div" ->
+  | XML.Data (_, s) :: tl ->
+    if only_whitespace s then get_xml_content xml0 tl
+    else xml0 (* unexpected *)
+  | XML.Node (pos, tag, data) :: tl when tag_is tag "div" ->
      let is_space =
-       List.for_all (function XML.Data s -> only_whitespace s | _ -> false) tl in
+       List.for_all (function XML.Data (_, s) -> only_whitespace s
+                            | _ -> false) tl in
      if is_space then data else xml0
   | _ -> xml0
 
@@ -108,7 +110,7 @@ let rm_namespace _ = no_namespace
    to a string as it should. *)
 let get_html_content html =
   match html with
-  | [XML.Data d] -> d
+  | [XML.Data (_, d)] -> d
   | h ->
      (* It is likely that, when the HTML was parsed, the Atom
         namespace was applied.  Remove it. *)
@@ -1110,12 +1112,13 @@ let feed_of_xml' =
 
 let parse input =
   match XML.of_xmlm input |> snd with
-  | XML.Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
+  | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
+    feed_of_xml (tag, datas)
   | _ -> Error.raise_expectation (Error.Tag "feed") Error.Root
 (* FIXME: the spec says that an entry can appear as the top-level element *)
 
 let unsafe input =
   match XML.of_xmlm input |> snd with
-  | XML.Node (tag, datas) when tag_is tag "feed" ->
-     `Feed (feed_of_xml' (tag, datas))
+  | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
+    `Feed (feed_of_xml' (tag, datas))
   | _ -> `Feed []

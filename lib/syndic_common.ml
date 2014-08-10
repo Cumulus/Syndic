@@ -28,12 +28,12 @@ module XML = struct
       | [] -> acc
     in
     let rec catch_datas acc = function
-      | Node (tag, datas) :: r ->
+      | Node (pos, tag, datas) :: r ->
         begin match get_producer (get_tag_name tag) data_producer with
           | Some f when in_namespaces tag ->
               catch_datas ((f acc (tag, datas)) :: acc) r
           | _ -> catch_datas acc r end
-      | Data str :: r ->
+      | Data (pos, str) :: r ->
         begin match leaf_producer with
           | Some f -> catch_datas ((f acc str) :: acc) r
           | None -> catch_datas acc r end
@@ -65,7 +65,7 @@ module Util = struct
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
   let datas_has_leaf = List.exists (function | XML.Data _ -> true | _ -> false)
   let get_leaf l  = match find (function XML.Data _ -> true | _ -> false) l with
-    | Some (XML.Data s) -> s
+    | Some (XML.Data (_, s)) -> s
     | _ -> raise Syndic_error.Expected_Data
   let get_attrs ((_, attrs) : Xmlm.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value

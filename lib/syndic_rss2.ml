@@ -864,26 +864,26 @@ let channel_of_xml' =
   generate_catcher ~data_producer (fun x -> x)
 
 let find_channel l =
-  find (function XML.Node(tag, data) -> tag_is tag "channel"
+  find (function XML.Node(pos, tag, data) -> tag_is tag "channel"
                 | XML.Data _ -> false) l
 
 let parse input =
   match XML.of_xmlm input |> snd with
-  | XML.Node(tag, data) ->
+  | XML.Node(pos, tag, data) ->
      if tag_is tag "channel" then
        channel_of_xml (tag, data)
      else (
        match find_channel data with
-       | Some(XML.Node(t, d)) -> channel_of_xml (t, d)
+       | Some(XML.Node(_, t, d)) -> channel_of_xml (t, d)
        | Some(XML.Data _)
        | None -> Error.raise_expectation (Error.Tag "channel") Error.Root)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
 
 let unsafe input =
   match XML.of_xmlm input |> snd with
-  | XML.Node (tag, data) ->
+  | XML.Node (pos, tag, data) ->
      if tag_is tag "channel" then `Channel (channel_of_xml' (tag, data))
      else (match find_channel data with
-           | Some(XML.Node(t, d)) -> `Channel (channel_of_xml' (t, d))
+           | Some(XML.Node(_, t, d)) -> `Channel (channel_of_xml' (t, d))
            | Some(XML.Data _) | None -> `Channel [])
   | _ -> `Channel []
