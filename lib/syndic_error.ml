@@ -6,8 +6,15 @@ type expected =
   | Data
   | Root
 
+type error = [
+  | `Expected_data of string
+  | `Expected_node of string
+  | `Expected_attr of string
+]
+
 exception Expected of expected * expected
 exception Expected_Data
+exception Error of Xmlm.pos * error
 
 let string_of_expected () = function
   | Attr a -> a ^ "="
