@@ -9,6 +9,8 @@ type t =
   | Node of Xmlm.pos * Xmlm.tag * t list
   | Data of Xmlm.pos * string
 
+val get_position : t -> Xmlm.pos
+
 val of_xmlm : Xmlm.input -> (dtd * t)
 (** [of_xmlm doc] converts an XML document [doc] into a DTD and a
     tree representing the document. *)

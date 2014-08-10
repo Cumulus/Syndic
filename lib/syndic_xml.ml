@@ -9,6 +9,9 @@ let of_xmlm input =
   let data data = Data (Xmlm.pos input, data) in
   Xmlm.input_doc_tree ~el ~data input
 
+let get_position = function
+  | Node (pos, _, _) -> pos
+  | Data (pos, _) -> pos
 
 let rec t_to_xmlm t output =
   match t with
