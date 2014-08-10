@@ -128,21 +128,21 @@ let make_image (l : [< image' ] list) =
   in
   ({ url; title; link; width; height; description } : image)
 
-let image_url_of_xml (tag, datas) =
+let image_url_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "image/url")
 
-let image_title_of_xml (tag, datas) =
+let image_title_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data -> ""
 
-let image_link_of_xml (tag, datas) =
+let image_link_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "image/link")
 
-let image_size_of_xml ~max (tag, datas) =
+let image_size_of_xml ~max (pos, tag, datas) =
   try let size = int_of_string (get_leaf datas) in
     if size > max
     then Error.raise_size_exceeded (get_tag_name tag) size max
@@ -155,7 +155,7 @@ let image_size_of_xml ~max (tag, datas) =
 let image_width_of_xml = image_size_of_xml ~max:144
 let image_height_of_xml = image_size_of_xml ~max:400
 
-let image_description_of_xml (tag, datas) =
+let image_description_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation
@@ -228,11 +228,11 @@ let make_cloud (l : [< cloud' ] list) =
 
 let cloud_of_xml, cloud_of_xml' =
   let attr_producer = [
-    ("domain", (fun ctx a -> `Domain a));
-    ("port", (fun ctx a -> `Port a));
-    ("path", (fun ctx a -> `Path a)); (* XXX: it's RFC compliant ? *)
-    ("registerProcedure", (fun ctx a -> `RegisterProcedure a));
-    ("protocol", (fun ctx a -> `Protocol a));
+    ("domain", (fun ctx pos a -> `Domain a));
+    ("port", (fun ctx pos a -> `Port a));
+    ("path", (fun ctx pos a -> `Path a)); (* XXX: it's RFC compliant ? *)
+    ("registerProcedure", (fun ctx pos a -> `RegisterProcedure a));
+    ("protocol", (fun ctx pos a -> `Protocol a));
   ] in
   generate_catcher ~attr_producer make_cloud,
   generate_catcher ~attr_producer (fun x -> x)
@@ -274,22 +274,22 @@ let make_textinput (l : [< textinput'] list) =
   in
   ({ title; description; name; link; } : textinput)
 
-let textinput_title_of_xml (tag, datas) =
+let textinput_title_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/title")
 
-let textinput_description_of_xml (tag, datas) =
+let textinput_description_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/description")
 
-let textinput_name_of_xml (tag, datas) =
+let textinput_name_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/name")
 
-let textinput_link_of_xml (tag, datas) =
+let textinput_link_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "textinput/link")
@@ -336,8 +336,8 @@ let make_category (l : [< category' ] list) =
   ({ data; domain; } : category )
 
 let category_of_xml, category_of_xml' =
-  let attr_producer = [ ("domain", (fun ctx a -> `Domain a)); ] in
-  let leaf_producer ctx data = `Data data in
+  let attr_producer = [ ("domain", (fun ctx pos a -> `Domain a)); ] in
+  let leaf_producer ctx pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_category,
   generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
@@ -371,9 +371,9 @@ let make_enclosure (l : [< enclosure' ] list) =
 
 let enclosure_of_xml, enclosure_of_xml' =
   let attr_producer = [
-    ("url", (fun ctx a -> `URL a));
-    ("length", (fun ctx a -> `Length a));
-    ("type", (fun ctx a -> `Mime a));
+    ("url", (fun ctx pos a -> `URL a));
+    ("length", (fun ctx pos a -> `Length a));
+    ("type", (fun ctx pos a -> `Mime a));
   ] in
   generate_catcher ~attr_producer make_enclosure,
   generate_catcher ~attr_producer (fun x -> x)
@@ -403,8 +403,8 @@ let make_guid (l : [< guid' ] list) =
   else Some({ data = Uri.of_string data;  permalink } : guid)
 
 let guid_of_xml, guid_of_xml' =
-  let attr_producer = [ ("isPermalink", (fun ctx a -> `Permalink a)); ] in
-  let leaf_producer ctx data = `Data data in
+  let attr_producer = [ ("isPermalink", (fun ctx pos a -> `Permalink a)); ] in
+  let leaf_producer ctx pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_guid,
   generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
@@ -431,8 +431,8 @@ let make_source (l : [< source' ] list) =
   ({ data; url; } : source)
 
 let source_of_xml, source_of_xml' =
-  let attr_producer = [ ("url", (fun ctx a -> `URL a)); ] in
-  let leaf_producer ctx data = `Data data in
+  let attr_producer = [ ("url", (fun ctx pos a -> `URL a)); ] in
+  let leaf_producer ctx pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_source,
   generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
@@ -519,30 +519,30 @@ let make_item (l : _ list) =
      pubDate;
      source; } : item)
 
-let item_title_of_xml (tag, datas) =
+let item_title_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "item/title")
 
-let item_description_of_xml (tag, datas) =
+let item_description_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data -> ""
 
-let item_link_of_xml (tag, datas) =
+let item_link_of_xml (pos, tag, datas) =
   try Some(Uri.of_string (get_leaf datas))
   with Error.Expected_Data -> None
 
-let item_author_of_xml (tag, datas) =
+let item_author_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "item/author")
 
-let item_comments_of_xml (tag, datas) =
+let item_comments_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "item/comments")
 
-let item_pubdate_of_xml (tag, datas) =
+let item_pubdate_of_xml (pos, tag, datas) =
   try Date.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "item/pubDate")
@@ -730,81 +730,81 @@ let make_channel (l : [< channel' ] list) =
      skipDays;
      items; } : channel)
 
-let channel_title_of_xml (tag, datas) =
+let channel_title_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/title")
 
-let channel_description_of_xml (tag, datas) =
+let channel_description_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data -> ""
 
-let channel_link_of_xml (tag, datas) =
+let channel_link_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/link")
 
-let channel_language_of_xml (tag, datas) =
+let channel_language_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/language")
 
-let channel_copyright_of_xml (tag, datas) =
+let channel_copyright_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/copyright")
 
-let channel_managingeditor_of_xml (tag, datas) =
+let channel_managingeditor_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/managingEditor")
 
-let channel_webmaster_of_xml (tag, datas) =
+let channel_webmaster_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/webMaster")
 
-let channel_pubdate_of_xml (tag, datas) =
+let channel_pubdate_of_xml (pos, tag, datas) =
   try Date.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/pubDate")
 
-let channel_lastbuilddate_of_xml (tag, datas) =
+let channel_lastbuilddate_of_xml (pos, tag, datas) =
   try Date.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/lastBuildDate")
 
-let channel_category_of_xml (tag, datas) =
+let channel_category_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/category")
 
-let channel_generator_of_xml (tag, datas) =
+let channel_generator_of_xml (pos, tag, datas) =
   try get_leaf datas
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/generator")
 
-let channel_docs_of_xml (tag, datas) =
+let channel_docs_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/docs")
 
-let channel_ttl_of_xml (tag, datas) =
+let channel_ttl_of_xml (pos, tag, datas) =
   try int_of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/ttl")
 
-let channel_rating_of_xml (tag, datas) =
+let channel_rating_of_xml (pos, tag, datas) =
   try int_of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/rating")
 
-let channel_skipHours_of_xml (tag, datas) =
+let channel_skipHours_of_xml (pos, tag, datas) =
   try int_of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/skipHours")
 
-let channel_skipDays_of_xml (tag, datas) =
+let channel_skipDays_of_xml (pos, tag, datas) =
   try int_of_string (get_leaf datas)
   with Error.Expected_Data ->
     Error.raise_expectation Error.Data (Error.Tag "channel/skipDays")
@@ -871,10 +871,10 @@ let parse input =
   match XML.of_xmlm input |> snd with
   | XML.Node(pos, tag, data) ->
      if tag_is tag "channel" then
-       channel_of_xml (tag, data)
+       channel_of_xml (pos, tag, data)
      else (
        match find_channel data with
-       | Some(XML.Node(_, t, d)) -> channel_of_xml (t, d)
+       | Some(XML.Node(p, t, d)) -> channel_of_xml (p, t, d)
        | Some(XML.Data _)
        | None -> Error.raise_expectation (Error.Tag "channel") Error.Root)
   | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
@@ -882,8 +882,8 @@ let parse input =
 let unsafe input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, data) ->
-     if tag_is tag "channel" then `Channel (channel_of_xml' (tag, data))
+     if tag_is tag "channel" then `Channel (channel_of_xml' (pos, tag, data))
      else (match find_channel data with
-           | Some(XML.Node(_, t, d)) -> `Channel (channel_of_xml' (t, d))
+           | Some(XML.Node(p, t, d)) -> `Channel (channel_of_xml' (p, t, d))
            | Some(XML.Data _) | None -> `Channel [])
   | _ -> `Channel []
