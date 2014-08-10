@@ -65,7 +65,7 @@ module Util = struct
   let datas_has_leaf = List.exists (function | XML.Data _ -> true | _ -> false)
   let get_leaf l  = match find (function XML.Data _ -> true | _ -> false) l with
     | Some (XML.Data (_, s)) -> s
-    | _ -> raise Syndic_error.Expected_Data
+    | _ -> raise Not_found
   let get_attrs ((_, attrs) : Xmlm.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
