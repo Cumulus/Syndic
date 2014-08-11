@@ -563,7 +563,9 @@ let parse input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, datas) when tag_is tag "RDF" ->
       rdf_of_xml (pos, tag, datas)
-  | _ -> Error.raise_expectation (Error.Tag "RDF") Error.Root
+  | _ -> raise (Error.Error ((0, 0), `Expected
+                         "document MUST contains exactly one \
+                          <rdf> element"))
 
 let unsafe input =
   match XML.of_xmlm input |> snd with

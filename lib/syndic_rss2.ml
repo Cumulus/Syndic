@@ -959,8 +959,12 @@ let parse input =
        match find_channel data with
        | Some(XML.Node(p, t, d)) -> channel_of_xml (p, t, d)
        | Some(XML.Data _)
-       | None -> Error.raise_expectation (Error.Tag "channel") Error.Root)
-  | _ -> Error.raise_expectation (Error.Tag "channel") Error.Root
+       | _ -> raise (Error.Error ((0, 0), `Expected
+                              "document MUST contains exactly one \
+                               <channel> element")))
+  | _ -> raise (Error.Error ((0, 0), `Expected
+                         "document MUST contains exactly one \
+                          <channel> element"))
 
 let unsafe input =
   match XML.of_xmlm input |> snd with
