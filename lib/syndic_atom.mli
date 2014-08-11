@@ -3,7 +3,9 @@
 
 module Error : module type of Syndic_error
 
-(** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}. *)
+(** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}.
+    It contains human-readable text, usually in small quantities.  The
+    content of Text constructs is Language-Sensitive. *)
 type text_construct =
   | Text of string (** [Text(content)] *)
   | Html of string (** [Html(content)] where the content is left unparsed. *)
@@ -25,11 +27,14 @@ type author =
     to the entry if there are no atom:author elements in the locations
     described above.
 
-   {{: http://tools.ietf.org/html/rfc4287#section-3.2} See RFC 4287 § 3.2}
+    {{: http://tools.ietf.org/html/rfc4287#section-3.2} See RFC 4287 § 3.2}
 
-     Person constructs allow extension Metadata elements (see Section 6.4).
+    Person constructs allow extension Metadata elements (see Section 6.4).
 
-   {{: http://tools.ietf.org/html/rfc4287#section-4.2.1} See RFC 4287 § 4.2.1}
+   They are used for authors
+   ({{:http://tools.ietf.org/html/rfc4287#section-4.2.1} See RFC 4287 § 4.2.1})
+   and contributors
+   ({{:http://tools.ietf.org/html/rfc4287#section-4.2.3} See RFC 4287 § 4.2.3})
  *)
 
 type category =
@@ -208,7 +213,6 @@ type published = CalendarLib.Calendar.t
 type rights = text_construct
 (** [rights] is a Text construct that conveys information about rights
     held in and over an entry or feed.
-
     The [rights] element SHOULD NOT be used to convey machine-readable
     licensing information.
 
@@ -216,8 +220,8 @@ type rights = text_construct
     then the atom:rights element of the containing atom:feed element,
     if present, is considered to apply to the entry.
 
-    {{: http://tools.ietf.org/html/rfc4287#section-4.2.10}
-    See RFC 4287 § 4.2.10 }
+    See {{: http://tools.ietf.org/html/rfc4287#section-4.2.10}
+    RFC 4287 § 4.2.10 }
  *)
 
 type title = text_construct
@@ -256,7 +260,7 @@ type source =
     generator: generator option;
     icon: icon option;
     id: id;
-    links: link * link list;
+    links: link list;
     logo: logo option;
     rights: rights option;
     subtitle: subtitle option;
@@ -434,6 +438,23 @@ val parse : Xmlm.input -> feed
 
     Raise [Error.Expected], [Expected_Data] or [Error.Duplicate_Link]
     if [xml] is not a valid Atom document. *)
+
+val to_xml : feed -> Syndic_xml.t
+(** [to_xml f] converts the feed [f] to an XML tree. *)
+
+val output : feed -> Xmlm.dest -> unit
+(** [output f dest] writes the XML tree of the feed [f] to [dest]. *)
+
+
+val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
+                ?title:text_construct ->
+                (Uri.t option * feed) list -> feed
+(** [aggregate feeds] returns a single feed containing all the posts
+    in [feeds].  Each element of [feeds] has the form [(uri, feed)]
+    where [uri], if given, is supposed to be the location of [feed].
+    It is used to add Alternate links to the entries sources showing
+    their origin. *)
+
 
 (**/**)
 

@@ -1016,9 +1016,9 @@ let entry_of_item (it: item) : Atom.entry =
            generator = None;
            icon = None;
            id;
-           links = ({ Atom.href = s.url;  rel = Atom.Related;
-                      type_media = None;  hreflang = None;  title = None;
-                      length = None}, []);
+           links = [ { Atom.href = s.url;  rel = Atom.Related;
+                       type_media = None;  hreflang = None;  title = None;
+                       length = None} ];
            logo = None;
            rights = None;
            subtitle = None;

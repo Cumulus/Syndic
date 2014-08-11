@@ -272,7 +272,8 @@ type channel =
     - [generator]: A string indicating the program used to generate the
       channel.
     - [docs]: A URL that points to the documentation for the format
-      used in the RSS file. It's probably a pointer to this page. It's
+      used in the RSS file. It's probably a pointer to
+      [http://www.rssboard.org/rss-specification]. It's
       for people who might stumble across an RSS file on a Web server
       25 years from now and wonder what it is.
     - [cloud]: Allows processes to register with a cloud to be

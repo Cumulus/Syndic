@@ -78,4 +78,47 @@ module Util = struct
     let i = ref 0 and len = String.length s in
     while !r && !i < len do r := is_space s.[!i]; incr i done;
     !r
+
+
+  (* Output feeds to XML
+   ***********************************************************************)
+
+  let add_attr name v_opt attr =
+    match v_opt with
+    | None -> attr
+    | Some v -> (name, v) :: attr
+
+  let add_attr_uri name v_opt attr =
+    match v_opt with
+    | None -> attr
+    | Some v -> (name, Uri.to_string v) :: attr
+
+  let tag name = (("", name), [])
+
+  let dummy_pos = (0,0) (* Do smarter positions make sense? *)
+
+  let node_data tag content =
+    XML.Node(dummy_pos, tag, [XML.Data(dummy_pos, content)])
+
+  let node_uri tag uri = node_data tag (Uri.to_string uri)
+
+  let add_node_data tag c nodes =
+    match c with
+    | None -> nodes
+    | Some content -> node_data tag content :: nodes
+
+  let add_node_uri tag c nodes =
+    match c with
+    | None -> nodes
+    | Some uri -> node_data tag (Uri.to_string uri) :: nodes
+
+  (* Add to [nodes] those coming from mapping [f] on [els] *)
+  let add_nodes_map f els nodes =
+    List.fold_left (fun nodes el -> f el :: nodes) nodes els
+
+  let add_node_option f op nodes =
+    match op with
+    | None -> nodes
+    | Some v -> f v :: nodes
+
 end

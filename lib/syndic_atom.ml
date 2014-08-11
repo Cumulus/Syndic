@@ -28,7 +28,9 @@ module Date = struct
       invalid_arg(sprintf "Syndic.Atom.Date.of_string: cannot parse %S" s)
 end
 
-let namespaces = [ "http://www.w3.org/2005/Atom" ]
+let atom_ns = "http://www.w3.org/2005/Atom"
+let xhtml_ns = "http://www.w3.org/1999/xhtml"
+let namespaces = [ atom_ns ]
 
 type rel =
   | Alternate
@@ -59,7 +61,6 @@ type link' = [
 
 (* The actual XML content is supposed to be inside a <div> which is NOT
    part of the content. *)
-(* FIXME: beware for output! Must pust the <div> back (with namespace ?) *)
 let rec get_xml_content xml0 = function
   | XML.Data (_, s) :: tl ->
     if only_whitespace s then get_xml_content xml0 tl
@@ -497,7 +498,7 @@ type source =
     generator: generator option;
     icon: icon option;
     id: id;
-    links: link * link list;
+    links: link list;
     logo: logo option;
     rights: rights option;
     subtitle: subtitle option;
@@ -564,12 +565,7 @@ let make_source ~pos ~entry_authors (l : [< source'] list) =
   in
   (* atomLink* *)
   let links =
-    (function
-      | [] -> raise (Error.Error (pos,
-                            "<source> elements MUST contains one or more \
-                             <link> elements"))
-      | x :: r -> (x, r))
-      (List.fold_left (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l)
+    List.fold_left (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l
   in
   (* atomLogo? *)
   let logo = match find (function `Logo _ -> true | _ -> false) l with
@@ -1173,3 +1169,242 @@ let unsafe input =
   | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
     `Feed (feed_of_xml' (pos, tag, datas))
   | _ -> `Feed []
+
+
+
+(* Conversion to XML *)
+
+(* Tag with the Atom namespace *)
+let atom name : Xmlm.tag = ((atom_ns, name), [])
+
+let text_construct_to_xml tag_name (t: text_construct) =
+  match t with
+  | Text t ->
+     XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "text"]),
+              [XML.Data(dummy_pos, t)])
+  | Html t ->
+     XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "html"]),
+              [XML.Data(dummy_pos, t)])
+  | Xhtml x ->
+     let div = XML.Node(dummy_pos,
+                        ((xhtml_ns, "div"), [("", "xmlns"), xhtml_ns]), x) in
+     XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "xhtml"]), [div])
+
+let person_to_xml name (a: author) =
+  XML.Node(dummy_pos, atom name,
+           [node_data (atom "name") a.name]
+           |> add_node_uri (atom "uri") a.uri
+           |> add_node_data (atom "email") a.email)
+
+let author_to_xml a = person_to_xml "author" a
+let contributor_to_xml a = person_to_xml "contributor" a
+
+let category_to_xml (c: category) =
+  XML.Node(dummy_pos, atom "category",
+           [node_data (tag "term") c.term]
+           |> add_node_uri (tag "scheme") c.scheme
+           |> add_node_data (tag "label") c.label)
+
+let generator_to_xml (g: generator) =
+  let attr = [] |> add_attr ("", "version") g.version
+             |> add_attr_uri ("", "uri") g.uri in
+  XML.Node(dummy_pos, ((atom_ns, "generator"), attr),
+           [XML.Data(dummy_pos, g.content)])
+
+let string_of_rel = function
+  | Alternate -> "alternate"
+  | Related -> "related"
+  | Self -> "self"
+  | Enclosure -> "enclosure"
+  | Via -> "via"
+  | Link l -> Uri.to_string l
+
+let link_to_xml (l: link) =
+  let attr = [("", "href"), Uri.to_string l.href;
+              ("", "rel"), string_of_rel l.rel ]
+             |> add_attr ("", "type") l.type_media
+             |> add_attr ("", "hreflang") l.hreflang
+             |> add_attr ("", "title") l.title in
+  let attr = match l.length with
+    | Some len -> (("", "length"), string_of_int len) :: attr
+    | None -> attr in
+  XML.Node(dummy_pos, ((atom_ns, "link"), attr), [])
+
+let string_of_date d =
+  (* Example: 2014-03-19T15:51:25.050-07:00 *)
+  CalendarLib.Printer.Calendar.sprint "%Y-%0m-%0dT%0H:%0M:%0S%:z" d
+
+let add_node_date tag date nodes =
+  match date with
+  | None -> nodes
+  | Some d -> node_data tag (string_of_date d) :: nodes
+
+let source_to_xml (s: source) =
+  let (a0, a) = s.authors in
+  let nodes =
+    [author_to_xml a0;
+     node_data (atom "id") s.id;
+     text_construct_to_xml "title" s.title ]
+    |> add_nodes_map author_to_xml a
+    |> add_nodes_map category_to_xml s.categories
+    |> add_nodes_map contributor_to_xml s.contributors
+    |> add_node_option generator_to_xml s.generator
+    |> add_node_option (node_uri (atom "icon")) s.icon
+    |> add_nodes_map link_to_xml s.links
+    |> add_node_option (node_uri (atom "logo")) s.logo
+    |> add_node_option (text_construct_to_xml "rights") s.rights
+    |> add_node_option (text_construct_to_xml "subtitle") s.subtitle
+    |> add_node_date (atom "updated") s.updated in
+  XML.Node(dummy_pos, atom "source", nodes)
+
+let content_to_xml (c: content) =
+  match c with
+  | Text t ->
+     XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), "text"]),
+              [XML.Data(dummy_pos, t)])
+  | Html t ->
+     XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), "html"]),
+              [XML.Data(dummy_pos, t)])
+  | Xhtml x ->
+     let div = XML.Node(dummy_pos,
+                        ((xhtml_ns, "div"), [("", "xmlns"), xhtml_ns]), x) in
+     XML.Node(dummy_pos,
+              ((atom_ns, "content"), [("", "type"), "xhtml"]), [div])
+  | Mime(mime, d) ->
+     XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), mime]),
+              [XML.Data(dummy_pos, d)])
+  | Src(mime, uri) ->
+     let attr = [ ("", "src"), Uri.to_string uri ]
+                |> add_attr ("", "type") mime in
+     XML.Node(dummy_pos, ((atom_ns, "content"), attr), [])
+
+let entry_to_xml (e: entry) =
+  let (a0, a) = e.authors in
+  let nodes =
+    [author_to_xml a0;
+     node_data (atom "id") e.id;
+     text_construct_to_xml "title" e.title;
+     node_data (atom "updated") (string_of_date e.updated) ]
+    |> add_nodes_map author_to_xml a
+    |> add_nodes_map category_to_xml e.categories
+    |> add_node_option content_to_xml e.content
+    |> add_nodes_map contributor_to_xml e.contributors
+    |> add_nodes_map link_to_xml e.links
+    |> add_node_date (atom "published") e.published
+    |> add_node_option (text_construct_to_xml "rights") e.rights
+    |> add_nodes_map source_to_xml e.sources
+    |> add_node_option (text_construct_to_xml "summary") e.summary in
+  XML.Node(dummy_pos, atom "entry", nodes)
+
+let to_xml (f: feed) =
+  let nodes =
+    (node_data (atom "id") f.id
+     :: text_construct_to_xml "title" f.title
+     :: node_data (atom "updated") (string_of_date f.updated)
+     :: List.map author_to_xml f.authors)
+    |> add_nodes_map category_to_xml f.categories
+    |> add_nodes_map contributor_to_xml f.contributors
+    |> add_node_option generator_to_xml f.generator
+    |> add_node_option (node_uri (atom "icon")) f.icon
+    |> add_nodes_map link_to_xml f.links
+    |> add_node_option (node_uri (atom "logo")) f.logo
+    |> add_node_option (text_construct_to_xml "rights") f.rights
+    |> add_node_option (text_construct_to_xml "subtitle") f.subtitle
+    |> add_nodes_map entry_to_xml f.entries in
+  XML.Node(dummy_pos, ((atom_ns, "feed"), [("", "xmlns"), atom_ns]), nodes)
+
+
+(* Atom and XHTML have been declared well in the above XML
+   representation.  One can remove them. *)
+let output_ns_prefix s =
+  if s = atom_ns || s = xhtml_ns then Some "" else None
+
+let output feed dest =
+  let o = Xmlm.make_output dest ~decl:true ~ns_prefix:output_ns_prefix in
+  XML.to_xmlm (to_xml feed) o
+
+
+(* Feed aggregation *)
+
+let syndic_generator = {
+    version = Some Syndic_conf.version;
+    uri = Some Syndic_conf.homepage;
+    content = "OCaml Syndic.Atom feed aggregator" }
+
+let ocaml_icon =
+  Uri.of_string "http://ocaml.org/img/colour-icon-170x148.png"
+
+let default_title : text_construct =
+  Text "Syndic.Atom aggregated feed"
+
+let is_alternate_Atom (l: link) =
+  match l.type_media with
+  | None -> false
+  | Some ty -> ty = "application/atom+xml" && l.rel = Alternate
+
+let add_entries_of_feed entries (uri_opt, feed) : entry list =
+  (* Add an Alternate link with the original URI if we know it and it
+     is not already provided. *)
+  let links = match uri_opt with
+    | None -> feed.links
+    | Some uri ->
+       if List.exists is_alternate_Atom feed.links then feed.links
+       else { href = uri;
+              rel = Alternate;
+              type_media = Some "application/atom+xml";
+              hreflang = None;
+              title = None;
+              length = None;
+            } :: feed.links in
+  let source authors =
+    { authors;
+      categories = feed.categories;
+      contributors = feed.contributors;
+      generator = feed.generator;
+      icon = feed.icon;
+      id = feed.id;
+      links;
+      logo = feed.logo;
+      rights = feed.rights;
+      subtitle = feed.subtitle;
+      title = feed.title;
+      updated = Some feed.updated;
+    } in
+  let add_entry entries (e: entry) =
+    { e with sources = source e.authors :: e.sources } :: entries in
+  List.fold_left add_entry entries feed.entries
+
+let entries_of_feeds feeds =
+  List.fold_left add_entries_of_feed [] feeds
+
+let more_recent d1 (e: entry) =
+  if CalendarLib.Calendar.compare d1 e.updated >= 0 then d1 else e.updated
+
+let aggregate ?id ?updated ?subtitle ?(title=default_title) feeds : feed =
+  let entries = entries_of_feeds feeds in
+  let id = match id with
+    | Some id -> id
+    | None ->
+       (* Collect all ids of the entries and "digest" them. *)
+       let b = Buffer.create 4096 in
+       List.iter (fun (e: entry) -> Buffer.add_string b e.id) entries;
+       Digest.to_hex (Digest.string (Buffer.contents b)) in
+  let updated = match updated with
+    | Some d -> d
+    | None ->
+       (* Use the more recent date of the entries. *)
+       match entries with
+       | [] -> CalendarLib.Calendar.now() (* no entries! *)
+       | e0 :: el ->
+          List.fold_left more_recent e0.updated el in
+  { authors = [];  categories = [];  contributors = [];
+    generator = Some syndic_generator;
+    icon = Some ocaml_icon;
+    id;
+    links = [];  logo = None;
+    rights = None;
+    subtitle = subtitle;
+    title;
+    updated;
+    entries;
+  }

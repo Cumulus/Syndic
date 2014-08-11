@@ -5,3 +5,5 @@ doc/*.html
 *.native
 *.byte
 *.docdir
+lib/syndic_conf.ml
+*.tar.gz
