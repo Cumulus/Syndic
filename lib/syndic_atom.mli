@@ -407,9 +407,6 @@ type feed =
     with the feed. Its element children consist of metadata elements
     followed by zero or more atom:entry child elements.
 
-    - [feed] MUST contain one or more [author], unless all of the
-      {!entry} elements of [entries] contain at least one [author]
-      element.
     - one of the [links] SHOULD have a [rel] attribute value of
       [Self].  This is the preferred URI for retrieving Atom Feed
       Documents representing this Atom feed.
@@ -437,7 +434,6 @@ val parse : Xmlm.input -> feed
 
     Raise [Error.Expected], [Expected_Data] or [Error.Duplicate_Link]
     if [xml] is not a valid Atom document. *)
-
 
 (**/**)
 
