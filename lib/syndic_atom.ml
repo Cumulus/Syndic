@@ -307,17 +307,18 @@ let icon_of_xml, icon_of_xml' =
      generate_catcher ~leaf_producer (make_icon ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
 
-type id = Uri.t
-type id' = [ `URI of string ]
+(* XXX: atom:id as string is more readable that Uri.t *)
+type id = string
+type id' = [ `Data of string ]
 
 let make_id ~pos (l : [< id'] list) =
   (* (atomUri) *)
-  let uri = match find (fun (`URI _) -> true) l with
-    | Some (`URI u) -> (Uri.of_string u)
+  let id = match find (fun (`Data _) -> true) l with
+    | Some (`Data u) -> u
     | _ -> raise (Error.Error (pos,
                             "The content of <id> MUST be \
                              a non-empty string"))
-  in uri
+  in id
 
 (* atomId = element atom:id {
       atomCommonAttributes,
@@ -325,7 +326,7 @@ let make_id ~pos (l : [< id'] list) =
     }
  *)
 let id_of_xml, id_of_xml' =
-  let leaf_producer ctx pos data = `URI data in
+  let leaf_producer ctx pos data = `Data data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~leaf_producer (make_id ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
