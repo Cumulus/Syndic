@@ -308,17 +308,18 @@ let icon_of_xml, icon_of_xml' =
      generate_catcher ~leaf_producer (make_icon ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
 
-type id = Uri.t
-type id' = [ `URI of string ]
+(* XXX: atom:id as string is more readable that Uri.t *)
+type id = string
+type id' = [ `Data of string ]
 
 let make_id ~pos (l : [< id'] list) =
   (* (atomUri) *)
-  let uri = match find (fun (`URI _) -> true) l with
-    | Some (`URI u) -> (Uri.of_string u)
+  let id = match find (fun (`Data _) -> true) l with
+    | Some (`Data u) -> u
     | _ -> raise (Error.Error (pos,
                             "The content of <id> MUST be \
                              a non-empty string"))
-  in uri
+  in id
 
 (* atomId = element atom:id {
       atomCommonAttributes,
@@ -326,7 +327,7 @@ let make_id ~pos (l : [< id'] list) =
     }
  *)
 let id_of_xml, id_of_xml' =
-  let leaf_producer ctx pos data = `URI data in
+  let leaf_producer ctx pos data = `Data data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~leaf_producer (make_id ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
@@ -1217,10 +1218,10 @@ let string_of_rel = function
   | Self -> "self"
   | Enclosure -> "enclosure"
   | Via -> "via"
-  | Link l -> uri_to_string l
+  | Link l -> Uri.to_string l
 
 let link_to_xml (l: link) =
-  let attr = [("", "href"), uri_to_string l.href;
+  let attr = [("", "href"), Uri.to_string l.href;
               ("", "rel"), string_of_rel l.rel ]
              |> add_attr ("", "type") l.type_media
              |> add_attr ("", "hreflang") l.hreflang
@@ -1243,7 +1244,7 @@ let source_to_xml (s: source) =
   let (a0, a) = s.authors in
   let nodes =
     [author_to_xml a0;
-     node_data (atom "id") (uri_to_string s.id);
+     node_data (atom "id") s.id;
      text_construct_to_xml "title" s.title ]
     |> add_nodes_map author_to_xml a
     |> add_nodes_map category_to_xml s.categories
@@ -1274,7 +1275,7 @@ let content_to_xml (c: content) =
      XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), mime]),
               [XML.Data(dummy_pos, d)])
   | Src(mime, uri) ->
-     let attr = [ ("", "src"), uri_to_string uri ]
+     let attr = [ ("", "src"), Uri.to_string uri ]
                 |> add_attr ("", "type") mime in
      XML.Node(dummy_pos, ((atom_ns, "content"), attr), [])
 
@@ -1282,7 +1283,7 @@ let entry_to_xml (e: entry) =
   let (a0, a) = e.authors in
   let nodes =
     [author_to_xml a0;
-     node_data (atom "id") (uri_to_string e.id);
+     node_data (atom "id") e.id;
      text_construct_to_xml "title" e.title;
      node_data (atom "updated") (string_of_date e.updated) ]
     |> add_nodes_map author_to_xml a
@@ -1298,7 +1299,7 @@ let entry_to_xml (e: entry) =
 
 let to_xml (f: feed) =
   let nodes =
-    (node_data (atom "id") (uri_to_string f.id)
+    (node_data (atom "id") f.id
      :: text_construct_to_xml "title" f.title
      :: node_data (atom "updated") (string_of_date f.updated)
      :: List.map author_to_xml f.authors)
@@ -1388,9 +1389,8 @@ let aggregate ?id ?updated ?subtitle ?(title=default_title) feeds : feed =
     | None ->
        (* Collect all ids of the entries and "digest" them. *)
        let b = Buffer.create 4096 in
-       List.iter (fun (e: entry) -> Buffer.add_string b (uri_to_string e.id))
-                 entries;
-       Uri.of_string(Digest.to_hex (Digest.string (Buffer.contents b))) in
+       List.iter (fun (e: entry) -> Buffer.add_string b e.id) entries;
+       Digest.to_hex (Digest.string (Buffer.contents b)) in
   let updated = match updated with
     | Some d -> d
     | None ->

@@ -99,7 +99,7 @@ type icon = Uri.t
     {{:http://tools.ietf.org/html/rfc4287#section-4.2.5} See RFC 4287 § 4.2.5}
  *)
 
-type id = Uri.t
+type id = string
 (** The [id] element conveys a permanent, universally unique
     identifier for an entry or feed.
 
@@ -450,7 +450,7 @@ val output : feed -> Xmlm.dest -> unit
 (** [output f dest] writes the XML tree of the feed [f] to [dest]. *)
 
 
-val aggregate : ?id:Uri.t -> ?updated:updated -> ?subtitle:subtitle ->
+val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
                 ?title:text_construct ->
                 (Uri.t option * feed) list -> feed
 (** [aggregate feeds] returns a single feed containing all the posts
@@ -485,7 +485,7 @@ val unsafe : Xmlm.input ->
             | `Contributor of
                  [> `Email of string | `Name of string | `URI of string ]
                    list
-            | `ID of [> `URI of string ] list
+            | `ID of [> `Data of string ] list
             | `Link of
                  [> `HREF of string
                  | `HREFLang of string
@@ -513,7 +513,7 @@ val unsafe : Xmlm.input ->
                       | `URI of string
                       | `Version of string ]
                         list
-                 | `ID of [> `URI of string ] list
+                 | `ID of [> `Data of string ] list
                  | `Icon of [> `URI of string ] list
                  | `Link of
                       [> `HREF of string
@@ -536,7 +536,7 @@ val unsafe : Xmlm.input ->
        | `Generator of
             [> `Content of string | `URI of string | `Version of string ]
               list
-       | `ID of [> `URI of string ] list
+       | `ID of [> `Data of string ] list
        | `Icon of [> `URI of string ] list
        | `Link of
             [> `HREF of string

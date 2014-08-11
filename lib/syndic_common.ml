@@ -83,8 +83,6 @@ module Util = struct
   (* Output feeds to XML
    ***********************************************************************)
 
-  let uri_to_string u = Uri.pct_decode (Uri.to_string u)
-
   let add_attr name v_opt attr =
     match v_opt with
     | None -> attr
@@ -93,7 +91,7 @@ module Util = struct
   let add_attr_uri name v_opt attr =
     match v_opt with
     | None -> attr
-    | Some v -> (name, uri_to_string v) :: attr
+    | Some v -> (name, Uri.to_string v) :: attr
 
   let tag name = (("", name), [])
 
@@ -112,7 +110,7 @@ module Util = struct
   let add_node_uri tag c nodes =
     match c with
     | None -> nodes
-    | Some uri -> node_data tag (uri_to_string uri) :: nodes
+    | Some uri -> node_data tag (Uri.to_string uri) :: nodes
 
   (* Add to [nodes] those coming from mapping [f] on [els] *)
   let add_nodes_map f els nodes =

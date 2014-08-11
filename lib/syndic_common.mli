@@ -34,10 +34,6 @@ module Util : sig
   val dummy_pos : Xmlm.pos
   (** A dummy position when generating XML files. *)
 
-  val uri_to_string : Uri.t -> string
-  (** [uri_to_string u] convert the URI to a string that is NOT
-      percent encoded.*)
-
   val add_attr : Xmlm.name -> string option ->
                  Xmlm.attribute list -> Xmlm.attribute list
   val add_attr_uri : Xmlm.name -> Uri.t option ->
