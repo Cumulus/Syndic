@@ -1172,8 +1172,7 @@ let unsafe input =
 
 
 
-(* Conversion to XML
- ***********************************************************************)
+(* Conversion to XML *)
 
 (* Tag with the Atom namespace *)
 let atom name : Xmlm.tag = ((atom_ns, name), [])
@@ -1325,8 +1324,7 @@ let output feed dest =
   XML.to_xmlm (to_xml feed) o
 
 
-(* Feed aggregation
- ***********************************************************************)
+(* Feed aggregation *)
 
 let syndic_generator = {
     version = Some Syndic_conf.version;
@@ -1410,5 +1408,3 @@ let aggregate ?id ?updated ?subtitle ?(title=default_title) feeds : feed =
     updated;
     entries;
   }
-
-;;
