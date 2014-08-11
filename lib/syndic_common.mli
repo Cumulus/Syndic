@@ -44,13 +44,21 @@ module Util : sig
       attributes. *)
 
   val node_data : Xmlm.tag -> string -> XML.t
-  (** [node_data name content] returns a node named [name] with data
+  (** [node_data tag content] returns a node named [tag] with data
       set to [content]. *)
 
   val node_uri : Xmlm.tag -> Uri.t -> XML.t
 
   val add_node_data : Xmlm.tag -> string option -> XML.t list -> XML.t list
   val add_node_uri : Xmlm.tag -> Uri.t option -> XML.t list -> XML.t list
-  val add_nodes_map : ('a -> XML.t) -> 'a list -> XML.t list -> XML.t list
+
+  val add_nodes_rev_map : ('a -> XML.t) -> 'a list -> XML.t list -> XML.t list
+  (** [add_nodes_rev_map f l nodes] apply [f] to each element of [l]
+      and add the resulting HTML trees in reverse order in front of
+      [nodes]. *)
+
   val add_node_option : ('a -> XML.t) -> 'a option -> XML.t list -> XML.t list
+  (** [add_node_option f o nodes]: if [o] is [None], return [nodes];
+      otherwise apply [f] to the value carried by [o] and add the
+      resulting XML tree in front of [nodes]. *)
 end

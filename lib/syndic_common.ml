@@ -80,8 +80,7 @@ module Util = struct
     !r
 
 
-  (* Output feeds to XML
-   ***********************************************************************)
+  (* Output feeds to XML *)
 
   let add_attr name v_opt attr =
     match v_opt with
@@ -113,7 +112,7 @@ module Util = struct
     | Some uri -> node_data tag (Uri.to_string uri) :: nodes
 
   (* Add to [nodes] those coming from mapping [f] on [els] *)
-  let add_nodes_map f els nodes =
+  let add_nodes_rev_map f els nodes =
     List.fold_left (fun nodes el -> f el :: nodes) nodes els
 
   let add_node_option f op nodes =
