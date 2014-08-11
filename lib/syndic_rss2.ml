@@ -54,33 +54,7 @@ module Date = struct
       invalid_arg(sprintf "Syndic.Rss2.Date.of_string: cannot parse %S" s)
 end
 
-module Error = struct
-  include Syndic_error
-
-  exception Size_Exceeded of string * int * int
-
-  let raise_size_exceeded tag value max =
-    raise (Size_Exceeded (tag, value, max))
-
-  let string_of_size_exceeded (tag, value, max) =
-    let buffer = Buffer.create 16 in
-    Buffer.add_string buffer "Size excedeed in ";
-    Buffer.add_string buffer tag;
-    Buffer.add_string buffer " tag (";
-    Buffer.add_string buffer (string_of_int value);
-    Buffer.add_string buffer " > ";
-    Buffer.add_string buffer (string_of_int max);
-    Buffer.add_string buffer ")";
-    Buffer.contents buffer
-
-  exception Item_expectation
-
-  let raise_item_exceptation () =
-    raise Item_expectation
-
-  let string_of_item_exceptation =
-    "Item expected <title> or <description> tag"
-end
+module Error = Syndic_error
 
 type image =
   {
@@ -157,7 +131,9 @@ let image_link_of_xml (pos, tag, datas) =
 let image_size_of_xml ~max (pos, tag, datas) =
   try let size = int_of_string (get_leaf datas) in
     if size > max
-    then Error.raise_size_exceeded (get_tag_name tag) size max
+    then raise (Error.Error
+                  (pos, ("size of "  ^ (get_tag_name tag)
+                         ^ " exceeded (max is " ^ (string_of_int max) ^ ")")))
     else size
   with Not_found -> raise (Error.Error (pos,
                             ("The content of <"^(get_tag_name tag)^"> MUST be \
