@@ -1,6 +1,7 @@
 open Syndic_common.XML
 open Syndic_common.Util
 module XML = Syndic_xml
+module Error = Syndic_error
 
 module Date = struct
   open CalendarLib
@@ -56,45 +57,17 @@ type link' = [
   | `Length of string
 ]
 
-module Error = struct
-  include Syndic_error
-
-  exception Duplicate_Link of (Uri.t * string * string) * (string * string)
-
-  let raise_duplicate_link { href; type_media; hreflang; _}
-                           (type_media', hreflang') =
-    let ty = (function Some a -> a | None -> "(none)") type_media in
-    let hl = (function Some a -> a | None -> "(none)") hreflang in
-    let ty' = (function "" -> "(none)" | s -> s) type_media' in
-    let hl' = (function "" -> "(none)" | s -> s) hreflang' in
-    raise (Duplicate_Link ((href, ty, hl), (ty', hl')))
-
-  let string_of_duplicate_exception ((uri, ty, hl), (ty', hl')) =
-    let buffer = Buffer.create 16 in
-    Buffer.add_string buffer "Duplicate link between [href: ";
-    Buffer.add_string buffer (Uri.to_string uri);
-    Buffer.add_string buffer ", ty: ";
-    Buffer.add_string buffer ty;
-    Buffer.add_string buffer ", hl: ";
-    Buffer.add_string buffer hl;
-    Buffer.add_string buffer "] and [ty: ";
-    Buffer.add_string buffer ty';
-    Buffer.add_string buffer ", hl: ";
-    Buffer.add_string buffer hl';
-    Buffer.add_string buffer "]";
-    Buffer.contents buffer
-end
-
-
 (* The actual XML content is supposed to be inside a <div> which is NOT
    part of the content. *)
 (* FIXME: beware for output! Must pust the <div> back (with namespace ?) *)
 let rec get_xml_content xml0 = function
-  | XML.Data s :: tl -> if only_whitespace s then get_xml_content xml0 tl
-                       else xml0 (* unexpected *)
-  | XML.Node(tag, data) :: tl when tag_is tag "div" ->
+  | XML.Data (_, s) :: tl ->
+    if only_whitespace s then get_xml_content xml0 tl
+    else xml0 (* unexpected *)
+  | XML.Node (pos, tag, data) :: tl when tag_is tag "div" ->
      let is_space =
-       List.for_all (function XML.Data s -> only_whitespace s | _ -> false) tl in
+       List.for_all (function XML.Data (_, s) -> only_whitespace s
+                            | _ -> false) tl in
      if is_space then data else xml0
   | _ -> xml0
 
@@ -108,7 +81,7 @@ let rm_namespace _ = no_namespace
    to a string as it should. *)
 let get_html_content html =
   match html with
-  | [XML.Data d] -> d
+  | [XML.Data (_, d)] -> d
   | h ->
      (* It is likely that, when the HTML was parsed, the Atom
         namespace was applied.  Remove it. *)
@@ -119,7 +92,8 @@ type text_construct =
   | Html of string
   | Xhtml of Syndic_xml.t list
 
-let text_construct_of_xml (((tag, attr), data): Xmlm.tag * t list) =
+let text_construct_of_xml
+    ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
   match find (fun a -> attr_is a "type") attr with
   | Some(_, "html") -> Html(get_html_content data)
   | Some(_, "application/xhtml+xml")
@@ -160,18 +134,19 @@ let make_author datas (l : [< author'] list) =
   in
   ({ name; uri; email; } : author)
 
-let author_name_of_xml (tag, datas) =
+let author_name_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Error.Expected_Data -> "" (* mandatory ? *)
+  with Not_found -> "" (* mandatory ? *)
 
-let author_uri_of_xml (tag, datas) =
+let author_uri_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Error.Expected_Data ->
-    Error.raise_expectation Error.Data (Error.Tag "author/uri")
+  with Not_found -> raise (Error.Error (pos,
+                            "The content of <uri> MUST be \
+                             a non-empty string"))
 
-let author_email_of_xml (tag, datas) =
+let author_email_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Error.Expected_Data -> "" (* mandatory ? *)
+  with Not_found -> "" (* mandatory ? *)
 
 (* {[  atomAuthor = element atom:author { atomPersonConstruct } ]}
    where
@@ -191,7 +166,7 @@ let author_of_xml =
     ("uri", (fun ctx a -> `URI (author_uri_of_xml a)));
     ("email", (fun ctx a -> `Email (author_email_of_xml a)));
   ] in
-  fun ((_, datas) as xml) ->
+  fun ((_, _, datas) as xml) ->
   generate_catcher ~namespaces ~data_producer (make_author datas) xml
 
 let author_of_xml' =
@@ -215,11 +190,14 @@ type category' = [
   | `Label of string
 ]
 
-let make_category (l : [< category'] list) =
+let make_category ~pos (l : [< category'] list) =
   (* attribute term { text } *)
   let term = match find (function `Term _ -> true | _ -> false) l with
     | Some (`Term t) -> t
-    | _ -> Error.raise_expectation (Error.Attr "term") (Error.Tag "category")
+    | _ ->
+      raise (Error.Error (pos,
+                            "Category elements MUST have a 'term' \
+                             attribute"))
   in
   (* attribute scheme { atomUri }? *)
   let scheme =
@@ -246,11 +224,12 @@ let make_category (l : [< category'] list) =
  *)
 let category_of_xml, category_of_xml' =
   let attr_producer = [
-    ("term", (fun ctx a -> `Term a));
-    ("scheme", (fun ctx a -> `Scheme a));
-    ("label", (fun ctx a -> `Label a))
+    ("term", (fun ctx pos a -> `Term a));
+    ("scheme", (fun ctx pos a -> `Scheme a));
+    ("label", (fun ctx pos a -> `Label a))
   ] in
-  generate_catcher ~attr_producer make_category,
+  (fun ((pos, _, _) as xml) ->
+     generate_catcher ~attr_producer (make_category ~pos) xml),
   generate_catcher ~attr_producer (fun x -> x)
 
 let make_contributor = make_author
@@ -270,11 +249,13 @@ type generator' = [
   | `Content of string
 ]
 
-let make_generator (l : [< generator'] list) =
+let make_generator ~pos (l : [< generator'] list) =
   (* text *)
   let content = match find (function `Content _ -> true | _ -> false) l with
     | Some ((`Content c)) -> c
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "generator")
+    | _ -> raise (Error.Error (pos,
+                            "The content of <generator> MUST be \
+                             a non-empty string"))
   in
   (* attribute version { text }? *)
   let version = match find (function `Version _ -> true | _ -> false) l with
@@ -296,21 +277,24 @@ let make_generator (l : [< generator'] list) =
  *)
 let generator_of_xml, generator_of_xml' =
   let attr_producer = [
-    ("version", (fun ctx a -> `Version a));
-    ("uri", (fun ctx a -> `URI a));
+    ("version", (fun ctx pos a -> `Version a));
+    ("uri", (fun ctx pos a -> `URI a));
   ] in
-  let leaf_producer ctx data = `Content data in
-  generate_catcher ~attr_producer ~leaf_producer make_generator,
+  let leaf_producer ctx pos data = `Content data in
+  (fun ((pos, _, _) as xml) ->
+     generate_catcher ~attr_producer ~leaf_producer (make_generator ~pos) xml),
   generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
 
 type icon = Uri.t
 type icon' = [ `URI of string ]
 
-let make_icon (l : [< icon'] list) =
+let make_icon ~pos (l : [< icon'] list) =
   (** (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "icon")
+    | _ -> raise (Error.Error (pos,
+                            "The content of <icon> MUST be \
+                             a non-empty string"))
   in uri
 
 (* atomIcon = element atom:icon {
@@ -318,18 +302,21 @@ let make_icon (l : [< icon'] list) =
     }
  *)
 let icon_of_xml, icon_of_xml' =
-  let leaf_producer ctx data = `URI data in
-  generate_catcher ~leaf_producer make_icon,
+  let leaf_producer ctx pos data = `URI data in
+  (fun ((pos, _, _) as xml) ->
+     generate_catcher ~leaf_producer (make_icon ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
 
 type id = Uri.t
 type id' = [ `URI of string ]
 
-let make_id (l : [< id'] list) =
+let make_id ~pos (l : [< id'] list) =
   (* (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "id")
+    | _ -> raise (Error.Error (pos,
+                            "The content of <id> MUST be \
+                             a non-empty string"))
   in uri
 
 (* atomId = element atom:id {
@@ -338,8 +325,9 @@ let make_id (l : [< id'] list) =
     }
  *)
 let id_of_xml, id_of_xml' =
-  let leaf_producer ctx data = `URI data in
-  generate_catcher ~leaf_producer make_id,
+  let leaf_producer ctx pos data = `URI data in
+  (fun ((pos, _, _) as xml) ->
+     generate_catcher ~leaf_producer (make_id ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
 
 let rel_of_string s = match String.lowercase (String.trim s) with
@@ -350,11 +338,14 @@ let rel_of_string s = match String.lowercase (String.trim s) with
   | "via" -> Via
   | uri -> Link (Uri.of_string uri) (* RFC 4287 § 4.2.7.2 *)
 
-let make_link (l : [< link'] list) =
+let make_link ~pos (l : [< link'] list) =
   (* attribute href { atomUri } *)
   let href = match find (function `HREF _ -> true | _ -> false) l with
     | Some (`HREF u) -> (Uri.of_string u)
-    | _ -> Error.raise_expectation (Error.Attr "href") (Error.Tag "link")
+    | _ ->
+      raise (Error.Error (pos,
+                            "Link elements MUST have a 'href' \
+                             attribute"))
   in
   (* attribute rel { atomNCName | atomUri }? *)
   let rel = match find (function `Rel _ -> true | _ -> false) l with
@@ -398,24 +389,27 @@ let make_link (l : [< link'] list) =
  *)
 let link_of_xml, link_of_xml' =
   let attr_producer = [
-    ("href", (fun ctx a -> `HREF a));
-    ("rel", (fun ctx a -> `Rel a));
-    ("type", (fun ctx a -> `Type a));
-    ("hreflang", (fun ctx a -> `HREFLang a));
-    ("title", (fun ctx a -> `Title a));
-    ("length", (fun ctx a -> `Length a));
+    ("href", (fun ctx pos a -> `HREF a));
+    ("rel", (fun ctx pos a -> `Rel a));
+    ("type", (fun ctx pos a -> `Type a));
+    ("hreflang", (fun ctx pos a -> `HREFLang a));
+    ("title", (fun ctx pos a -> `Title a));
+    ("length", (fun ctx pos a -> `Length a));
   ] in
-  generate_catcher ~attr_producer make_link,
+  (fun ((pos, _, _) as xml) ->
+     generate_catcher ~attr_producer (make_link ~pos) xml),
   generate_catcher ~attr_producer (fun x -> x)
 
 type logo = Uri.t
 type logo' = [ `URI of string ]
 
-let make_logo (l : [< logo'] list) =
+let make_logo ~pos (l : [< logo'] list) =
   (* (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "logo")
+    | _ -> raise (Error.Error (pos,
+                            "The content of <logo> MUST be \
+                             a non-empty string"))
   in uri
 
 (* atomLogo = element atom:logo {
@@ -424,26 +418,29 @@ let make_logo (l : [< logo'] list) =
     }
  *)
 let logo_of_xml, logo_of_xml' =
-  let leaf_producer ctx data = `URI data in
-  generate_catcher ~leaf_producer make_logo,
+  let leaf_producer ctx pos data = `URI data in
+  (fun ((pos, _, _) as xml) ->
+     generate_catcher ~leaf_producer (make_logo ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
 
 type published = CalendarLib.Calendar.t
 type published' = [ `Date of string ]
 
-let make_published (l : [< published'] list) =
+let make_published ~pos (l : [< published'] list) =
   (* atom:published { atomDateConstruct } *)
   let date = match find (fun (`Date _) -> true) l with
     | Some (`Date d) -> Date.of_string d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "published")
+    | _ -> raise (Error.Error (pos,
+                            "The content of <published> MUST be \
+                             a non-empty string"))
   in date
 
 (* atomPublished = element atom:published { atomDateConstruct } *)
 let published_of_xml, published_of_xml' =
-  let leaf_producer ctx data = `Date data in
-  generate_catcher ~leaf_producer make_published,
+  let leaf_producer ctx pos data = `Date data in
+  (fun ((pos, _, _) as xml) ->
+    generate_catcher ~leaf_producer (make_published ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
-
 
 type rights = text_construct
 type rights' = [ `Data of Syndic_xml.t list ]
@@ -451,7 +448,7 @@ type rights' = [ `Data of Syndic_xml.t list ]
 let rights_of_xml = text_construct_of_xml
 
 (* atomRights = element atom:rights { atomTextConstruct } *)
-let rights_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+let rights_of_xml' ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
   `Data data
 
 type title = text_construct
@@ -460,7 +457,7 @@ type title' = [ `Data of Syndic_xml.t list ]
 let title_of_xml = text_construct_of_xml
 
 (* atomTitle = element atom:title { atomTextConstruct } *)
-let title_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+let title_of_xml' ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
   `Data data
 
 type subtitle = text_construct
@@ -469,23 +466,26 @@ type subtitle' = [ `Data of Syndic_xml.t list ]
 let subtitle_of_xml = text_construct_of_xml
 
 (* atomSubtitle = element atom:subtitle { atomTextConstruct } *)
-let subtitle_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+let subtitle_of_xml' ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
   `Data data
 
 type updated = CalendarLib.Calendar.t
 type updated' = [ `Date of string ]
 
-let make_updated (l : [< updated'] list) =
+let make_updated ~pos (l : [< updated'] list) =
   (* atom:updated { atomDateConstruct } *)
   let updated = match find (fun (`Date _) -> true) l with
     | Some (`Date d) -> Date.of_string d
-    | _ -> Error.raise_expectation Error.Data (Error.Tag "updated")
+    | _ -> raise (Error.Error (pos,
+                            "The content of <updated> MUST be \
+                             a non-empty string"))
   in updated
 
 (* atomUpdated = element atom:updated { atomDateConstruct } *)
 let updated_of_xml, updated_of_xml' =
-  let leaf_producer ctx data = `Date data in
-  generate_catcher ~leaf_producer make_updated,
+  let leaf_producer ctx pos data = `Date data in
+  (fun ((pos, _, _) as xml) ->
+     generate_catcher ~leaf_producer (make_updated ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
 
 type source =
@@ -519,14 +519,19 @@ type source' = [
   | `Updated of updated
 ]
 
-let make_source ~entry_authors (l : [< source'] list) =
+let make_source ~pos ~entry_authors (l : [< source'] list) =
   (* atomAuthor* *)
   let authors =
-    List.fold_left (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
+    List.fold_left
+      (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
   let authors = match authors, entry_authors with
     | x :: r, _ -> x, r
     | [], x :: r -> x, r
-    | [], [] -> Error.raise_expectation (Error.Tag "author") (Error.Tag "source")
+    | [], [] ->
+      raise (Error.Error (pos,
+                            "<source> elements MUST contains one or more \
+                             <author> elements"))
+      (* XXX: no see this rule in RFC *)
   in
   (* atomCategory* *)
   let categories =
@@ -552,12 +557,16 @@ let make_source ~entry_authors (l : [< source'] list) =
   (* atomId? *)
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
-    | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "source")
+    | _ -> raise (Error.Error (pos,
+                            "<source> elements MUST contains exactly one \
+                             <id> elements"))
   in
   (* atomLink* *)
   let links =
     (function
-      | [] -> Error.raise_expectation (Error.Tag "link") (Error.Tag "source")
+      | [] -> raise (Error.Error (pos,
+                            "<source> elements MUST contains one or more \
+                             <link> elements"))
       | x :: r -> (x, r))
       (List.fold_left (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l)
   in
@@ -579,7 +588,9 @@ let make_source ~entry_authors (l : [< source'] list) =
   (* atomTitle? *)
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title s) -> s
-    | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "source")
+    | _ -> raise (Error.Error (pos,
+                            "<source> elements MUST contains exactly one \
+                             <title> elements"))
   in
   (* atomUpdated? *)
   let updated = match find (function `Updated _ -> true | _ -> false) l with
@@ -617,7 +628,7 @@ let make_source ~entry_authors (l : [< source'] list) =
          & extensionElement * )
       }
  *)
-let source_of_xml =
+let source_of_xml ((pos, _, _) as xml)=
   let data_producer = [
     ("author", (fun ctx a -> `Author (author_of_xml a)));
     ("category", (fun ctx a -> `Category (category_of_xml a)));
@@ -633,7 +644,10 @@ let source_of_xml =
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
   ] in
   fun ~entry_authors ->
-  generate_catcher ~namespaces ~data_producer (make_source ~entry_authors)
+  generate_catcher
+    ~namespaces
+    ~data_producer
+    (make_source ~pos ~entry_authors) xml
 
 let source_of_xml' =
   let data_producer = [
@@ -652,7 +666,6 @@ let source_of_xml' =
   ] in
   generate_catcher ~namespaces ~data_producer (fun x -> x)
 
-
 type mime = string
 
 type content =
@@ -667,7 +680,6 @@ type content' = [
   | `SRC of string
   | `Data of Syndic_xml.t list
 ]
-
 
 (*  atomInlineTextContent =
       element atom:content {
@@ -703,7 +715,8 @@ type content' = [
     | atomInlineOtherContent
     | atomOutOfLineContent
  *)
-let content_of_xml (((tag, attr), data): Xmlm.tag * t list) : content =
+let content_of_xml
+    ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) : content =
   (* MIME ::= attribute type { "text" | "html" }?
               | attribute type { "xhtml" }
               | attribute type { atomMediaType }? *)
@@ -726,7 +739,7 @@ let content_of_xml (((tag, attr), data): Xmlm.tag * t list) : content =
      | Some (_, "xhtml") -> Xhtml(get_xml_content data data)
      | Some (_, mime) -> Mime(mime, get_leaf data)
 
-let content_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+let content_of_xml' ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
   let l = match find (fun a -> attr_is a "src") attr with
     | Some(_, src) -> [`SRC src]
     | None -> [] in
@@ -742,7 +755,7 @@ type summary' = [ `Data of Syndic_xml.t list ]
 (* atomSummary = element atom:summary { atomTextConstruct } *)
 let summary_of_xml = text_construct_of_xml
 
-let summary_of_xml' (((tag, attr), data): Xmlm.tag * t list) =
+let summary_of_xml' ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
   `Data data
 
 type entry =
@@ -787,32 +800,49 @@ end
 
 module LinkSet = Set.Make(LinkOrder)
 
-let uniq_link_alternate (l : link list) =
+let uniq_link_alternate ~pos (l : link list) =
+  let string_of_duplicate_link
+      { href; type_media; hreflang; _ }
+      (type_media', hreflang') =
+    let ty = (function Some a -> a | None -> "(none)") type_media in
+    let hl = (function Some a -> a | None -> "(none)") hreflang in
+    let ty' = (function "" -> "(none)" | s -> s) type_media' in
+    let hl' = (function "" -> "(none)" | s -> s) hreflang' in
+    Printf.sprintf
+      "Duplicate link between \
+       <link href=\"%s\" hreflang=\"%s\" type=\"%s\" ..> and \
+       <link hreflang=\"%s\" type=\"%s\" ..>"
+      (Uri.to_string href)
+      hl ty hl' ty'
+  in
+  let raise_error link link' =
+    raise (Error.Error (pos,  (string_of_duplicate_link link link')))
+  in
   let rec aux acc = function
     | [] -> l
 
     | ({ rel; type_media = Some ty; hreflang = Some hl; _ } as x) :: r
       when rel = Alternate ->
       if LinkSet.mem (ty, hl) acc
-      then Error.raise_duplicate_link x (LinkSet.find (ty, hl) acc)
+      then raise_error x (LinkSet.find (ty, hl) acc)
       else aux (LinkSet.add (ty, hl) acc) r
 
     | ({ rel; type_media = None; hreflang = Some hl; _ } as x) :: r
       when rel = Alternate ->
       if LinkSet.mem ("", hl) acc
-      then Error.raise_duplicate_link x (LinkSet.find ("", hl) acc)
+      then raise_error x (LinkSet.find ("", hl) acc)
       else aux (LinkSet.add ("", hl) acc) r
 
     | ({ rel; type_media = Some ty; hreflang = None; _ } as x) :: r
       when rel = Alternate ->
       if LinkSet.mem (ty, "") acc
-      then Error.raise_duplicate_link x (LinkSet.find (ty, "") acc)
+      then raise_error x (LinkSet.find (ty, "") acc)
       else aux (LinkSet.add (ty, "") acc) r
 
     | ({ rel; type_media = None; hreflang = None; _ } as x) :: r
       when rel = Alternate ->
       if LinkSet.mem ("", "") acc
-      then Error.raise_duplicate_link x (LinkSet.find ("", "") acc)
+      then raise_error x (LinkSet.find ("", "") acc)
       else aux (LinkSet.add ("", "") acc) r
 
     | x :: r -> aux acc r
@@ -835,9 +865,10 @@ type feed' = [
 ]
 
 
-let make_entry ~(feed_authors: author list) l =
+let make_entry ~pos ~(feed_authors: author list) l =
   let authors =
-    List.fold_left (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
+    List.fold_left
+      (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
   let authors = match authors with
     (* default author is feed/author, see RFC 4287 § 4.1.2 *)
     | [] -> feed_authors
@@ -855,7 +886,10 @@ let make_entry ~(feed_authors: author list) l =
          List.map (fun (s: source) -> let a1, a = s.authors in a1 :: a) src in
        a0, List.concat (a1 :: a2)
     | [], [] ->
-       Error.raise_expectation (Error.Tag "author") (Error.Tag "entry")
+      raise (Error.Error (pos,
+                            "<entry> elements MUST contains one or more \
+                             <author> elements or <feed> elements MUST \
+                             contains one or more <author> elements"))
   (* atomCategory* *)
   in let categories = List.fold_left
       (fun acc -> function `Category x -> x :: acc | _ -> acc) [] l
@@ -865,7 +899,9 @@ let make_entry ~(feed_authors: author list) l =
   (* atomId *)
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
-    | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "entry")
+    | _ -> raise (Error.Error (pos,
+                            "<entry> elements MUST contains exactly one \
+                             <id> elements"))
     (* atomLink* *)
   in let links = List.fold_left
       (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l in
@@ -891,19 +927,23 @@ let make_entry ~(feed_authors: author list) l =
   (* atomTitle *)
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
-    | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "entry")
+    | _ -> raise (Error.Error (pos,
+                            "<entry> elements MUST contains exactly one \
+                             <title> elements"))
   in
   (* atomUpdated *)
   let updated = match find (function `Updated _ -> true | _ -> false) l with
     | Some (`Updated u) -> u
-    | _ -> Error.raise_expectation (Error.Tag "updated") (Error.Tag "entry")
+    | _ -> raise (Error.Error (pos,
+                            "<entry> elements MUST contains exactly one \
+                             <updated> elements"))
   in
   ({ authors;
      categories;
      content;
      contributors;
      id;
-     links = uniq_link_alternate links;
+     links = uniq_link_alternate ~pos links;
      published;
      rights;
      sources;
@@ -929,7 +969,7 @@ let make_entry ~(feed_authors: author list) l =
          & extensionElement * )
       }
  *)
-let entry_of_xml =
+let entry_of_xml ((pos, _, _) as xml)=
   let data_producer = [
     ("author", (fun ctx a -> `Author (author_of_xml a)));
     ("category", (fun ctx a -> `Category (category_of_xml a)));
@@ -945,7 +985,10 @@ let entry_of_xml =
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
   ] in
   fun ~feed_authors ->
-  generate_catcher ~namespaces ~data_producer (make_entry ~feed_authors)
+  generate_catcher
+    ~namespaces
+    ~data_producer
+    (make_entry ~pos ~feed_authors) xml
 
 let entry_of_xml' =
   let data_producer = [
@@ -981,7 +1024,7 @@ type feed =
     entries: entry list;
   }
 
-let make_feed (l : _ list) =
+let make_feed ~pos (l : _ list) =
   (* atomAuthor* *)
   let authors = List.fold_left
       (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
@@ -1007,7 +1050,9 @@ let make_feed (l : _ list) =
   (* atomId *)
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
-    | _ -> Error.raise_expectation (Error.Tag "id") (Error.Tag "feed")
+    | _ -> raise (Error.Error (pos,
+                            "<feed> elements MUST contains exactly one \
+                             <id> elements"))
   in
   (* atomLogo? *)
   let logo = match find (function `Logo _ -> true | _ -> false) l with
@@ -1027,18 +1072,23 @@ let make_feed (l : _ list) =
   (* atomTitle *)
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
-    | _ -> Error.raise_expectation (Error.Tag "title") (Error.Tag "feed")
+    | _ -> raise (Error.Error (pos,
+                            "<feed> elements MUST contains exactly one \
+                             <title> elements"))
   in
   (* atomUpdated *)
   let updated = match find (function `Updated _ -> true | _ -> false) l with
     | Some (`Updated u) -> u
-    | _ -> Error.raise_expectation (Error.Tag "updated") (Error.Tag "feed")
+    | _ -> raise (Error.Error (pos,
+                            "<feed> elements MUST contains exactly one \
+                             <updated> elements"))
   in
   (* atomEntry* *)
   let entries =
     List.fold_left
-      (fun acc -> function `Entry x -> entry_of_xml ~feed_authors:authors x :: acc
-                      | _ -> acc) [] l in
+      (fun acc -> function `Entry x ->
+         entry_of_xml ~feed_authors:authors x :: acc
+                         | _ -> acc) [] l in
   ({ authors;
      categories;
      contributors;
@@ -1072,7 +1122,7 @@ let make_feed (l : _ list) =
         atomEntry*
       }
  *)
-let feed_of_xml =
+let feed_of_xml ((pos, _, _) as xml) =
   let data_producer = [
     ("author", (fun ctx a -> `Author (author_of_xml a)));
     ("category", (fun ctx a -> `Category (category_of_xml a)));
@@ -1088,7 +1138,7 @@ let feed_of_xml =
     ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
     ("entry", (fun ctx a -> `Entry a));
   ] in
-  generate_catcher ~namespaces ~data_producer make_feed
+  generate_catcher ~namespaces ~data_producer (make_feed ~pos) xml
 
 let feed_of_xml' =
   let data_producer = [
@@ -1110,12 +1160,15 @@ let feed_of_xml' =
 
 let parse input =
   match XML.of_xmlm input |> snd with
-  | XML.Node (tag, datas) when tag_is tag "feed" -> feed_of_xml (tag, datas)
-  | _ -> Error.raise_expectation (Error.Tag "feed") Error.Root
+  | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
+    feed_of_xml (pos, tag, datas)
+  | _ -> raise (Error.Error ((0, 0),
+                         "document MUST contains exactly one \
+                          <feed> element"))
 (* FIXME: the spec says that an entry can appear as the top-level element *)
 
 let unsafe input =
   match XML.of_xmlm input |> snd with
-  | XML.Node (tag, datas) when tag_is tag "feed" ->
-     `Feed (feed_of_xml' (tag, datas))
+  | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
+    `Feed (feed_of_xml' (pos, tag, datas))
   | _ -> `Feed []

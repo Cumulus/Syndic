@@ -1,19 +1,22 @@
 type dtd = string option
 
 type t =
-  | Node of Xmlm.tag * t list
-  | Data of string              (* FIXME: I prefer Data *)
+  | Node of Xmlm.pos * Xmlm.tag * t list
+  | Data of Xmlm.pos * string              (* FIXME: I prefer Data *)
 
 let of_xmlm input =
-  let el tag datas = Node (tag, datas) in
-  let data data = Data data in
+  let el tag datas = Node (Xmlm.pos input, tag, datas) in
+  let data data = Data (Xmlm.pos input, data) in
   Xmlm.input_doc_tree ~el ~data input
 
+let get_position = function
+  | Node (pos, _, _) -> pos
+  | Data (pos, _) -> pos
 
 let rec t_to_xmlm t output =
   match t with
-  | Data d -> Xmlm.output output (`Data d)
-  | Node(tag, t_sub) ->
+  | Data (pos, d) -> Xmlm.output output (`Data d)
+  | Node (pos, tag, t_sub) ->
      Xmlm.output output (`El_start tag);
      List.iter (fun t -> t_to_xmlm t output) t_sub;
      Xmlm.output output (`El_end)

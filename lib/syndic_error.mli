@@ -1,14 +1,6 @@
 
 (** The common signature that all error modules must (at least) satisfy. *)
 
-type expected =
-  | Attr of string
-  | Tag of string
-  | Data
-  | Root
+exception Error of Xmlm.pos * string
 
-exception Expected of expected * expected
-exception Expected_Data
-
-val string_of_expectation : expected * expected -> string
-val raise_expectation : expected -> expected -> 'a
+val to_string : exn -> string

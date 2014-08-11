@@ -1,14 +1,7 @@
 (** [Syndic.Atom]: {{: http://tools.ietf.org/html/rfc4287} RFC 4287}
     compliant. *)
 
-module Error : sig
-  include module type of Syndic_error
-
-  exception Duplicate_Link of (Uri.t * string * string) * (string * string)
-
-  val string_of_duplicate_exception :
-    (Uri.t * string * string) * (string * string) -> string
-end
+module Error : module type of Syndic_error
 
 (** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}. *)
 type text_construct =

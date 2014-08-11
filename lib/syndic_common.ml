@@ -19,34 +19,33 @@ module XML = struct
       try Some (List.assoc name map)
       with _ -> None
     in
-    let rec catch_attr acc = function
+    let rec catch_attr acc pos = function
       | attr :: r -> begin
           match get_producer (get_attr_name attr) attr_producer with
           | Some f when in_namespaces attr ->
-              catch_attr ((f acc (get_attr_value attr)) :: acc) r
-          | _ -> catch_attr acc r end
+              catch_attr ((f acc pos (get_attr_value attr)) :: acc) pos r
+          | _ -> catch_attr acc pos r end
       | [] -> acc
     in
     let rec catch_datas acc = function
-      | Node (tag, datas) :: r ->
+      | Node (pos, tag, datas) :: r ->
         begin match get_producer (get_tag_name tag) data_producer with
           | Some f when in_namespaces tag ->
-              catch_datas ((f acc (tag, datas)) :: acc) r
+              catch_datas ((f acc (pos, tag, datas)) :: acc) r
           | _ -> catch_datas acc r end
-      | Data str :: r ->
+      | Data (pos, str) :: r ->
         begin match leaf_producer with
-          | Some f -> catch_datas ((f acc str) :: acc) r
+          | Some f -> catch_datas ((f acc pos str) :: acc) r
           | None -> catch_datas acc r end
       | [] -> acc
     in
-    let generate (tag, datas) =
-      maker (catch_attr (catch_datas [] datas) (get_attrs tag))
+    let generate (pos, tag, datas) =
+      maker (catch_attr (catch_datas [] datas) pos (get_attrs tag))
     in generate
 
   let dummy_of_xml ~ctor =
-    let leaf_producer ctx data = ctor data in
+    let leaf_producer ctx pos data = ctor data in
     generate_catcher ~leaf_producer (function [] -> (ctor "") | x :: r -> x)
-
 end
 
 (* Util *)
@@ -65,8 +64,8 @@ module Util = struct
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
   let datas_has_leaf = List.exists (function | XML.Data _ -> true | _ -> false)
   let get_leaf l  = match find (function XML.Data _ -> true | _ -> false) l with
-    | Some (XML.Data s) -> s
-    | _ -> raise Syndic_error.Expected_Data
+    | Some (XML.Data (_, s)) -> s
+    | _ -> raise Not_found
   let get_attrs ((_, attrs) : Xmlm.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
