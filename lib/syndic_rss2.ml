@@ -104,21 +104,21 @@ let make_image ~pos (l : [< image' ] list) =
   let url = match find (function `URL _ -> true | _ -> false) l with
     | Some (`URL u) -> u
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<image> elements MUST contains exactly one \
                              <url> element"))
   in
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<image> elements MUST contains exactly one \
                              <title> element"))
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link l) -> l
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<image> elements MUST contains exactly one \
                              <link> element"))
   in
@@ -139,7 +139,7 @@ let make_image ~pos (l : [< image' ] list) =
 
 let image_url_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <uri> MUST be \
                              a non-empty string"))
 
@@ -149,7 +149,7 @@ let image_title_of_xml (pos, tag, datas) =
 
 let image_link_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <link> MUST be \
                              a non-empty string"))
 
@@ -158,10 +158,10 @@ let image_size_of_xml ~max (pos, tag, datas) =
     if size > max
     then Error.raise_size_exceeded (get_tag_name tag) size max
     else size
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             ("The content of <"^(get_tag_name tag)^"> MUST be \
                               a non-empty string")))
-     | Failure "int_of_string" -> raise (Error.Error (pos, `Expected
+     | Failure "int_of_string" -> raise (Error.Error (pos,
                             ("The content of <"^(get_tag_name tag)^"> MUST be \
                               an integer")))
 
@@ -170,7 +170,7 @@ let image_height_of_xml = image_size_of_xml ~max:400
 
 let image_description_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <description> MUST be \
                              a non-empty string"))
 
@@ -216,21 +216,21 @@ let make_cloud ~pos (l : [< cloud' ] list) =
   let domain = match find (function `Domain _ -> true | _ -> false) l with
     | Some (`Domain u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Cloud elements MUST have a 'domain' \
                              attribute"))
   in
   let port = match find (function `Port _ -> true | _ -> false) l with
     | Some (`Port p) -> (int_of_string p)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Cloud elements MUST have a 'port' \
                              attribute"))
   in
   let path = match find (function `Path _ -> true | _ -> false) l with
     | Some (`Path p) -> p
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Cloud elements MUST have a 'path' \
                              attribute"))
   in
@@ -238,14 +238,14 @@ let make_cloud ~pos (l : [< cloud' ] list) =
     match find (function `RegisterProcedure _ -> true | _ -> false) l with
     | Some (`RegisterProcedure r) -> r
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Cloud elements MUST have a 'registerProcedure' \
                              attribute"))
   in
   let protocol = match find (function `Protocol _ -> true | _ -> false) l with
     | Some (`Protocol p) -> p
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Cloud elements MUST have a 'protocol' \
                              attribute"))
   in
@@ -282,7 +282,7 @@ let make_textinput ~pos (l : [< textinput'] list) =
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<textinput> elements MUST contains exactly one \
                              <title> element"))
   in
@@ -290,21 +290,21 @@ let make_textinput ~pos (l : [< textinput'] list) =
     match find (function `Description _ -> true | _ -> false) l with
     | Some (`Description s) -> s
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<textinput> elements MUST contains exactly one \
                              <description> element"))
   in
   let name = match find (function `Name _ -> true | _ -> false) l with
     | Some (`Name s) -> s
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<textinput> elements MUST contains exactly one \
                              <name> element"))
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link u) -> u
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<textinput> elements MUST contains exactly one \
                              <link> element"))
   in
@@ -312,25 +312,25 @@ let make_textinput ~pos (l : [< textinput'] list) =
 
 let textinput_title_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <title> MUST be \
                              a non-empty string"))
 
 let textinput_description_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <description> MUST be \
                              a non-empty string"))
 
 let textinput_name_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <name> MUST be \
                              a non-empty string"))
 
 let textinput_link_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <link> MUST be \
                              a non-empty string"))
 
@@ -398,21 +398,21 @@ let make_enclosure ~pos (l : [< enclosure' ] list) =
   let url = match find (function `URL _ -> true | _ -> false) l with
     | Some (`URL u) -> Uri.of_string u
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Enclosure elements MUST have a 'url' \
                              attribute"))
   in
   let length = match find (function `Length _ -> true | _ -> false) l with
     | Some (`Length l) -> int_of_string l
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Enclosure elements MUST have a 'length' \
                              attribute"))
   in
   let mime = match find (function `Mime _ -> true | _ -> false) l with
     | Some (`Mime m) -> m
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Enclosure elements MUST have a 'type' \
                              attribute"))
   in
@@ -472,14 +472,14 @@ type source' = [
 let make_source ~pos (l : [< source' ] list) =
   let data = match find (function `Data _ -> true | _ -> false) l with
     | Some (`Data s) -> s
-    | _  -> raise (Error.Error (pos, `Expected
+    | _  -> raise (Error.Error (pos,
                             "The content of <source> MUST be \
                              a non-empty string"))
   in
   let url = match find (function `URL _ -> true | _ -> false) l with
     | Some (`URL u) -> Uri.of_string u
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Source elements MUST have a 'url' \
                              attribute"))
   in
@@ -531,7 +531,7 @@ let make_item ~pos (l : _ list) =
     | Some (`Title t), Some (`Description d) -> All (t, d)
     | Some (`Title t), _ -> Title t
     | _, Some (`Description d) -> Description d
-    | _, _ -> raise (Error.Error (pos, `Expected
+    | _, _ -> raise (Error.Error (pos,
                                   "Item expected <title> or <description> tag"))
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
@@ -578,7 +578,7 @@ let make_item ~pos (l : _ list) =
 
 let item_title_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <title> MUST be \
                              a non-empty string"))
 
@@ -592,19 +592,19 @@ let item_link_of_xml (pos, tag, datas) =
 
 let item_author_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <author> MUST be \
                              a non-empty string"))
 
 let item_comments_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <comments> MUST be \
                              a non-empty string"))
 
 let item_pubdate_of_xml (pos, tag, datas) =
   try Date.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <pubDate> MUST be \
                              a non-empty string"))
 
@@ -690,14 +690,14 @@ let make_channel ~pos (l : [< channel' ] list) =
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<channel> elements MUST contains exactly one \
                              <title> element"))
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link l) -> l
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<channel> elements MUST contains exactly one \
                              <link> element"))
   in
@@ -705,7 +705,7 @@ let make_channel ~pos (l : [< channel' ] list) =
     match find (function `Description _ -> true | _ -> false) l with
     | Some (`Description l) -> l
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<channel> elements MUST contains exactly one \
                              <description> element"))
   in
@@ -800,7 +800,7 @@ let make_channel ~pos (l : [< channel' ] list) =
 
 let channel_title_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <title> MUST be \
                              a non-empty string"))
 
@@ -810,85 +810,85 @@ let channel_description_of_xml (pos, tag, datas) =
 
 let channel_link_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <link> MUST be \
                              a non-empty string"))
 
 let channel_language_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <language> MUST be \
                              a non-empty string"))
 
 let channel_copyright_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <copyright> MUST be \
                              a non-empty string"))
 
 let channel_managingeditor_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <managingEditor> MUST be \
                              a non-empty string"))
 
 let channel_webmaster_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <webMaster> MUST be \
                              a non-empty string"))
 
 let channel_pubdate_of_xml (pos, tag, datas) =
   try Date.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <pubDate> MUST be \
                              a non-empty string"))
 
 let channel_lastbuilddate_of_xml (pos, tag, datas) =
   try Date.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <lastBuildDate> MUST be \
                              a non-empty string"))
 
 let channel_category_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <category> MUST be \
                              a non-empty string"))
 
 let channel_generator_of_xml (pos, tag, datas) =
   try get_leaf datas
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <generator> MUST be \
                              a non-empty string"))
 
 let channel_docs_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <docs> MUST be \
                              a non-empty string"))
 
 let channel_ttl_of_xml (pos, tag, datas) =
   try int_of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <ttl> MUST be \
                              a non-empty string"))
 
 let channel_rating_of_xml (pos, tag, datas) =
   try int_of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <rating> MUST be \
                              a non-empty string"))
 
 let channel_skipHours_of_xml (pos, tag, datas) =
   try int_of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <skipHours> MUST be \
                              a non-empty string"))
 
 let channel_skipDays_of_xml (pos, tag, datas) =
   try int_of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <skipDays> MUST be \
                              a non-empty string"))
 
@@ -959,10 +959,10 @@ let parse input =
        match find_channel data with
        | Some(XML.Node(p, t, d)) -> channel_of_xml (p, t, d)
        | Some(XML.Data _)
-       | _ -> raise (Error.Error ((0, 0), `Expected
+       | _ -> raise (Error.Error ((0, 0),
                               "document MUST contains exactly one \
                                <channel> element")))
-  | _ -> raise (Error.Error ((0, 0), `Expected
+  | _ -> raise (Error.Error ((0, 0),
                          "document MUST contains exactly one \
                           <channel> element"))
 

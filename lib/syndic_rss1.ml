@@ -14,7 +14,7 @@ let make_title ~pos (l : [< title' ] list) =
   let title = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "The content of <title> MUST be \
                              a non-empty string"))
   in title
@@ -32,7 +32,7 @@ let make_name ~pos (l : [< name' ] list) =
   let name = match find (fun (`Data _) -> true) l with
     | Some (`Data d) -> d
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "The content of <name> MUST be \
                              a non-empty string"))
   in name
@@ -50,7 +50,7 @@ let make_description ~pos (l : [< description' ] list) =
   let description = match find (function `Data _ -> true) l with
     | Some (`Data s) -> s
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "The content of <description> MUST be \
                              a non-empty string"))
   in description
@@ -68,7 +68,7 @@ let make_channel_image ~pos (l : [< channel_image' ] list) =
   let image = match find (function `URI _ -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "The content of <image> MUST be \
                              a non-empty string"))
   in image
@@ -88,7 +88,7 @@ let make_link ~pos (l : [< link' ] list) =
   let link = match find (function `URI _ -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "The content of <link> MUST be \
                              a non-empty string"))
   in link
@@ -106,7 +106,7 @@ let make_url ~pos (l : [< url' ] list) =
   let url = match find (function `URI _ -> true) l with
     | Some (`URI u) -> Uri.of_string u
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "The content of <url> MUST be \
                              a non-empty string"))
   in url
@@ -124,7 +124,7 @@ let make_li ~pos (l : [< li' ] list) =
   let url = match find (function `URI _ -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Li elements MUST have a 'resource' \
                              attribute"))
   in url
@@ -171,7 +171,7 @@ let make_items ~pos (l : [< items' ] list) =
   let li = match find (function `Seq _ -> true) l with
     | Some (`Seq l) -> l
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<items> elements MUST contains exactly one \
                              <rdf:Seq> element"))
   in li
@@ -199,7 +199,7 @@ let make_textinput ~pos (l : [< channel_textinput' ] list) =
   let url = match find (function `URI _ -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Textinput elements MUST have a 'resource' \
                              attribute"))
   in url
@@ -237,23 +237,23 @@ let make_channel ~pos (l : [< channel' ] list) =
   let about = match find (function `About _ -> true | _ -> false) l with
     | Some (`About u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Channel elements MUST have a 'about' \
                              attribute"))
   in let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title s) -> s
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<channel> elements MUST contains exactly one \
                              <title> element"))
   in let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link u) -> u
-    | _ ->  raise (Error.Error (pos, `Expected
+    | _ ->  raise (Error.Error (pos,
                             "<channel> elements MUST contains exactly one \
                              <link> element"))
   in let description =
     match find (function `Description _ -> true | _ -> false) l with
     | Some (`Description s) -> s
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<channel> elements MUST contains exactly one \
                              <description> element"))
   in let image = match find (function `Image _ -> true | _ -> false) l with
@@ -261,7 +261,7 @@ let make_channel ~pos (l : [< channel' ] list) =
     | _ -> None
   in let items = match find (function `Items _ -> true | _ -> false) l with
     | Some (`Items l) -> l
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<channel> elements MUST contains exactly one \
                              <items> element"))
   in let textinput =
@@ -320,23 +320,23 @@ type image' = [
 let make_image ~pos (l : [< image' ] list) =
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
-    | _ ->  raise (Error.Error (pos, `Expected
+    | _ ->  raise (Error.Error (pos,
                             "<image> elements MUST contains exactly one \
                              <title> element"))
   in let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link u) -> u
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<image> elements MUST contains exactly one \
                              <link> element"))
   in let url = match find (function `URL _ -> true | _ -> false) l with
     | Some (`URL u) -> u
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<image> elements MUST contains exactly one \
                              <url> element"))
   in let about = match find (function `About _ -> true | _ -> false) l with
     | Some (`About a) -> (Uri.of_string a)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Image elements MUST have a 'about' \
                              attribute"))
   in ({ about; title; url; link; } : image)
@@ -385,12 +385,12 @@ type item' = [
 let make_item ~pos (l : [< item' ] list) =
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<item> elements MUST contains exactly one \
                              <title> element"))
   in let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link u) -> u
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<item> elements MUST contains exactly one \
                              <link> element"))
   in let description =
@@ -400,7 +400,7 @@ let make_item ~pos (l : [< item' ] list) =
   in let about = match find (function `About _ -> true | _ -> false) l with
     | Some (`About u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Item elements MUST have a 'about' \
                              attribute"))
   in ({ about; title; link; description; } : item)
@@ -451,29 +451,29 @@ type textinput' = [
 let make_textinput ~pos (l : [< textinput' ] list) =
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title s) -> s
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<textinput> elements MUST contains exactly one \
                              <title> element"))
   in let description =
     match find (function `Description _ -> true | _ -> false) l with
     | Some (`Description s) -> s
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<textinput> elements MUST contains exactly one \
                              <description> element"))
   in let name = match find (function `Name _ -> true | _ -> false) l with
     | Some (`Name n) -> n
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<textinput> elements MUST contains exactly one \
                              <name> element"))
   in let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link u) -> u
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<textinput> elements MUST contains exactly one \
                              <link> element"))
   in let about = match find (function `About _ -> true | _ -> false) l with
     | Some (`About u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Textinput elements MUST have a 'about' \
                              attribute"))
   in ({ about; title; description; name; link; } : textinput)
@@ -524,7 +524,7 @@ type rdf' = [
 let make_rdf ~pos (l : [< rdf' ] list) =
   let channel = match find (function `Channel _ -> true | _ -> false) l with
     | Some (`Channel channel) -> channel
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<rdf> elements MUST contains exactly one \
                              <channel> element"))
   in let image = match find (function `Image _ -> true | _ -> false) l with
@@ -563,7 +563,7 @@ let parse input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, datas) when tag_is tag "RDF" ->
       rdf_of_xml (pos, tag, datas)
-  | _ -> raise (Error.Error ((0, 0), `Expected
+  | _ -> raise (Error.Error ((0, 0),
                          "document MUST contains exactly one \
                           <rdf> element"))
 

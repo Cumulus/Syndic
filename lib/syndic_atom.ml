@@ -140,7 +140,7 @@ let author_name_of_xml (pos, tag, datas) =
 
 let author_uri_of_xml (pos, tag, datas) =
   try Uri.of_string (get_leaf datas)
-  with Not_found -> raise (Error.Error (pos, `Expected
+  with Not_found -> raise (Error.Error (pos,
                             "The content of <uri> MUST be \
                              a non-empty string"))
 
@@ -195,7 +195,7 @@ let make_category ~pos (l : [< category'] list) =
   let term = match find (function `Term _ -> true | _ -> false) l with
     | Some (`Term t) -> t
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Category elements MUST have a 'term' \
                              attribute"))
   in
@@ -253,7 +253,7 @@ let make_generator ~pos (l : [< generator'] list) =
   (* text *)
   let content = match find (function `Content _ -> true | _ -> false) l with
     | Some ((`Content c)) -> c
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "The content of <generator> MUST be \
                              a non-empty string"))
   in
@@ -292,7 +292,7 @@ let make_icon ~pos (l : [< icon'] list) =
   (** (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "The content of <icon> MUST be \
                              a non-empty string"))
   in uri
@@ -314,7 +314,7 @@ let make_id ~pos (l : [< id'] list) =
   (* (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "The content of <id> MUST be \
                              a non-empty string"))
   in uri
@@ -343,7 +343,7 @@ let make_link ~pos (l : [< link'] list) =
   let href = match find (function `HREF _ -> true | _ -> false) l with
     | Some (`HREF u) -> (Uri.of_string u)
     | _ ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "Link elements MUST have a 'href' \
                              attribute"))
   in
@@ -407,7 +407,7 @@ let make_logo ~pos (l : [< logo'] list) =
   (* (atomUri) *)
   let uri = match find (fun (`URI _) -> true) l with
     | Some (`URI u) -> (Uri.of_string u)
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "The content of <logo> MUST be \
                              a non-empty string"))
   in uri
@@ -430,7 +430,7 @@ let make_published ~pos (l : [< published'] list) =
   (* atom:published { atomDateConstruct } *)
   let date = match find (fun (`Date _) -> true) l with
     | Some (`Date d) -> Date.of_string d
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "The content of <published> MUST be \
                              a non-empty string"))
   in date
@@ -476,7 +476,7 @@ let make_updated ~pos (l : [< updated'] list) =
   (* atom:updated { atomDateConstruct } *)
   let updated = match find (fun (`Date _) -> true) l with
     | Some (`Date d) -> Date.of_string d
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "The content of <updated> MUST be \
                              a non-empty string"))
   in updated
@@ -528,7 +528,7 @@ let make_source ~pos ~entry_authors (l : [< source'] list) =
     | x :: r, _ -> x, r
     | [], x :: r -> x, r
     | [], [] ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<source> elements MUST contains one or more \
                              <author> elements"))
       (* XXX: no see this rule in RFC *)
@@ -557,14 +557,14 @@ let make_source ~pos ~entry_authors (l : [< source'] list) =
   (* atomId? *)
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<source> elements MUST contains exactly one \
                              <id> elements"))
   in
   (* atomLink* *)
   let links =
     (function
-      | [] -> raise (Error.Error (pos, `Expected
+      | [] -> raise (Error.Error (pos,
                             "<source> elements MUST contains one or more \
                              <link> elements"))
       | x :: r -> (x, r))
@@ -588,7 +588,7 @@ let make_source ~pos ~entry_authors (l : [< source'] list) =
   (* atomTitle? *)
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title s) -> s
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<source> elements MUST contains exactly one \
                              <title> elements"))
   in
@@ -816,7 +816,7 @@ let uniq_link_alternate ~pos (l : link list) =
       hl ty hl' ty'
   in
   let raise_error link link' =
-    raise (Error.Error (pos, `Expected (string_of_duplicate_link link link')))
+    raise (Error.Error (pos,  (string_of_duplicate_link link link')))
   in
   let rec aux acc = function
     | [] -> l
@@ -886,7 +886,7 @@ let make_entry ~pos ~(feed_authors: author list) l =
          List.map (fun (s: source) -> let a1, a = s.authors in a1 :: a) src in
        a0, List.concat (a1 :: a2)
     | [], [] ->
-      raise (Error.Error (pos, `Expected
+      raise (Error.Error (pos,
                             "<entry> elements MUST contains one or more \
                              <author> elements or <feed> elements MUST \
                              contains one or more <author> elements"))
@@ -899,7 +899,7 @@ let make_entry ~pos ~(feed_authors: author list) l =
   (* atomId *)
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<entry> elements MUST contains exactly one \
                              <id> elements"))
     (* atomLink* *)
@@ -927,14 +927,14 @@ let make_entry ~pos ~(feed_authors: author list) l =
   (* atomTitle *)
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<entry> elements MUST contains exactly one \
                              <title> elements"))
   in
   (* atomUpdated *)
   let updated = match find (function `Updated _ -> true | _ -> false) l with
     | Some (`Updated u) -> u
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<entry> elements MUST contains exactly one \
                              <updated> elements"))
   in
@@ -1050,7 +1050,7 @@ let make_feed ~pos (l : _ list) =
   (* atomId *)
   let id = match find (function `ID _ -> true | _ -> false) l with
     | Some (`ID i) -> i
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<feed> elements MUST contains exactly one \
                              <id> elements"))
   in
@@ -1072,14 +1072,14 @@ let make_feed ~pos (l : _ list) =
   (* atomTitle *)
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title t) -> t
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<feed> elements MUST contains exactly one \
                              <title> elements"))
   in
   (* atomUpdated *)
   let updated = match find (function `Updated _ -> true | _ -> false) l with
     | Some (`Updated u) -> u
-    | _ -> raise (Error.Error (pos, `Expected
+    | _ -> raise (Error.Error (pos,
                             "<feed> elements MUST contains exactly one \
                              <updated> elements"))
   in
@@ -1162,7 +1162,7 @@ let parse input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
     feed_of_xml (pos, tag, datas)
-  | _ -> raise (Error.Error ((0, 0), `Expected
+  | _ -> raise (Error.Error ((0, 0),
                          "document MUST contains exactly one \
                           <feed> element"))
 (* FIXME: the spec says that an entry can appear as the top-level element *)
