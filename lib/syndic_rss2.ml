@@ -870,7 +870,7 @@ let find_channel l =
 
 let parse input =
   match XML.of_xmlm input |> snd with
-  | XML.Node(tag, data) ->
+  | XML.Node (tag, data) ->
      if tag_is tag "channel" then
        channel_of_xml (tag, data)
      else (
@@ -890,8 +890,7 @@ let unsafe input =
   | _ -> `Channel []
 
 
-(* Conversion to Atom
- ***********************************************************************)
+(* Conversion to Atom *)
 
 let map_option o f = match o with
   | None -> None
@@ -980,7 +979,6 @@ let entry_of_item (it: item) : Atom.entry =
                | None -> epoch);
   }
 
-
 let to_atom (ch: channel) : Atom.feed =
   let contributors = match ch.webMaster with
     | Some p -> [ { Atom.name = "Webmaster";  uri = None;  email = Some p } ]
@@ -1017,5 +1015,3 @@ let to_atom (ch: channel) : Atom.feed =
     updated;
     entries = List.map entry_of_item ch.items;
   }
-
-;;
