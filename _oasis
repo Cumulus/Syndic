@@ -16,8 +16,8 @@ Library syndic
   Path:                 lib
   BuildDepends:         xmlm (>= 1.2.0), uri (>= 1.3.13), calendar (>= 2.03.2)
   Modules:              Syndic, Syndic_rss1, Syndic_rss2, Syndic_atom,
-                        Syndic_xml, Syndic_error, Syndic_conf
-  InternalModules:      Syndic_common
+                        Syndic_xml, Syndic_error
+  InternalModules:      Syndic_common, Syndic_conf
 
 Document "Syndic"
   Type:                 ocamlbuild (0.4)
