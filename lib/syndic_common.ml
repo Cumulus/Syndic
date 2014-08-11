@@ -97,7 +97,10 @@ module Util = struct
 
   let tag name = (("", name), [])
 
-  let node_data tag content = XML.Node(tag, [XML.Data content])
+  let dummy_pos = (0,0) (* Do smarter positions make sense? *)
+
+  let node_data tag content =
+    XML.Node(dummy_pos, tag, [XML.Data(dummy_pos, content)])
 
   let node_uri tag uri = node_data tag (Uri.to_string uri)
 

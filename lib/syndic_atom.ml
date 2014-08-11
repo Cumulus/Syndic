@@ -1180,30 +1180,36 @@ let atom name : Xmlm.tag = ((atom_ns, name), [])
 let text_construct_to_xml tag_name (t: text_construct) =
   match t with
   | Text t ->
-     XML.Node(((atom_ns, tag_name), [("", "type"), "text"]), [XML.Data t])
+     XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "text"]),
+              [XML.Data(dummy_pos, t)])
   | Html t ->
-     XML.Node(((atom_ns, tag_name), [("", "type"), "html"]), [XML.Data t])
+     XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "html"]),
+              [XML.Data(dummy_pos, t)])
   | Xhtml x ->
-     let div = XML.Node(((xhtml_ns, "div"), [("", "xmlns"), xhtml_ns]), x) in
-     XML.Node(((atom_ns, tag_name), [("", "type"), "xhtml"]), [div])
+     let div = XML.Node(dummy_pos,
+                        ((xhtml_ns, "div"), [("", "xmlns"), xhtml_ns]), x) in
+     XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "xhtml"]), [div])
 
 let person_to_xml name (a: author) =
-  XML.Node(atom name, [node_data (atom "name") a.name]
-                      |> add_node_uri (atom "uri") a.uri
-                      |> add_node_data (atom "email") a.email)
+  XML.Node(dummy_pos, atom name,
+           [node_data (atom "name") a.name]
+           |> add_node_uri (atom "uri") a.uri
+           |> add_node_data (atom "email") a.email)
 
 let author_to_xml a = person_to_xml "author" a
 let contributor_to_xml a = person_to_xml "contributor" a
 
 let category_to_xml (c: category) =
-  XML.Node(atom "category", [node_data (tag "term") c.term]
-                            |> add_node_uri (tag "scheme") c.scheme
-                            |> add_node_data (tag "label") c.label)
+  XML.Node(dummy_pos, atom "category",
+           [node_data (tag "term") c.term]
+           |> add_node_uri (tag "scheme") c.scheme
+           |> add_node_data (tag "label") c.label)
 
 let generator_to_xml (g: generator) =
   let attr = [] |> add_attr ("", "version") g.version
              |> add_attr_uri ("", "uri") g.uri in
-  XML.Node(((atom_ns, "generator"), attr), [XML.Data g.content])
+  XML.Node(dummy_pos, ((atom_ns, "generator"), attr),
+           [XML.Data(dummy_pos, g.content)])
 
 let string_of_rel = function
   | Alternate -> "alternate"
@@ -1222,7 +1228,7 @@ let link_to_xml (l: link) =
   let attr = match l.length with
     | Some len -> (("", "length"), string_of_int len) :: attr
     | None -> attr in
-  XML.Node(((atom_ns, "link"), attr), [])
+  XML.Node(dummy_pos, ((atom_ns, "link"), attr), [])
 
 let string_of_date d =
   (* Example: 2014-03-19T15:51:25.050-07:00 *)
@@ -1249,23 +1255,28 @@ let source_to_xml (s: source) =
     |> add_node_option (text_construct_to_xml "rights") s.rights
     |> add_node_option (text_construct_to_xml "subtitle") s.subtitle
     |> add_node_date (atom "updated") s.updated in
-  XML.Node(atom "source", nodes)
+  XML.Node(dummy_pos, atom "source", nodes)
 
 let content_to_xml (c: content) =
   match c with
   | Text t ->
-     XML.Node(((atom_ns, "content"), [("", "type"), "text"]), [XML.Data t])
+     XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), "text"]),
+              [XML.Data(dummy_pos, t)])
   | Html t ->
-     XML.Node(((atom_ns, "content"), [("", "type"), "html"]), [XML.Data t])
+     XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), "html"]),
+              [XML.Data(dummy_pos, t)])
   | Xhtml x ->
-     let div = XML.Node(((xhtml_ns, "div"), [("", "xmlns"), xhtml_ns]), x) in
-     XML.Node(((atom_ns, "content"), [("", "type"), "xhtml"]), [div])
+     let div = XML.Node(dummy_pos,
+                        ((xhtml_ns, "div"), [("", "xmlns"), xhtml_ns]), x) in
+     XML.Node(dummy_pos,
+              ((atom_ns, "content"), [("", "type"), "xhtml"]), [div])
   | Mime(mime, d) ->
-     XML.Node(((atom_ns, "content"), [("", "type"), mime]), [XML.Data d])
+     XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), mime]),
+              [XML.Data(dummy_pos, d)])
   | Src(mime, uri) ->
      let attr = [ ("", "src"), uri_to_string uri ]
                 |> add_attr ("", "type") mime in
-     XML.Node(((atom_ns, "content"), attr), [])
+     XML.Node(dummy_pos, ((atom_ns, "content"), attr), [])
 
 let entry_to_xml (e: entry) =
   let (a0, a) = e.authors in
@@ -1283,7 +1294,7 @@ let entry_to_xml (e: entry) =
     |> add_node_option (text_construct_to_xml "rights") e.rights
     |> add_nodes_map source_to_xml e.sources
     |> add_node_option (text_construct_to_xml "summary") e.summary in
-  XML.Node(atom "entry", nodes)
+  XML.Node(dummy_pos, atom "entry", nodes)
 
 let to_xml (f: feed) =
   let nodes =
@@ -1300,7 +1311,7 @@ let to_xml (f: feed) =
     |> add_node_option (text_construct_to_xml "rights") f.rights
     |> add_node_option (text_construct_to_xml "subtitle") f.subtitle
     |> add_nodes_map entry_to_xml f.entries in
-  XML.Node(((atom_ns, "feed"), [("", "xmlns"), atom_ns]), nodes)
+  XML.Node(dummy_pos, ((atom_ns, "feed"), [("", "xmlns"), atom_ns]), nodes)
 
 
 (* Atom and XHTML have been declared well in the above XML

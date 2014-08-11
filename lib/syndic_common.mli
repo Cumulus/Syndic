@@ -31,6 +31,9 @@ module Util : sig
 
   (** {2 Helpers to output XML} *)
 
+  val dummy_pos : Xmlm.pos
+  (** A dummy position when generating XML files. *)
+
   val uri_to_string : Uri.t -> string
   (** [uri_to_string u] convert the URI to a string that is NOT
       percent encoded.*)
