@@ -1,14 +1,7 @@
 (** [Syndic.Atom]: {{: http://tools.ietf.org/html/rfc4287} RFC 4287}
     compliant. *)
 
-module Error : sig
-  include module type of Syndic_error
-
-  exception Duplicate_Link of (Uri.t * string * string) * (string * string)
-
-  val string_of_duplicate_exception :
-    (Uri.t * string * string) * (string * string) -> string
-end
+module Error : module type of Syndic_error
 
 (** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}. *)
 type text_construct =
@@ -101,7 +94,7 @@ type icon = Uri.t
     {{:http://tools.ietf.org/html/rfc4287#section-4.2.5} See RFC 4287 § 4.2.5}
  *)
 
-type id = Uri.t
+type id = string
 (** The [id] element conveys a permanent, universally unique
     identifier for an entry or feed.
 
@@ -439,7 +432,7 @@ val parse : Xmlm.input -> feed
     [xml] is mutable, so when the parsing fails, one have to create a
     new copy of [xml] to use it with another function.
 
-    Raise [Error.Expected], [Expected_Leaf] or [Error.Duplicate_Link]
+    Raise [Error.Expected], [Expected_Data] or [Error.Duplicate_Link]
     if [xml] is not a valid Atom document. *)
 
 (**/**)
@@ -467,7 +460,7 @@ val unsafe : Xmlm.input ->
             | `Contributor of
                  [> `Email of string | `Name of string | `URI of string ]
                    list
-            | `ID of [> `URI of string ] list
+            | `ID of [> `Data of string ] list
             | `Link of
                  [> `HREF of string
                  | `HREFLang of string
@@ -495,7 +488,7 @@ val unsafe : Xmlm.input ->
                       | `URI of string
                       | `Version of string ]
                         list
-                 | `ID of [> `URI of string ] list
+                 | `ID of [> `Data of string ] list
                  | `Icon of [> `URI of string ] list
                  | `Link of
                       [> `HREF of string
@@ -518,7 +511,7 @@ val unsafe : Xmlm.input ->
        | `Generator of
             [> `Content of string | `URI of string | `Version of string ]
               list
-       | `ID of [> `URI of string ] list
+       | `ID of [> `Data of string ] list
        | `Icon of [> `URI of string ] list
        | `Link of
             [> `HREF of string
