@@ -6,3 +6,4 @@ doc/*.html
 *.byte
 *.docdir
 lib/syndic_conf.ml
+*.tar.gz
