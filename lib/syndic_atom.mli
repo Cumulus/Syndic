@@ -267,7 +267,7 @@ type source =
     generator: generator option;
     icon: icon option;
     id: id;
-    links: link * link list;
+    links: link list;
     logo: logo option;
     rights: rights option;
     subtitle: subtitle option;

@@ -497,7 +497,7 @@ type source =
     generator: generator option;
     icon: icon option;
     id: id;
-    links: link * link list;
+    links: link list;
     logo: logo option;
     rights: rights option;
     subtitle: subtitle option;
@@ -557,10 +557,7 @@ let make_source ~entry_authors (l : [< source'] list) =
   in
   (* atomLink* *)
   let links =
-    (function
-      | [] -> Error.raise_expectation (Error.Tag "link") (Error.Tag "source")
-      | x :: r -> (x, r))
-      (List.fold_left (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l)
+    List.fold_left (fun acc -> function `Link x -> x :: acc | _ -> acc) [] l
   in
   (* atomLogo? *)
   let logo = match find (function `Logo _ -> true | _ -> false) l with
@@ -1187,18 +1184,16 @@ let add_node_date tag date nodes =
 
 let source_to_xml (s: source) =
   let (a0, a) = s.authors in
-  let (l0, l) = s.links in
   let nodes =
     [author_to_xml a0;
      node_data (atom "id") (uri_to_string s.id);
-     link_to_xml l0;
      text_construct_to_xml "title" s.title ]
     |> add_nodes_map author_to_xml a
     |> add_nodes_map category_to_xml s.categories
     |> add_nodes_map contributor_to_xml s.contributors
     |> add_node_option generator_to_xml s.generator
     |> add_node_option (node_uri (atom "icon")) s.icon
-    |> add_nodes_map link_to_xml l
+    |> add_nodes_map link_to_xml s.links
     |> add_node_option (node_uri (atom "logo")) s.logo
     |> add_node_option (text_construct_to_xml "rights") s.rights
     |> add_node_option (text_construct_to_xml "subtitle") s.subtitle
