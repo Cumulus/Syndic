@@ -1,3 +1,4 @@
+(** Common module for XML parsing *)
 
 type dtd = string option
 (** The type for the optional
@@ -5,13 +6,14 @@ type dtd = string option
 
 (** A XML tree. *)
 type t =
-  | Node of Xmlm.tag * t list
-  | Data of string
+  | Node of Xmlm.pos * Xmlm.tag * t list
+  | Data of Xmlm.pos * string
+
+val get_position : t -> Xmlm.pos
 
 val of_xmlm : Xmlm.input -> (dtd * t)
 (** [of_xmlm doc] converts an XML document [doc] into a DTD and a
     tree representing the document. *)
-
 
 val to_xmlm : ?dtd:string -> t -> Xmlm.output -> unit
 

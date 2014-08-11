@@ -3,13 +3,13 @@ module XML : sig
 
   val generate_catcher :
     ?namespaces:string list ->
-    ?attr_producer:(string * ('a list -> string -> 'a)) list ->
-    ?data_producer:(string * ('a list -> Xmlm.tag * t list -> 'a)) list ->
-    ?leaf_producer:('a list -> string -> 'a) ->
-    ('a list -> 'b) -> Xmlm.tag * t list -> 'b
+    ?attr_producer:(string * ('a list -> Xmlm.pos -> string -> 'a)) list ->
+    ?data_producer:(string * ('a list -> Xmlm.pos * Xmlm.tag * t list -> 'a)) list ->
+    ?leaf_producer:('a list -> Xmlm.pos -> string -> 'a) ->
+    ('a list -> 'b) -> Xmlm.pos * Xmlm.tag * t list -> 'b
 
   val dummy_of_xml : ctor:(string -> 'a) ->
-    Xmlm.tag * t list -> 'a
+    Xmlm.pos * Xmlm.tag * t list -> 'a
 end
 
 module Util : sig
