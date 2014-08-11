@@ -9,6 +9,7 @@ License:                MIT
 Plugins:                META (0.3), DevFiles (0.3)
 BuildTools:             ocamlbuild
 OCamlVersion:           >= 4.01
+FilesAB:                lib/syndic_conf.ml.ab
 AlphaFeatures:          ocamlbuild_more_args
 
 Library syndic

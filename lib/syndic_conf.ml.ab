@@ -1,0 +1,4 @@
+(* -*-tuareg-*- *)
+
+let version = "$(pkg_version)"
+let homepage = Uri.of_string "$(homepage)"

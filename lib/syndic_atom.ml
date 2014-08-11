@@ -1322,3 +1322,93 @@ let output_ns_prefix s =
 let output feed dest =
   let o = Xmlm.make_output dest ~decl:true ~ns_prefix:output_ns_prefix in
   XML.to_xmlm (to_xml feed) o
+
+
+(* Feed aggregation
+ ***********************************************************************)
+
+let syndic_generator = {
+    version = Some Syndic_conf.version;
+    uri = Some Syndic_conf.homepage;
+    content = "OCaml Syndic.Atom feed aggregator" }
+
+let ocaml_icon =
+  Uri.of_string "http://ocaml.org/img/colour-icon-170x148.png"
+
+let default_title : text_construct =
+  Text "Syndic.Atom aggregated feed"
+
+let is_alternate_Atom (l: link) =
+  match l.type_media with
+  | None -> false
+  | Some ty -> ty = "application/atom+xml" && l.rel = Alternate
+
+let add_entries_of_feed entries (uri_opt, feed) : entry list =
+  (* Add an Alternate link with the original URI if we know it and it
+     is not already provided. *)
+  let links = match uri_opt with
+    | None -> feed.links
+    | Some uri ->
+       if List.exists is_alternate_Atom feed.links then feed.links
+       else { href = uri;
+              rel = Alternate;
+              type_media = Some "application/atom+xml";
+              hreflang = None;
+              title = None;
+              length = None;
+            } :: feed.links in
+  let source authors =
+    { authors;
+      categories = feed.categories;
+      contributors = feed.contributors;
+      generator = feed.generator;
+      icon = feed.icon;
+      id = feed.id;
+      links;
+      logo = feed.logo;
+      rights = feed.rights;
+      subtitle = feed.subtitle;
+      title = feed.title;
+      updated = Some feed.updated;
+    } in
+  let add_entry entries (e: entry) =
+    { e with sources = source e.authors :: e.sources } :: entries in
+  List.fold_left add_entry entries feed.entries
+
+let entries_of_feeds feeds =
+  List.fold_left add_entries_of_feed [] feeds
+
+let more_recent d1 (e: entry) =
+  if CalendarLib.Calendar.compare d1 e.updated >= 0 then d1 else e.updated
+
+let aggregate ?id ?updated ?subtitle ?(title=default_title) feeds : feed =
+  let entries = entries_of_feeds feeds in
+  let id = match id with
+    | Some id -> id
+    | None ->
+       (* Collect all ids of the entries and "digest" them. *)
+       let b = Buffer.create 4096 in
+       List.iter (fun (e: entry) -> Buffer.add_string b (uri_to_string e.id))
+                 entries;
+       Uri.of_string(Digest.to_hex (Digest.string (Buffer.contents b))) in
+  let updated = match updated with
+    | Some d -> d
+    | None ->
+       (* Use the more recent date of the entries. *)
+       match entries with
+       | [] -> CalendarLib.Calendar.now() (* no entries! *)
+       | e0 :: el ->
+          List.fold_left more_recent e0.updated el in
+  { authors = [];  categories = [];  contributors = [];
+    generator = Some syndic_generator;
+    icon = Some ocaml_icon;
+    id;
+    links = [];  logo = None;
+    rights = None;
+    subtitle = subtitle;
+    title;
+    updated;
+    entries;
+  }
+
+;;

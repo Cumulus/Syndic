@@ -450,6 +450,16 @@ val output : feed -> Xmlm.dest -> unit
 (** [output f dest] writes the XML tree of the feed [f] to [dest]. *)
 
 
+val aggregate : ?id:Uri.t -> ?updated:updated -> ?subtitle:subtitle ->
+                ?title:text_construct ->
+                (Uri.t option * feed) list -> feed
+(** [aggregate feeds] returns a single feed containing all the posts
+    in [feeds].  Each element of [feeds] has the form [(uri, feed)]
+    where [uri], if given, is supposed to be the location of [feed].
+    It is used to add Alternate links to the entries sources showing
+    their origin. *)
+
+
 (**/**)
 
 (** Analysis without verification, enjoy ! *)
