@@ -1242,15 +1242,14 @@ let add_node_date tag date nodes =
 let source_to_xml (s: source) =
   let (a0, a) = s.authors in
   let nodes =
-    [author_to_xml a0;
-     node_data (atom "id") s.id;
-     text_construct_to_xml "title" s.title ]
-    |> add_nodes_map author_to_xml a
-    |> add_nodes_map category_to_xml s.categories
-    |> add_nodes_map contributor_to_xml s.contributors
+    (node_data (atom "id") s.id
+     :: text_construct_to_xml "title" s.title
+     :: author_to_xml a0 :: List.map author_to_xml a)
+    |> add_nodes_rev_map category_to_xml s.categories
+    |> add_nodes_rev_map contributor_to_xml s.contributors
     |> add_node_option generator_to_xml s.generator
     |> add_node_option (node_uri (atom "icon")) s.icon
-    |> add_nodes_map link_to_xml s.links
+    |> add_nodes_rev_map link_to_xml s.links
     |> add_node_option (node_uri (atom "logo")) s.logo
     |> add_node_option (text_construct_to_xml "rights") s.rights
     |> add_node_option (text_construct_to_xml "subtitle") s.subtitle
@@ -1281,18 +1280,17 @@ let content_to_xml (c: content) =
 let entry_to_xml (e: entry) =
   let (a0, a) = e.authors in
   let nodes =
-    [author_to_xml a0;
-     node_data (atom "id") e.id;
-     text_construct_to_xml "title" e.title;
-     node_data (atom "updated") (string_of_date e.updated) ]
-    |> add_nodes_map author_to_xml a
-    |> add_nodes_map category_to_xml e.categories
+    (node_data (atom "id") e.id
+     :: text_construct_to_xml "title" e.title
+     :: node_data (atom "updated") (string_of_date e.updated)
+     :: author_to_xml a0 :: List.map author_to_xml a)
+    |> add_nodes_rev_map category_to_xml e.categories
     |> add_node_option content_to_xml e.content
-    |> add_nodes_map contributor_to_xml e.contributors
-    |> add_nodes_map link_to_xml e.links
+    |> add_nodes_rev_map contributor_to_xml e.contributors
+    |> add_nodes_rev_map link_to_xml e.links
     |> add_node_date (atom "published") e.published
     |> add_node_option (text_construct_to_xml "rights") e.rights
-    |> add_nodes_map source_to_xml e.sources
+    |> add_nodes_rev_map source_to_xml e.sources
     |> add_node_option (text_construct_to_xml "summary") e.summary in
   XML.Node(dummy_pos, atom "entry", nodes)
 
@@ -1301,16 +1299,16 @@ let to_xml (f: feed) =
     (node_data (atom "id") f.id
      :: text_construct_to_xml "title" f.title
      :: node_data (atom "updated") (string_of_date f.updated)
-     :: List.map author_to_xml f.authors)
-    |> add_nodes_map category_to_xml f.categories
-    |> add_nodes_map contributor_to_xml f.contributors
+     :: List.map entry_to_xml f.entries)
+    |> add_nodes_rev_map author_to_xml (List.rev f.authors)
+    |> add_nodes_rev_map category_to_xml f.categories
+    |> add_nodes_rev_map contributor_to_xml f.contributors
     |> add_node_option generator_to_xml f.generator
     |> add_node_option (node_uri (atom "icon")) f.icon
-    |> add_nodes_map link_to_xml f.links
+    |> add_nodes_rev_map link_to_xml f.links
     |> add_node_option (node_uri (atom "logo")) f.logo
     |> add_node_option (text_construct_to_xml "rights") f.rights
-    |> add_node_option (text_construct_to_xml "subtitle") f.subtitle
-    |> add_nodes_map entry_to_xml f.entries in
+    |> add_node_option (text_construct_to_xml "subtitle") f.subtitle in
   XML.Node(dummy_pos, ((atom_ns, "feed"), [("", "xmlns"), atom_ns]), nodes)
 
 
