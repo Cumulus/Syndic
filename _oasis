@@ -1,8 +1,8 @@
 OASISFormat:            0.4
 Name:                   syndic
-Version:                1.0
+Version:                1.1
 Synopsis:               RSS and Atom feed parsing
-Authors:                Romain Calascibetta
+Authors:                Romain Calascibetta, Christophe Troestler
 Maintainers:            Romain Calascibetta <romain.calascibetta@gmail.com>
 Homepage:               https://github.com/Cumulus/Syndic
 License:                MIT
