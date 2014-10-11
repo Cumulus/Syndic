@@ -37,7 +37,7 @@ type author =
    ({{:http://tools.ietf.org/html/rfc4287#section-4.2.3} See RFC 4287 § 4.2.3})
  *)
 
-val mk_author : ?uri:Uri.t -> ?email:string -> string -> author
+val author : ?uri:Uri.t -> ?email:string -> string -> author
 
 type category =
   {
@@ -67,7 +67,7 @@ type category =
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.2.1} See RFC 4287 § 4.2.2.1 }
  *)
 
-val mk_category : ?scheme:Uri.t -> ?label:string -> string -> category
+val category : ?scheme:Uri.t -> ?label:string -> string -> category
 
 type generator =
   {
@@ -90,7 +90,7 @@ type generator =
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.4} See RFC 4287 § 4.2.4 }
  *)
 
-val mk_generator : ?uri:Uri.t -> ?version:string -> string -> generator
+val generator : ?uri:Uri.t -> ?version:string -> string -> generator
 
 type icon = Uri.t
 (** The [icon] element's content is an IRI reference [RFC3987] that
@@ -196,7 +196,7 @@ type link =
     See RFC 4287 § 4.2.7.1 }
  *)
 
-val mk_link :
+val link :
   ?type_media:string -> ?hreflang:string -> ?title:string -> ?length:int ->
   rel:rel -> Uri.t -> link
 
@@ -301,7 +301,7 @@ type source =
     See RFC 4287 § 4.1.2 for more details.}
  *)
 
-val mk_source :
+val source :
   ?categories:category list ->
   ?contributors:author list ->
   ?generator:generator ->
@@ -409,7 +409,7 @@ type entry =
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.2} See RFC 4287 § 4.1.2}
  *)
 
-val mk_entry :
+val entry :
   ?categories:category list ->
   ?content:content ->
   ?contributors:author list ->
@@ -463,7 +463,7 @@ type feed =
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.1} See RFC 4287 § 4.1.1}
  *)
 
-val mk_feed :
+val feed :
   ?authors:author list ->
   ?categories:category list ->
   ?contributors:author list ->

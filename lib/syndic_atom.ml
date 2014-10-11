@@ -50,7 +50,7 @@ type link =
     length: int option;
   }
 
-let mk_link ?type_media ?hreflang ?title ?length ~rel href =
+let link ?type_media ?hreflang ?title ?length ~rel href =
   { href ; rel ; type_media ; hreflang ; title ; length }
 
 type link' = [
@@ -112,7 +112,7 @@ type author =
     email: string option;
   }
 
-let mk_author ?uri ?email name =
+let author ?uri ?email name =
   { uri ; email ; name }
 
 type author' = [
@@ -191,7 +191,7 @@ type category =
     label: string option;
   }
 
-let mk_category ?scheme ?label term =
+let category ?scheme ?label term =
   { scheme ; label ; term }
 
 type category' = [
@@ -253,7 +253,7 @@ type generator =
     content: string;
   }
 
-let mk_generator ?uri ?version content = { uri ; version ; content }
+let generator ?uri ?version content = { uri ; version ; content }
 
 type generator' = [
   | `URI of string
@@ -517,7 +517,7 @@ type source =
     updated: updated option;
   }
 
-let mk_source
+let source
     ?(categories=[]) ?(contributors=[]) ?generator
     ?icon ?(links=[]) ?logo ?rights ?subtitle
     ?updated ~authors ~id ~title
@@ -791,7 +791,7 @@ type entry =
     updated: updated;
   }
 
-let mk_entry
+let entry
   ?(categories=[]) ?content ?(contributors=[])
   ?(links=[]) ?published ?rights ?(sources=[]) ?summary
   ~id ~authors ~title ~updated ()
@@ -1050,7 +1050,7 @@ type feed =
     entries: entry list;
   }
 
-let mk_feed
+let feed
   ?(authors=[]) ?(categories=[]) ?(contributors=[]) ?generator
   ?icon ?(links=[]) ?logo ?rights ?subtitle
   ~id ~title ~updated entries
@@ -1386,7 +1386,7 @@ let add_entries_of_feed entries (uri_opt, feed) : entry list =
     | Some uri ->
        if List.exists is_alternate_Atom feed.links then feed.links
        else
-         mk_link ~type_media:"application/atom+xml" ~rel:Alternate uri
+         link ~type_media:"application/atom+xml" ~rel:Alternate uri
          :: feed.links in
   let source authors =
     { authors;
