@@ -517,10 +517,10 @@ type source =
     updated: updated option;
   }
 
-let mk_source ~authors
+let mk_source
     ?(categories=[]) ?(contributors=[]) ?generator
-    ?icon ~id ?(links=[]) ?logo ?rights ?subtitle
-    ~title ?updated ()
+    ?icon ?(links=[]) ?logo ?rights ?subtitle
+    ?updated ~authors ~id ~title
   =
   { authors ; categories ; contributors ; generator ;
     icon ; id ; links ; logo ; rights ; subtitle ;

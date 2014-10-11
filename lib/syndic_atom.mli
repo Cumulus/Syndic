@@ -302,17 +302,16 @@ type source =
  *)
 
 val mk_source :
-  authors:author * author list ->
   ?categories:category list ->
   ?contributors:author list ->
   ?generator:generator ->
   ?icon:icon ->
-  id:id ->
   ?links:link list ->
   ?logo:logo ->
   ?rights:rights ->
   ?subtitle:subtitle ->
-  title:title -> ?updated:updated -> unit -> source
+  ?updated:updated ->
+  authors:author * author list -> id:id -> title:title -> source
 
 type mime = string
 (** A MIME type that conform to the syntax of a MIME media type, but
