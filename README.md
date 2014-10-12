@@ -14,6 +14,6 @@ Build Requirements
  * OCaml >= 4.01.0
  * Calendar >= 2.03.2
  * Xmlm >= 1.2.0
- * Uri >= 1.3.13
+ * Uri >= 1.3.1
 
 [![Build Status](https://travis-ci.org/Cumulus/Syndic.svg?branch=master)](https://travis-ci.org/Cumulus/Syndic)
