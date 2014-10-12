@@ -37,6 +37,8 @@ type author =
    ({{:http://tools.ietf.org/html/rfc4287#section-4.2.3} See RFC 4287 § 4.2.3})
  *)
 
+val author : ?uri:Uri.t -> ?email:string -> string -> author
+
 type category =
   {
     term : string;
@@ -65,6 +67,7 @@ type category =
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.2.1} See RFC 4287 § 4.2.2.1 }
  *)
 
+val category : ?scheme:Uri.t -> ?label:string -> string -> category
 
 type generator =
   {
@@ -86,6 +89,8 @@ type generator =
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.4} See RFC 4287 § 4.2.4 }
  *)
+
+val generator : ?uri:Uri.t -> ?version:string -> string -> generator
 
 type icon = Uri.t
 (** The [icon] element's content is an IRI reference [RFC3987] that
@@ -191,6 +196,10 @@ type link =
     See RFC 4287 § 4.2.7.1 }
  *)
 
+val link :
+  ?type_media:string -> ?hreflang:string -> ?title:string -> ?length:int ->
+  rel:rel -> Uri.t -> link
+
 type logo = Uri.t
 (** [logo] is an IRI reference [RFC3987] that identifies an image that
     provides visual identification for a feed.
@@ -292,6 +301,17 @@ type source =
     See RFC 4287 § 4.1.2 for more details.}
  *)
 
+val source :
+  ?categories:category list ->
+  ?contributors:author list ->
+  ?generator:generator ->
+  ?icon:icon ->
+  ?links:link list ->
+  ?logo:logo ->
+  ?rights:rights ->
+  ?subtitle:subtitle ->
+  ?updated:updated ->
+  authors:author * author list -> id:id -> title:title -> source
 
 type mime = string
 (** A MIME type that conform to the syntax of a MIME media type, but
@@ -389,6 +409,18 @@ type entry =
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.2} See RFC 4287 § 4.1.2}
  *)
 
+val entry :
+  ?categories:category list ->
+  ?content:content ->
+  ?contributors:author list ->
+  ?links:link list ->
+  ?published:published ->
+  ?rights:rights ->
+  ?sources:source list ->
+  ?summary:summary ->
+  id:id ->
+  authors:author * author list ->
+  title:title -> updated:updated -> unit -> entry
 
 type feed =
   {
@@ -430,6 +462,18 @@ type feed =
 
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.1} See RFC 4287 § 4.1.1}
  *)
+
+val feed :
+  ?authors:author list ->
+  ?categories:category list ->
+  ?contributors:author list ->
+  ?generator:generator ->
+  ?icon:icon ->
+  ?links:link list ->
+  ?logo:logo ->
+  ?rights:rights ->
+  ?subtitle:subtitle ->
+  id:id -> title:title -> updated:updated -> entry list -> feed
 
 val parse : Xmlm.input -> feed
 (** [parse xml] returns the feed corresponding to [xml].  Beware that

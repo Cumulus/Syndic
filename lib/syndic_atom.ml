@@ -50,6 +50,9 @@ type link =
     length: int option;
   }
 
+let link ?type_media ?hreflang ?title ?length ~rel href =
+  { href ; rel ; type_media ; hreflang ; title ; length }
+
 type link' = [
   | `HREF of string
   | `Rel of string
@@ -108,6 +111,9 @@ type author =
     uri: Uri.t option;
     email: string option;
   }
+
+let author ?uri ?email name =
+  { uri ; email ; name }
 
 type author' = [
   | `Name of string
@@ -185,6 +191,9 @@ type category =
     label: string option;
   }
 
+let category ?scheme ?label term =
+  { scheme ; label ; term }
+
 type category' = [
   | `Term of string
   | `Scheme of string
@@ -243,6 +252,8 @@ type generator =
     uri: Uri.t option;
     content: string;
   }
+
+let generator ?uri ?version content = { uri ; version ; content }
 
 type generator' = [
   | `URI of string
@@ -505,6 +516,15 @@ type source =
     title: title;
     updated: updated option;
   }
+
+let source
+    ?(categories=[]) ?(contributors=[]) ?generator
+    ?icon ?(links=[]) ?logo ?rights ?subtitle
+    ?updated ~authors ~id ~title
+  =
+  { authors ; categories ; contributors ; generator ;
+    icon ; id ; links ; logo ; rights ; subtitle ;
+    title ; updated }
 
 type source' = [
   | `Author of author
@@ -771,6 +791,15 @@ type entry =
     updated: updated;
   }
 
+let entry
+  ?(categories=[]) ?content ?(contributors=[])
+  ?(links=[]) ?published ?rights ?(sources=[]) ?summary
+  ~id ~authors ~title ~updated ()
+  =
+  { authors ; categories ; content ; contributors ;
+    id ; links ; published ; rights ; sources ; summary ;
+    title ; updated }
+
 type entry' = [
   | `Author of author
   | `Category of category
@@ -1020,6 +1049,15 @@ type feed =
     updated: updated;
     entries: entry list;
   }
+
+let feed
+  ?(authors=[]) ?(categories=[]) ?(contributors=[]) ?generator
+  ?icon ?(links=[]) ?logo ?rights ?subtitle
+  ~id ~title ~updated entries
+  =
+  { authors ; categories ; contributors ; generator ;
+    icon ; id ; links ; logo ; rights ; subtitle ; title ; updated ; entries }
+
 
 let make_feed ~pos (l : _ list) =
   (* atomAuthor* *)
@@ -1347,13 +1385,9 @@ let add_entries_of_feed entries (uri_opt, feed) : entry list =
     | None -> feed.links
     | Some uri ->
        if List.exists is_alternate_Atom feed.links then feed.links
-       else { href = uri;
-              rel = Alternate;
-              type_media = Some "application/atom+xml";
-              hreflang = None;
-              title = None;
-              length = None;
-            } :: feed.links in
+       else
+         link ~type_media:"application/atom+xml" ~rel:Alternate uri
+         :: feed.links in
   let source authors =
     { authors;
       categories = feed.categories;
