@@ -6,19 +6,19 @@ module Error = Syndic_error
 module Date = Syndic_date
 
 type head =
-    {
-      title : string;
-      date_created : CalendarLib.Calendar.t;
-      date_modified : CalendarLib.Calendar.t;
-      owner_name : string;
-      owner_email : string;
-      expansion_state : int list;
-      vert_scroll_state : int;
-      window_top : int;
-      window_left : int;
-      window_bottom : int;
-      window_right : int
-    }
+  {
+    title : string;
+    date_created : CalendarLib.Calendar.t;
+    date_modified : CalendarLib.Calendar.t;
+    owner_name : string;
+    owner_email : string;
+    expansion_state : int list;
+    vert_scroll_state : int;
+    window_top : int;
+    window_left : int;
+    window_bottom : int;
+    window_right : int
+  }
 
 let string_of_xml name (pos, _, datas) =
   try get_leaf datas 
@@ -57,20 +57,20 @@ let expansion_state_of_xml (pos, _, datas) =
       | x :: xs -> aux (x :: acc_char) acc xs
       | [] -> (List.rev acc_char) :: acc
     in explode s
-    |> aux [] []
-    |> List.rev
-    |> List.map implode
+       |> aux [] []
+       |> List.rev
+       |> List.map implode
   in 
   try get_leaf datas 
       |> split ',' 
       |> List.map int_of_string
-      with Not_found -> raise (Error.Error (pos, "<expansionState> must not be empty"))
-	 | _ -> raise (Error.Error (pos, "<expansionState> must be a list of number separated by comma as 1,2,3"))
+  with Not_found -> []
+     | _ -> raise (Error.Error (pos, "<expansionState> must be a list of number separated by comma as 1,2,3"))
 
 let int_of_xml name (pos, _, datas) =
   try get_leaf datas |> int_of_string
-      with Not_found -> raise (Error.Error (pos, name ^ "must not be empty"))
-	 | Failure _ -> raise (Error.Error (pos, name ^ "must be an integer"))
+  with Not_found -> raise (Error.Error (pos, name ^ "must not be empty"))
+     | Failure _ -> raise (Error.Error (pos, name ^ "must be an integer"))
 
 let vert_scroll_state_of_xml = int_of_xml "<vertScrollState>"
 
@@ -100,57 +100,57 @@ let make_head ~pos (l : [< head'] list) =
   let title = match find (function `Title _ -> true | _ -> false) l with
     | Some (`Title s) -> s
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <title> \
-				     element"))
+                                     				     element"))
   in 
   let date_created = match find (function `DateCreated _ -> true | _ -> false) l with
     | Some (`DateCreated d) -> d
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <dateCreated> \
-				     element"))
+                                     				     element"))
   in
   let date_modified = match find (function `DateModified _ -> true | _ -> false) l with
     | Some (`DateModified d) -> d
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <dateModified> \
-				     element"))
+                                     				     element"))
   in
   let owner_name = match find (function `OwnerName _ -> true | _ -> false) l with
     | Some (`OwnerName s) -> s
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <ownerName> \
-				     element"))
+                                     				     element"))
   in
   let owner_email = match find (function `OwnerEmail _ -> true | _ -> false) l with
     | Some (`OwnerEmail s) -> s
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <ownerEmail> \
-				     element"))
+                                     				     element"))
   in
   let expansion_state = match find (function `ExpansionState _ -> true | _ -> false) l with
     | Some (`ExpansionState l) -> l
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <expansionState> \
-				     element"))
+                                     				     element"))
   in
   let vert_scroll_state = match find (function `VertScrollState _ -> true | _ -> false) l with
     | Some (`VertScrollState n) -> n
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <vertScrollState> \
-				     element"))
+                                     				     element"))
   in
   let window_top = match find (function `WindowTop _ -> true | _ -> false) l with
     | Some (`WindowTop h) -> h
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowTop> \
-				     element"))
+                                     				     element"))
   in
   let window_left = match find (function `WindowLeft _ -> true | _ -> false) l with
     | Some (`WindowLeft x) -> x
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowLeft> \
-				     element"))
+                                     				     element"))
   in
   let window_bottom = match find (function `WindowBottom _ -> true | _ -> false) l with
     | Some (`WindowBottom y) -> y
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowBottom> \
-				     element"))
+                                     				     element"))
   in
   let window_right = match find (function `WindowRight _ -> true | _ -> false) l with
     | Some (`WindowRight r) -> r
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowRight> \
-				     element"))
+                                     				     element"))
   in 
   { 
     title; 
@@ -203,14 +203,14 @@ let head_of_xml' =
     (fun x -> x)
 
 type outline = 
-    {
-      text : string option;
-      type_ : string option;
-      is_comment : bool; (* see common attributes *)
-      is_breakpoint : bool; (* see common attributes *)
-      (* attrs : (string * string) list; *)
-      outlines : outline list
-    }
+  {
+    text : string option;
+    type_ : string option;
+    is_comment : bool; (* see common attributes *)
+    is_breakpoint : bool; (* see common attributes *)
+    (* attrs : (string * string) list; *)
+    outlines : outline list
+  }
 
 let string_option_of_xml (pos, _, datas) =
   try Some (get_leaf datas) 
@@ -223,7 +223,7 @@ let bool_option_of_xml (pos, _, datas) =
   try Some ((get_leaf datas) |> bool_of_string) 
   with Not_found -> None
      | Failure _ -> raise (Error.Error (pos, "bool attributes must have \
-					      true or false value"))
+                                              					      true or false value"))
 
 let is_comment_of_xml xml = match bool_option_of_xml xml with Some v -> v | _ -> false
 let is_breakpoint_of_xml xml = match bool_option_of_xml xml with Some v -> v | _ -> false
@@ -254,9 +254,9 @@ let make_outline ~pos (l : [< outline'] list) =
     | _ -> false
   in
   let outlines = 
-(*    l 
-    |> List.filter (function `Outline _ -> true | _ -> false)
-    |> List.map (function `Outline o -> o | _ -> assert false)*)
+    (*    l 
+          |> List.filter (function `Outline _ -> true | _ -> false)
+          |> List.map (function `Outline o -> o | _ -> assert false)*)
     List.fold_left
       (fun acc -> function `Outline o -> o :: acc | _ -> acc) [] l (* from dino *)
     |> List.rev
@@ -268,21 +268,21 @@ let make_outline ~pos (l : [< outline'] list) =
     is_breakpoint;
     outlines
   }
-  
+
 let rec outline_of_xml ((pos, _, _) as xml) =
   let attr_producer = [
     "text", (fun _ _ a -> `Text a);
     "type", (fun _ _ a -> `Type a);
     "isComment", 
-      (fun _ _ a -> 
+    (fun _ _ a -> 
        `IsComment 
-	(try bool_of_string a 
-	 with _ -> raise (Error.Error (pos, "<isComment> must have true or false value."))));
+         (try bool_of_string a 
+          with _ -> raise (Error.Error (pos, "<isComment> must have true or false value."))));
     "isBreakpoint", 
-      (fun _ _ a -> 
+    (fun _ _ a -> 
        `IsBreakpoint
-	(try bool_of_string a 
-	 with _ -> raise (Error.Error (pos, "<isBreakpoint> must have true or false value."))))
+         (try bool_of_string a 
+          with _ -> raise (Error.Error (pos, "<isBreakpoint> must have true or false value."))))
   ] in 
   let data_producer = [
     "outline", (fun _ a -> (`Outline (outline_of_xml a)))
@@ -334,11 +334,11 @@ let body_of_xml' =
     (fun x -> x)
 
 type opml =
-    {
-      version : string;
-      head : head;
-      body : body
-    }
+  {
+    version : string;
+    head : head;
+    body : body
+  }
 
 type opml' =  [
   | `Version of string
@@ -392,28 +392,27 @@ let find_opml l =
 let parse input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, data) ->
-      if tag_is tag "opml" then
-	opml_of_xml (pos, tag, data)
-      else
-	begin match find_opml data with
-	      | Some (XML.Node (p, t, d)) -> opml_of_xml (p, t, d)
-	      | _ -> raise (Error.Error ((0, 0),
-					 "document MUST contains exactly one <opml> \
-					  element")) 
-	end
+    if tag_is tag "opml" then
+      opml_of_xml (pos, tag, data)
+    else
+      begin match find_opml data with
+        | Some (XML.Node (p, t, d)) -> opml_of_xml (p, t, d)
+        | _ -> raise (Error.Error ((0, 0),
+                                   "document MUST contains exactly one <opml> \
+                                    				    element")) 
+      end
   | _ -> raise (Error.Error ((0, 0),
-			     "document MUST contains exactly one <opml> \
-			      element"))
+                             "document MUST contains exactly one <opml> \
+                              			      element"))
 
 let unsafe input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, data) ->
-      if tag_is tag "opml" then
-	`Opml (opml_of_xml' (pos, tag, data))
-      else
-	begin match find_opml data with
-	      | Some (XML.Node (p, t, d)) -> `Opml (opml_of_xml' (p, t, d))
-	      | _ -> `Opml []
-	end
+    if tag_is tag "opml" then
+      `Opml (opml_of_xml' (pos, tag, data))
+    else
+      begin match find_opml data with
+        | Some (XML.Node (p, t, d)) -> `Opml (opml_of_xml' (p, t, d))
+        | _ -> `Opml []
+      end
   | _ -> `Opml []
-

@@ -42,6 +42,6 @@ let () =
   try let o = parse (Xmlm.make_input (`Channel stdin)) in print_opml1 o
   with
   | Error.Error (pos, err) ->
-        print_endline err
+    print_endline err
   | _ -> Printexc.print_backtrace stderr
-				  
+
