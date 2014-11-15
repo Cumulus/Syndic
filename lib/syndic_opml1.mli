@@ -13,7 +13,7 @@ module Error : module type of Syndic_error
 type head =
   {
     title : string;  (** Title of the document. *)
-    date_created : CalendarLib.Calendar.t;
+    date_created : CalendarLib.Calendar.t option;
     (** A date-time indicating when the document was created. *)
     date_modified : CalendarLib.Calendar.t;
     (** A date-time indicating when the document was last modified. *)
@@ -25,14 +25,18 @@ type head =
         The order is important.  For each element in the list, X,
         starting at the first summit, navigate flatdown X times and
         expand.  Repeat for each element in the list. *)
-    vert_scroll_state : int;
+    vert_scroll_state : int option;
     (** A number saying which line of the outline is displayed on the
         top line of the window. This number is calculated with the
         expansion state already applied. *)
-    window_top : int;    (** Pixel location of the top edge of the window. *)
-    window_left : int;   (** Pixel location of the left edge of the window. *)
-    window_bottom : int; (** Pixel location of the bottom edge of the window. *)
-    window_right : int   (** Pixel location of the right edge of the window. *)
+    window_top : int option;
+    (** Pixel location of the top edge of the window. *)
+    window_left : int option;
+    (** Pixel location of the left edge of the window. *)
+    window_bottom : int option;
+    (** Pixel location of the bottom edge of the window. *)
+    window_right : int option;
+    (** Pixel location of the right edge of the window. *)
   }
 
 type outline =

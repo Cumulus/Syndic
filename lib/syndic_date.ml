@@ -46,4 +46,4 @@ let of_string s =
 	sscanf s "%i %s %i" (fun d m y -> make_date d m y 0 0 "" "UT")
     )
   with _ ->
-    invalid_arg(sprintf "Syndic.Rss2.Date.of_string: cannot parse %S" s)
+    invalid_arg(sprintf "Syndic.Date.of_string: cannot parse %S" s)

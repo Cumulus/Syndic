@@ -1,5 +1,6 @@
 open Syndic_common.XML
 open Syndic_common.Util
+open Printf
 
 module XML = Syndic_xml
 module Error = Syndic_error
@@ -8,16 +9,16 @@ module Date = Syndic_date
 type head =
   {
     title : string;
-    date_created : CalendarLib.Calendar.t;
+    date_created : CalendarLib.Calendar.t option;
     date_modified : CalendarLib.Calendar.t;
     owner_name : string;
     owner_email : string;
     expansion_state : int list;
-    vert_scroll_state : int;
-    window_top : int;
-    window_left : int;
-    window_bottom : int;
-    window_right : int
+    vert_scroll_state : int option;
+    window_top : int option;
+    window_left : int option;
+    window_bottom : int option;
+    window_right : int option;
   }
 
 let string_of_xml name (pos, _, datas) =
@@ -25,14 +26,6 @@ let string_of_xml name (pos, _, datas) =
   with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
 
 let title_of_xml = string_of_xml "<title>"
-
-let date_of_xml name (pos, _, datas) =
-  try get_leaf datas |> Date.of_string
-  with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
-
-let date_created_of_xml = date_of_xml "<dateCreated>"
-
-let date_modified_of_xml = date_of_xml "<dateModified>"
 
 let owner_name_of_xml = string_of_xml "<ownerName>"
 
@@ -65,12 +58,13 @@ let expansion_state_of_xml (pos, _, datas) =
       |> split ','
       |> List.map int_of_string
   with Not_found -> []
-     | _ -> raise (Error.Error (pos, "<expansionState> must be a list of number separated by comma as 1,2,3"))
+     | _ -> raise (Error.Error (pos, "<expansionState> must be a list of \
+                                     numbers separated by commas as 1,2,3"))
 
 let int_of_xml name (pos, _, datas) =
   try get_leaf datas |> int_of_string
-  with Not_found -> raise (Error.Error (pos, name ^ "must not be empty"))
-     | Failure _ -> raise (Error.Error (pos, name ^ "must be an integer"))
+  with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
+     | Failure _ -> raise (Error.Error (pos, name ^ " must be an integer"))
 
 let vert_scroll_state_of_xml = int_of_xml "<vertScrollState>"
 
@@ -104,9 +98,8 @@ let make_head ~pos (l : [< head'] list) =
   in
   let date_created =
     match find (function `DateCreated _ -> true | _ -> false) l with
-    | Some (`DateCreated d) -> d
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
-                                    <dateCreated> element"))
+    | Some (`DateCreated d) -> Some d
+    | _ -> None
   in
   let date_modified =
     match find (function `DateModified _ -> true | _ -> false) l with
@@ -129,38 +122,32 @@ let make_head ~pos (l : [< head'] list) =
   let expansion_state =
     match find (function `ExpansionState _ -> true | _ -> false) l with
     | Some (`ExpansionState l) -> l
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
-                                    <expansionState> element"))
+    | _ -> []
   in
   let vert_scroll_state =
     match find (function `VertScrollState _ -> true | _ -> false) l with
-    | Some (`VertScrollState n) -> n
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
-                                    <vertScrollState> element"))
+    | Some (`VertScrollState n) -> Some n
+    | _ -> None
   in
   let window_top =
     match find (function `WindowTop _ -> true | _ -> false) l with
-    | Some (`WindowTop h) -> h
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
-                                    <windowTop> element"))
+    | Some (`WindowTop h) -> Some h
+    | _ -> None
   in
   let window_left =
     match find (function `WindowLeft _ -> true | _ -> false) l with
-    | Some (`WindowLeft x) -> x
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
-                                    <windowLeft> element"))
+    | Some (`WindowLeft x) -> Some x
+    | _ -> None
   in
   let window_bottom =
     match find (function `WindowBottom _ -> true | _ -> false) l with
-    | Some (`WindowBottom y) -> y
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
-                                    <windowBottom> element"))
+    | Some (`WindowBottom y) -> Some y
+    | _ -> None
   in
   let window_right =
     match find (function `WindowRight _ -> true | _ -> false) l with
-    | Some (`WindowRight r) -> r
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
-                                    <windowRight> element"))
+    | Some (`WindowRight r) -> Some r
+    | _ -> None
   in
   {
     title;
@@ -176,11 +163,19 @@ let make_head ~pos (l : [< head'] list) =
     window_right
   }
 
-let head_of_xml ((pos, _, _) as xml) =
+
+let date_of_xml name (pos, _, datas) =
+  let d =
+    try get_leaf datas
+    with Not_found -> raise (Error.Error (pos, name ^ " must not be empty")) in
+  try Date.of_string d
+  with _ -> raise (Error.Error (pos, sprintf "Date %S incorrect" d))
+
+let head_of_xml =
   let data_producer = [
     "title", (fun _ a -> `Title (title_of_xml a));
-    "dateCreated", (fun _ a -> `DateCreated (date_created_of_xml a));
-    "dateModified", (fun _ a -> `DateModified (date_modified_of_xml a));
+    "dateCreated", (fun _ a -> `DateCreated (date_of_xml "<dateCreated>" a));
+    "dateModified", (fun _ a -> `DateModified (date_of_xml "<dateModified>" a));
     "ownerName", (fun _ a -> `OwnerName (owner_name_of_xml a));
     "ownerEmail", (fun _ a -> `OwnerEmail (owner_email_of_xml a));
     "expansionState", (fun _ a -> `ExpansionState (expansion_state_of_xml a));
@@ -189,7 +184,8 @@ let head_of_xml ((pos, _, _) as xml) =
     "windowLeft", (fun _ a -> `WindowLeft (window_left_of_xml a));
     "windowBottom", (fun _ a -> `WindowBottom (window_bottom_of_xml a));
     "windowRight", (fun _ a -> `WindowRight (window_right_of_xml a))
-  ] in
+    ] in
+  fun ((pos, _, _) as xml) ->
   generate_catcher
     ~data_producer
     (make_head ~pos) xml

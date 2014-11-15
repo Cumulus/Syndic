@@ -11,17 +11,25 @@ open Printf
 (*         print_endline err *)
 (*     | _ -> Printexc.print_backtrace stderr *)
 
+let iter_opt o f =
+  match o with
+  | None -> ()
+  | Some x -> f x
+
 let print_head h =
   printf "Title : %s\n" h.title;
-  printf "Date Creation : %f\n" (CalendarLib.Calendar.to_unixfloat h.date_created);
-  printf "Date Modified : %f\n" (CalendarLib.Calendar.to_unixfloat h.date_modified);
+  iter_opt h.date_created (fun d -> printf "Date Creation : %f\n"
+                                        (CalendarLib.Calendar.to_unixfloat d));
+  printf "Date Modified : %f\n"
+         (CalendarLib.Calendar.to_unixfloat h.date_modified);
   printf "Name %s\n" h.owner_name;
   printf "Email %s\n" h.owner_email;
-  printf "Expansion State ["; List.iter (printf "%d,") h.expansion_state; printf "]\n";
-  printf "Window Top %d\n" h.window_top;
-  printf "Window Left %d\n" h.window_left;
-  printf "Window Bottom %d\n" h.window_bottom;
-  printf "Window Right %d\n" h.window_right
+  printf "Expansion State [%s]\n"
+         (String.concat ", " (List.map string_of_int h.expansion_state));
+  iter_opt h.window_top (fun i -> printf "Window Top %d\n" i);
+  iter_opt h.window_left (fun i -> printf "Window Left %d\n" i);
+  iter_opt h.window_bottom (fun i -> printf "Window Bottom %d\n" i);
+  iter_opt h.window_right (fun i -> printf "Window Right %d\n" i)
 
 let rec print_outline level o =
   printf "%s Text %s\n" level (match o.text with Some s -> s | None -> "<None>");
@@ -36,7 +44,6 @@ let print_opml1 o =
   print_body o.body
 
 let () =
-
   Printexc.record_backtrace true;
 
   try let o = parse (Xmlm.make_input (`Channel stdin)) in print_opml1 o
@@ -44,4 +51,3 @@ let () =
   | Error.Error (pos, err) ->
     print_endline err
   | _ -> Printexc.print_backtrace stderr
-
