@@ -1,5 +1,12 @@
 (** [Syndic.Opml1]: compliant with
-    {{:http://dev.opml.org/spec1.html} OPML 1.0}. *)
+    {{:http://dev.opml.org/spec1.html} OPML 1.0}.
+
+    The purpose of the {i Outline Processor Markup Language}, or OPML,
+    is to provide a way to exchange information between outliners and
+    Internet services that can be browsed or controlled through an
+    outliner.  Outlines can be used for specifications, legal briefs,
+    product plans, presentations, screenplays, directories, diaries,
+    discussion groups, chat systems and stories.  *)
 
 module Error : module type of Syndic_error
 
