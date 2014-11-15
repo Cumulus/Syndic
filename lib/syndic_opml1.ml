@@ -430,3 +430,59 @@ let unsafe input =
         | _ -> `Opml []
       end
   | _ -> `Opml []
+
+
+(* Output functions *)
+
+(* Names have have no namespace.  This shortcut makes it more readable. *)
+let n x = ("", x)
+
+let node name sub = XML.Node(dummy_pos, (n name, []), sub)
+let data d = XML.Data(dummy_pos, d)
+
+let add_node name opt to_string xml =
+  match opt with
+  | None -> xml
+  | Some d -> node name [data(to_string d)] :: xml
+
+let head_to_xml h =
+  let xml =
+    add_node "windowRight"     h.window_right  string_of_int []
+    |> add_node "windowBottom" h.window_bottom string_of_int
+    |> add_node "windowLeft"   h.window_left   string_of_int
+    |> add_node "windowTop"    h.window_top    string_of_int
+    |> add_node "vertScrollState" h.vert_scroll_state string_of_int
+    |> (fun x -> let c = List.map string_of_int h.expansion_state in
+              node "expansionState" [data(String.concat "," c)]  :: x)
+    |> add_node "dateCreated" h.date_created Date.to_rfc822 in
+  node "title" [data h.title]
+  :: node "dateModified" [data (Date.to_rfc822 h.date_modified)]
+  :: node "ownerName" [data h.owner_name]
+  :: node "ownerEmail" [data h.owner_email]
+  :: xml
+
+let add_attr name opt to_string attr =
+  match opt with
+  | None -> attr
+  | Some d -> (n name, to_string d) :: attr
+
+let id_string (s: string) = s
+
+let rec outline_to_xml o =
+  let attr =
+    [(n "isComment", o.is_comment |> string_of_bool);
+     (n "isBreakpoint", o.is_breakpoint |> string_of_bool) ]
+    |> add_attr "text" o.text id_string
+    |> add_attr "type" o.type_ id_string in
+  XML.Node(dummy_pos, (n "outline", attr),
+           List.map outline_to_xml o.outlines)
+
+
+let to_xml (o: opml) =
+  XML.Node(dummy_pos, (n"opml", [n"version", o.version]),
+           [node "head" (head_to_xml o.head);
+            node "body" (List.map outline_to_xml o.body)  ])
+
+let output opml dest =
+  let o = Xmlm.make_output dest ~decl:true in
+  XML.to_xmlm (to_xml opml) o

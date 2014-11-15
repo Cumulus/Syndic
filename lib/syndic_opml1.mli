@@ -73,6 +73,12 @@ val parse : Xmlm.input -> opml
 (** [parse i] takes [i] and returns an opml record which is the OCaml
     representation of the OPML document. *)
 
+val to_xml : opml -> Syndic_xml.t
+(** [to_xml opml] converts the OPML document [opml] to an XML tree. *)
+
+val output : opml -> Xmlm.dest -> unit
+(** [output opml dest] writes the XML tree of the OPML document [opml]
+    to [dest]. *)
 
 
 (**/**)
