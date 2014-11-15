@@ -21,12 +21,12 @@ type head =
   }
 
 let string_of_xml name (pos, _, datas) =
-  try get_leaf datas 
+  try get_leaf datas
   with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
 
 let title_of_xml = string_of_xml "<title>"
 
-let date_of_xml name (pos, _, datas) = 
+let date_of_xml name (pos, _, datas) =
   try get_leaf datas |> Date.of_string
   with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
 
@@ -60,9 +60,9 @@ let expansion_state_of_xml (pos, _, datas) =
        |> aux [] []
        |> List.rev
        |> List.map implode
-  in 
-  try get_leaf datas 
-      |> split ',' 
+  in
+  try get_leaf datas
+      |> split ','
       |> List.map int_of_string
   with Not_found -> []
      | _ -> raise (Error.Error (pos, "<expansionState> must be a list of number separated by comma as 1,2,3"))
@@ -101,7 +101,7 @@ let make_head ~pos (l : [< head'] list) =
     | Some (`Title s) -> s
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <title> \
                                      				     element"))
-  in 
+  in
   let date_created = match find (function `DateCreated _ -> true | _ -> false) l with
     | Some (`DateCreated d) -> d
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <dateCreated> \
@@ -151,13 +151,13 @@ let make_head ~pos (l : [< head'] list) =
     | Some (`WindowRight r) -> r
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowRight> \
                                      				     element"))
-  in 
-  { 
-    title; 
-    date_created; 
-    date_modified; 
-    owner_name; 
-    owner_email; 
+  in
+  {
+    title;
+    date_created;
+    date_modified;
+    owner_name;
+    owner_email;
     expansion_state;
     vert_scroll_state;
     window_top;
@@ -202,7 +202,7 @@ let head_of_xml' =
     ~data_producer
     (fun x -> x)
 
-type outline = 
+type outline =
   {
     text : string option;
     type_ : string option;
@@ -213,14 +213,14 @@ type outline =
   }
 
 let string_option_of_xml (pos, _, datas) =
-  try Some (get_leaf datas) 
+  try Some (get_leaf datas)
   with Not_found -> None
 
 let text_of_xml = string_option_of_xml
 let type_of_xml = string_option_of_xml
 
 let bool_option_of_xml (pos, _, datas) =
-  try Some ((get_leaf datas) |> bool_of_string) 
+  try Some ((get_leaf datas) |> bool_of_string)
   with Not_found -> None
      | Failure _ -> raise (Error.Error (pos, "bool attributes must have \
                                               					      true or false value"))
@@ -253,8 +253,8 @@ let make_outline ~pos (l : [< outline'] list) =
     | Some (`IsBreakpoint b) -> true
     | _ -> false
   in
-  let outlines = 
-    (*    l 
+  let outlines =
+    (*    l
           |> List.filter (function `Outline _ -> true | _ -> false)
           |> List.map (function `Outline o -> o | _ -> assert false)*)
     List.fold_left
@@ -273,23 +273,23 @@ let rec outline_of_xml ((pos, _, _) as xml) =
   let attr_producer = [
     "text", (fun _ _ a -> `Text a);
     "type", (fun _ _ a -> `Type a);
-    "isComment", 
-    (fun _ _ a -> 
-       `IsComment 
-         (try bool_of_string a 
+    "isComment",
+    (fun _ _ a ->
+       `IsComment
+         (try bool_of_string a
           with _ -> raise (Error.Error (pos, "<isComment> must have true or false value."))));
-    "isBreakpoint", 
-    (fun _ _ a -> 
+    "isBreakpoint",
+    (fun _ _ a ->
        `IsBreakpoint
-         (try bool_of_string a 
+         (try bool_of_string a
           with _ -> raise (Error.Error (pos, "<isBreakpoint> must have true or false value."))))
-  ] in 
+  ] in
   let data_producer = [
     "outline", (fun _ a -> (`Outline (outline_of_xml a)))
   ] in
   generate_catcher
     ~attr_producer
-    ~data_producer 
+    ~data_producer
     (make_outline ~pos) xml
 
 let rec outline_of_xml' () =
@@ -314,7 +314,7 @@ type body' = [`Outline of outline]
 let make_body ~pos (l : [< body'] list) =
   let l =
     List.map (function `Outline o -> o) l
-    |> List.rev 
+    |> List.rev
   in
   if List.length l <> 0 then l
   else raise (Error.Error (pos, "Body must contains one <outline> element."))
@@ -329,8 +329,8 @@ let body_of_xml' =
   let data_producer = [
     "outline", (fun _ a -> (`Outline (outline_of_xml' () a)))
   ] in
-  generate_catcher 
-    ~data_producer 
+  generate_catcher
+    ~data_producer
     (fun x -> x)
 
 type opml =
@@ -399,7 +399,7 @@ let parse input =
         | Some (XML.Node (p, t, d)) -> opml_of_xml (p, t, d)
         | _ -> raise (Error.Error ((0, 0),
                                    "document MUST contains exactly one <opml> \
-                                    				    element")) 
+                                    				    element"))
       end
   | _ -> raise (Error.Error ((0, 0),
                              "document MUST contains exactly one <opml> \

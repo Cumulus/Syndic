@@ -28,7 +28,7 @@ type outline =
 
 type body = outline list (** A <body> contains one or more <outline> elements.*)
 
-type opml = 
+type opml =
   {
     version : string; (** version is a string which tells version of OPML document (should be 1.0 or 1.1*)
     head : head; (** <head> element.*)
@@ -38,7 +38,7 @@ type opml =
 val parse : Xmlm.input -> opml
 (** Takes an Xmlm.input and gives opml record which is an OCaml repr of an OPML document.*)
 
-val unsafe : Xmlm.input -> 
+val unsafe : Xmlm.input ->
   [> `Opml of
        [> `Body of
             [> `Outline of
