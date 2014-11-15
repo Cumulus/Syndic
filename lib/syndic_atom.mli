@@ -209,7 +209,7 @@ type logo = Uri.t
     {{: http://tools.ietf.org/html/rfc4287#section-4.2.8} See RFC 4287 § 4.2.8}
  *)
 
-type published = CalendarLib.Calendar.t
+type published = Syndic_date.t
 (** [published] is a Date construct indicating an instant in time
     associated with an event early in the life cycle of the entry.
 
@@ -247,7 +247,7 @@ type subtitle = text_construct
     See RFC 4287 § 4.2.12 }
  *)
 
-type updated = CalendarLib.Calendar.t
+type updated = Syndic_date.t
 (** [updated] is a Date construct indicating the most recent instant
     in time when an entry or feed was modified in a way the publisher
     considers significant.  Therefore, not all modifications

@@ -3,7 +3,7 @@ open Syndic_common.Util
 module XML = Syndic_xml
 module Atom = Syndic_atom
 
-module Date = Syndic_date 
+module Date = Syndic_date
 module Error = Syndic_error
 
 type image =
@@ -433,7 +433,7 @@ type item =
     comments: Uri.t option;
     enclosure: enclosure option;
     guid: guid option;
-    pubDate: CalendarLib.Calendar.t option; (* date *)
+    pubDate: Date.t option; (* date *)
     source: source option;
   }
 
@@ -446,7 +446,7 @@ type item' = [
   | `Comments of Uri.t
   | `Enclosure of enclosure
   | `Guid of guid
-  | `PubDate of CalendarLib.Calendar.t
+  | `PubDate of Date.t
   | `Source of source
 ]
 
@@ -575,8 +575,8 @@ type channel =
     copyright: string option;
     managingEditor: string option;
     webMaster: string option;
-    pubDate: CalendarLib.Calendar.t option;
-    lastBuildDate: CalendarLib.Calendar.t option;
+    pubDate: Date.t option;
+    lastBuildDate: Date.t option;
     category: string option;
     generator: string option;
     docs: Uri.t option;
@@ -598,8 +598,8 @@ type channel' = [
   | `Copyright of string
   | `ManagingEditor of string
   | `WebMaster of string
-  | `PubDate of CalendarLib.Calendar.t
-  | `LastBuildDate of CalendarLib.Calendar.t
+  | `PubDate of Date.t
+  | `LastBuildDate of Date.t
   | `Category of string
   | `Generator of string
   | `Docs of Uri.t
@@ -910,12 +910,12 @@ let map_option o f = match o with
   | Some v -> Some(f v)
 
 let cmp_date_opt d1 d2 = match d1, d2 with
-  | Some d1, Some d2 -> CalendarLib.Calendar.compare d1 d2
+  | Some d1, Some d2 -> Date.compare d1 d2
   | Some _, None -> 1
   | None, Some _ -> -1
   | None, None -> 0
 
-let epoch = CalendarLib.Calendar.from_unixfloat 0. (* 1970-1-1 *)
+let epoch = Date.from_unixfloat 0. (* 1970-1-1 *)
 
 let entry_of_item (it: item) : Atom.entry =
   let author = match it.author with

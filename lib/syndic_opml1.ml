@@ -9,8 +9,8 @@ module Date = Syndic_date
 type head =
   {
     title : string;
-    date_created : CalendarLib.Calendar.t option;
-    date_modified : CalendarLib.Calendar.t;
+    date_created : Date.t option;
+    date_modified : Date.t;
     owner_name : string;
     owner_email : string;
     expansion_state : int list;
@@ -78,8 +78,8 @@ let window_right_of_xml = int_of_xml "<windowRight>"
 
 type head' = [
   | `Title of string
-  | `DateCreated of CalendarLib.Calendar.t
-  | `DateModified of CalendarLib.Calendar.t
+  | `DateCreated of Date.t
+  | `DateModified of Date.t
   | `OwnerName of string
   | `OwnerEmail of string
   | `ExpansionState of int list

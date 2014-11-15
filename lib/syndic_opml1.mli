@@ -13,9 +13,9 @@ module Error : module type of Syndic_error
 type head =
   {
     title : string;  (** Title of the document. *)
-    date_created : CalendarLib.Calendar.t option;
+    date_created : Syndic_date.t option;
     (** A date-time indicating when the document was created. *)
-    date_modified : CalendarLib.Calendar.t;
+    date_modified : Syndic_date.t;
     (** A date-time indicating when the document was last modified. *)
     owner_name : string;  (** Owner of the document. *)
     owner_email : string; (** Email address of the owner of the document. *)

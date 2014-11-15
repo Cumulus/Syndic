@@ -412,7 +412,7 @@ let logo_of_xml, logo_of_xml' =
      generate_catcher ~leaf_producer (make_logo ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
 
-type published = CalendarLib.Calendar.t
+type published = Date.t
 type published' = [ `Date of string ]
 
 let make_published ~pos (l : [< published'] list) =
@@ -458,7 +458,7 @@ let subtitle_of_xml = text_construct_of_xml
 let subtitle_of_xml' ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
   `Data data
 
-type updated = CalendarLib.Calendar.t
+type updated = Date.t
 type updated' = [ `Date of string ]
 
 let make_updated ~pos (l : [< updated'] list) =
@@ -1382,7 +1382,7 @@ let entries_of_feeds feeds =
   List.fold_left add_entries_of_feed [] feeds
 
 let more_recent d1 (e: entry) =
-  if CalendarLib.Calendar.compare d1 e.updated >= 0 then d1 else e.updated
+  if Date.compare d1 e.updated >= 0 then d1 else e.updated
 
 let aggregate ?id ?updated ?subtitle ?(title=default_title) feeds : feed =
   let entries = entries_of_feeds feeds in
@@ -1398,7 +1398,7 @@ let aggregate ?id ?updated ?subtitle ?(title=default_title) feeds : feed =
     | None ->
        (* Use the more recent date of the entries. *)
        match entries with
-       | [] -> CalendarLib.Calendar.now() (* no entries! *)
+       | [] -> Date.now() (* no entries! *)
        | e0 :: el ->
           List.fold_left more_recent e0.updated el in
   { authors = [];  categories = [];  contributors = [];

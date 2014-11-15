@@ -183,7 +183,7 @@ type item =
     comments: Uri.t option;
     enclosure: enclosure option;
     guid: guid option;
-    pubDate: CalendarLib.Calendar.t option;
+    pubDate: Syndic_date.t option;
     source: source option;
   }
 (** A {!channel} may contain any number of [item]s.  An item may
@@ -219,8 +219,8 @@ type channel =
     copyright: string option;
     managingEditor: string option;
     webMaster: string option;
-    pubDate: CalendarLib.Calendar.t option;
-    lastBuildDate: CalendarLib.Calendar.t option;
+    pubDate: Syndic_date.t option;
+    lastBuildDate: Syndic_date.t option;
     category: string option;
     generator: string option;
     docs: Uri.t option;
