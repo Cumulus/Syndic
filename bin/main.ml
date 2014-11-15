@@ -32,7 +32,7 @@ let print_head h =
   iter_opt h.window_right (fun i -> printf "Window Right %d\n" i)
 
 let rec print_outline level o =
-  printf "%s Text %s\n" level (match o.text with Some s -> s | None -> "<None>");
+  printf "%s Text %s\n" level o.text;
   List.iter (print_outline "Sub") o.outlines
 
 let print_body b =

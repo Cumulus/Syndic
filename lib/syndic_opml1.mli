@@ -41,11 +41,13 @@ type head =
 
 type outline =
   {
-    text : string option;
+    text : string;
     (** String that's displayed when the outline is being browsed or edited.
         There is no specific limit on the length of the text attribute.*)
     type_ : string option;
-    (** Says how other attributes of the [outline] are interpreted. *)
+    (** Says how other attributes of the [outline] are interpreted.
+        This is application dependent.  For example, for news feed,
+        it is common to have "rss" as the value of this field. *)
     is_comment : bool;
     (** Indicates whether the outline is commented or not.  By convention
         if an outline is commented, all subordinate outlines are considered

@@ -210,7 +210,7 @@ let head_of_xml' =
 
 type outline =
   {
-    text : string option;
+    text : string;
     type_ : string option;
     is_comment : bool; (* see common attributes *)
     is_breakpoint : bool; (* see common attributes *)
@@ -218,12 +218,13 @@ type outline =
     outlines : outline list
   }
 
-let string_option_of_xml (pos, _, datas) =
+let text_of_xml (pos, _, datas) =
+  try get_leaf datas
+  with Not_found -> ""
+
+let type_of_xml (pos, _, datas) =
   try Some (get_leaf datas)
   with Not_found -> None
-
-let text_of_xml = string_option_of_xml
-let type_of_xml = string_option_of_xml
 
 let bool_option_of_xml (pos, _, datas) =
   try Some ((get_leaf datas) |> bool_of_string)
@@ -246,8 +247,8 @@ type outline' = [
 
 let make_outline ~pos (l : [< outline'] list) =
   let text = match find (function `Text _ -> true | _ -> false) l with
-    | Some (`Text t) -> Some t
-    | _ -> None
+    | Some (`Text t) -> t
+    | _ -> ""
   in
   let type_ = match find (function `Type _ -> true | _ -> false) l with
     | Some (`Type t) -> Some t
@@ -470,9 +471,9 @@ let id_string (s: string) = s
 
 let rec outline_to_xml o =
   let attr =
-    [(n "isComment", o.is_comment |> string_of_bool);
+    [(n "text", o.text);
+     (n "isComment", o.is_comment |> string_of_bool);
      (n "isBreakpoint", o.is_breakpoint |> string_of_bool) ]
-    |> add_attr "text" o.text id_string
     |> add_attr "type" o.type_ id_string in
   XML.Node(dummy_pos, (n "outline", attr),
            List.map outline_to_xml o.outlines)
