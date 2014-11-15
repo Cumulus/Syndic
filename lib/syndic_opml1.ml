@@ -168,7 +168,7 @@ let date_of_xml name (pos, _, datas) =
   let d =
     try get_leaf datas
     with Not_found -> raise (Error.Error (pos, name ^ " must not be empty")) in
-  try Date.of_string d
+  try Date.of_rfc822 d
   with _ -> raise (Error.Error (pos, sprintf "Date %S incorrect" d))
 
 let head_of_xml =

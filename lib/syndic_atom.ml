@@ -2,31 +2,7 @@ open Syndic_common.XML
 open Syndic_common.Util
 module XML = Syndic_xml
 module Error = Syndic_error
-
-module Date = struct
-  open CalendarLib
-  open Printf
-  open Scanf
-
-  (* RFC3339 date *)
-  let of_string s =
-    let make_date year month day h m s z =
-      let date = Calendar.Date.make year month day in
-      let t = Calendar.Time.(make h m (Second.from_float s)) in
-      if z = "" || z.[0] = 'Z' then
-        Calendar.(create date t)
-      else
-        let tz =
-          let open Calendar.Time in
-          sscanf z "%i:%i" (fun h m -> Period.make h m (Second.from_int 0)) in
-        Calendar.(create date (Time.add t tz))
-    in
-    (* Sometimes, the seconds have a decimal point
-       See https://forge.ocamlcore.org/tracker/index.php?func=detail&aid=1414&group_id=83&atid=418 *)
-    try sscanf s "%i-%i-%iT%i:%i:%f%s" make_date
-    with Scanf.Scan_failure _ ->
-      invalid_arg(sprintf "Syndic.Atom.Date.of_string: cannot parse %S" s)
-end
+module Date = Syndic_date
 
 let atom_ns = "http://www.w3.org/2005/Atom"
 let xhtml_ns = "http://www.w3.org/1999/xhtml"
@@ -442,7 +418,7 @@ type published' = [ `Date of string ]
 let make_published ~pos (l : [< published'] list) =
   (* atom:published { atomDateConstruct } *)
   let date = match find (fun (`Date _) -> true) l with
-    | Some (`Date d) -> Date.of_string d
+    | Some (`Date d) -> Date.of_rfc3339 d
     | _ -> raise (Error.Error (pos,
                             "The content of <published> MUST be \
                              a non-empty string"))
@@ -488,7 +464,7 @@ type updated' = [ `Date of string ]
 let make_updated ~pos (l : [< updated'] list) =
   (* atom:updated { atomDateConstruct } *)
   let updated = match find (fun (`Date _) -> true) l with
-    | Some (`Date d) -> Date.of_string d
+    | Some (`Date d) -> Date.of_rfc3339 d
     | _ -> raise (Error.Error (pos,
                             "The content of <updated> MUST be \
                              a non-empty string"))
@@ -1268,14 +1244,10 @@ let link_to_xml (l: link) =
     | None -> attr in
   XML.Node(dummy_pos, ((atom_ns, "link"), attr), [])
 
-let string_of_date d =
-  (* Example: 2014-03-19T15:51:25.050-07:00 *)
-  CalendarLib.Printer.Calendar.sprint "%Y-%0m-%0dT%0H:%0M:%0S%:z" d
-
 let add_node_date tag date nodes =
   match date with
   | None -> nodes
-  | Some d -> node_data tag (string_of_date d) :: nodes
+  | Some d -> node_data tag (Date.to_rfc3339 d) :: nodes
 
 let source_to_xml (s: source) =
   let (a0, a) = s.authors in
@@ -1320,7 +1292,7 @@ let entry_to_xml (e: entry) =
   let nodes =
     (node_data (atom "id") e.id
      :: text_construct_to_xml "title" e.title
-     :: node_data (atom "updated") (string_of_date e.updated)
+     :: node_data (atom "updated") (Date.to_rfc3339 e.updated)
      :: author_to_xml a0 :: List.map author_to_xml a)
     |> add_nodes_rev_map category_to_xml e.categories
     |> add_node_option content_to_xml e.content
@@ -1336,7 +1308,7 @@ let to_xml (f: feed) =
   let nodes =
     (node_data (atom "id") f.id
      :: text_construct_to_xml "title" f.title
-     :: node_data (atom "updated") (string_of_date f.updated)
+     :: node_data (atom "updated") (Date.to_rfc3339 f.updated)
      :: List.map entry_to_xml f.entries)
     |> add_nodes_rev_map author_to_xml (List.rev f.authors)
     |> add_nodes_rev_map category_to_xml f.categories

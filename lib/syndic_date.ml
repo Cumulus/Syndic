@@ -14,7 +14,7 @@ let () =
      Examples: Sun, 19 May 2002 15:21:36 GMT
      Sat, 25 Sep 2010 08:01:00 -0700
      20 Mar 2013 03:47:14 +0000 *)
-let of_string s =
+let of_rfc822 s =
   let make_date day month year h m maybe_s z =
     let month = if String.length month <= 3 then month
 		else String.sub month 0 3 in
@@ -47,3 +47,30 @@ let of_string s =
     )
   with _ ->
     invalid_arg(sprintf "Syndic.Date.of_string: cannot parse %S" s)
+
+let to_rfc822 d =
+  (* Example: Sat, 25 Sep 2010 08:01:00 -0700 *)
+  CalendarLib.Printer.Calendar.sprint "%a, %d %b %Y %0H:%0M:%0S %z" d
+
+(* RFC3339 date *)
+let of_rfc3339 s =
+  let make_date year month day h m s z =
+    let date = Calendar.Date.make year month day in
+    let t = Calendar.Time.(make h m (Second.from_float s)) in
+    if z = "" || z.[0] = 'Z' then
+      Calendar.(create date t)
+    else
+      let tz =
+        let open Calendar.Time in
+        sscanf z "%i:%i" (fun h m -> Period.make h m (Second.from_int 0)) in
+      Calendar.(create date (Time.add t tz))
+  in
+  (* Sometimes, the seconds have a decimal point
+     See https://forge.ocamlcore.org/tracker/index.php?func=detail&aid=1414&group_id=83&atid=418 *)
+  try sscanf s "%i-%i-%iT%i:%i:%f%s" make_date
+  with Scanf.Scan_failure _ ->
+    invalid_arg(sprintf "Syndic.Atom.Date.of_string: cannot parse %S" s)
+
+let to_rfc3339 d =
+  (* Example: 2014-03-19T15:51:25.050-07:00 *)
+  CalendarLib.Printer.Calendar.sprint "%Y-%0m-%0dT%0H:%0M:%0S%:z" d

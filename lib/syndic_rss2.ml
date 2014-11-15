@@ -530,7 +530,7 @@ let item_comments_of_xml (pos, tag, datas) =
                              a non-empty string"))
 
 let item_pubdate_of_xml (pos, tag, datas) =
-  try Date.of_string (get_leaf datas)
+  try Date.of_rfc822 (get_leaf datas)
   with Not_found -> raise (Error.Error (pos,
                             "The content of <pubDate> MUST be \
                              a non-empty string"))
@@ -766,13 +766,13 @@ let channel_webmaster_of_xml (pos, tag, datas) =
                              a non-empty string"))
 
 let channel_pubdate_of_xml (pos, tag, datas) =
-  try Date.of_string (get_leaf datas)
+  try Date.of_rfc822 (get_leaf datas)
   with Not_found -> raise (Error.Error (pos,
                             "The content of <pubDate> MUST be \
                              a non-empty string"))
 
 let channel_lastbuilddate_of_xml (pos, tag, datas) =
-  try Date.of_string (get_leaf datas)
+  try Date.of_rfc822 (get_leaf datas)
   with Not_found -> raise (Error.Error (pos,
                             "The content of <lastBuildDate> MUST be \
                              a non-empty string"))
