@@ -102,55 +102,65 @@ let make_head ~pos (l : [< head'] list) =
     | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <title> \
                                      				     element"))
   in
-  let date_created = match find (function `DateCreated _ -> true | _ -> false) l with
+  let date_created =
+    match find (function `DateCreated _ -> true | _ -> false) l with
     | Some (`DateCreated d) -> d
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <dateCreated> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <dateCreated> element"))
   in
-  let date_modified = match find (function `DateModified _ -> true | _ -> false) l with
+  let date_modified =
+    match find (function `DateModified _ -> true | _ -> false) l with
     | Some (`DateModified d) -> d
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <dateModified> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <dateModified> element"))
   in
-  let owner_name = match find (function `OwnerName _ -> true | _ -> false) l with
+  let owner_name =
+    match find (function `OwnerName _ -> true | _ -> false) l with
     | Some (`OwnerName s) -> s
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <ownerName> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <ownerName> element"))
   in
-  let owner_email = match find (function `OwnerEmail _ -> true | _ -> false) l with
+  let owner_email =
+    match find (function `OwnerEmail _ -> true | _ -> false) l with
     | Some (`OwnerEmail s) -> s
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <ownerEmail> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <ownerEmail> element"))
   in
-  let expansion_state = match find (function `ExpansionState _ -> true | _ -> false) l with
+  let expansion_state =
+    match find (function `ExpansionState _ -> true | _ -> false) l with
     | Some (`ExpansionState l) -> l
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <expansionState> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <expansionState> element"))
   in
-  let vert_scroll_state = match find (function `VertScrollState _ -> true | _ -> false) l with
+  let vert_scroll_state =
+    match find (function `VertScrollState _ -> true | _ -> false) l with
     | Some (`VertScrollState n) -> n
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <vertScrollState> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <vertScrollState> element"))
   in
-  let window_top = match find (function `WindowTop _ -> true | _ -> false) l with
+  let window_top =
+    match find (function `WindowTop _ -> true | _ -> false) l with
     | Some (`WindowTop h) -> h
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowTop> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <windowTop> element"))
   in
-  let window_left = match find (function `WindowLeft _ -> true | _ -> false) l with
+  let window_left =
+    match find (function `WindowLeft _ -> true | _ -> false) l with
     | Some (`WindowLeft x) -> x
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowLeft> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <windowLeft> element"))
   in
-  let window_bottom = match find (function `WindowBottom _ -> true | _ -> false) l with
+  let window_bottom =
+    match find (function `WindowBottom _ -> true | _ -> false) l with
     | Some (`WindowBottom y) -> y
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowBottom> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <windowBottom> element"))
   in
-  let window_right = match find (function `WindowRight _ -> true | _ -> false) l with
+  let window_right =
+    match find (function `WindowRight _ -> true | _ -> false) l with
     | Some (`WindowRight r) -> r
-    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one <windowRight> \
-                                     				     element"))
+    | _ -> raise (Error.Error (pos, "<head> MUST contains exactly one \
+                                    <windowRight> element"))
   in
   {
     title;
@@ -223,10 +233,12 @@ let bool_option_of_xml (pos, _, datas) =
   try Some ((get_leaf datas) |> bool_of_string)
   with Not_found -> None
      | Failure _ -> raise (Error.Error (pos, "bool attributes must have \
-                                              					      true or false value"))
+                                             true or false value"))
 
-let is_comment_of_xml xml = match bool_option_of_xml xml with Some v -> v | _ -> false
-let is_breakpoint_of_xml xml = match bool_option_of_xml xml with Some v -> v | _ -> false
+let is_comment_of_xml xml =
+  match bool_option_of_xml xml with Some v -> v | _ -> false
+let is_breakpoint_of_xml xml =
+  match bool_option_of_xml xml with Some v -> v | _ -> false
 
 type outline' = [
   | `Text of string
@@ -245,11 +257,13 @@ let make_outline ~pos (l : [< outline'] list) =
     | Some (`Type t) -> Some t
     | _ -> None
   in
-  let is_comment = match find (function `IsComment _ -> true | _ -> false) l with
+  let is_comment =
+    match find (function `IsComment _ -> true | _ -> false) l with
     | Some (`IsComment b) -> true
     | _ -> false
   in
-  let is_breakpoint = match find (function `IsBreakpoint _ -> true | _ -> false) l with
+  let is_breakpoint =
+    match find (function `IsBreakpoint _ -> true | _ -> false) l with
     | Some (`IsBreakpoint b) -> true
     | _ -> false
   in
@@ -277,12 +291,14 @@ let rec outline_of_xml ((pos, _, _) as xml) =
     (fun _ _ a ->
        `IsComment
          (try bool_of_string a
-          with _ -> raise (Error.Error (pos, "<isComment> must have true or false value."))));
+          with _ -> raise(Error.Error (pos, "<isComment> must have true or \
+                                            false value."))));
     "isBreakpoint",
     (fun _ _ a ->
        `IsBreakpoint
          (try bool_of_string a
-          with _ -> raise (Error.Error (pos, "<isBreakpoint> must have true or false value."))))
+          with _ -> raise (Error.Error (pos, "<isBreakpoint> must have true \
+                                             or false value."))))
   ] in
   let data_producer = [
     "outline", (fun _ a -> (`Outline (outline_of_xml a)))
@@ -353,11 +369,13 @@ let make_opml ~pos (l : [< opml'] list) =
   in
   let head = match find (function `Head _ -> true | _ -> false) l with
     | Some (`Head h) -> h
-    | _ -> raise (Error.Error (pos, "Opml tag must have exactly one <head> element"))
+    | _ -> raise (Error.Error (pos, "Opml tag must have exactly one <head> \
+                                    element"))
   in
   let body = match find (function `Body _ -> true | _ -> false) l with
     | Some (`Body b) -> b
-    | _ -> raise (Error.Error (pos, "Opml tag must have exactly one <body> element"))
+    | _ -> raise (Error.Error (pos, "Opml tag must have exactly one <body> \
+                                    element"))
   in { version; head; body}
 
 let opml_of_xml ((pos, _, _) as xml) =

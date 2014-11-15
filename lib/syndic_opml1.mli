@@ -1,42 +1,70 @@
+(** [Syndic.Opml1]: compliant with
+    {{:http://dev.opml.org/spec1.html} OPML 1.0}. *)
 
 module Error : module type of Syndic_error
 
 type head =
   {
-    title : string; (** <title> is the title of the document.*)
-    date_created : CalendarLib.Calendar.t; (** <dateCreated> is a date-time, indicating when the document was created.*)
-    date_modified : CalendarLib.Calendar.t; (** <dateModified> is a date-time, indicating when the document was last modified.*)
-    owner_name : string; (** <ownerName> is a string, the owner of the document.*)
-    owner_email : string; (** <ownerEmail> is a string, the email address of the owner of the document.*)
-    expansion_state : int list; (** <expansionState> is a comma-separated list of line numbers that are expanded. The line numbers in the list tell you which headlines to expand. The order is important. For each element in the list, X, starting at the first summit, navigate flatdown X times and expand. Repeat for each element in the list.*)
-    vert_scroll_state : int; (** <vertScrollState> is a number, saying which line of the outline is displayed on the top line of the window. This number is calculated with the expansion state already applied.*)
-    window_top : int; (** <windowTop> is a number, the pixel location of the top edge of the window.*)
-    window_left : int; (** <windowLeft> is a number, the pixel location of the left edge of the window.*)
-    window_bottom : int; (** <windowBottom> is a number, the pixel location of the bottom edge of the window.*)
-    window_right : int (** <windowRight> is a number, the pixel location of the right edge of the window.*)
+    title : string;  (** Title of the document. *)
+    date_created : CalendarLib.Calendar.t;
+    (** A date-time indicating when the document was created. *)
+    date_modified : CalendarLib.Calendar.t;
+    (** A date-time indicating when the document was last modified. *)
+    owner_name : string;  (** Owner of the document. *)
+    owner_email : string; (** Email address of the owner of the document. *)
+    expansion_state : int list;
+    (** A comma-separated list of line numbers that are expanded.  The
+        line numbers in the list tell you which headlines to expand.
+        The order is important.  For each element in the list, X,
+        starting at the first summit, navigate flatdown X times and
+        expand.  Repeat for each element in the list. *)
+    vert_scroll_state : int;
+    (** A number saying which line of the outline is displayed on the
+        top line of the window. This number is calculated with the
+        expansion state already applied. *)
+    window_top : int;    (** Pixel location of the top edge of the window. *)
+    window_left : int;   (** Pixel location of the left edge of the window. *)
+    window_bottom : int; (** Pixel location of the bottom edge of the window. *)
+    window_right : int   (** Pixel location of the right edge of the window. *)
   }
 
 type outline =
   {
-    text : string option; (** text is the string of characters that's displayed when the outline is being browsed or edited. There is no specific limit on the length of the text attribute.*)
-    type_ : string option; (** type is a string, it says how the other attributes of the <outline> are interpreted.*)
-    is_comment : bool; (** isComment is a string, either "true" or "false", indicating whether the outline is commented or not. By convention if an outline is commented, all subordinate outlines are considered to be commented as well. If it's not present, the value is false.*)(* see common attributes *)
-    is_breakpoint : bool; (** isBreakpoint is a string, either "true" or "false", indicating whether a breakpoint is set on this outline. This attribute is mainly necessary for outlines used to edit scripts that execute. If it's not present, the value is false.*)(* see common attributes *)
-    (* attrs : (string * string) list; *)
-    outlines : outline list (** List that contains any number of <outline> elements.*)
+    text : string option;
+    (** String that's displayed when the outline is being browsed or edited.
+        There is no specific limit on the length of the text attribute.*)
+    type_ : string option;
+    (** Says how other attributes of the [outline] are interpreted. *)
+    is_comment : bool;
+    (** Indicates whether the outline is commented or not.  By convention
+        if an outline is commented, all subordinate outlines are considered
+        to be commented as well. *)
+    is_breakpoint : bool;
+    (** Indicates whether a breakpoint is set on this outline.  This
+        attribute is mainly necessary for outlines used to edit scripts
+        that execute. *)
+    outlines : outline list;
+    (** List of [outline] elements that are considered sub-items of
+        the current outline. *)
   }
 
-type body = outline list (** A <body> contains one or more <outline> elements.*)
+type body = outline list (** List of outline elements. *)
 
 type opml =
   {
-    version : string; (** version is a string which tells version of OPML document (should be 1.0 or 1.1*)
-    head : head; (** <head> element.*)
-    body : body (** <body> element.*)
+    version : string;
+    (** Tells version of OPML document (should be 1.0 or 1.1) *)
+    head : head;
+    body : body;
   }
 
 val parse : Xmlm.input -> opml
-(** Takes an Xmlm.input and gives opml record which is an OCaml repr of an OPML document.*)
+(** [parse i] takes [i] and returns an opml record which is the OCaml
+    representation of the OPML document. *)
+
+
+
+(**/**)
 
 val unsafe : Xmlm.input ->
   [> `Opml of
@@ -64,4 +92,4 @@ val unsafe : Xmlm.input ->
               list
        | `Version of string ]
          list ]
-(** Analyse without verification *)
+(** Analysis without verification. *)
