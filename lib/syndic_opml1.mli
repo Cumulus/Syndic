@@ -56,6 +56,14 @@ type outline =
     (** Indicates whether a breakpoint is set on this outline.  This
         attribute is mainly necessary for outlines used to edit scripts
         that execute. *)
+    xml_url : Uri.t option;
+    (** Link to the XML data associated to this outline, typically the
+        RSS feed. *)
+    html_url : Uri.t option;
+    (** Link to the HTML data associated to this outline, typically the
+        HTML pages rendering the news feed. *)
+    attrs: (string * string) list;
+    (** Association list of additional attributes in the outline. *)
     outlines : outline list;
     (** List of [outline] elements that are considered sub-items of
         the current outline. *)
@@ -89,11 +97,14 @@ val unsafe : Xmlm.input ->
   [> `Opml of
        [> `Body of
             [> `Outline of
-                 [> `IsBreakpoint of string
+                 [> `Text of string
+                 | `Type of string
+                 | `IsBreakpoint of string
                  | `IsComment of string
                  | `Outline of 'a
-                 | `Text of string
-                 | `Type of string ]
+                 | `XML_url of string
+                 | `HTML_url of string
+                 | `Attr of string * string ]
                    list as 'a ]
               list
        | `Head of

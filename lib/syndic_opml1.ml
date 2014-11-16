@@ -214,111 +214,74 @@ type outline =
     type_ : string option;
     is_comment : bool; (* see common attributes *)
     is_breakpoint : bool; (* see common attributes *)
-    (* attrs : (string * string) list; *)
+    xml_url : Uri.t option;
+    html_url : Uri.t option;
+    attrs : (string * string) list;
     outlines : outline list
   }
 
-let text_of_xml (pos, _, datas) =
-  try get_leaf datas
-  with Not_found -> ""
-
-let type_of_xml (pos, _, datas) =
-  try Some (get_leaf datas)
-  with Not_found -> None
-
-let bool_option_of_xml (pos, _, datas) =
-  try Some ((get_leaf datas) |> bool_of_string)
-  with Not_found -> None
-     | Failure _ -> raise (Error.Error (pos, "bool attributes must have \
-                                             true or false value"))
-
-let is_comment_of_xml xml =
-  match bool_option_of_xml xml with Some v -> v | _ -> false
-let is_breakpoint_of_xml xml =
-  match bool_option_of_xml xml with Some v -> v | _ -> false
-
-type outline' = [
-  | `Text of string
-  | `Type of string
-  | `IsComment of bool
-  | `IsBreakpoint of bool
-  | `Outline of outline
-]
-
-let make_outline ~pos (l : [< outline'] list) =
-  let text = match find (function `Text _ -> true | _ -> false) l with
-    | Some (`Text t) -> t
-    | _ -> ""
-  in
-  let type_ = match find (function `Type _ -> true | _ -> false) l with
-    | Some (`Type t) -> Some t
-    | _ -> None
-  in
-  let is_comment =
-    match find (function `IsComment _ -> true | _ -> false) l with
-    | Some (`IsComment b) -> true
-    | _ -> false
-  in
-  let is_breakpoint =
-    match find (function `IsBreakpoint _ -> true | _ -> false) l with
-    | Some (`IsBreakpoint b) -> true
-    | _ -> false
-  in
-  let outlines =
-    (*    l
-          |> List.filter (function `Outline _ -> true | _ -> false)
-          |> List.map (function `Outline o -> o | _ -> assert false)*)
-    List.fold_left
-      (fun acc -> function `Outline o -> o :: acc | _ -> acc) [] l (* from dino *)
-    |> List.rev
-  in
-  {
-    text;
-    type_;
-    is_comment;
-    is_breakpoint;
-    outlines
+let rec outline_of_xml (pos, ((_outline, attributes): Xmlm.tag), datas) =
+  let text = ref ""
+  and typ = ref None
+  and is_comment = ref false
+  and is_breakpoint = ref false
+  and xml_url = ref None
+  and html_url = ref None
+  and attrs = ref []
+  and outlines = ref [] in
+  let process_attrs ((_, name), v) = match name with
+    | "text" -> text := v
+    | "type" -> typ := Some v
+    | "isComment" ->
+       (try is_comment := bool_of_string v
+        with _ -> raise(Error.Error (pos, "<isComment> must have true or \
+                                          false value.")))
+    | "isBreakpoint" ->
+       (try is_breakpoint := bool_of_string v
+        with _ -> raise (Error.Error (pos, "<isBreakpoint> must have true \
+                                           or false value.")))
+    | "xmlUrl" ->
+       (try xml_url := Some(Uri.of_string v)
+        with _ -> raise(Error.Error(pos, "<xmlUrl> content must be an URL")))
+    | "htmlUrl" ->
+       (try html_url := Some(Uri.of_string v)
+        with _ -> raise(Error.Error(pos, "<htmlUrl> content must be an URL")))
+    | _ ->
+       attrs := (name, v) :: !attrs in
+  List.iter process_attrs attributes;
+  let process_outlines = function
+    | XML.Node (p, (((ns, name), _) as t), d) ->
+       if ns = "" && name = "outline" then
+         outlines := outline_of_xml (p, t, d) :: !outlines
+    | XML.Data _ -> () in
+  List.iter process_outlines datas;
+  { text = !text;
+    type_ = !typ;
+    is_comment = !is_comment;
+    is_breakpoint = !is_breakpoint;
+    xml_url = !xml_url;
+    html_url = !html_url;
+    attrs = !attrs;
+    outlines = !outlines;
   }
 
-let rec outline_of_xml ((pos, _, _) as xml) =
-  let attr_producer = [
-    "text", (fun _ _ a -> `Text a);
-    "type", (fun _ _ a -> `Type a);
-    "isComment",
-    (fun _ _ a ->
-       `IsComment
-         (try bool_of_string a
-          with _ -> raise(Error.Error (pos, "<isComment> must have true or \
-                                            false value."))));
-    "isBreakpoint",
-    (fun _ _ a ->
-       `IsBreakpoint
-         (try bool_of_string a
-          with _ -> raise (Error.Error (pos, "<isBreakpoint> must have true \
-                                             or false value."))))
-  ] in
-  let data_producer = [
-    "outline", (fun _ a -> (`Outline (outline_of_xml a)))
-  ] in
-  generate_catcher
-    ~attr_producer
-    ~data_producer
-    (make_outline ~pos) xml
-
-let rec outline_of_xml' () =
-  let attr_producer = [
-    "text", (fun _ _ a -> `Text a);
-    "type", (fun _ _ a -> `Type a);
-    "isComment", (fun _ _ a -> `IsComment a);
-    "isBreakpoint", (fun _ _ a -> `IsBreakpoint a)
-  ] in
-  let data_producer = [
-    "outline", (fun _ a -> `Outline (outline_of_xml' () a))
-  ] in
-  generate_catcher
-    ~attr_producer
-    ~data_producer
-    (fun x -> x)
+let rec outline_of_xml' (pos, ((_outline, attributes): Xmlm.tag), datas) =
+  let el_of_attrs ((_, name), v) = match name with
+    | "text" -> `Text v
+    | "type" -> `Type v
+    | "isComment" -> `IsComment v
+    | "isBreakpoint" -> `IsBreakpoint v
+    | "xmlUrl" -> `XML_url v
+    | "htmlUrl" -> `HTML_url v
+    | _ -> `Attr (name, v) in
+  let el = ref (List.map el_of_attrs attributes) in
+  let process_outlines = function
+    | XML.Node (p, (((ns, name), _) as t), d) ->
+       if ns = "" && name = "outline" then
+         el := `Outline(outline_of_xml' (p, t, d)) :: !el
+    | XML.Data _ -> () in
+  List.iter process_outlines datas;
+  !el
 
 type body = outline list
 
@@ -340,7 +303,7 @@ let body_of_xml ((pos, _, _) as xml) =
 
 let body_of_xml' =
   let data_producer = [
-    "outline", (fun _ a -> (`Outline (outline_of_xml' () a)))
+    "outline", (fun _ a -> (`Outline (outline_of_xml' a)))
   ] in
   generate_catcher
     ~data_producer
