@@ -218,7 +218,7 @@ let head_of_xml' =
 type outline =
   {
     text : string;
-    type_ : string option;
+    typ : string option;
     is_comment : bool; (* see common attributes *)
     is_breakpoint : bool; (* see common attributes *)
     xml_url : Uri.t option;
@@ -227,9 +227,9 @@ type outline =
     outlines : outline list
   }
 
-let outline ?ty ?(is_comment=false) ?(is_breakpoint=false) ?xml_url ?html_url
+let outline ?typ ?(is_comment=false) ?(is_breakpoint=false) ?xml_url ?html_url
             ?(attrs=[]) ?(outlines=[]) text =
-  { text;  type_ = ty;  is_comment;  is_breakpoint;  xml_url;  html_url;
+  { text;  typ;  is_comment;  is_breakpoint;  xml_url;  html_url;
     attrs;  outlines }
 
 let rec outline_of_xml (pos, ((_outline, attributes): Xmlm.tag), datas) =
@@ -268,7 +268,7 @@ let rec outline_of_xml (pos, ((_outline, attributes): Xmlm.tag), datas) =
     | XML.Data _ -> () in
   List.iter process_outlines datas;
   { text = !text;
-    type_ = !typ;
+    typ = !typ;
     is_comment = !is_comment;
     is_breakpoint = !is_breakpoint;
     xml_url = !xml_url;
@@ -449,7 +449,7 @@ let rec outline_to_xml o =
     [(n "text", o.text);
      (n "isComment", o.is_comment |> string_of_bool);
      (n "isBreakpoint", o.is_breakpoint |> string_of_bool) ]
-    |> add_attr "type" o.type_ id_string in
+    |> add_attr "type" o.typ id_string in
   XML.Node(dummy_pos, (n "outline", attr),
            List.map outline_to_xml o.outlines)
 

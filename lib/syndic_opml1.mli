@@ -55,8 +55,9 @@ type outline =
     text : string;
     (** String that's displayed when the outline is being browsed or edited.
         There is no specific limit on the length of the text attribute.*)
-    type_ : string option;
-    (** Says how other attributes of the [outline] are interpreted.
+    typ : string option;
+    (** "Type" of outline.
+        Says how other attributes of the [outline] are interpreted.
         This is application dependent.  For example, for news feed,
         it is common to have "rss" as the value of this field. *)
     is_comment : bool;
@@ -80,7 +81,7 @@ type outline =
         the current outline. *)
   }
 
-val outline : ?ty: string -> ?is_comment: bool -> ?is_breakpoint: bool ->
+val outline : ?typ: string -> ?is_comment: bool -> ?is_breakpoint: bool ->
               ?xml_url: Uri.t -> ?html_url: Uri.t ->
               ?attrs:(string * string) list -> ?outlines: outline list ->
               string -> outline
