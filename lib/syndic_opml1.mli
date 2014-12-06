@@ -39,6 +39,17 @@ type head =
     (** Pixel location of the right edge of the window. *)
   }
 
+val head : ?date_created: Syndic_date.t ->
+           ?expansion_state: int list ->
+           ?vert_scroll_state: int ->
+           ?window_top: int -> ?window_left: int ->
+           ?window_bottom: int -> ?window_right: int ->
+           date_modified: Syndic_date.t ->
+           owner_name: string -> owner_email: string -> string -> head
+(** [head ~date_modified ~owner_name ~owner_email title] returns a
+    head.  By default, all optional arguments leave the corresponding
+    fields empty.  *)
+
 type outline =
   {
     text : string;
@@ -69,12 +80,23 @@ type outline =
         the current outline. *)
   }
 
+val outline : ?ty: string -> ?is_comment: bool -> ?is_breakpoint: bool ->
+              ?xml_url: Uri.t -> ?html_url: Uri.t ->
+              ?attrs:(string * string) list -> ?outlines: outline list ->
+              string -> outline
+(** [outline text] returns an outline.
+
+    @param is_comment Default: [false].
+    @param is_breakpoint Default: [false].
+
+    All the other parameters are bu default empty. *)
+
 type body = outline list (** List of outline elements. *)
 
 type opml =
   {
     version : string;
-    (** Tells version of OPML document (should be 1.0 or 1.1) *)
+    (** The version of OPML document (should be 1.0 or 1.1) *)
     head : head;
     body : body;
   }

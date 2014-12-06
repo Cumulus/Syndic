@@ -21,6 +21,13 @@ type head =
     window_right : int option;
   }
 
+let head ?date_created ?(expansion_state=[]) ?vert_scroll_state
+         ?window_top ?window_left ?window_bottom ?window_right
+         ~date_modified ~owner_name ~owner_email title =
+  { title;  date_created;  date_modified;  owner_name;  owner_email;
+    expansion_state;  vert_scroll_state;  window_top;  window_left;
+    window_bottom;  window_right }
+
 let string_of_xml name (pos, _, datas) =
   try get_leaf datas
   with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
@@ -219,6 +226,11 @@ type outline =
     attrs : (string * string) list;
     outlines : outline list
   }
+
+let outline ?ty ?(is_comment=false) ?(is_breakpoint=false) ?xml_url ?html_url
+            ?(attrs=[]) ?(outlines=[]) text =
+  { text;  type_ = ty;  is_comment;  is_breakpoint;  xml_url;  html_url;
+    attrs;  outlines }
 
 let rec outline_of_xml (pos, ((_outline, attributes): Xmlm.tag), datas) =
   let text = ref ""
