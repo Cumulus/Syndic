@@ -80,3 +80,24 @@ let of_rfc3339 s =
 let to_rfc3339 d =
   (* Example: 2014-03-19T15:51:25.050-07:00 *)
   CalendarLib.Printer.Calendar.sprint "%Y-%0m-%0dT%0H:%0M:%0S%:z" d
+
+
+(* Convenience functions *)
+
+type month =
+  CalendarLib.Calendar.month =
+    Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec
+
+let string_of_month = function
+  | Jan -> "Jan"  | Feb -> "Feb"  | Mar -> "Mar"  | Apr -> "Apr"  | May -> "May"
+  | Jun -> "Jun"  | Jul -> "Jul"  | Aug -> "Aug"  | Sep -> "Sep"  | Oct -> "Oct"
+  | Nov -> "Nov"  | Dec -> "Dec"
+
+let year = CalendarLib.Calendar.year
+let month = CalendarLib.Calendar.month
+let day = CalendarLib.Calendar.day_of_month
+let hour = CalendarLib.Calendar.hour
+let minute = CalendarLib.Calendar.minute
+let second t =
+  CalendarLib.Calendar.Time.Second.to_float(CalendarLib.Calendar.second t)
+;;
