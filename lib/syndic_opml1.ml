@@ -180,17 +180,17 @@ let date_of_xml name (pos, _, datas) =
 
 let head_of_xml =
   let data_producer = [
-    "title", (fun _ a -> `Title (title_of_xml a));
-    "dateCreated", (fun _ a -> `DateCreated (date_of_xml "<dateCreated>" a));
-    "dateModified", (fun _ a -> `DateModified (date_of_xml "<dateModified>" a));
-    "ownerName", (fun _ a -> `OwnerName (owner_name_of_xml a));
-    "ownerEmail", (fun _ a -> `OwnerEmail (owner_email_of_xml a));
-    "expansionState", (fun _ a -> `ExpansionState (expansion_state_of_xml a));
-    "vertScrollState", (fun _ a -> `VertScrollState (vert_scroll_state_of_xml a));
-    "windowTop", (fun _ a -> `WindowTop (window_top_of_xml a));
-    "windowLeft", (fun _ a -> `WindowLeft (window_left_of_xml a));
-    "windowBottom", (fun _ a -> `WindowBottom (window_bottom_of_xml a));
-    "windowRight", (fun _ a -> `WindowRight (window_right_of_xml a))
+    "title", (fun a -> `Title (title_of_xml a));
+    "dateCreated", (fun a -> `DateCreated (date_of_xml "<dateCreated>" a));
+    "dateModified", (fun a -> `DateModified (date_of_xml "<dateModified>" a));
+    "ownerName", (fun a -> `OwnerName (owner_name_of_xml a));
+    "ownerEmail", (fun a -> `OwnerEmail (owner_email_of_xml a));
+    "expansionState", (fun a -> `ExpansionState (expansion_state_of_xml a));
+    "vertScrollState", (fun a -> `VertScrollState (vert_scroll_state_of_xml a));
+    "windowTop", (fun a -> `WindowTop (window_top_of_xml a));
+    "windowLeft", (fun a -> `WindowLeft (window_left_of_xml a));
+    "windowBottom", (fun a -> `WindowBottom (window_bottom_of_xml a));
+    "windowRight", (fun a -> `WindowRight (window_right_of_xml a))
     ] in
   fun ((pos, _, _) as xml) ->
   generate_catcher
@@ -199,17 +199,17 @@ let head_of_xml =
 
 let head_of_xml' =
   let data_producer = [
-    "title", (fun _ -> dummy_of_xml ~ctor:(fun a -> `Title a));
-    "dateCreated", (fun _ -> dummy_of_xml ~ctor:(fun a -> `DateCreated a));
-    "dateModified", (fun _ -> dummy_of_xml ~ctor:(fun a -> `DateModified a));
-    "ownerName", (fun _ -> dummy_of_xml ~ctor:(fun a -> `OwnerName a));
-    "ownerEmail", (fun _ -> dummy_of_xml ~ctor:(fun a -> `OwnerEmail a));
-    "expansionState", (fun _ -> dummy_of_xml ~ctor:(fun a -> `ExpansionSate a));
-    "vertScrollState", (fun _ -> dummy_of_xml ~ctor:(fun a -> `VertScrollState a));
-    "windowTop", (fun _ -> dummy_of_xml ~ctor:(fun a -> `WindowTop a));
-    "windowLeft", (fun _ -> dummy_of_xml ~ctor:(fun a -> `WindowLeft a));
-    "windowBottom", (fun _ -> dummy_of_xml ~ctor:(fun a -> `WindowBottom a));
-    "windowRight", (fun _ -> dummy_of_xml ~ctor:(fun a -> `WindowRight a))
+    "title", dummy_of_xml ~ctor:(fun a -> `Title a);
+    "dateCreated", dummy_of_xml ~ctor:(fun a -> `DateCreated a);
+    "dateModified", dummy_of_xml ~ctor:(fun a -> `DateModified a);
+    "ownerName", dummy_of_xml ~ctor:(fun a -> `OwnerName a);
+    "ownerEmail", dummy_of_xml ~ctor:(fun a -> `OwnerEmail a);
+    "expansionState", dummy_of_xml ~ctor:(fun a -> `ExpansionSate a);
+    "vertScrollState", dummy_of_xml ~ctor:(fun a -> `VertScrollState a);
+    "windowTop", dummy_of_xml ~ctor:(fun a -> `WindowTop a);
+    "windowLeft", dummy_of_xml ~ctor:(fun a -> `WindowLeft a);
+    "windowBottom", dummy_of_xml ~ctor:(fun a -> `WindowBottom a);
+    "windowRight", dummy_of_xml ~ctor:(fun a -> `WindowRight a)
   ] in
   generate_catcher
     ~data_producer
@@ -309,13 +309,13 @@ let make_body ~pos (l : [< body'] list) =
 
 let body_of_xml ((pos, _, _) as xml) =
   let data_producer = [
-    "outline", (fun _ a -> (`Outline (outline_of_xml a)))
+    "outline", (fun a -> (`Outline (outline_of_xml a)))
   ] in
   generate_catcher ~data_producer (make_body ~pos) xml
 
 let body_of_xml' =
   let data_producer = [
-    "outline", (fun _ a -> (`Outline (outline_of_xml' a)))
+    "outline", (fun a -> (`Outline (outline_of_xml' a)))
   ] in
   generate_catcher
     ~data_producer
@@ -352,11 +352,11 @@ let make_opml ~pos (l : [< opml'] list) =
 
 let opml_of_xml ((pos, _, _) as xml) =
   let attr_producer = [
-    "version", (fun _ _ a -> `Version a)
+    "version", (fun _ a -> `Version a)
   ] in
   let data_producer = [
-    "head", (fun _ a -> `Head (head_of_xml a));
-    "body", (fun _ a -> `Body (body_of_xml a))
+    "head", (fun a -> `Head (head_of_xml a));
+    "body", (fun a -> `Body (body_of_xml a))
   ] in
   generate_catcher
     ~attr_producer
@@ -365,11 +365,11 @@ let opml_of_xml ((pos, _, _) as xml) =
 
 let opml_of_xml' =
   let attr_producer = [
-    "version", (fun _ _ a -> `Version a)
+    "version", (fun _ a -> `Version a)
   ] in
   let data_producer = [
-    "head", (fun _ a -> `Head (head_of_xml' a));
-    "body", (fun _ a -> `Body (body_of_xml' a))
+    "head", (fun a -> `Head (head_of_xml' a));
+    "body", (fun a -> `Body (body_of_xml' a))
   ] in
   generate_catcher
     ~attr_producer

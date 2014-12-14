@@ -20,7 +20,7 @@ let make_title ~pos (l : [< title' ] list) =
   in title
 
 let title_of_xml, title_of_xml' =
-  let leaf_producer ctx pos data = `Data data in
+  let leaf_producer pos data = `Data data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~namespaces ~leaf_producer (make_title ~pos) xml),
   generate_catcher ~namespaces ~leaf_producer (fun x -> x)
@@ -38,7 +38,7 @@ let make_name ~pos (l : [< name' ] list) =
   in name
 
 let name_of_xml, name_of_xml' =
-  let leaf_producer ctx pos data = `Data data in
+  let leaf_producer pos data = `Data data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~namespaces ~leaf_producer (make_name ~pos) xml),
   generate_catcher ~namespaces ~leaf_producer (fun x -> x)
@@ -56,7 +56,7 @@ let make_description ~pos (l : [< description' ] list) =
   in description
 
 let description_of_xml, description_of_xml' =
-  let leaf_producer ctx pos data = `Data data in
+  let leaf_producer pos data = `Data data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~namespaces ~leaf_producer (make_description ~pos) xml),
   generate_catcher ~namespaces ~leaf_producer (fun x -> x)
@@ -75,7 +75,7 @@ let make_channel_image ~pos (l : [< channel_image' ] list) =
 
 let channel_image_of_xml, channel_image_of_xml' =
   let attr_producer = [
-    ("resource", (fun ctx pos a -> `URI a));
+    ("resource", (fun pos a -> `URI a));
   ] in
   (fun ((pos, _, _) as xml) ->
     generate_catcher ~namespaces ~attr_producer (make_channel_image ~pos) xml),
@@ -94,7 +94,7 @@ let make_link ~pos (l : [< link' ] list) =
   in link
 
 let link_of_xml, link_of_xml' =
-  let leaf_producer ctx pos data = `URI data in
+  let leaf_producer pos data = `URI data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~namespaces ~leaf_producer (make_link ~pos) xml),
   generate_catcher ~namespaces ~leaf_producer (fun x -> x)
@@ -112,7 +112,7 @@ let make_url ~pos (l : [< url' ] list) =
   in url
 
 let url_of_xml, url_of_xml' =
-  let leaf_producer ctx pos data = `URI data in
+  let leaf_producer pos data = `URI data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~namespaces ~leaf_producer (make_url ~pos) xml),
   generate_catcher ~namespaces ~leaf_producer (fun x -> x)
@@ -131,7 +131,7 @@ let make_li ~pos (l : [< li' ] list) =
 
 let li_of_xml, li_of_xml' =
   let attr_producer = [
-    ("resource", (fun ctx pos a -> `URI a));
+    ("resource", (fun pos a -> `URI a));
   ] in
   (fun ((pos, _, _) as xml) ->
     generate_catcher
@@ -150,7 +150,7 @@ let make_seq (l : [< seq' ] list) =
 
 let seq_of_xml =
   let data_producer = [
-    ("li", (fun ctx a -> `Li (li_of_xml a)));
+    ("li", (fun a -> `Li (li_of_xml a)));
   ] in
   generate_catcher
       ~namespaces
@@ -158,7 +158,7 @@ let seq_of_xml =
 
 let seq_of_xml' =
   let data_producer = [
-    ("li", (fun ctx a -> `Li (li_of_xml' a)));
+    ("li", (fun a -> `Li (li_of_xml' a)));
   ] in
   generate_catcher
       ~namespaces
@@ -178,7 +178,7 @@ let make_items ~pos (l : [< items' ] list) =
 
 let items_of_xml ((pos, _, _) as xml)=
   let data_producer = [
-    ("Seq", (fun ctx a -> `Seq (seq_of_xml a)));
+    ("Seq", (fun a -> `Seq (seq_of_xml a)));
   ] in
   generate_catcher
       ~namespaces
@@ -186,7 +186,7 @@ let items_of_xml ((pos, _, _) as xml)=
 
 let items_of_xml' =
   let data_producer = [
-    ("Seq", (fun ctx a -> `Seq (seq_of_xml' a)));
+    ("Seq", (fun a -> `Seq (seq_of_xml' a)));
   ] in
   generate_catcher
       ~namespaces
@@ -206,7 +206,7 @@ let make_textinput ~pos (l : [< channel_textinput' ] list) =
 
 let channel_textinput_of_xml, channel_textinput_of_xml' =
   let attr_producer = [
-    ("resource", (fun ctx pos a -> `URI a));
+    ("resource", (fun pos a -> `URI a));
   ] in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~namespaces ~attr_producer (make_textinput ~pos) xml),
@@ -272,15 +272,15 @@ let make_channel ~pos (l : [< channel' ] list) =
 
 let channel_of_xml ((pos, _, _) as xml) =
   let data_producer = [
-    ("title", (fun ctx a -> `Title (title_of_xml a)));
-    ("link", (fun ctx a -> `Link (link_of_xml a)));
-    ("description", (fun ctx a -> `Description (description_of_xml a)));
-    ("image", (fun ctx a -> `Image (channel_image_of_xml a)));
-    ("items", (fun ctx a -> `Items (items_of_xml a)));
-    ("textinput", (fun ctx a -> `TextInput (channel_textinput_of_xml a)));
+    ("title", (fun a -> `Title (title_of_xml a)));
+    ("link", (fun a -> `Link (link_of_xml a)));
+    ("description", (fun a -> `Description (description_of_xml a)));
+    ("image", (fun a -> `Image (channel_image_of_xml a)));
+    ("items", (fun a -> `Items (items_of_xml a)));
+    ("textinput", (fun a -> `TextInput (channel_textinput_of_xml a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx pos a -> `About a));
+    ("about", (fun pos a -> `About a));
   ] in
   generate_catcher
     ~namespaces
@@ -290,15 +290,15 @@ let channel_of_xml ((pos, _, _) as xml) =
 
 let channel_of_xml' =
   let data_producer = [
-    ("title", (fun ctx a -> `Title (title_of_xml' a)));
-    ("link", (fun ctx a -> `Link (link_of_xml' a)));
-    ("description", (fun ctx a -> `Description (description_of_xml' a)));
-    ("image", (fun ctx a -> `Image (channel_image_of_xml' a)));
-    ("items", (fun ctx a -> `Items (items_of_xml' a)));
-    ("textinput", (fun ctx a -> `TextInput (channel_textinput_of_xml' a)));
+    ("title", (fun a -> `Title (title_of_xml' a)));
+    ("link", (fun a -> `Link (link_of_xml' a)));
+    ("description", (fun a -> `Description (description_of_xml' a)));
+    ("image", (fun a -> `Image (channel_image_of_xml' a)));
+    ("items", (fun a -> `Items (items_of_xml' a)));
+    ("textinput", (fun a -> `TextInput (channel_textinput_of_xml' a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx pos a -> `About a));
+    ("about", (fun pos a -> `About a));
   ] in
   generate_catcher ~namespaces ~attr_producer ~data_producer (fun x -> x)
 
@@ -343,12 +343,12 @@ let make_image ~pos (l : [< image' ] list) =
 
 let image_of_xml ((pos, _, _) as xml)=
   let data_producer = [
-    ("title", (fun ctx a -> `Title (title_of_xml a)));
-    ("link" , (fun ctx a -> `Link (link_of_xml a)));
-    ("url", (fun ctx a -> `URL (url_of_xml a)));
+    ("title", (fun a -> `Title (title_of_xml a)));
+    ("link" , (fun a -> `Link (link_of_xml a)));
+    ("url", (fun a -> `URL (url_of_xml a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx pos a -> `About a));
+    ("about", (fun pos a -> `About a));
   ] in
   generate_catcher
     ~namespaces
@@ -358,12 +358,12 @@ let image_of_xml ((pos, _, _) as xml)=
 
 let image_of_xml' =
   let data_producer = [
-    ("title", (fun ctx a -> `Title (title_of_xml' a)));
-    ("link" , (fun ctx a -> `Link (link_of_xml' a)));
-    ("url", (fun ctx a -> `URL (url_of_xml' a)));
+    ("title", (fun a -> `Title (title_of_xml' a)));
+    ("link" , (fun a -> `Link (link_of_xml' a)));
+    ("url", (fun a -> `URL (url_of_xml' a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx pos a -> `About a));
+    ("about", (fun pos a -> `About a));
   ] in
   generate_catcher ~namespaces ~attr_producer ~data_producer (fun x -> x)
 
@@ -407,12 +407,12 @@ let make_item ~pos (l : [< item' ] list) =
 
 let item_of_xml ((pos, _, _) as xml)=
   let data_producer = [
-    ("title", (fun ctx a -> `Title (title_of_xml a)));
-    ("link", (fun ctx a -> `Link (link_of_xml a)));
-    ("description", (fun ctx a -> `Description (description_of_xml a)));
+    ("title", (fun a -> `Title (title_of_xml a)));
+    ("link", (fun a -> `Link (link_of_xml a)));
+    ("description", (fun a -> `Description (description_of_xml a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx pos a -> `About a));
+    ("about", (fun pos a -> `About a));
   ] in
   generate_catcher
     ~namespaces
@@ -422,12 +422,12 @@ let item_of_xml ((pos, _, _) as xml)=
 
 let item_of_xml' =
   let data_producer = [
-    ("title", (fun ctx a -> `Title (title_of_xml' a)));
-    ("link", (fun ctx a -> `Link (link_of_xml' a)));
-    ("description", (fun ctx a -> `Description (description_of_xml' a)));
+    ("title", (fun a -> `Title (title_of_xml' a)));
+    ("link", (fun a -> `Link (link_of_xml' a)));
+    ("description", (fun a -> `Description (description_of_xml' a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx pos a -> `About a));
+    ("about", (fun pos a -> `About a));
   ] in
   generate_catcher ~namespaces ~attr_producer ~data_producer (fun x -> x)
 
@@ -480,13 +480,13 @@ let make_textinput ~pos (l : [< textinput' ] list) =
 
 let textinput_of_xml ((pos, _, _) as xml)=
   let data_producer = [
-    ("title", (fun ctx a -> `Title (title_of_xml a)));
-    ("description", (fun ctx a -> `Description (description_of_xml a)));
-    ("name", (fun ctx a -> `Name (name_of_xml a)));
-    ("link", (fun ctx a -> `Link (link_of_xml a)));
+    ("title", (fun a -> `Title (title_of_xml a)));
+    ("description", (fun a -> `Description (description_of_xml a)));
+    ("name", (fun a -> `Name (name_of_xml a)));
+    ("link", (fun a -> `Link (link_of_xml a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx pos a -> `About a))
+    ("about", (fun pos a -> `About a))
   ] in
   generate_catcher
     ~namespaces
@@ -496,13 +496,13 @@ let textinput_of_xml ((pos, _, _) as xml)=
 
 let textinput_of_xml' =
   let data_producer = [
-    ("title", (fun ctx a -> `Title (title_of_xml' a)));
-    ("description", (fun ctx a -> `Description (description_of_xml' a)));
-    ("name", (fun ctx a -> `Name (name_of_xml' a)));
-    ("link", (fun ctx a -> `Link (link_of_xml' a)));
+    ("title", (fun a -> `Title (title_of_xml' a)));
+    ("description", (fun a -> `Description (description_of_xml' a)));
+    ("name", (fun a -> `Name (name_of_xml' a)));
+    ("link", (fun a -> `Link (link_of_xml' a)));
   ] in
   let attr_producer = [
-    ("about", (fun ctx pos a -> `About a))
+    ("about", (fun pos a -> `About a))
   ] in
   generate_catcher ~namespaces ~attr_producer ~data_producer (fun x -> x)
 
@@ -540,10 +540,10 @@ let make_rdf ~pos (l : [< rdf' ] list) =
 
 let rdf_of_xml ((pos, _, _) as xml)=
   let data_producer = [
-    ("channel", (fun ctx a -> `Channel (channel_of_xml a)));
-    ("image", (fun ctx a -> `Image (image_of_xml a)));
-    ("item", (fun ctx a -> `Item (item_of_xml a)));
-    ("textinput", (fun ctx a -> `TextInput (textinput_of_xml a)))
+    ("channel", (fun a -> `Channel (channel_of_xml a)));
+    ("image", (fun a -> `Image (image_of_xml a)));
+    ("item", (fun a -> `Item (item_of_xml a)));
+    ("textinput", (fun a -> `TextInput (textinput_of_xml a)))
   ] in
   generate_catcher
     ~namespaces
@@ -552,10 +552,10 @@ let rdf_of_xml ((pos, _, _) as xml)=
 
 let rdf_of_xml' =
   let data_producer = [
-    ("channel", (fun ctx a -> `Channel (channel_of_xml' a)));
-    ("image", (fun ctx a -> `Image (image_of_xml' a)));
-    ("item", (fun ctx a -> `Item (item_of_xml' a)));
-    ("textinput", (fun ctx a -> `TextInput (textinput_of_xml' a)))
+    ("channel", (fun a -> `Channel (channel_of_xml' a)));
+    ("image", (fun a -> `Image (image_of_xml' a)));
+    ("item", (fun a -> `Item (item_of_xml' a)));
+    ("textinput", (fun a -> `TextInput (textinput_of_xml' a)))
   ] in
   generate_catcher ~namespaces ~data_producer (fun x -> x)
 

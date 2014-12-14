@@ -145,18 +145,18 @@ let author_email_of_xml (pos, tag, datas) =
    appearance of the child elements in a Person construct.  *)
 let author_of_xml =
   let data_producer = [
-    ("name", (fun ctx a -> `Name (author_name_of_xml a)));
-    ("uri", (fun ctx a -> `URI (author_uri_of_xml a)));
-    ("email", (fun ctx a -> `Email (author_email_of_xml a)));
+    ("name", (fun a -> `Name (author_name_of_xml a)));
+    ("uri", (fun a -> `URI (author_uri_of_xml a)));
+    ("email", (fun a -> `Email (author_email_of_xml a)));
   ] in
   fun ((_, _, datas) as xml) ->
   generate_catcher ~namespaces ~data_producer (make_author datas) xml
 
 let author_of_xml' =
   let data_producer = [
-    ("name", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Name a)));
-    ("uri", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `URI a)));
-    ("email", (fun ctx -> dummy_of_xml ~ctor:(fun a -> `Email a)));
+    ("name", dummy_of_xml ~ctor:(fun a -> `Name a));
+    ("uri", dummy_of_xml ~ctor:(fun a -> `URI a));
+    ("email", dummy_of_xml ~ctor:(fun a -> `Email a));
   ] in
   generate_catcher ~namespaces ~data_producer (fun x -> x)
 
@@ -210,9 +210,9 @@ let make_category ~pos (l : [< category'] list) =
  *)
 let category_of_xml, category_of_xml' =
   let attr_producer = [
-    ("term", (fun ctx pos a -> `Term a));
-    ("scheme", (fun ctx pos a -> `Scheme a));
-    ("label", (fun ctx pos a -> `Label a))
+    ("term", (fun pos a -> `Term a));
+    ("scheme", (fun pos a -> `Scheme a));
+    ("label", (fun pos a -> `Label a))
   ] in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~attr_producer (make_category ~pos) xml),
@@ -265,10 +265,10 @@ let make_generator ~pos (l : [< generator'] list) =
  *)
 let generator_of_xml, generator_of_xml' =
   let attr_producer = [
-    ("version", (fun ctx pos a -> `Version a));
-    ("uri", (fun ctx pos a -> `URI a));
+    ("version", (fun pos a -> `Version a));
+    ("uri", (fun pos a -> `URI a));
   ] in
-  let leaf_producer ctx pos data = `Content data in
+  let leaf_producer pos data = `Content data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~attr_producer ~leaf_producer (make_generator ~pos) xml),
   generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
@@ -290,7 +290,7 @@ let make_icon ~pos (l : [< icon'] list) =
     }
  *)
 let icon_of_xml, icon_of_xml' =
-  let leaf_producer ctx pos data = `URI data in
+  let leaf_producer pos data = `URI data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~leaf_producer (make_icon ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
@@ -314,7 +314,7 @@ let make_id ~pos (l : [< id'] list) =
     }
  *)
 let id_of_xml, id_of_xml' =
-  let leaf_producer ctx pos data = `Data data in
+  let leaf_producer pos data = `Data data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~leaf_producer (make_id ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
@@ -378,12 +378,12 @@ let make_link ~pos (l : [< link'] list) =
  *)
 let link_of_xml, link_of_xml' =
   let attr_producer = [
-    ("href", (fun ctx pos a -> `HREF a));
-    ("rel", (fun ctx pos a -> `Rel a));
-    ("type", (fun ctx pos a -> `Type a));
-    ("hreflang", (fun ctx pos a -> `HREFLang a));
-    ("title", (fun ctx pos a -> `Title a));
-    ("length", (fun ctx pos a -> `Length a));
+    ("href", (fun pos a -> `HREF a));
+    ("rel", (fun pos a -> `Rel a));
+    ("type", (fun pos a -> `Type a));
+    ("hreflang", (fun pos a -> `HREFLang a));
+    ("title", (fun pos a -> `Title a));
+    ("length", (fun pos a -> `Length a));
   ] in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~attr_producer (make_link ~pos) xml),
@@ -407,7 +407,7 @@ let make_logo ~pos (l : [< logo'] list) =
     }
  *)
 let logo_of_xml, logo_of_xml' =
-  let leaf_producer ctx pos data = `URI data in
+  let leaf_producer pos data = `URI data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~leaf_producer (make_logo ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
@@ -426,7 +426,7 @@ let make_published ~pos (l : [< published'] list) =
 
 (* atomPublished = element atom:published { atomDateConstruct } *)
 let published_of_xml, published_of_xml' =
-  let leaf_producer ctx pos data = `Date data in
+  let leaf_producer pos data = `Date data in
   (fun ((pos, _, _) as xml) ->
     generate_catcher ~leaf_producer (make_published ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
@@ -472,7 +472,7 @@ let make_updated ~pos (l : [< updated'] list) =
 
 (* atomUpdated = element atom:updated { atomDateConstruct } *)
 let updated_of_xml, updated_of_xml' =
-  let leaf_producer ctx pos data = `Date data in
+  let leaf_producer pos data = `Date data in
   (fun ((pos, _, _) as xml) ->
      generate_catcher ~leaf_producer (make_updated ~pos) xml),
   generate_catcher ~leaf_producer (fun x -> x)
@@ -623,18 +623,18 @@ let make_source ~pos ~entry_authors (l : [< source'] list) =
  *)
 let source_of_xml ((pos, _, _) as xml)=
   let data_producer = [
-    ("author", (fun ctx a -> `Author (author_of_xml a)));
-    ("category", (fun ctx a -> `Category (category_of_xml a)));
-    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml a)));
-    ("generator", (fun ctx a -> `Generator (generator_of_xml a)));
-    ("icon", (fun ctx a -> `Icon (icon_of_xml a)));
-    ("id", (fun ctx a -> `ID (id_of_xml a)));
-    ("link", (fun ctx a -> `Link (link_of_xml a)));
-    ("logo", (fun ctx a -> `Logo (logo_of_xml a)));
-    ("rights", (fun ctx a -> `Rights (rights_of_xml a)));
-    ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml a)));
-    ("title", (fun ctx a -> `Title (title_of_xml a)));
-    ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
+    ("author", (fun a -> `Author (author_of_xml a)));
+    ("category", (fun a -> `Category (category_of_xml a)));
+    ("contributor", (fun a -> `Contributor (contributor_of_xml a)));
+    ("generator", (fun a -> `Generator (generator_of_xml a)));
+    ("icon", (fun a -> `Icon (icon_of_xml a)));
+    ("id", (fun a -> `ID (id_of_xml a)));
+    ("link", (fun a -> `Link (link_of_xml a)));
+    ("logo", (fun a -> `Logo (logo_of_xml a)));
+    ("rights", (fun a -> `Rights (rights_of_xml a)));
+    ("subtitle", (fun a -> `Subtitle (subtitle_of_xml a)));
+    ("title", (fun a -> `Title (title_of_xml a)));
+    ("updated", (fun a -> `Updated (updated_of_xml a)));
   ] in
   fun ~entry_authors ->
   generate_catcher
@@ -644,18 +644,18 @@ let source_of_xml ((pos, _, _) as xml)=
 
 let source_of_xml' =
   let data_producer = [
-    ("author", (fun ctx a -> `Author (author_of_xml' a)));
-    ("category", (fun ctx a -> `Category (category_of_xml' a)));
-    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml' a)));
-    ("generator", (fun ctx a -> `Generator (generator_of_xml' a)));
-    ("icon", (fun ctx a -> `Icon (icon_of_xml' a)));
-    ("id", (fun ctx a -> `ID (id_of_xml' a)));
-    ("link", (fun ctx a -> `Link (link_of_xml' a)));
-    ("logo", (fun ctx a -> `Logo (logo_of_xml' a)));
-    ("rights", (fun ctx a -> `Rights (rights_of_xml' a)));
-    ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml' a)));
-    ("title", (fun ctx a -> `Title (title_of_xml' a)));
-    ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
+    ("author", (fun a -> `Author (author_of_xml' a)));
+    ("category", (fun a -> `Category (category_of_xml' a)));
+    ("contributor", (fun a -> `Contributor (contributor_of_xml' a)));
+    ("generator", (fun a -> `Generator (generator_of_xml' a)));
+    ("icon", (fun a -> `Icon (icon_of_xml' a)));
+    ("id", (fun a -> `ID (id_of_xml' a)));
+    ("link", (fun a -> `Link (link_of_xml' a)));
+    ("logo", (fun a -> `Logo (logo_of_xml' a)));
+    ("rights", (fun a -> `Rights (rights_of_xml' a)));
+    ("subtitle", (fun a -> `Subtitle (subtitle_of_xml' a)));
+    ("title", (fun a -> `Title (title_of_xml' a)));
+    ("updated", (fun a -> `Updated (updated_of_xml' a)));
   ] in
   generate_catcher ~namespaces ~data_producer (fun x -> x)
 
@@ -973,18 +973,18 @@ let make_entry ~pos ~(feed_authors: author list) l =
  *)
 let entry_of_xml ((pos, _, _) as xml)=
   let data_producer = [
-    ("author", (fun ctx a -> `Author (author_of_xml a)));
-    ("category", (fun ctx a -> `Category (category_of_xml a)));
-    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml a)));
-    ("id", (fun ctx a -> `ID (id_of_xml a)));
-    ("link", (fun ctx a -> `Link (link_of_xml a)));
-    ("published", (fun ctx a -> `Published (published_of_xml a)));
-    ("rights", (fun ctx a -> `Rights (rights_of_xml a)));
-    ("source", (fun ctx a -> `Source a));
-    ("content", (fun ctx a -> `Content (content_of_xml a)));
-    ("summary", (fun ctx a -> `Summary (summary_of_xml a)));
-    ("title", (fun ctx a -> `Title (title_of_xml a)));
-    ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
+    ("author", (fun a -> `Author (author_of_xml a)));
+    ("category", (fun a -> `Category (category_of_xml a)));
+    ("contributor", (fun a -> `Contributor (contributor_of_xml a)));
+    ("id", (fun a -> `ID (id_of_xml a)));
+    ("link", (fun a -> `Link (link_of_xml a)));
+    ("published", (fun a -> `Published (published_of_xml a)));
+    ("rights", (fun a -> `Rights (rights_of_xml a)));
+    ("source", (fun a -> `Source a));
+    ("content", (fun a -> `Content (content_of_xml a)));
+    ("summary", (fun a -> `Summary (summary_of_xml a)));
+    ("title", (fun a -> `Title (title_of_xml a)));
+    ("updated", (fun a -> `Updated (updated_of_xml a)));
   ] in
   fun ~feed_authors ->
   generate_catcher
@@ -994,18 +994,18 @@ let entry_of_xml ((pos, _, _) as xml)=
 
 let entry_of_xml' =
   let data_producer = [
-    ("author", (fun ctx a -> `Author (author_of_xml' a)));
-    ("category", (fun ctx a -> `Category (category_of_xml' a)));
-    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml' a)));
-    ("id", (fun ctx a -> `ID (id_of_xml' a)));
-    ("link", (fun ctx a -> `Link (link_of_xml' a)));
-    ("published", (fun ctx a -> `Published (published_of_xml' a)));
-    ("rights", (fun ctx a -> `Rights (rights_of_xml' a)));
-    ("source", (fun ctx a -> `Source (source_of_xml' a)));
-    ("content", (fun ctx a -> `Content (content_of_xml' a)));
-    ("summary", (fun ctx a -> `Summary (summary_of_xml' a)));
-    ("title", (fun ctx a -> `Title (title_of_xml' a)));
-    ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
+    ("author", (fun a -> `Author (author_of_xml' a)));
+    ("category", (fun a -> `Category (category_of_xml' a)));
+    ("contributor", (fun a -> `Contributor (contributor_of_xml' a)));
+    ("id", (fun a -> `ID (id_of_xml' a)));
+    ("link", (fun a -> `Link (link_of_xml' a)));
+    ("published", (fun a -> `Published (published_of_xml' a)));
+    ("rights", (fun a -> `Rights (rights_of_xml' a)));
+    ("source", (fun a -> `Source (source_of_xml' a)));
+    ("content", (fun a -> `Content (content_of_xml' a)));
+    ("summary", (fun a -> `Summary (summary_of_xml' a)));
+    ("title", (fun a -> `Title (title_of_xml' a)));
+    ("updated", (fun a -> `Updated (updated_of_xml' a)));
   ] in
   generate_catcher ~namespaces ~data_producer (fun x -> x)
 
@@ -1135,37 +1135,37 @@ let make_feed ~pos (l : _ list) =
  *)
 let feed_of_xml ((pos, _, _) as xml) =
   let data_producer = [
-    ("author", (fun ctx a -> `Author (author_of_xml a)));
-    ("category", (fun ctx a -> `Category (category_of_xml a)));
-    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml a)));
-    ("generator", (fun ctx a -> `Generator (generator_of_xml a)));
-    ("icon", (fun ctx a -> `Icon (icon_of_xml a)));
-    ("id", (fun ctx a -> `ID (id_of_xml a)));
-    ("link", (fun ctx a -> `Link (link_of_xml a)));
-    ("logo", (fun ctx a -> `Logo (logo_of_xml a)));
-    ("rights", (fun ctx a -> `Rights (rights_of_xml a)));
-    ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml a)));
-    ("title", (fun ctx a -> `Title (title_of_xml a)));
-    ("updated", (fun ctx a -> `Updated (updated_of_xml a)));
-    ("entry", (fun ctx a -> `Entry a));
+    ("author", (fun a -> `Author (author_of_xml a)));
+    ("category", (fun a -> `Category (category_of_xml a)));
+    ("contributor", (fun a -> `Contributor (contributor_of_xml a)));
+    ("generator", (fun a -> `Generator (generator_of_xml a)));
+    ("icon", (fun a -> `Icon (icon_of_xml a)));
+    ("id", (fun a -> `ID (id_of_xml a)));
+    ("link", (fun a -> `Link (link_of_xml a)));
+    ("logo", (fun a -> `Logo (logo_of_xml a)));
+    ("rights", (fun a -> `Rights (rights_of_xml a)));
+    ("subtitle", (fun a -> `Subtitle (subtitle_of_xml a)));
+    ("title", (fun a -> `Title (title_of_xml a)));
+    ("updated", (fun a -> `Updated (updated_of_xml a)));
+    ("entry", (fun a -> `Entry a));
   ] in
   generate_catcher ~namespaces ~data_producer (make_feed ~pos) xml
 
 let feed_of_xml' =
   let data_producer = [
-    ("author", (fun ctx a -> `Author (author_of_xml' a)));
-    ("category", (fun ctx a -> `Category (category_of_xml' a)));
-    ("contributor", (fun ctx a -> `Contributor (contributor_of_xml' a)));
-    ("generator", (fun ctx a -> `Generator (generator_of_xml' a)));
-    ("icon", (fun ctx a -> `Icon (icon_of_xml' a)));
-    ("id", (fun ctx a -> `ID (id_of_xml' a)));
-    ("link", (fun ctx a -> `Link (link_of_xml' a)));
-    ("logo", (fun ctx a -> `Logo (logo_of_xml' a)));
-    ("rights", (fun ctx a -> `Rights (rights_of_xml' a)));
-    ("subtitle", (fun ctx a -> `Subtitle (subtitle_of_xml' a)));
-    ("title", (fun ctx a -> `Title (title_of_xml' a)));
-    ("updated", (fun ctx a -> `Updated (updated_of_xml' a)));
-    ("entry", (fun ctx a -> `Entry (entry_of_xml' a)));
+    ("author", (fun a -> `Author (author_of_xml' a)));
+    ("category", (fun a -> `Category (category_of_xml' a)));
+    ("contributor", (fun a -> `Contributor (contributor_of_xml' a)));
+    ("generator", (fun a -> `Generator (generator_of_xml' a)));
+    ("icon", (fun a -> `Icon (icon_of_xml' a)));
+    ("id", (fun a -> `ID (id_of_xml' a)));
+    ("link", (fun a -> `Link (link_of_xml' a)));
+    ("logo", (fun a -> `Logo (logo_of_xml' a)));
+    ("rights", (fun a -> `Rights (rights_of_xml' a)));
+    ("subtitle", (fun a -> `Subtitle (subtitle_of_xml' a)));
+    ("title", (fun a -> `Title (title_of_xml' a)));
+    ("updated", (fun a -> `Updated (updated_of_xml' a)));
+    ("entry", (fun a -> `Entry (entry_of_xml' a)));
   ] in
   generate_catcher ~namespaces ~data_producer (fun x -> x)
 
