@@ -23,7 +23,7 @@ module XML = struct
       | attr :: r -> begin
           match get_producer (get_attr_name attr) attr_producer with
           | Some f when in_namespaces attr ->
-              catch_attr ((f acc pos (get_attr_value attr)) :: acc) pos r
+              catch_attr ((f pos (get_attr_value attr)) :: acc) pos r
           | _ -> catch_attr acc pos r end
       | [] -> acc
     in
@@ -31,11 +31,11 @@ module XML = struct
       | Node (pos, tag, datas) :: r ->
         begin match get_producer (get_tag_name tag) data_producer with
           | Some f when in_namespaces tag ->
-              catch_datas ((f acc (pos, tag, datas)) :: acc) r
+              catch_datas ((f (pos, tag, datas)) :: acc) r
           | _ -> catch_datas acc r end
       | Data (pos, str) :: r ->
         begin match leaf_producer with
-          | Some f -> catch_datas ((f acc pos str) :: acc) r
+          | Some f -> catch_datas ((f pos str) :: acc) r
           | None -> catch_datas acc r end
       | [] -> acc
     in
@@ -44,7 +44,7 @@ module XML = struct
     in generate
 
   let dummy_of_xml ~ctor =
-    let leaf_producer ctx pos data = ctor data in
+    let leaf_producer pos data = ctor data in
     generate_catcher ~leaf_producer (function [] -> (ctor "") | x :: r -> x)
 end
 
