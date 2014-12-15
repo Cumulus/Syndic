@@ -296,32 +296,32 @@ val unsafe : Xmlm.input ->
   [> `RDF of
        [> `Channel of
             [> `About of string
-            | `Description of [> `Data of string ] list
+            | `Description of string list
             | `Image of [> `URI of string ] list
             | `Items of
                  [> `Seq of [> `Li of [> `URI of string ] list ] list ]
                    list
             | `Link of [> `URI of string ] list
             | `TextInput of [> `URI of string ] list
-            | `Title of [> `Data of string ] list ]
+            | `Title of string list ]
               list
        | `Image of
             [> `About of string
             | `Link of [> `URI of string ] list
-            | `Title of [> `Data of string ] list
+            | `Title of string list
             | `URL of [> `URI of string ] list ]
               list
        | `Item of
             [> `About of string
-            | `Description of [> `Data of string ] list
+            | `Description of string list
             | `Link of [> `URI of string ] list
-            | `Title of [> `Data of string ] list ]
+            | `Title of string list ]
               list
        | `TextInput of
             [> `About of string
-            | `Description of [> `Data of string ] list
+            | `Description of string list
             | `Link of [> `URI of string ] list
-            | `Name of [> `Data of string ] list
-            | `Title of [> `Data of string ] list ]
+            | `Name of string list
+            | `Title of string list ]
               list ]
          list ]

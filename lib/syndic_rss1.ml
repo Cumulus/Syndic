@@ -8,55 +8,52 @@ let namespaces = [ "http://purl.org/rss/1.0/";
                    "http://www.w3.org/1999/02/22-rdf-syntax-ns#" ]
 
 type title = string
-type title' = [ `Data of string ]
 
-let make_title ~pos (l : [< title' ] list) =
-  let title = match find (fun (`Data _) -> true) l with
-    | Some (`Data d) -> d
-    | _ ->
+let make_title ~pos (l : string list) =
+  let title = match l with
+    | d :: _ -> d
+    | [] ->
       raise (Error.Error (pos,
                             "The content of <title> MUST be \
                              a non-empty string"))
-  in title
+  in `Title title
 
 let title_of_xml, title_of_xml' =
-  let leaf_producer pos data = `Data data in
+  let leaf_producer pos data = data in
   generate_catcher ~namespaces ~leaf_producer make_title,
-  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `Title x)
 
 type name = string
-type name' = [`Data of string]
 
-let make_name ~pos (l : [< name' ] list) =
-  let name = match find (fun (`Data _) -> true) l with
-    | Some (`Data d) -> d
-    | _ ->
+let make_name ~pos (l : string list) =
+  let name = match l with
+    | d :: _ -> d
+    | [] ->
       raise (Error.Error (pos,
                             "The content of <name> MUST be \
                              a non-empty string"))
-  in name
+  in `Name name
 
 let name_of_xml, name_of_xml' =
-  let leaf_producer pos data = `Data data in
+  let leaf_producer pos data = data in
   generate_catcher ~namespaces ~leaf_producer make_name,
-  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `Name x)
 
 type description = string
-type description' = [ `Data of string ]
 
-let make_description ~pos (l : [< description' ] list) =
-  let description = match find (function `Data _ -> true) l with
-    | Some (`Data s) -> s
-    | _ ->
+let make_description ~pos (l : string list) =
+  let description = match l with
+    | s :: _ -> s
+    | [] ->
       raise (Error.Error (pos,
                             "The content of <description> MUST be \
                              a non-empty string"))
-  in description
+  in `Description description
 
 let description_of_xml, description_of_xml' =
-  let leaf_producer pos data = `Data data in
+  let leaf_producer pos data = data in
   generate_catcher ~namespaces ~leaf_producer make_description,
-  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `Description x)
 
 type channel_image = Uri.t
 type channel_image' = [ `URI of string ]
@@ -68,14 +65,14 @@ let make_channel_image ~pos (l : [< channel_image' ] list) =
       raise (Error.Error (pos,
                             "The content of <image> MUST be \
                              a non-empty string"))
-  in image
+  in `Image image
 
 let channel_image_of_xml, channel_image_of_xml' =
   let attr_producer = [
     ("resource", (fun a -> `URI a));
   ] in
   generate_catcher ~namespaces ~attr_producer make_channel_image,
-  generate_catcher ~namespaces ~attr_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~attr_producer (fun ~pos x -> `Image x)
 
 type link = Uri.t
 type link' = [ `URI of string ]
@@ -87,12 +84,12 @@ let make_link ~pos (l : [< link' ] list) =
       raise (Error.Error (pos,
                             "The content of <link> MUST be \
                              a non-empty string"))
-  in link
+  in `Link link
 
 let link_of_xml, link_of_xml' =
   let leaf_producer pos data = `URI data in
   generate_catcher ~namespaces ~leaf_producer make_link,
-  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `Link x)
 
 type url = Uri.t
 type url' = [ `URI of string ]
@@ -104,12 +101,12 @@ let make_url ~pos (l : [< url' ] list) =
       raise (Error.Error (pos,
                             "The content of <url> MUST be \
                              a non-empty string"))
-  in url
+  in `URL url
 
 let url_of_xml, url_of_xml' =
   let leaf_producer pos data = `URI data in
   generate_catcher ~namespaces ~leaf_producer make_url,
-  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `URL x)
 
 type li = Uri.t
 type li' = [ `URI of string ]
@@ -121,7 +118,8 @@ let make_li ~pos (l : [< li' ] list) =
       raise (Error.Error (pos,
                             "Li elements MUST have a 'resource' \
                              attribute"))
-  in url
+  in
+  `Li url
 
 let li_of_xml, li_of_xml' =
   let attr_producer = [
@@ -132,18 +130,18 @@ let li_of_xml, li_of_xml' =
     ~attr_producer make_li,
   generate_catcher
       ~namespaces
-      ~attr_producer (fun ~pos x -> x)
+      ~attr_producer (fun ~pos x -> `Li x)
 
 type seq = li list
 type seq' = [ `Li of li ]
 
 let make_seq ~pos (l : [< seq' ] list) =
   let li = List.map (function `Li u -> u) l
-  in li
+  in `Seq li
 
 let seq_of_xml =
   let data_producer = [
-    ("li", (fun a -> `Li (li_of_xml a)));
+    ("li", li_of_xml);
   ] in
   generate_catcher
       ~namespaces
@@ -151,11 +149,11 @@ let seq_of_xml =
 
 let seq_of_xml' =
   let data_producer = [
-    ("li", (fun a -> `Li (li_of_xml' a)));
+    ("li", li_of_xml');
   ] in
   generate_catcher
       ~namespaces
-      ~data_producer (fun ~pos x -> x)
+      ~data_producer (fun ~pos x -> `Seq x)
 
 type items = seq
 type items' = [ `Seq of seq ]
@@ -167,11 +165,11 @@ let make_items ~pos (l : [< items' ] list) =
       raise (Error.Error (pos,
                             "<items> elements MUST contains exactly one \
                              <rdf:Seq> element"))
-  in li
+  in `Items li
 
 let items_of_xml =
   let data_producer = [
-    ("Seq", (fun a -> `Seq (seq_of_xml a)));
+    ("Seq", seq_of_xml);
   ] in
   generate_catcher
       ~namespaces
@@ -179,11 +177,11 @@ let items_of_xml =
 
 let items_of_xml' =
   let data_producer = [
-    ("Seq", (fun a -> `Seq (seq_of_xml' a)));
+    ("Seq", seq_of_xml');
   ] in
   generate_catcher
       ~namespaces
-      ~data_producer (fun ~pos x -> x)
+      ~data_producer (fun ~pos x -> `Items x)
 
 type channel_textinput = Uri.t
 type channel_textinput' = [ `URI of string ]
@@ -195,14 +193,14 @@ let make_textinput ~pos (l : [< channel_textinput' ] list) =
       raise (Error.Error (pos,
                             "Textinput elements MUST have a 'resource' \
                              attribute"))
-  in url
+  in `TextInput url
 
 let channel_textinput_of_xml, channel_textinput_of_xml' =
   let attr_producer = [
     ("resource", (fun a -> `URI a));
   ] in
   generate_catcher ~namespaces ~attr_producer make_textinput,
-  generate_catcher ~namespaces ~attr_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~attr_producer (fun ~pos x -> `TextInput x)
 
 type channel =
   {
@@ -260,16 +258,18 @@ let make_channel ~pos (l : [< channel' ] list) =
     match find (function `TextInput _ -> true | _ -> false) l with
     | Some (`TextInput u) -> Some u
     | _ -> None
-  in ({ about; title; link; description; image; items; textinput } : channel)
+  in
+  `Channel({ about; title; link; description; image; items; textinput }
+           : channel)
 
 let channel_of_xml =
   let data_producer = [
-    ("title", (fun a -> `Title (title_of_xml a)));
-    ("link", (fun a -> `Link (link_of_xml a)));
-    ("description", (fun a -> `Description (description_of_xml a)));
-    ("image", (fun a -> `Image (channel_image_of_xml a)));
-    ("items", (fun a -> `Items (items_of_xml a)));
-    ("textinput", (fun a -> `TextInput (channel_textinput_of_xml a)));
+    ("title", title_of_xml);
+    ("link", link_of_xml);
+    ("description", description_of_xml);
+    ("image", channel_image_of_xml);
+    ("items", items_of_xml);
+    ("textinput", channel_textinput_of_xml);
   ] in
   let attr_producer = [
     ("about", (fun a -> `About a));
@@ -282,17 +282,18 @@ let channel_of_xml =
 
 let channel_of_xml' =
   let data_producer = [
-    ("title", (fun a -> `Title (title_of_xml' a)));
-    ("link", (fun a -> `Link (link_of_xml' a)));
-    ("description", (fun a -> `Description (description_of_xml' a)));
-    ("image", (fun a -> `Image (channel_image_of_xml' a)));
-    ("items", (fun a -> `Items (items_of_xml' a)));
-    ("textinput", (fun a -> `TextInput (channel_textinput_of_xml' a)));
+    ("title", title_of_xml');
+    ("link", link_of_xml');
+    ("description", description_of_xml');
+    ("image", channel_image_of_xml');
+    ("items", items_of_xml');
+    ("textinput", channel_textinput_of_xml');
   ] in
   let attr_producer = [
     ("about", (fun a -> `About a));
   ] in
-  generate_catcher ~namespaces ~attr_producer ~data_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~attr_producer ~data_producer
+                   (fun ~pos x -> `Channel x)
 
 type image =
   {
@@ -331,13 +332,13 @@ let make_image ~pos (l : [< image' ] list) =
       raise (Error.Error (pos,
                             "Image elements MUST have a 'about' \
                              attribute"))
-  in ({ about; title; url; link; } : image)
+  in `Image ({ about; title; url; link; } : image)
 
 let image_of_xml =
   let data_producer = [
-    ("title", (fun a -> `Title (title_of_xml a)));
-    ("link" , (fun a -> `Link (link_of_xml a)));
-    ("url", (fun a -> `URL (url_of_xml a)));
+    ("title", title_of_xml);
+    ("link" , link_of_xml);
+    ("url", url_of_xml);
   ] in
   let attr_producer = [
     ("about", (fun a -> `About a));
@@ -350,14 +351,15 @@ let image_of_xml =
 
 let image_of_xml' =
   let data_producer = [
-    ("title", (fun a -> `Title (title_of_xml' a)));
-    ("link" , (fun a -> `Link (link_of_xml' a)));
-    ("url", (fun a -> `URL (url_of_xml' a)));
+    ("title", title_of_xml');
+    ("link" , link_of_xml');
+    ("url", url_of_xml');
   ] in
   let attr_producer = [
     ("about", (fun a -> `About a));
   ] in
-  generate_catcher ~namespaces ~attr_producer ~data_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~attr_producer ~data_producer
+                   (fun ~pos x -> `Image x)
 
 type item =
   {
@@ -395,13 +397,13 @@ let make_item ~pos (l : [< item' ] list) =
       raise (Error.Error (pos,
                             "Item elements MUST have a 'about' \
                              attribute"))
-  in ({ about; title; link; description; } : item)
+  in `Item({ about; title; link; description; } : item)
 
 let item_of_xml =
   let data_producer = [
-    ("title", (fun a -> `Title (title_of_xml a)));
-    ("link", (fun a -> `Link (link_of_xml a)));
-    ("description", (fun a -> `Description (description_of_xml a)));
+    ("title", title_of_xml);
+    ("link", link_of_xml);
+    ("description", description_of_xml);
   ] in
   let attr_producer = [
     ("about", (fun a -> `About a));
@@ -414,14 +416,15 @@ let item_of_xml =
 
 let item_of_xml' =
   let data_producer = [
-    ("title", (fun a -> `Title (title_of_xml' a)));
-    ("link", (fun a -> `Link (link_of_xml' a)));
-    ("description", (fun a -> `Description (description_of_xml' a)));
+    ("title", title_of_xml');
+    ("link", link_of_xml');
+    ("description", description_of_xml');
   ] in
   let attr_producer = [
     ("about", (fun a -> `About a));
   ] in
-  generate_catcher ~namespaces ~attr_producer ~data_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~attr_producer ~data_producer
+                   (fun ~pos x -> `Item x)
 
 type textinput =
   {
@@ -468,14 +471,14 @@ let make_textinput ~pos (l : [< textinput' ] list) =
       raise (Error.Error (pos,
                             "Textinput elements MUST have a 'about' \
                              attribute"))
-  in ({ about; title; description; name; link; } : textinput)
+  in `TextInput({ about; title; description; name; link; } : textinput)
 
 let textinput_of_xml =
   let data_producer = [
-    ("title", (fun a -> `Title (title_of_xml a)));
-    ("description", (fun a -> `Description (description_of_xml a)));
-    ("name", (fun a -> `Name (name_of_xml a)));
-    ("link", (fun a -> `Link (link_of_xml a)));
+    ("title", title_of_xml);
+    ("description", description_of_xml);
+    ("name", name_of_xml);
+    ("link", link_of_xml);
   ] in
   let attr_producer = [
     ("about", (fun a -> `About a))
@@ -488,15 +491,16 @@ let textinput_of_xml =
 
 let textinput_of_xml' =
   let data_producer = [
-    ("title", (fun a -> `Title (title_of_xml' a)));
-    ("description", (fun a -> `Description (description_of_xml' a)));
-    ("name", (fun a -> `Name (name_of_xml' a)));
-    ("link", (fun a -> `Link (link_of_xml' a)));
+    ("title", title_of_xml');
+    ("description", description_of_xml');
+    ("name", name_of_xml');
+    ("link", link_of_xml');
   ] in
   let attr_producer = [
     ("about", (fun a -> `About a))
   ] in
-  generate_catcher ~namespaces ~attr_producer ~data_producer (fun ~pos x -> x)
+  generate_catcher ~namespaces ~attr_producer ~data_producer
+                   (fun ~pos x -> `TextInput x)
 
 type rdf =
   {
@@ -532,10 +536,10 @@ let make_rdf ~pos (l : [< rdf' ] list) =
 
 let rdf_of_xml =
   let data_producer = [
-    ("channel", (fun a -> `Channel (channel_of_xml a)));
-    ("image", (fun a -> `Image (image_of_xml a)));
-    ("item", (fun a -> `Item (item_of_xml a)));
-    ("textinput", (fun a -> `TextInput (textinput_of_xml a)))
+    ("channel", channel_of_xml);
+    ("image", image_of_xml);
+    ("item", item_of_xml);
+    ("textinput", textinput_of_xml)
   ] in
   generate_catcher
     ~namespaces
@@ -544,10 +548,10 @@ let rdf_of_xml =
 
 let rdf_of_xml' =
   let data_producer = [
-    ("channel", (fun a -> `Channel (channel_of_xml' a)));
-    ("image", (fun a -> `Image (image_of_xml' a)));
-    ("item", (fun a -> `Item (item_of_xml' a)));
-    ("textinput", (fun a -> `TextInput (textinput_of_xml' a)))
+    ("channel", channel_of_xml');
+    ("image", image_of_xml');
+    ("item", item_of_xml');
+    ("textinput", textinput_of_xml')
   ] in
   generate_catcher ~namespaces ~data_producer (fun ~pos x -> x)
 
