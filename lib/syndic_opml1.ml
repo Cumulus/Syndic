@@ -32,11 +32,11 @@ let string_of_xml name (pos, _, datas) =
   try get_leaf datas
   with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
 
-let title_of_xml = string_of_xml "<title>"
+let title_of_xml a = `Title(string_of_xml "<title>" a)
 
-let owner_name_of_xml = string_of_xml "<ownerName>"
+let owner_name_of_xml a = `OwnerName(string_of_xml "<ownerName>" a)
 
-let owner_email_of_xml = string_of_xml "<ownerEmail>"
+let owner_email_of_xml a = `OwnerEmail(string_of_xml "<ownerEmail>" a)
 
 let expansion_state_of_xml (pos, _, datas) =
   let explode s =
@@ -61,10 +61,10 @@ let expansion_state_of_xml (pos, _, datas) =
        |> List.rev
        |> List.map implode
   in
-  try get_leaf datas
-      |> split ','
-      |> List.map int_of_string
-  with Not_found -> []
+  try `ExpansionState(get_leaf datas
+                      |> split ','
+                      |> List.map int_of_string)
+  with Not_found -> `ExpansionState []
      | _ -> raise (Error.Error (pos, "<expansionState> must be a list of \
                                      numbers separated by commas as 1,2,3"))
 
@@ -73,15 +73,16 @@ let int_of_xml name (pos, _, datas) =
   with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
      | Failure _ -> raise (Error.Error (pos, name ^ " must be an integer"))
 
-let vert_scroll_state_of_xml = int_of_xml "<vertScrollState>"
+let vert_scroll_state_of_xml a =
+  `VertScrollState(int_of_xml "<vertScrollState>" a)
 
-let window_top_of_xml = int_of_xml "<windowTop>"
+let window_top_of_xml a = `WindowTop(int_of_xml "<windowTop>" a)
 
-let window_left_of_xml = int_of_xml "<windowLeft>"
+let window_left_of_xml a = `WindowLeft(int_of_xml "<windowLeft>" a)
 
-let window_bottom_of_xml = int_of_xml "<windowBotton>"
+let window_bottom_of_xml a = `WindowBottom(int_of_xml "<windowBotton>" a)
 
-let window_right_of_xml = int_of_xml "<windowRight>"
+let window_right_of_xml a = `WindowRight(int_of_xml "<windowRight>" a)
 
 type head' = [
   | `Title of string
@@ -156,19 +157,18 @@ let make_head ~pos (l : [< head'] list) =
     | Some (`WindowRight r) -> Some r
     | _ -> None
   in
-  {
-    title;
-    date_created;
-    date_modified;
-    owner_name;
-    owner_email;
-    expansion_state;
-    vert_scroll_state;
-    window_top;
-    window_left;
-    window_bottom;
-    window_right
-  }
+  `Head { title;
+          date_created;
+          date_modified;
+          owner_name;
+          owner_email;
+          expansion_state;
+          vert_scroll_state;
+          window_top;
+          window_left;
+          window_bottom;
+          window_right
+        }
 
 
 let date_of_xml name (pos, _, datas) =
@@ -178,19 +178,22 @@ let date_of_xml name (pos, _, datas) =
   try Date.of_rfc822 d
   with _ -> raise (Error.Error (pos, sprintf "Date %S incorrect" d))
 
+let date_created_of_xml a = `DateCreated (date_of_xml "<dateCreated>" a)
+let date_modified_of_xml a = `DateModified (date_of_xml "<dateModified>" a)
+
 let head_of_xml =
   let data_producer = [
-    "title", (fun a -> `Title (title_of_xml a));
-    "dateCreated", (fun a -> `DateCreated (date_of_xml "<dateCreated>" a));
-    "dateModified", (fun a -> `DateModified (date_of_xml "<dateModified>" a));
-    "ownerName", (fun a -> `OwnerName (owner_name_of_xml a));
-    "ownerEmail", (fun a -> `OwnerEmail (owner_email_of_xml a));
-    "expansionState", (fun a -> `ExpansionState (expansion_state_of_xml a));
-    "vertScrollState", (fun a -> `VertScrollState (vert_scroll_state_of_xml a));
-    "windowTop", (fun a -> `WindowTop (window_top_of_xml a));
-    "windowLeft", (fun a -> `WindowLeft (window_left_of_xml a));
-    "windowBottom", (fun a -> `WindowBottom (window_bottom_of_xml a));
-    "windowRight", (fun a -> `WindowRight (window_right_of_xml a))
+    "title", title_of_xml;
+    "dateCreated", date_created_of_xml;
+    "dateModified", date_modified_of_xml;
+    "ownerName", owner_name_of_xml;
+    "ownerEmail", owner_email_of_xml;
+    "expansionState", expansion_state_of_xml;
+    "vertScrollState", vert_scroll_state_of_xml;
+    "windowTop", window_top_of_xml;
+    "windowLeft", window_left_of_xml;
+    "windowBottom", window_bottom_of_xml;
+    "windowRight", window_right_of_xml
     ] in
   generate_catcher
     ~data_producer
@@ -212,7 +215,7 @@ let head_of_xml' =
   ] in
   generate_catcher
     ~data_producer
-    (fun ~pos x -> x)
+    (fun ~pos x -> `Head x)
 
 type outline =
   {
@@ -231,7 +234,7 @@ let outline ?typ ?(is_comment=false) ?(is_breakpoint=false) ?xml_url ?html_url
   { text;  typ;  is_comment;  is_breakpoint;  xml_url;  html_url;
     attrs;  outlines }
 
-let rec outline_of_xml (pos, ((_outline, attributes): Xmlm.tag), datas) =
+let rec outline_of_node (pos, ((_outline, attributes): Xmlm.tag), datas) =
   let text = ref ""
   and typ = ref None
   and is_comment = ref false
@@ -263,7 +266,7 @@ let rec outline_of_xml (pos, ((_outline, attributes): Xmlm.tag), datas) =
   let process_outlines = function
     | XML.Node (p, (((ns, name), _) as t), d) ->
        if ns = "" && name = "outline" then
-         outlines := outline_of_xml (p, t, d) :: !outlines
+         outlines := outline_of_node (p, t, d) :: !outlines
     | XML.Data _ -> () in
   List.iter process_outlines datas;
   { text = !text;
@@ -276,7 +279,9 @@ let rec outline_of_xml (pos, ((_outline, attributes): Xmlm.tag), datas) =
     outlines = !outlines;
   }
 
-let rec outline_of_xml' (pos, ((_outline, attributes): Xmlm.tag), datas) =
+let outline_of_xml a = `Outline(outline_of_node a)
+
+let rec outline_of_node' (pos, ((_outline, attributes): Xmlm.tag), datas) =
   let el_of_attrs ((_, name), v) = match name with
     | "text" -> `Text v
     | "type" -> `Type v
@@ -289,10 +294,12 @@ let rec outline_of_xml' (pos, ((_outline, attributes): Xmlm.tag), datas) =
   let process_outlines = function
     | XML.Node (p, (((ns, name), _) as t), d) ->
        if ns = "" && name = "outline" then
-         el := `Outline(outline_of_xml' (p, t, d)) :: !el
+         el := `Outline(outline_of_node' (p, t, d)) :: !el
     | XML.Data _ -> () in
   List.iter process_outlines datas;
   !el
+
+let outline_of_xml' a = `Outline(outline_of_node' a)
 
 type body = outline list
 
@@ -303,22 +310,22 @@ let make_body ~pos (l : [< body'] list) =
     List.map (function `Outline o -> o) l
     |> List.rev
   in
-  if List.length l <> 0 then l
+  if List.length l <> 0 then `Body l
   else raise (Error.Error (pos, "Body must contains one <outline> element."))
 
 let body_of_xml =
   let data_producer = [
-    "outline", (fun a -> (`Outline (outline_of_xml a)))
+    "outline", outline_of_xml
   ] in
   generate_catcher ~data_producer make_body
 
 let body_of_xml' =
   let data_producer = [
-    "outline", (fun a -> (`Outline (outline_of_xml' a)))
+    "outline", outline_of_xml'
   ] in
   generate_catcher
     ~data_producer
-    (fun ~pos x -> x)
+    (fun ~pos x -> `Body x)
 
 type opml =
   {
@@ -354,8 +361,8 @@ let opml_of_xml =
     "version", (fun a -> `Version a)
   ] in
   let data_producer = [
-    "head", (fun a -> `Head (head_of_xml a));
-    "body", (fun a -> `Body (body_of_xml a))
+    "head", head_of_xml;
+    "body", body_of_xml;
   ] in
   generate_catcher
     ~attr_producer
@@ -367,8 +374,8 @@ let opml_of_xml' =
     "version", (fun a -> `Version a)
   ] in
   let data_producer = [
-    "head", (fun a -> `Head (head_of_xml' a));
-    "body", (fun a -> `Body (body_of_xml' a))
+    "head", head_of_xml';
+    "body", body_of_xml';
   ] in
   generate_catcher
     ~attr_producer
