@@ -502,19 +502,17 @@ val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
 
 (**/**)
 
+type person = [ `Email of string | `Name of string | `URI of string ] list
+
 (** Analysis without verification, enjoy ! *)
 val unsafe : Xmlm.input ->
   [> `Feed of
-       [> `Author of
-            [> `Email of string | `Name of string | `URI of string ] list
+       [> `Author of person
        | `Category of
             [> `Label of string | `Scheme of string | `Term of string ] list
-       | `Contributor of
-            [> `Email of string | `Name of string | `URI of string ] list
+       | `Contributor of person
        | `Entry of
-            [> `Author of
-                 [> `Email of string | `Name of string | `URI of string ]
-                   list
+            [> `Author of person
             | `Category of
                  [> `Label of string | `Scheme of string | `Term of string ]
                    list
@@ -522,10 +520,8 @@ val unsafe : Xmlm.input ->
                  [> `Data of Syndic_xml.t list | `SRC of string
                   | `Type of string
                  ] list
-            | `Contributor of
-                 [> `Email of string | `Name of string | `URI of string ]
-                   list
-            | `ID of [> `Data of string ] list
+            | `Contributor of person
+            | `ID of string list
             | `Link of
                  [> `HREF of string
                  | `HREFLang of string
@@ -535,25 +531,21 @@ val unsafe : Xmlm.input ->
                  | `Type of string ]
                    list
             | `Published of [> `Date of string ] list
-            | `Rights of [> `Data of Syndic_xml.t list ]
+            | `Rights of Syndic_xml.t list
             | `Source of
-                 [> `Author of
-                      [> `Email of string | `Name of string | `URI of string ]
-                        list
+                 [> `Author of person
                  | `Category of
                       [> `Label of string
                       | `Scheme of string
                       | `Term of string ]
                         list
-                 | `Contributor of
-                      [> `Email of string | `Name of string | `URI of string ]
-                        list
+                 | `Contributor of person
                  | `Generator of
                       [> `Content of string
                       | `URI of string
                       | `Version of string ]
                         list
-                 | `ID of [> `Data of string ] list
+                 | `ID of string list
                  | `Icon of [> `URI of string ] list
                  | `Link of
                       [> `HREF of string
@@ -564,19 +556,19 @@ val unsafe : Xmlm.input ->
                       | `Type of string ]
                         list
                  | `Logo of [> `URI of string ] list
-                 | `Rights of [> `Data of Syndic_xml.t list ]
-                 | `Subtitle of [> `Data of Syndic_xml.t list ]
-                 | `Title of [> `Data of Syndic_xml.t list ]
+                 | `Rights of Syndic_xml.t list
+                 | `Subtitle of Syndic_xml.t list
+                 | `Title of Syndic_xml.t list
                  | `Updated of [> `Date of string ] list ]
                    list
-            | `Summary of [> `Data of Syndic_xml.t list ]
-            | `Title of [> `Data of Syndic_xml.t  list ]
+            | `Summary of Syndic_xml.t list
+            | `Title of Syndic_xml.t  list
             | `Updated of [> `Date of string ] list ]
               list
        | `Generator of
             [> `Content of string | `URI of string | `Version of string ]
               list
-       | `ID of [> `Data of string ] list
+       | `ID of string list
        | `Icon of [> `URI of string ] list
        | `Link of
             [> `HREF of string
@@ -587,8 +579,8 @@ val unsafe : Xmlm.input ->
             | `Type of string ]
               list
        | `Logo of [> `URI of string ] list
-       | `Rights of [> `Data of Syndic_xml.t list ]
-       | `Subtitle of [> `Data of Syndic_xml.t list ]
-       | `Title of [> `Data of Syndic_xml.t list ]
+       | `Rights of Syndic_xml.t list
+       | `Subtitle of Syndic_xml.t list
+       | `Title of Syndic_xml.t list
        | `Updated of [> `Date of string ] list
        ] list ]
