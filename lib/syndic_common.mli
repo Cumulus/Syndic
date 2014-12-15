@@ -3,10 +3,10 @@ module XML : sig
 
   val generate_catcher :
     ?namespaces:string list ->
-    ?attr_producer:(string * (Xmlm.pos -> string -> 'a)) list ->
+    ?attr_producer:(string * (string -> 'a)) list ->
     ?data_producer:(string * (Xmlm.pos * Xmlm.tag * t list -> 'a)) list ->
     ?leaf_producer:(Xmlm.pos -> string -> 'a) ->
-    ('a list -> 'b) -> Xmlm.pos * Xmlm.tag * t list -> 'b
+    (pos: Xmlm.pos -> 'a list -> 'b) -> Xmlm.pos * Xmlm.tag * t list -> 'b
 
   val dummy_of_xml : ctor:(string -> 'a) ->
     Xmlm.pos * Xmlm.tag * t list -> 'a

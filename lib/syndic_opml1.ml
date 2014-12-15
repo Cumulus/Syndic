@@ -192,10 +192,9 @@ let head_of_xml =
     "windowBottom", (fun a -> `WindowBottom (window_bottom_of_xml a));
     "windowRight", (fun a -> `WindowRight (window_right_of_xml a))
     ] in
-  fun ((pos, _, _) as xml) ->
   generate_catcher
     ~data_producer
-    (make_head ~pos) xml
+    make_head
 
 let head_of_xml' =
   let data_producer = [
@@ -213,7 +212,7 @@ let head_of_xml' =
   ] in
   generate_catcher
     ~data_producer
-    (fun x -> x)
+    (fun ~pos x -> x)
 
 type outline =
   {
@@ -307,11 +306,11 @@ let make_body ~pos (l : [< body'] list) =
   if List.length l <> 0 then l
   else raise (Error.Error (pos, "Body must contains one <outline> element."))
 
-let body_of_xml ((pos, _, _) as xml) =
+let body_of_xml =
   let data_producer = [
     "outline", (fun a -> (`Outline (outline_of_xml a)))
   ] in
-  generate_catcher ~data_producer (make_body ~pos) xml
+  generate_catcher ~data_producer make_body
 
 let body_of_xml' =
   let data_producer = [
@@ -319,7 +318,7 @@ let body_of_xml' =
   ] in
   generate_catcher
     ~data_producer
-    (fun x -> x)
+    (fun ~pos x -> x)
 
 type opml =
   {
@@ -350,9 +349,9 @@ let make_opml ~pos (l : [< opml'] list) =
                                     element"))
   in { version; head; body}
 
-let opml_of_xml ((pos, _, _) as xml) =
+let opml_of_xml =
   let attr_producer = [
-    "version", (fun _ a -> `Version a)
+    "version", (fun a -> `Version a)
   ] in
   let data_producer = [
     "head", (fun a -> `Head (head_of_xml a));
@@ -361,11 +360,11 @@ let opml_of_xml ((pos, _, _) as xml) =
   generate_catcher
     ~attr_producer
     ~data_producer
-    (make_opml ~pos) xml
+    make_opml
 
 let opml_of_xml' =
   let attr_producer = [
-    "version", (fun _ a -> `Version a)
+    "version", (fun a -> `Version a)
   ] in
   let data_producer = [
     "head", (fun a -> `Head (head_of_xml' a));
@@ -374,7 +373,7 @@ let opml_of_xml' =
   generate_catcher
     ~attr_producer
     ~data_producer
-    (fun x -> x)
+    (fun ~pos x -> x)
 
 let find_opml l =
   find (function XML.Node (_, t, _) -> tag_is t "opml" | _ -> false) l

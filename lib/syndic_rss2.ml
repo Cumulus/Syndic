@@ -101,7 +101,7 @@ let image_description_of_xml (pos, tag, datas) =
                             "The content of <description> MUST be \
                              a non-empty string"))
 
-let image_of_xml ((pos, _, _) as xml) =
+let image_of_xml =
   let data_producer = [
     ("url", (fun a -> `URL (image_url_of_xml a)));
     ("title", (fun a -> `Title (image_title_of_xml a)));
@@ -110,7 +110,7 @@ let image_of_xml ((pos, _, _) as xml) =
     ("height", (fun a -> `Height (image_height_of_xml a)));
     ("description", (fun a -> `Description (image_description_of_xml a)));
   ] in
-  generate_catcher ~data_producer (make_image ~pos) xml
+  generate_catcher ~data_producer make_image
 
 let image_of_xml' =
   let data_producer = [
@@ -121,7 +121,7 @@ let image_of_xml' =
     ("height", dummy_of_xml ~ctor:(fun a -> `Height a));
     ("description", dummy_of_xml ~ctor:(fun a -> `Description a));
   ] in
-  generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun ~pos x -> x)
 
 type cloud = {
   domain: Uri.t;
@@ -180,15 +180,14 @@ let make_cloud ~pos (l : [< cloud' ] list) =
 
 let cloud_of_xml, cloud_of_xml' =
   let attr_producer = [
-    ("domain", (fun pos a -> `Domain a));
-    ("port", (fun pos a -> `Port a));
-    ("path", (fun pos a -> `Path a)); (* XXX: it's RFC compliant ? *)
-    ("registerProcedure", (fun pos a -> `RegisterProcedure a));
-    ("protocol", (fun pos a -> `Protocol a));
+    ("domain", (fun a -> `Domain a));
+    ("port", (fun a -> `Port a));
+    ("path", (fun a -> `Path a)); (* XXX: it's RFC compliant ? *)
+    ("registerProcedure", (fun a -> `RegisterProcedure a));
+    ("protocol", (fun a -> `Protocol a));
   ] in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~attr_producer (make_cloud ~pos) xml),
-  generate_catcher ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_cloud,
+  generate_catcher ~attr_producer (fun ~pos x -> x)
 
 type textinput =
   {
@@ -261,7 +260,7 @@ let textinput_link_of_xml (pos, tag, datas) =
                             "The content of <link> MUST be \
                              a non-empty string"))
 
-let textinput_of_xml ((pos, _, _) as xml)=
+let textinput_of_xml =
   let data_producer = [
     ("title", (fun a -> `Title (textinput_title_of_xml a)));
     ("description",
@@ -269,7 +268,7 @@ let textinput_of_xml ((pos, _, _) as xml)=
     ("name", (fun a -> `Name (textinput_name_of_xml a)));
     ("link", (fun a -> `Link (textinput_link_of_xml a)));
   ] in
-  generate_catcher ~data_producer (make_textinput ~pos) xml
+  generate_catcher ~data_producer make_textinput
 
 let textinput_of_xml' =
   let data_producer = [
@@ -278,7 +277,7 @@ let textinput_of_xml' =
     ("name", dummy_of_xml ~ctor:(fun a -> `Name a));
     ("link", dummy_of_xml ~ctor:(fun a -> `Link a));
   ] in
-  generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun ~pos x -> x)
 
 type category =
   {
@@ -291,7 +290,7 @@ type category' = [
   | `Domain of string
 ]
 
-let make_category (l : [< category' ] list) =
+let make_category ~pos (l : [< category' ] list) =
   let data = match find (function `Data _ -> true | _ -> false) l with
     | Some (`Data s)-> s
     | _ -> ""
@@ -302,10 +301,10 @@ let make_category (l : [< category' ] list) =
   ({ data; domain; } : category )
 
 let category_of_xml, category_of_xml' =
-  let attr_producer = [ ("domain", (fun pos a -> `Domain a)); ] in
+  let attr_producer = [ ("domain", (fun a -> `Domain a)); ] in
   let leaf_producer pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_category,
-  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> x)
 
 type enclosure =
   {
@@ -346,13 +345,12 @@ let make_enclosure ~pos (l : [< enclosure' ] list) =
 
 let enclosure_of_xml, enclosure_of_xml' =
   let attr_producer = [
-    ("url", (fun pos a -> `URL a));
-    ("length", (fun pos a -> `Length a));
-    ("type", (fun pos a -> `Mime a));
+    ("url", (fun a -> `URL a));
+    ("length", (fun a -> `Length a));
+    ("type", (fun a -> `Mime a));
   ] in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~attr_producer (make_enclosure ~pos) xml),
-  generate_catcher ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_enclosure,
+  generate_catcher ~attr_producer (fun ~pos x -> x)
 
 type guid =
   {
@@ -366,7 +364,7 @@ type guid' = [
 ]
 
 (* Some RSS2 server output <guid isPermaLink="false"></guid> ! *)
-let make_guid (l : [< guid' ] list) =
+let make_guid ~pos (l : [< guid' ] list) =
   let data = match find (function `Data _ -> true | _ -> false) l with
     | Some (`Data u) -> u
     | _ -> ""
@@ -379,10 +377,10 @@ let make_guid (l : [< guid' ] list) =
   else Some({ data = Uri.of_string data;  permalink } : guid)
 
 let guid_of_xml, guid_of_xml' =
-  let attr_producer = [ ("isPermalink", (fun pos a -> `Permalink a)); ] in
+  let attr_producer = [ ("isPermalink", (fun a -> `Permalink a)); ] in
   let leaf_producer pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_guid,
-  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> x)
 
 type source =
   {
@@ -412,11 +410,10 @@ let make_source ~pos (l : [< source' ] list) =
   ({ data; url; } : source)
 
 let source_of_xml, source_of_xml' =
-  let attr_producer = [ ("url", (fun pos a -> `URL a)); ] in
+  let attr_producer = [ ("url", (fun a -> `URL a)); ] in
   let leaf_producer pos data = `Data data in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~attr_producer ~leaf_producer (make_source ~pos) xml),
-  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer make_source,
+  generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> x)
 
 type story =
   | All of string * string
@@ -534,7 +531,7 @@ let item_pubdate_of_xml (pos, tag, datas) =
                             "The content of <pubDate> MUST be \
                              a non-empty string"))
 
-let item_of_xml ((pos, _, _) as xml) =
+let item_of_xml =
   let data_producer = [
     ("title", (fun a -> `Title (item_title_of_xml a)));
     ("description", (fun a -> `Description (item_description_of_xml a)));
@@ -547,7 +544,7 @@ let item_of_xml ((pos, _, _) as xml) =
     ("pubDate", (fun a -> `PubDate (item_pubdate_of_xml a)));
     ("source", (fun a -> `Source (source_of_xml a)));
   ] in
-  generate_catcher ~data_producer (make_item ~pos) xml
+  generate_catcher ~data_producer make_item
 
 let item_of_xml' =
   let data_producer = [
@@ -562,7 +559,7 @@ let item_of_xml' =
     ("pubdate", dummy_of_xml ~ctor:(fun a -> `PubDate a));
     ("source", (fun a -> `Source (source_of_xml' a)));
   ] in
-  generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun ~pos x -> x)
 
 type channel =
   {
@@ -817,7 +814,7 @@ let channel_skipDays_of_xml (pos, tag, datas) =
                             "The content of <skipDays> MUST be \
                              a non-empty string"))
 
-let channel_of_xml ((pos, _, _) as xml) =
+let channel_of_xml =
   let data_producer = [
     ("title", (fun a -> `Title (channel_title_of_xml a)));
     ("link", (fun a -> `Link (channel_link_of_xml a)));
@@ -842,7 +839,7 @@ let channel_of_xml ((pos, _, _) as xml) =
     ("skipdays", (fun a -> `SkipDays (channel_skipDays_of_xml a)));
     ("item", (fun a -> `Item (item_of_xml a)));
   ] in
-  generate_catcher ~data_producer (make_channel ~pos) xml
+  generate_catcher ~data_producer make_channel
 
 let channel_of_xml' =
   let data_producer = [
@@ -867,7 +864,7 @@ let channel_of_xml' =
     ("skipdays", dummy_of_xml ~ctor:(fun a -> `SkipDays a));
     ("item", (fun a -> `Item (item_of_xml' a)));
   ] in
-  generate_catcher ~data_producer (fun x -> x)
+  generate_catcher ~data_producer (fun ~pos x -> x)
 
 let find_channel l =
   find (function XML.Node(pos, tag, data) -> tag_is tag "channel"

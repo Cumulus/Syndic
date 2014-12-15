@@ -97,7 +97,7 @@ type author' = [
   | `Email of string
 ]
 
-let make_author datas (l : [< author'] list) =
+let make_author datas ~pos (l : [< author'] list) =
   (* element atom:name { text } *)
   let name = match find (function `Name _ -> true | _ -> false) l with
     | Some (`Name s) -> s
@@ -158,7 +158,7 @@ let author_of_xml' =
     ("uri", dummy_of_xml ~ctor:(fun a -> `URI a));
     ("email", dummy_of_xml ~ctor:(fun a -> `Email a));
   ] in
-  generate_catcher ~namespaces ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~data_producer (fun ~pos x -> x)
 
 type category =
   {
@@ -210,13 +210,12 @@ let make_category ~pos (l : [< category'] list) =
  *)
 let category_of_xml, category_of_xml' =
   let attr_producer = [
-    ("term", (fun pos a -> `Term a));
-    ("scheme", (fun pos a -> `Scheme a));
-    ("label", (fun pos a -> `Label a))
+    ("term", (fun a -> `Term a));
+    ("scheme", (fun a -> `Scheme a));
+    ("label", (fun a -> `Label a))
   ] in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~attr_producer (make_category ~pos) xml),
-  generate_catcher ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_category,
+  generate_catcher ~attr_producer (fun ~pos x -> x)
 
 let make_contributor = make_author
 let contributor_of_xml = author_of_xml
@@ -265,13 +264,12 @@ let make_generator ~pos (l : [< generator'] list) =
  *)
 let generator_of_xml, generator_of_xml' =
   let attr_producer = [
-    ("version", (fun pos a -> `Version a));
-    ("uri", (fun pos a -> `URI a));
+    ("version", (fun a -> `Version a));
+    ("uri", (fun a -> `URI a));
   ] in
   let leaf_producer pos data = `Content data in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~attr_producer ~leaf_producer (make_generator ~pos) xml),
-  generate_catcher ~attr_producer ~leaf_producer (fun x -> x)
+  generate_catcher ~attr_producer ~leaf_producer make_generator,
+  generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> x)
 
 type icon = Uri.t
 type icon' = [ `URI of string ]
@@ -291,9 +289,8 @@ let make_icon ~pos (l : [< icon'] list) =
  *)
 let icon_of_xml, icon_of_xml' =
   let leaf_producer pos data = `URI data in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~leaf_producer (make_icon ~pos) xml),
-  generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_icon,
+  generate_catcher ~leaf_producer (fun ~pos x -> x)
 
 (* XXX: atom:id as string is more readable that Uri.t *)
 type id = string
@@ -315,9 +312,8 @@ let make_id ~pos (l : [< id'] list) =
  *)
 let id_of_xml, id_of_xml' =
   let leaf_producer pos data = `Data data in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~leaf_producer (make_id ~pos) xml),
-  generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_id,
+  generate_catcher ~leaf_producer (fun ~pos x -> x)
 
 let rel_of_string s = match String.lowercase (String.trim s) with
   | "alternate" -> Alternate
@@ -378,16 +374,15 @@ let make_link ~pos (l : [< link'] list) =
  *)
 let link_of_xml, link_of_xml' =
   let attr_producer = [
-    ("href", (fun pos a -> `HREF a));
-    ("rel", (fun pos a -> `Rel a));
-    ("type", (fun pos a -> `Type a));
-    ("hreflang", (fun pos a -> `HREFLang a));
-    ("title", (fun pos a -> `Title a));
-    ("length", (fun pos a -> `Length a));
+    ("href", (fun a -> `HREF a));
+    ("rel", (fun a -> `Rel a));
+    ("type", (fun a -> `Type a));
+    ("hreflang", (fun a -> `HREFLang a));
+    ("title", (fun a -> `Title a));
+    ("length", (fun a -> `Length a));
   ] in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~attr_producer (make_link ~pos) xml),
-  generate_catcher ~attr_producer (fun x -> x)
+  generate_catcher ~attr_producer make_link,
+  generate_catcher ~attr_producer (fun ~pos x -> x)
 
 type logo = Uri.t
 type logo' = [ `URI of string ]
@@ -408,9 +403,8 @@ let make_logo ~pos (l : [< logo'] list) =
  *)
 let logo_of_xml, logo_of_xml' =
   let leaf_producer pos data = `URI data in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~leaf_producer (make_logo ~pos) xml),
-  generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_logo,
+  generate_catcher ~leaf_producer (fun ~pos x -> x)
 
 type published = Date.t
 type published' = [ `Date of string ]
@@ -427,9 +421,8 @@ let make_published ~pos (l : [< published'] list) =
 (* atomPublished = element atom:published { atomDateConstruct } *)
 let published_of_xml, published_of_xml' =
   let leaf_producer pos data = `Date data in
-  (fun ((pos, _, _) as xml) ->
-    generate_catcher ~leaf_producer (make_published ~pos) xml),
-  generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_published,
+  generate_catcher ~leaf_producer (fun ~pos x -> x)
 
 type rights = text_construct
 type rights' = [ `Data of Syndic_xml.t list ]
@@ -473,9 +466,8 @@ let make_updated ~pos (l : [< updated'] list) =
 (* atomUpdated = element atom:updated { atomDateConstruct } *)
 let updated_of_xml, updated_of_xml' =
   let leaf_producer pos data = `Date data in
-  (fun ((pos, _, _) as xml) ->
-     generate_catcher ~leaf_producer (make_updated ~pos) xml),
-  generate_catcher ~leaf_producer (fun x -> x)
+  generate_catcher ~leaf_producer make_updated,
+  generate_catcher ~leaf_producer (fun ~pos x -> x)
 
 type source =
   {
@@ -517,7 +509,7 @@ type source' = [
   | `Updated of updated
 ]
 
-let make_source ~pos ~entry_authors (l : [< source'] list) =
+let make_source ~entry_authors ~pos (l : [< source'] list) =
   (* atomAuthor* *)
   let authors =
     List.fold_left
@@ -621,7 +613,7 @@ let make_source ~pos ~entry_authors (l : [< source'] list) =
          & extensionElement * )
       }
  *)
-let source_of_xml ((pos, _, _) as xml)=
+let source_of_xml =
   let data_producer = [
     ("author", (fun a -> `Author (author_of_xml a)));
     ("category", (fun a -> `Category (category_of_xml a)));
@@ -640,7 +632,7 @@ let source_of_xml ((pos, _, _) as xml)=
   generate_catcher
     ~namespaces
     ~data_producer
-    (make_source ~pos ~entry_authors) xml
+    (make_source ~entry_authors)
 
 let source_of_xml' =
   let data_producer = [
@@ -657,7 +649,7 @@ let source_of_xml' =
     ("title", (fun a -> `Title (title_of_xml' a)));
     ("updated", (fun a -> `Updated (updated_of_xml' a)));
   ] in
-  generate_catcher ~namespaces ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~data_producer (fun ~pos x -> x)
 
 type mime = string
 
@@ -867,7 +859,7 @@ type feed' = [
 ]
 
 
-let make_entry ~pos ~(feed_authors: author list) l =
+let make_entry ~(feed_authors: author list) ~pos l =
   let authors =
     List.fold_left
       (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
@@ -971,7 +963,7 @@ let make_entry ~pos ~(feed_authors: author list) l =
          & extensionElement * )
       }
  *)
-let entry_of_xml ((pos, _, _) as xml)=
+let entry_of_xml =
   let data_producer = [
     ("author", (fun a -> `Author (author_of_xml a)));
     ("category", (fun a -> `Category (category_of_xml a)));
@@ -990,7 +982,7 @@ let entry_of_xml ((pos, _, _) as xml)=
   generate_catcher
     ~namespaces
     ~data_producer
-    (make_entry ~pos ~feed_authors) xml
+    (make_entry ~feed_authors)
 
 let entry_of_xml' =
   let data_producer = [
@@ -1007,7 +999,7 @@ let entry_of_xml' =
     ("title", (fun a -> `Title (title_of_xml' a)));
     ("updated", (fun a -> `Updated (updated_of_xml' a)));
   ] in
-  generate_catcher ~namespaces ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~data_producer (fun ~pos x -> x)
 
 type feed =
   {
@@ -1133,7 +1125,7 @@ let make_feed ~pos (l : _ list) =
         atomEntry*
       }
  *)
-let feed_of_xml ((pos, _, _) as xml) =
+let feed_of_xml =
   let data_producer = [
     ("author", (fun a -> `Author (author_of_xml a)));
     ("category", (fun a -> `Category (category_of_xml a)));
@@ -1149,7 +1141,7 @@ let feed_of_xml ((pos, _, _) as xml) =
     ("updated", (fun a -> `Updated (updated_of_xml a)));
     ("entry", (fun a -> `Entry a));
   ] in
-  generate_catcher ~namespaces ~data_producer (make_feed ~pos) xml
+  generate_catcher ~namespaces ~data_producer make_feed
 
 let feed_of_xml' =
   let data_producer = [
@@ -1167,7 +1159,7 @@ let feed_of_xml' =
     ("updated", (fun a -> `Updated (updated_of_xml' a)));
     ("entry", (fun a -> `Entry (entry_of_xml' a)));
   ] in
-  generate_catcher ~namespaces ~data_producer (fun x -> x)
+  generate_catcher ~namespaces ~data_producer (fun ~pos x -> x)
 
 let parse input =
   match XML.of_xmlm input |> snd with
