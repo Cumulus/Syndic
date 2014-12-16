@@ -261,7 +261,7 @@ type updated = Syndic_date.t
 
 type source =
   {
-    authors: author * author list;
+    authors: author list;
     categories: category list;
     contributors: author list;
     (** {{: http://tools.ietf.org/html/rfc4287#section-4.2.3}
@@ -311,7 +311,7 @@ val source :
   ?rights:rights ->
   ?subtitle:subtitle ->
   ?updated:updated ->
-  authors:author * author list -> id:id -> title:title -> source
+  authors: author list -> id:id -> title:title -> source
 
 type mime = string
 (** A MIME type that conform to the syntax of a MIME media type, but
@@ -370,7 +370,7 @@ type entry =
     links: link list;
     published: published option;
     rights: rights option;
-    sources: source list;
+    source: source option;
     summary: summary option;
     title: title;
     updated: updated;
@@ -416,7 +416,7 @@ val entry :
   ?links:link list ->
   ?published:published ->
   ?rights:rights ->
-  ?sources:source list ->
+  ?source:source ->
   ?summary:summary ->
   id:id ->
   authors:author * author list ->

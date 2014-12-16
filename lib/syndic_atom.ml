@@ -486,7 +486,7 @@ let updated_of_xml, updated_of_xml' =
 
 type source =
   {
-    authors: author * author list;
+    authors: author list;
     categories: category list;
     contributors: author list;
     generator: generator option;
@@ -530,8 +530,8 @@ let make_source ~entry_authors ~pos (l : [< source'] list) =
     List.fold_left
       (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
   let authors = match authors, entry_authors with
-    | x :: r, _ -> x, r
-    | [], x :: r -> x, r
+    | _ :: _, _ -> authors
+    | [], _ :: _ -> entry_authors
     | [], [] ->
       raise (Error.Error (pos,
                             "<source> elements MUST contains one or more \
@@ -766,7 +766,7 @@ type entry =
     links: link list;
     published: published option;
     rights: rights option;
-    sources: source list;
+    source: source option;
     summary: summary option;
     title: title;
     updated: updated;
@@ -774,11 +774,11 @@ type entry =
 
 let entry
   ?(categories=[]) ?content ?(contributors=[])
-  ?(links=[]) ?published ?rights ?(sources=[]) ?summary
+  ?(links=[]) ?published ?rights ?source ?summary
   ~id ~authors ~title ~updated ()
   =
   { authors ; categories ; content ; contributors ;
-    id ; links ; published ; rights ; sources ; summary ;
+    id ; links ; published ; rights ; source ; summary ;
     title ; updated }
 
 type entry' = [
@@ -883,16 +883,23 @@ let make_entry ~(feed_authors: author list) ~pos l =
   (* atomSource? (pass the authors known so far) *)
   let sources = List.fold_left
                   (fun acc -> function `Source x -> x :: acc | _ -> acc) [] l in
-  let sources = List.map (source_of_xml ~entry_authors:authors) sources in
-  let authors = match authors, sources with
+  let source = match sources with
+    | [] -> None
+    | [s] -> Some(source_of_xml ~entry_authors:authors s)
+    | _ -> (*  RFC 4287 § 4.1.2 *)
+       let msg = "<entry> elements MUST NOT contain more than one <source> \
+                  element." in
+       raise(Error.Error(pos, msg)) in
+  let authors = match authors, source with
     | a0 :: a, _ -> a0, a
-    | [], s :: src ->
-       (* Collect authors given in [sources] *)
-       let a0, a1 = s.authors in
-       let a2 =
-         List.map (fun (s: source) -> let a1, a = s.authors in a1 :: a) src in
-       a0, List.concat (a1 :: a2)
-    | [], [] ->
+    | [], Some s ->
+       (match s.authors with
+        | a0 :: a -> a0, a
+        | [] ->
+           let msg = "<entry> does not contain an <author> and its <source> \
+                      neither does" in
+           raise (Error.Error (pos, msg)))
+    | [], None ->
       raise (Error.Error (pos,
                             "<entry> elements MUST contains one or more \
                              <author> elements or <feed> elements MUST \
@@ -953,7 +960,7 @@ let make_entry ~(feed_authors: author list) ~pos l =
      links = uniq_link_alternate ~pos links;
      published;
      rights;
-     sources;
+     source;
      summary;
      title;
      updated; } : entry)
@@ -1255,11 +1262,10 @@ let add_node_date tag date nodes =
   | Some d -> node_data tag (Date.to_rfc3339 d) :: nodes
 
 let source_to_xml (s: source) =
-  let (a0, a) = s.authors in
   let nodes =
     (node_data (atom "id") s.id
      :: text_construct_to_xml "title" s.title
-     :: author_to_xml a0 :: List.map author_to_xml a)
+     :: List.map author_to_xml s.authors)
     |> add_nodes_rev_map category_to_xml s.categories
     |> add_nodes_rev_map contributor_to_xml s.contributors
     |> add_node_option generator_to_xml s.generator
@@ -1305,7 +1311,7 @@ let entry_to_xml (e: entry) =
     |> add_nodes_rev_map link_to_xml e.links
     |> add_node_date (atom "published") e.published
     |> add_node_option (text_construct_to_xml "rights") e.rights
-    |> add_nodes_rev_map source_to_xml e.sources
+    |> add_node_option source_to_xml e.source
     |> add_node_option (text_construct_to_xml "summary") e.summary in
   XML.Node(dummy_pos, atom "entry", nodes)
 
@@ -1365,22 +1371,26 @@ let add_entries_of_feed entries (uri_opt, feed) : entry list =
        else
          link ~type_media:"application/atom+xml" ~rel:Alternate uri
          :: feed.links in
-  let source authors =
-    { authors;
-      categories = feed.categories;
-      contributors = feed.contributors;
-      generator = feed.generator;
-      icon = feed.icon;
-      id = feed.id;
-      links;
-      logo = feed.logo;
-      rights = feed.rights;
-      subtitle = feed.subtitle;
-      title = feed.title;
-      updated = Some feed.updated;
-    } in
+  let source_of_feed =
+    Some { authors = feed.authors;
+           categories = feed.categories;
+           contributors = feed.contributors;
+           generator = feed.generator;
+           icon = feed.icon;
+           id = feed.id;
+           links;
+           logo = feed.logo;
+           rights = feed.rights;
+           subtitle = feed.subtitle;
+           title = feed.title;
+           updated = Some feed.updated;
+         } in
   let add_entry entries (e: entry) =
-    { e with sources = source e.authors :: e.sources } :: entries in
+    let source = match e.source with
+      | Some s -> e.source (* if a source is present, assume it has
+                             been well designed. *)
+      | None -> source_of_feed in
+    { e with source = source } :: entries in
   List.fold_left add_entry entries feed.entries
 
 let entries_of_feeds feeds =

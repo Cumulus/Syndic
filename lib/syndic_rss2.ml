@@ -948,9 +948,10 @@ let entry_of_item (it: item) : Atom.entry =
                  hreflang = None;  title = None;  length = Some e.length }
                :: links
     | None -> links in
-  let sources = match it.source with
+  let source = match it.source with
     | Some s ->
-       [ { Atom.authors = (author, []); (* Best guess *)
+       Some
+         { Atom.authors = [author]; (* Best guess *)
            categories = [];
            contributors = [];
            generator = None;
@@ -963,8 +964,8 @@ let entry_of_item (it: item) : Atom.entry =
            rights = None;
            subtitle = None;
            title = Atom.Text s.data;
-           updated = None } ]
-    | None -> [] in
+           updated = None }
+    | None -> None in
   { Atom.
     authors = (author, []);
     categories;
@@ -974,7 +975,7 @@ let entry_of_item (it: item) : Atom.entry =
     links;
     published = None;
     rights = None;
-    sources;
+    source;
     summary = None;
     title;
     updated = (match it.pubDate with
