@@ -32,13 +32,15 @@ let string_of_xml name (pos, _, datas) =
   try get_leaf datas
   with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
 
-let title_of_xml a = `Title(string_of_xml "<title>" a)
+let title_of_xml ~xmlbase a = `Title(string_of_xml "<title>" a)
 
-let owner_name_of_xml a = `OwnerName(string_of_xml "<ownerName>" a)
+let owner_name_of_xml ~xmlbase a =
+  `OwnerName(string_of_xml "<ownerName>" a)
 
-let owner_email_of_xml a = `OwnerEmail(string_of_xml "<ownerEmail>" a)
+let owner_email_of_xml ~xmlbase a =
+  `OwnerEmail(string_of_xml "<ownerEmail>" a)
 
-let expansion_state_of_xml (pos, _, datas) =
+let expansion_state_of_xml ~xmlbase (pos, _, datas) =
   let explode s =
     let rec aux acc i =
       if i = String.length s then acc
@@ -73,16 +75,20 @@ let int_of_xml name (pos, _, datas) =
   with Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
      | Failure _ -> raise (Error.Error (pos, name ^ " must be an integer"))
 
-let vert_scroll_state_of_xml a =
+let vert_scroll_state_of_xml ~xmlbase a =
   `VertScrollState(int_of_xml "<vertScrollState>" a)
 
-let window_top_of_xml a = `WindowTop(int_of_xml "<windowTop>" a)
+let window_top_of_xml ~xmlbase a =
+  `WindowTop(int_of_xml "<windowTop>" a)
 
-let window_left_of_xml a = `WindowLeft(int_of_xml "<windowLeft>" a)
+let window_left_of_xml ~xmlbase a =
+  `WindowLeft(int_of_xml "<windowLeft>" a)
 
-let window_bottom_of_xml a = `WindowBottom(int_of_xml "<windowBotton>" a)
+let window_bottom_of_xml ~xmlbase a =
+  `WindowBottom(int_of_xml "<windowBotton>" a)
 
-let window_right_of_xml a = `WindowRight(int_of_xml "<windowRight>" a)
+let window_right_of_xml ~xmlbase a =
+  `WindowRight(int_of_xml "<windowRight>" a)
 
 type head' = [
   | `Title of string
@@ -178,8 +184,11 @@ let date_of_xml name (pos, _, datas) =
   try Date.of_rfc822 d
   with _ -> raise (Error.Error (pos, sprintf "Date %S incorrect" d))
 
-let date_created_of_xml a = `DateCreated (date_of_xml "<dateCreated>" a)
-let date_modified_of_xml a = `DateModified (date_of_xml "<dateModified>" a)
+let date_created_of_xml ~xmlbase a =
+  `DateCreated (date_of_xml "<dateCreated>" a)
+
+let date_modified_of_xml ~xmlbase a =
+  `DateModified (date_of_xml "<dateModified>" a)
 
 let head_of_xml =
   let data_producer = [
@@ -201,17 +210,17 @@ let head_of_xml =
 
 let head_of_xml' =
   let data_producer = [
-    "title", dummy_of_xml ~ctor:(fun a -> `Title a);
-    "dateCreated", dummy_of_xml ~ctor:(fun a -> `DateCreated a);
-    "dateModified", dummy_of_xml ~ctor:(fun a -> `DateModified a);
-    "ownerName", dummy_of_xml ~ctor:(fun a -> `OwnerName a);
-    "ownerEmail", dummy_of_xml ~ctor:(fun a -> `OwnerEmail a);
-    "expansionState", dummy_of_xml ~ctor:(fun a -> `ExpansionSate a);
-    "vertScrollState", dummy_of_xml ~ctor:(fun a -> `VertScrollState a);
-    "windowTop", dummy_of_xml ~ctor:(fun a -> `WindowTop a);
-    "windowLeft", dummy_of_xml ~ctor:(fun a -> `WindowLeft a);
-    "windowBottom", dummy_of_xml ~ctor:(fun a -> `WindowBottom a);
-    "windowRight", dummy_of_xml ~ctor:(fun a -> `WindowRight a)
+    "title", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Title a);
+    "dateCreated", dummy_of_xml ~ctor:(fun ~xmlbase a -> `DateCreated a);
+    "dateModified", dummy_of_xml ~ctor:(fun ~xmlbase a -> `DateModified a);
+    "ownerName", dummy_of_xml ~ctor:(fun ~xmlbase a -> `OwnerName a);
+    "ownerEmail", dummy_of_xml ~ctor:(fun ~xmlbase a -> `OwnerEmail a);
+    "expansionState", dummy_of_xml ~ctor:(fun ~xmlbase a -> `ExpansionSate a);
+    "vertScrollState", dummy_of_xml ~ctor:(fun ~xmlbase a -> `VertScrollState a);
+    "windowTop", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WindowTop a);
+    "windowLeft", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WindowLeft a);
+    "windowBottom", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WindowBottom a);
+    "windowRight", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WindowRight a)
   ] in
   generate_catcher
     ~data_producer
@@ -234,7 +243,8 @@ let outline ?typ ?(is_comment=false) ?(is_breakpoint=false) ?xml_url ?html_url
   { text;  typ;  is_comment;  is_breakpoint;  xml_url;  html_url;
     attrs;  outlines }
 
-let rec outline_of_node (pos, ((_outline, attributes): Xmlm.tag), datas) =
+let rec outline_of_node ~xmlbase ((pos, ((_, attributes)), datas): node) =
+  let new_xmlbase = ref xmlbase in
   let text = ref ""
   and typ = ref None
   and is_comment = ref false
@@ -243,30 +253,33 @@ let rec outline_of_node (pos, ((_outline, attributes): Xmlm.tag), datas) =
   and html_url = ref None
   and attrs = ref []
   and outlines = ref [] in
-  let process_attrs ((_, name), v) = match name with
-    | "text" -> text := v
-    | "type" -> typ := Some v
-    | "isComment" ->
+  let process_attrs (name, v) = match name with
+    | ("http://www.w3.org/XML/1998/namespace", "base") ->
+       new_xmlbase := XML.base ~parent:xmlbase v
+    | (_, "text") -> text := v
+    | (_, "type") -> typ := Some v
+    | (_, "isComment") ->
        (try is_comment := bool_of_string v
         with _ -> raise(Error.Error (pos, "<isComment> must have true or \
                                           false value.")))
-    | "isBreakpoint" ->
+    | (_, "isBreakpoint") ->
        (try is_breakpoint := bool_of_string v
         with _ -> raise (Error.Error (pos, "<isBreakpoint> must have true \
                                            or false value.")))
-    | "xmlUrl" ->
-       (try xml_url := Some(Uri.of_string v)
+    | (_, "xmlUrl") ->
+       (try xml_url := Some( XML.resolve ~xmlbase (Uri.of_string v))
         with _ -> raise(Error.Error(pos, "<xmlUrl> content must be an URL")))
-    | "htmlUrl" ->
-       (try html_url := Some(Uri.of_string v)
+    | (_, "htmlUrl") ->
+       (try html_url := Some( XML.resolve ~xmlbase (Uri.of_string v))
         with _ -> raise(Error.Error(pos, "<htmlUrl> content must be an URL")))
-    | _ ->
+    | (_, name) ->
        attrs := (name, v) :: !attrs in
   List.iter process_attrs attributes;
   let process_outlines = function
     | XML.Node (p, (((ns, name), _) as t), d) ->
        if ns = "" && name = "outline" then
-         outlines := outline_of_node (p, t, d) :: !outlines
+         outlines := outline_of_node ~xmlbase:!new_xmlbase (p, t, d)
+                     :: !outlines
     | XML.Data _ -> () in
   List.iter process_outlines datas;
   { text = !text;
@@ -279,27 +292,32 @@ let rec outline_of_node (pos, ((_outline, attributes): Xmlm.tag), datas) =
     outlines = !outlines;
   }
 
-let outline_of_xml a = `Outline(outline_of_node a)
+let outline_of_xml ~xmlbase a = `Outline(outline_of_node ~xmlbase a)
 
-let rec outline_of_node' (pos, ((_outline, attributes): Xmlm.tag), datas) =
-  let el_of_attrs ((_, name), v) = match name with
-    | "text" -> `Text v
-    | "type" -> `Type v
-    | "isComment" -> `IsComment v
-    | "isBreakpoint" -> `IsBreakpoint v
-    | "xmlUrl" -> `XML_url v
-    | "htmlUrl" -> `HTML_url v
-    | _ -> `Attr (name, v) in
-  let el = ref (List.map el_of_attrs attributes) in
+let rec outline_of_node' ~xmlbase ((pos, ((_, attributes)), datas): node) =
+  let new_xmlbase = ref xmlbase in
+  let el = ref [] in
+  let el_of_attrs (name, v) = match name with
+    | ("http://www.w3.org/XML/1998/namespace", "base") ->
+       new_xmlbase := XML.base ~parent:xmlbase v
+    | (_, "text") -> el := `Text v :: !el
+    | (_, "type") -> el := `Type v :: !el
+    | (_, "isComment") -> el := `IsComment v :: !el
+    | (_, "isBreakpoint") -> el := `IsBreakpoint v :: !el
+    | (_, "xmlUrl") -> el := `XML_url(xmlbase, v) :: !el
+    | (_, "htmlUrl") -> el := `HTML_url(xmlbase, v) :: !el
+    | (_, name) -> el := `Attr (name, v) :: !el in
+  List.iter el_of_attrs attributes;
   let process_outlines = function
     | XML.Node (p, (((ns, name), _) as t), d) ->
        if ns = "" && name = "outline" then
-         el := `Outline(outline_of_node' (p, t, d)) :: !el
+         el := `Outline(outline_of_node' ~xmlbase:!new_xmlbase (p, t, d))
+               :: !el
     | XML.Data _ -> () in
   List.iter process_outlines datas;
   !el
 
-let outline_of_xml' a = `Outline(outline_of_node' a)
+let outline_of_xml' ~xmlbase a = `Outline(outline_of_node' ~xmlbase a)
 
 type body = outline list
 
@@ -358,7 +376,7 @@ let make_opml ~pos (l : [< opml'] list) =
 
 let opml_of_xml =
   let attr_producer = [
-    "version", (fun a -> `Version a)
+    "version", (fun ~xmlbase a -> `Version a)
   ] in
   let data_producer = [
     "head", head_of_xml;
@@ -371,7 +389,7 @@ let opml_of_xml =
 
 let opml_of_xml' =
   let attr_producer = [
-    "version", (fun a -> `Version a)
+    "version", (fun ~xmlbase a -> `Version a)
   ] in
   let data_producer = [
     "head", head_of_xml';
@@ -385,14 +403,14 @@ let opml_of_xml' =
 let find_opml l =
   find (function XML.Node (_, t, _) -> tag_is t "opml" | _ -> false) l
 
-let parse input =
+let parse ?xmlbase input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, data) ->
     if tag_is tag "opml" then
-      opml_of_xml (pos, tag, data)
+      opml_of_xml ~xmlbase (pos, tag, data)
     else
       begin match find_opml data with
-        | Some (XML.Node (p, t, d)) -> opml_of_xml (p, t, d)
+        | Some (XML.Node (p, t, d)) -> opml_of_xml ~xmlbase (p, t, d)
         | _ -> raise (Error.Error ((0, 0),
                                    "document MUST contains exactly one <opml> \
                                     				    element"))
@@ -401,14 +419,16 @@ let parse input =
                              "document MUST contains exactly one <opml> \
                               			      element"))
 
-let unsafe input =
+type uri = Uri.t option * string
+
+let unsafe ?xmlbase input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, data) ->
     if tag_is tag "opml" then
-      `Opml (opml_of_xml' (pos, tag, data))
+      `Opml (opml_of_xml' ~xmlbase (pos, tag, data))
     else
       begin match find_opml data with
-        | Some (XML.Node (p, t, d)) -> `Opml (opml_of_xml' (p, t, d))
+        | Some (XML.Node (p, t, d)) -> `Opml (opml_of_xml' ~xmlbase (p, t, d))
         | _ -> `Opml []
       end
   | _ -> `Opml []

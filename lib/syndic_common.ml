@@ -5,6 +5,8 @@ module XML = struct
 
   exception Ignore_namespace
 
+  type node = Xmlm.pos * Xmlm.tag * t list
+
   let generate_catcher
       ?(namespaces=[""])
       ?(attr_producer=[])
@@ -19,33 +21,39 @@ module XML = struct
       try Some (List.assoc name map)
       with _ -> None
     in
-    let rec catch_attr acc pos = function
+    let rec catch_attr ~xmlbase acc pos = function
+      | (("http://www.w3.org/XML/1998/namespace", "base"), new_base) :: r ->
+         let xmlbase = base ~parent:xmlbase new_base in
+         catch_attr ~xmlbase acc pos r
       | attr :: r -> begin
           match get_producer (get_attr_name attr) attr_producer with
           | Some f when in_namespaces attr ->
-              catch_attr ((f (get_attr_value attr)) :: acc) pos r
-          | _ -> catch_attr acc pos r end
-      | [] -> acc
+             let acc = (f ~xmlbase (get_attr_value attr)) :: acc in
+             catch_attr ~xmlbase acc pos r
+          | _ -> catch_attr ~xmlbase acc pos r end
+      | [] -> xmlbase, acc
     in
-    let rec catch_datas acc = function
+    let rec catch_datas ~xmlbase acc = function
       | Node (pos, tag, datas) :: r ->
         begin match get_producer (get_tag_name tag) data_producer with
           | Some f when in_namespaces tag ->
-              catch_datas ((f (pos, tag, datas)) :: acc) r
-          | _ -> catch_datas acc r end
+             let acc = (f ~xmlbase (pos, tag, datas)) :: acc in
+             catch_datas ~xmlbase acc r
+          | _ -> catch_datas ~xmlbase acc r end
       | Data (pos, str) :: r ->
         begin match leaf_producer with
-          | Some f -> catch_datas ((f pos str) :: acc) r
-          | None -> catch_datas acc r end
+          | Some f -> catch_datas ~xmlbase ((f ~xmlbase pos str) :: acc) r
+          | None -> catch_datas ~xmlbase acc r end
       | [] -> acc
     in
-    let generate (pos, tag, datas) =
-      maker ~pos (catch_attr (catch_datas [] datas) pos (get_attrs tag))
+    let generate ~xmlbase ((pos, tag, datas): node) =
+      let xmlbase, acc = catch_attr ~xmlbase [] pos (get_attrs tag) in
+      maker ~pos (catch_datas ~xmlbase acc datas)
     in generate
 
   let dummy_of_xml ~ctor =
-    let leaf_producer pos data = ctor data in
-    let head ~pos = function [] -> ctor ""
+    let leaf_producer ~xmlbase pos data = ctor ~xmlbase data in
+    let head ~pos = function [] -> ctor ~xmlbase:None ""
                            | x :: r -> x in
     generate_catcher ~leaf_producer head
 end

@@ -1,5 +1,5 @@
 (** [Syndic.Rss2]: compliant with
-    {{: http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt} RSS 2.0}. *)
+    {{: http://www.rssboard.org/rss-specification} RSS 2.0}. *)
 
 module Error : module type of Syndic_error
 
@@ -305,7 +305,7 @@ type channel =
  *)
 
 
-val parse : Xmlm.input -> channel
+val parse : ?xmlbase: Uri.t -> Xmlm.input -> channel
 (** [parse xml] returns the channel corresponding to [xml].
 
     Raise [Error.Expected], [Error.Size_Exceeded] or
@@ -319,12 +319,17 @@ val to_atom : channel -> Syndic_atom.feed
 
 (**/**)
 
+type uri = Uri.t option * string
+(** An URI is given by (xmlbase, uri).  The value of [xmlbase], if not
+    [None], gives the base URI against which [uri] must be resolved if
+    it is relative. *)
+
 (** Analysis without verification, enjoy ! *)
-val unsafe : Xmlm.input ->
+val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
   [> `Channel of
        [> `Category of string
        | `Cloud of
-            [> `Domain of string
+            [> `Domain of uri
             | `Path of string
             | `Port of string
             | `Protocol of string
@@ -337,27 +342,27 @@ val unsafe : Xmlm.input ->
        | `Image of
             [> `Description of string
             | `Height of string
-            | `Link of string
+            | `Link of uri
             | `Title of string
-            | `URL of string
+            | `URL of uri
             | `Width of string ]
               list
        | `Item of
             [> `Author of string
-            | `Category of [> `Data of string | `Domain of string ] list
+            | `Category of [> `Data of string | `Domain of uri ] list
             | `Comments of string
             | `Description of string
             | `Enclosure of
-                 [> `Length of string | `Mime of string | `URL of string ] list
+                 [> `Length of string | `Mime of string | `URL of uri ] list
             | `Guid of [> `Data of string | `Permalink of string ] list
-            | `Link of string
+            | `Link of uri
             | `PubDate of string
-            | `Source of [> `Data of string | `URL of string ] list
+            | `Source of [> `Data of string | `URL of uri ] list
             | `Title of string ]
               list
        | `Language of string
        | `LastBuildDate of string
-       | `Link of string
+       | `Link of uri
        | `ManagingEditor of string
        | `PubDate of string
        | `Rating of string
@@ -366,7 +371,7 @@ val unsafe : Xmlm.input ->
        | `TTL of string
        | `TextInput of
             [> `Description of string
-            | `Link of string
+            | `Link of uri
             | `Name of string
             | `Title of string ]
               list

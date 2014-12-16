@@ -282,45 +282,54 @@ Model: (channel, image?, item+, textinput?)
 ]}
  *)
 
-val parse : Xmlm.input -> rdf
+val parse : ?xmlbase: Uri.t -> Xmlm.input -> rdf
 (** [parse xml] returns the RDF corresponding to [xml].
 
     @raise Error.raise_expectation if [xml] is not a valid RSS1
-    document. *)
+    document.
+
+    @param xmlbase the base URI against which relative URIs in the XML
+    RSS1 document are resolved.  It is superseded by xml:base present
+    in the document (if any). *)
 
 
 (**/**)
 
+type uri = Uri.t option * string
+(** An URI is given by (xmlbase, uri).  The value of [xmlbase], if not
+    [None], gives the base URI against which [uri] must be resolved if
+    it is relative. *)
+
 (** Analysis without verification, enjoy ! *)
-val unsafe : Xmlm.input ->
+val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
   [> `RDF of
        [> `Channel of
-            [> `About of string
+            [> `About of uri
             | `Description of string list
-            | `Image of [> `URI of string ] list
+            | `Image of [> `URI of uri ] list
             | `Items of
-                 [> `Seq of [> `Li of [> `URI of string ] list ] list ]
+                 [> `Seq of [> `Li of [> `URI of uri ] list ] list ]
                    list
-            | `Link of [> `URI of string ] list
-            | `TextInput of [> `URI of string ] list
+            | `Link of [> `URI of uri ] list
+            | `TextInput of [> `URI of uri ] list
             | `Title of string list ]
               list
        | `Image of
-            [> `About of string
-            | `Link of [> `URI of string ] list
+            [> `About of uri
+            | `Link of [> `URI of uri ] list
             | `Title of string list
-            | `URL of [> `URI of string ] list ]
+            | `URL of [> `URI of uri ] list ]
               list
        | `Item of
-            [> `About of string
+            [> `About of uri
             | `Description of string list
-            | `Link of [> `URI of string ] list
+            | `Link of [> `URI of uri ] list
             | `Title of string list ]
               list
        | `TextInput of
-            [> `About of string
+            [> `About of uri
             | `Description of string list
-            | `Link of [> `URI of string ] list
+            | `Link of [> `URI of uri ] list
             | `Name of string list
             | `Title of string list ]
               list ]

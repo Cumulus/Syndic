@@ -9,6 +9,11 @@ type t =
   | Node of Xmlm.pos * Xmlm.tag * t list
   | Data of Xmlm.pos * string
 
+val resolve : xmlbase: Uri.t option -> Uri.t -> Uri.t
+(** [resolve base uri] resolve the [uri] against the possible base. *)
+
+val base : parent: Uri.t option -> string -> Uri.t option
+
 val get_position : t -> Xmlm.pos
 
 val of_xmlm : Xmlm.input -> (dtd * t)
