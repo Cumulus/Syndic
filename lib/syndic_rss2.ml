@@ -131,15 +131,13 @@ let image_of_xml' =
   generate_catcher ~data_producer (fun ~pos x -> `Image x)
 
 type cloud = {
-  domain: Uri.t;
-  port: int;
-  path: string;
+  uri: Uri.t;
   registerProcedure: string;
   protocol: string;
 }
 
 type cloud' = [
-  | `Domain of Uri.t
+  | `Domain of string
   | `Port of string
   | `Path of string
   | `RegisterProcedure of string
@@ -183,15 +181,11 @@ let make_cloud ~pos (l : [< cloud' ] list) =
                             "Cloud elements MUST have a 'protocol' \
                              attribute"))
   in
-  `Cloud ({ domain; port; path; registerProcedure; protocol; } : cloud)
-
-let domain_of_xml ~xmlbase a =
-  `Domain(XML.resolve ~xmlbase (Uri.of_string a))
-
-let domain_of_xml' ~xmlbase a =
-  `Domain(xmlbase, a)
+  let uri = Uri.make ~host:domain ~port ~path () in
+  `Cloud ({ uri; registerProcedure; protocol; } : cloud)
 
 let cloud_attr_producer = [
+    ("domain", (fun ~xmlbase a -> `Domain a));
     ("port", (fun ~xmlbase a -> `Port a));
     ("path", (fun ~xmlbase a -> `Path a)); (* XXX: it's RFC compliant ? *)
     ("registerProcedure", (fun ~xmlbase a -> `RegisterProcedure a));
@@ -199,12 +193,10 @@ let cloud_attr_producer = [
   ]
 
 let cloud_of_xml =
-  let attr_producer = ("domain", domain_of_xml) :: cloud_attr_producer in
-  generate_catcher ~attr_producer make_cloud
+  generate_catcher ~attr_producer:cloud_attr_producer make_cloud
 
 let cloud_of_xml' =
-  let attr_producer =  ("domain", domain_of_xml') :: cloud_attr_producer in
-  generate_catcher ~attr_producer (fun ~pos x -> `Cloud x)
+  generate_catcher ~attr_producer:cloud_attr_producer (fun ~pos x -> `Cloud x)
 
 
 type textinput =
@@ -318,12 +310,13 @@ let make_category ~pos (l : [< category' ] list) =
   `Category({ data; domain; } : category )
 
 let category_of_xml =
-  let attr_producer = [ ("domain", domain_of_xml) ] in
+  let attr_producer =
+    [ ("domain", (fun ~xmlbase a -> `Domain(Uri.of_string a))) ] in
   let leaf_producer ~xmlbase pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_category
 
 let category_of_xml' =
-  let attr_producer = [ ("domain", domain_of_xml') ] in
+  let attr_producer = [ ("domain", (fun ~xmlbase a -> `Domain a)) ] in
   let leaf_producer ~xmlbase pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Category x)
 

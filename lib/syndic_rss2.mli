@@ -31,9 +31,7 @@ type image =
 
 type cloud =
   {
-    domain: Uri.t;
-    port: int;
-    path: string;
+    uri: Uri.t;  (** The URI of the cloud (domain, port, path). *)
     registerProcedure: string;
     protocol: string;
   }
@@ -329,7 +327,7 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
   [> `Channel of
        [> `Category of string
        | `Cloud of
-            [> `Domain of uri
+            [> `Domain of string
             | `Path of string
             | `Port of string
             | `Protocol of string
@@ -349,7 +347,7 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
               list
        | `Item of
             [> `Author of string
-            | `Category of [> `Data of string | `Domain of uri ] list
+            | `Category of [> `Data of string | `Domain of string ] list
             | `Comments of string
             | `Description of string
             | `Enclosure of
