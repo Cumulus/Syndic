@@ -23,7 +23,7 @@ module XML = struct
     in
     let rec catch_attr ~xmlbase acc pos = function
       | (("http://www.w3.org/XML/1998/namespace", "base"), new_base) :: r ->
-         let xmlbase = base ~parent:xmlbase new_base in
+         let xmlbase = Some(resolve ~xmlbase (Uri.of_string new_base)) in
          catch_attr ~xmlbase acc pos r
       | attr :: r -> begin
           match get_producer (get_attr_name attr) attr_producer with

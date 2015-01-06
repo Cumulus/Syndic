@@ -12,8 +12,6 @@ type t =
 val resolve : xmlbase: Uri.t option -> Uri.t -> Uri.t
 (** [resolve base uri] resolve the [uri] against the possible base. *)
 
-val base : parent: Uri.t option -> string -> Uri.t option
-
 val get_position : t -> Xmlm.pos
 
 val of_xmlm : Xmlm.input -> (dtd * t)

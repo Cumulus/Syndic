@@ -8,11 +8,6 @@ let resolve ~xmlbase uri = match xmlbase with
   | None -> uri
   | Some b -> Uri.resolve "" b uri
 
-let base ~parent base =
-  let base = Uri.of_string base in
-  Some(match parent with Some p -> Uri.resolve "" p base
-                       | None -> base)
-
 let of_xmlm input =
   let el tag datas = Node (Xmlm.pos input, tag, datas) in
   let data data = Data (Xmlm.pos input, data) in

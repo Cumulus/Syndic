@@ -255,7 +255,7 @@ let rec outline_of_node ~xmlbase ((pos, ((_, attributes)), datas): node) =
   and outlines = ref [] in
   let process_attrs (name, v) = match name with
     | ("http://www.w3.org/XML/1998/namespace", "base") ->
-       new_xmlbase := XML.base ~parent:xmlbase v
+       new_xmlbase := Some(XML.resolve ~xmlbase (Uri.of_string v))
     | (_, "text") -> text := v
     | (_, "type") -> typ := Some v
     | (_, "isComment") ->
@@ -299,7 +299,7 @@ let rec outline_of_node' ~xmlbase ((pos, ((_, attributes)), datas): node) =
   let el = ref [] in
   let el_of_attrs (name, v) = match name with
     | ("http://www.w3.org/XML/1998/namespace", "base") ->
-       new_xmlbase := XML.base ~parent:xmlbase v
+       new_xmlbase := Some(XML.resolve ~xmlbase (Uri.of_string v))
     | (_, "text") -> el := `Text v :: !el
     | (_, "type") -> el := `Type v :: !el
     | (_, "isComment") -> el := `IsComment v :: !el
