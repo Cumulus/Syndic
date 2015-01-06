@@ -299,7 +299,7 @@ let generator_of_xml =
 let generator_of_xml' =
   let attr_producer = [
     ("version", (fun ~xmlbase a -> `Version a));
-    ("uri", (fun ~xmlbase a -> `URI a));
+    ("uri", (fun ~xmlbase a -> `URI(xmlbase, a)));
   ] in
   let leaf_producer ~xmlbase pos data = `Content data in
   generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Generator x)
@@ -326,7 +326,7 @@ let icon_of_xml =
   generate_catcher ~leaf_producer make_icon
 
 let icon_of_xml' =
-  let leaf_producer ~xmlbase pos data = `URI data in
+  let leaf_producer ~xmlbase pos data = `URI(xmlbase, data) in
   generate_catcher ~leaf_producer (fun ~pos x -> `Icon x)
 
 
@@ -456,7 +456,7 @@ let logo_of_xml =
   generate_catcher ~leaf_producer make_logo
 
 let logo_of_xml' =
-  let leaf_producer ~xmlbase pos data = `URI data in
+  let leaf_producer ~xmlbase pos data = `URI(xmlbase, data) in
   generate_catcher ~leaf_producer (fun ~pos x -> `Logo x)
 
 type published = Date.t

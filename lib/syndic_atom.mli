@@ -553,11 +553,11 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
                  | `Contributor of person
                  | `Generator of
                       [> `Content of string
-                      | `URI of string
+                      | `URI of uri
                       | `Version of string ]
                         list
                  | `ID of string list
-                 | `Icon of [> `URI of string ] list
+                 | `Icon of [> `URI of uri ] list
                  | `Link of
                       [> `HREF of string
                       | `HREFLang of string
@@ -566,7 +566,7 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
                       | `Title of string
                       | `Type of string ]
                         list
-                 | `Logo of [> `URI of string ] list
+                 | `Logo of [> `URI of uri ] list
                  | `Rights of Syndic_xml.t list
                  | `Subtitle of Syndic_xml.t list
                  | `Title of Syndic_xml.t list
@@ -577,10 +577,10 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
             | `Updated of [> `Date of string ] list ]
               list
        | `Generator of
-            [> `Content of string | `URI of string | `Version of string ]
+            [> `Content of string | `URI of uri | `Version of string ]
               list
        | `ID of string list
-       | `Icon of [> `URI of string ] list
+       | `Icon of [> `URI of uri ] list
        | `Link of
             [> `HREF of string
             | `HREFLang of string
@@ -589,7 +589,7 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
             | `Title of string
             | `Type of string ]
               list
-       | `Logo of [> `URI of string ] list
+       | `Logo of [> `URI of uri ] list
        | `Rights of Syndic_xml.t list
        | `Subtitle of Syndic_xml.t list
        | `Title of Syndic_xml.t list
