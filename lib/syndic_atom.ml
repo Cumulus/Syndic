@@ -1413,7 +1413,7 @@ let aggregate ?id ?updated ?subtitle ?(title=default_title) feeds : feed =
     | None ->
        (* Use the more recent date of the entries. *)
        match entries with
-       | [] -> Date.now() (* no entries! *)
+       | [] -> Date.epoch
        | e0 :: el ->
           List.fold_left more_recent e0.updated el in
   { authors = [];  categories = [];  contributors = [];

@@ -905,8 +905,6 @@ let cmp_date_opt d1 d2 = match d1, d2 with
   | None, Some _ -> -1
   | None, None -> 0
 
-let epoch = Date.from_unixfloat 0. (* 1970-1-1 *)
-
 let entry_of_item (it: item) : Atom.entry =
   let author = match it.author with
     | Some a -> { Atom.name = a;  uri = None;  email = Some a }
@@ -980,7 +978,7 @@ let entry_of_item (it: item) : Atom.entry =
     title;
     updated = (match it.pubDate with
                | Some d -> d
-               | None -> epoch);
+               | None -> Date.epoch);
   }
 
 let to_atom (ch: channel) : Atom.feed =
@@ -996,7 +994,7 @@ let to_atom (ch: channel) : Atom.feed =
     let d = List.sort cmp_date_opt (ch.lastBuildDate :: d) in
     match d with
     | Some d :: _ -> d
-    | None :: _ -> epoch
+    | None :: _ -> Date.epoch
     | [] -> assert false in
   { Atom.authors = [];
     categories = (match ch.category with

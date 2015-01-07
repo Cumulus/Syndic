@@ -4,9 +4,8 @@ open Scanf
 
 type t = CalendarLib.Calendar.t
 
+let epoch = Calendar.make 1970 1 1  0 0 0
 let compare = CalendarLib.Calendar.compare
-let now = CalendarLib.Calendar.now
-let from_unixfloat = CalendarLib.Calendar.from_unixfloat
 
 let month_to_int = Hashtbl.create 12
 
