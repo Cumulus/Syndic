@@ -7,6 +7,15 @@ module XML = struct
 
   type node = Xmlm.pos * Xmlm.tag * t list
 
+  let xmlbase_tag = (Xmlm.ns_xml, "base")
+
+  let xmlbase_of_attr ~xmlbase attr =
+    try
+      let new_base = List.assoc xmlbase_tag attr in
+      Some(Syndic_xml.resolve ~xmlbase (Uri.of_string new_base))
+    with Not_found ->
+      xmlbase
+
   let generate_catcher
       ?(namespaces=[""])
       ?(attr_producer=[])
@@ -22,16 +31,13 @@ module XML = struct
       with _ -> None
     in
     let rec catch_attr ~xmlbase acc pos = function
-      | (("http://www.w3.org/XML/1998/namespace", "base"), new_base) :: r ->
-         let xmlbase = Some(resolve ~xmlbase (Uri.of_string new_base)) in
-         catch_attr ~xmlbase acc pos r
       | attr :: r -> begin
           match get_producer (get_attr_name attr) attr_producer with
           | Some f when in_namespaces attr ->
              let acc = (f ~xmlbase (get_attr_value attr)) :: acc in
              catch_attr ~xmlbase acc pos r
           | _ -> catch_attr ~xmlbase acc pos r end
-      | [] -> xmlbase, acc
+      | [] -> acc
     in
     let rec catch_datas ~xmlbase acc = function
       | Node (pos, tag, datas) :: r ->
@@ -47,7 +53,12 @@ module XML = struct
       | [] -> acc
     in
     let generate ~xmlbase ((pos, tag, datas): node) =
-      let xmlbase, acc = catch_attr ~xmlbase [] pos (get_attrs tag) in
+      (* The spec says that "The base URI for a URI reference
+         appearing in any other attribute value, including default
+         attribute values, is the base URI of the element bearing the
+         attribute" so get xml:base first. *)
+      let xmlbase = xmlbase_of_attr ~xmlbase (get_attrs tag) in
+      let acc = catch_attr ~xmlbase [] pos (get_attrs tag) in
       maker ~pos (catch_datas ~xmlbase acc datas)
     in generate
 

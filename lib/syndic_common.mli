@@ -13,6 +13,9 @@ module XML : sig
 
   val dummy_of_xml : ctor:(xmlbase: Uri.t option -> string -> 'a) ->
                      xmlbase: Uri.t option -> node -> 'a
+
+  val xmlbase_of_attr :
+    xmlbase: Uri.t option -> Xmlm.attribute list -> Uri.t option
 end
 
 module Util : sig

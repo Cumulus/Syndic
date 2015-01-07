@@ -244,7 +244,6 @@ let outline ?typ ?(is_comment=false) ?(is_breakpoint=false) ?xml_url ?html_url
     attrs;  outlines }
 
 let rec outline_of_node ~xmlbase ((pos, ((_, attributes)), datas): node) =
-  let new_xmlbase = ref xmlbase in
   let text = ref ""
   and typ = ref None
   and is_comment = ref false
@@ -253,9 +252,9 @@ let rec outline_of_node ~xmlbase ((pos, ((_, attributes)), datas): node) =
   and html_url = ref None
   and attrs = ref []
   and outlines = ref [] in
+  (* Get xml:base first as it must be used the these attributes too. *)
+  let xmlbase = xmlbase_of_attr ~xmlbase attributes in
   let process_attrs (name, v) = match name with
-    | ("http://www.w3.org/XML/1998/namespace", "base") ->
-       new_xmlbase := Some(XML.resolve ~xmlbase (Uri.of_string v))
     | (_, "text") -> text := v
     | (_, "type") -> typ := Some v
     | (_, "isComment") ->
@@ -278,8 +277,7 @@ let rec outline_of_node ~xmlbase ((pos, ((_, attributes)), datas): node) =
   let process_outlines = function
     | XML.Node (p, (((ns, name), _) as t), d) ->
        if ns = "" && name = "outline" then
-         outlines := outline_of_node ~xmlbase:!new_xmlbase (p, t, d)
-                     :: !outlines
+         outlines := outline_of_node ~xmlbase (p, t, d)  :: !outlines
     | XML.Data _ -> () in
   List.iter process_outlines datas;
   { text = !text;
@@ -295,11 +293,9 @@ let rec outline_of_node ~xmlbase ((pos, ((_, attributes)), datas): node) =
 let outline_of_xml ~xmlbase a = `Outline(outline_of_node ~xmlbase a)
 
 let rec outline_of_node' ~xmlbase ((pos, ((_, attributes)), datas): node) =
-  let new_xmlbase = ref xmlbase in
   let el = ref [] in
+  let xmlbase = xmlbase_of_attr ~xmlbase attributes in
   let el_of_attrs (name, v) = match name with
-    | ("http://www.w3.org/XML/1998/namespace", "base") ->
-       new_xmlbase := Some(XML.resolve ~xmlbase (Uri.of_string v))
     | (_, "text") -> el := `Text v :: !el
     | (_, "type") -> el := `Type v :: !el
     | (_, "isComment") -> el := `IsComment v :: !el
@@ -311,8 +307,7 @@ let rec outline_of_node' ~xmlbase ((pos, ((_, attributes)), datas): node) =
   let process_outlines = function
     | XML.Node (p, (((ns, name), _) as t), d) ->
        if ns = "" && name = "outline" then
-         el := `Outline(outline_of_node' ~xmlbase:!new_xmlbase (p, t, d))
-               :: !el
+         el := `Outline(outline_of_node' ~xmlbase (p, t, d))  :: !el
     | XML.Data _ -> () in
   List.iter process_outlines datas;
   !el
