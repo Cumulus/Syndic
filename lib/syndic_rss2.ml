@@ -964,9 +964,16 @@ let entry_of_item (it: item) : Atom.entry =
                    label = None } ]
     | None -> [] in
   let (title: Atom.title), content = match it.story with
-    | All(t, d) -> Atom.Text t, Some(Atom.Html d)
-    | Title t -> Atom.Text t, None
-    | Description d -> Atom.Text "", Some(Atom.Html d) in
+    | All(t, d) ->
+       let c = if it.content = "" then d else it.content in
+       Atom.Text t, Some(Atom.Html c)
+    | Title t ->
+       let c = if it.content = "" then None
+               else Some(Atom.Html it.content) in
+       Atom.Text t, c
+    | Description d ->
+       let c = if it.content = "" then d else it.content in
+       Atom.Text "", Some(Atom.Html c) in
   let id = match it.guid with
     | Some g -> Uri.to_string g.data
     | None -> match it.link with
