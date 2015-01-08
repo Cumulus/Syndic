@@ -19,7 +19,7 @@ let make_title ~pos (l : string list) =
   in `Title title
 
 let title_of_xml, title_of_xml' =
-  let leaf_producer pos data = data in
+  let leaf_producer ~xmlbase pos data = data in
   generate_catcher ~namespaces ~leaf_producer make_title,
   generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `Title x)
 
@@ -35,7 +35,7 @@ let make_name ~pos (l : string list) =
   in `Name name
 
 let name_of_xml, name_of_xml' =
-  let leaf_producer pos data = data in
+  let leaf_producer ~xmlbase pos data = data in
   generate_catcher ~namespaces ~leaf_producer make_name,
   generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `Name x)
 
@@ -51,16 +51,16 @@ let make_description ~pos (l : string list) =
   in `Description description
 
 let description_of_xml, description_of_xml' =
-  let leaf_producer pos data = data in
+  let leaf_producer ~xmlbase pos data = data in
   generate_catcher ~namespaces ~leaf_producer make_description,
   generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `Description x)
 
 type channel_image = Uri.t
-type channel_image' = [ `URI of string ]
+type channel_image' = [ `URI of Uri.t option * string ]
 
 let make_channel_image ~pos (l : [< channel_image' ] list) =
   let image = match find (function `URI _ -> true) l with
-    | Some (`URI u) -> (Uri.of_string u)
+    | Some (`URI(xmlbase, u)) -> XML.resolve ~xmlbase (Uri.of_string u)
     | _ ->
       raise (Error.Error (pos,
                             "The content of <image> MUST be \
@@ -69,17 +69,17 @@ let make_channel_image ~pos (l : [< channel_image' ] list) =
 
 let channel_image_of_xml, channel_image_of_xml' =
   let attr_producer = [
-    ("resource", (fun a -> `URI a));
+    ("resource", (fun ~xmlbase a -> `URI(xmlbase, a)));
   ] in
   generate_catcher ~namespaces ~attr_producer make_channel_image,
   generate_catcher ~namespaces ~attr_producer (fun ~pos x -> `Image x)
 
 type link = Uri.t
-type link' = [ `URI of string ]
+type link' = [ `URI of Uri.t option * string ]
 
 let make_link ~pos (l : [< link' ] list) =
   let link = match find (function `URI _ -> true) l with
-    | Some (`URI u) -> (Uri.of_string u)
+    | Some (`URI(xmlbase, u)) -> XML.resolve ~xmlbase (Uri.of_string u)
     | _ ->
       raise (Error.Error (pos,
                             "The content of <link> MUST be \
@@ -87,16 +87,16 @@ let make_link ~pos (l : [< link' ] list) =
   in `Link link
 
 let link_of_xml, link_of_xml' =
-  let leaf_producer pos data = `URI data in
+  let leaf_producer ~xmlbase pos data = `URI(xmlbase, data) in
   generate_catcher ~namespaces ~leaf_producer make_link,
   generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `Link x)
 
 type url = Uri.t
-type url' = [ `URI of string ]
+type url' = [ `URI of Uri.t option * string ]
 
 let make_url ~pos (l : [< url' ] list) =
   let url = match find (function `URI _ -> true) l with
-    | Some (`URI u) -> Uri.of_string u
+    | Some (`URI(xmlbase, u)) -> XML.resolve ~xmlbase (Uri.of_string u)
     | _ ->
       raise (Error.Error (pos,
                             "The content of <url> MUST be \
@@ -104,16 +104,16 @@ let make_url ~pos (l : [< url' ] list) =
   in `URL url
 
 let url_of_xml, url_of_xml' =
-  let leaf_producer pos data = `URI data in
+  let leaf_producer ~xmlbase pos data = `URI(xmlbase, data) in
   generate_catcher ~namespaces ~leaf_producer make_url,
   generate_catcher ~namespaces ~leaf_producer (fun ~pos x -> `URL x)
 
 type li = Uri.t
-type li' = [ `URI of string ]
+type li' = [ `URI of Uri.t option * string ]
 
 let make_li ~pos (l : [< li' ] list) =
   let url = match find (function `URI _ -> true) l with
-    | Some (`URI u) -> (Uri.of_string u)
+    | Some (`URI(xmlbase, u)) -> XML.resolve ~xmlbase (Uri.of_string u)
     | _ ->
       raise (Error.Error (pos,
                             "Li elements MUST have a 'resource' \
@@ -123,7 +123,7 @@ let make_li ~pos (l : [< li' ] list) =
 
 let li_of_xml, li_of_xml' =
   let attr_producer = [
-    ("resource", (fun a -> `URI a));
+    ("resource", (fun ~xmlbase a -> `URI(xmlbase, a)));
   ] in
   generate_catcher
     ~namespaces
@@ -184,11 +184,11 @@ let items_of_xml' =
       ~data_producer (fun ~pos x -> `Items x)
 
 type channel_textinput = Uri.t
-type channel_textinput' = [ `URI of string ]
+type channel_textinput' = [ `URI of Uri.t option * string ]
 
 let make_textinput ~pos (l : [< channel_textinput' ] list) =
   let url = match find (function `URI _ -> true) l with
-    | Some (`URI u) -> (Uri.of_string u)
+    | Some (`URI(xmlbase, u)) -> XML.resolve ~xmlbase (Uri.of_string u)
     | _ ->
       raise (Error.Error (pos,
                             "Textinput elements MUST have a 'resource' \
@@ -197,7 +197,7 @@ let make_textinput ~pos (l : [< channel_textinput' ] list) =
 
 let channel_textinput_of_xml, channel_textinput_of_xml' =
   let attr_producer = [
-    ("resource", (fun a -> `URI a));
+    ("resource", (fun ~xmlbase a -> `URI(xmlbase, a)));
   ] in
   generate_catcher ~namespaces ~attr_producer make_textinput,
   generate_catcher ~namespaces ~attr_producer (fun ~pos x -> `TextInput x)
@@ -220,12 +220,12 @@ type channel' = [
   | `Image of channel_image
   | `Items of items
   | `TextInput of channel_textinput
-  | `About of string
+  | `About of Uri.t
 ]
 
 let make_channel ~pos (l : [< channel' ] list) =
   let about = match find (function `About _ -> true | _ -> false) l with
-    | Some (`About u) -> (Uri.of_string u)
+    | Some (`About u) -> u
     | _ ->
       raise (Error.Error (pos,
                             "Channel elements MUST have a 'about' \
@@ -262,6 +262,12 @@ let make_channel ~pos (l : [< channel' ] list) =
   `Channel({ about; title; link; description; image; items; textinput }
            : channel)
 
+let about_of_xml ~xmlbase a =
+  `About(XML.resolve ~xmlbase (Uri.of_string a))
+
+let about_of_xml' ~xmlbase a = `About(xmlbase, a)
+
+
 let channel_of_xml =
   let data_producer = [
     ("title", title_of_xml);
@@ -272,7 +278,7 @@ let channel_of_xml =
     ("textinput", channel_textinput_of_xml);
   ] in
   let attr_producer = [
-    ("about", (fun a -> `About a));
+    ("about", about_of_xml);
   ] in
   generate_catcher
     ~namespaces
@@ -290,7 +296,7 @@ let channel_of_xml' =
     ("textinput", channel_textinput_of_xml');
   ] in
   let attr_producer = [
-    ("about", (fun a -> `About a));
+    ("about", about_of_xml');
   ] in
   generate_catcher ~namespaces ~attr_producer ~data_producer
                    (fun ~pos x -> `Channel x)
@@ -307,7 +313,7 @@ type image' = [
   | `Title of title
   | `Link of link
   | `URL of url
-  | `About of string
+  | `About of Uri.t
 ]
 
 let make_image ~pos (l : [< image' ] list) =
@@ -327,7 +333,7 @@ let make_image ~pos (l : [< image' ] list) =
                             "<image> elements MUST contains exactly one \
                              <url> element"))
   in let about = match find (function `About _ -> true | _ -> false) l with
-    | Some (`About a) -> (Uri.of_string a)
+    | Some (`About a) -> a
     | _ ->
       raise (Error.Error (pos,
                             "Image elements MUST have a 'about' \
@@ -341,7 +347,7 @@ let image_of_xml =
     ("url", url_of_xml);
   ] in
   let attr_producer = [
-    ("about", (fun a -> `About a));
+    ("about", about_of_xml);
   ] in
   generate_catcher
     ~namespaces
@@ -356,7 +362,7 @@ let image_of_xml' =
     ("url", url_of_xml');
   ] in
   let attr_producer = [
-    ("about", (fun a -> `About a));
+    ("about", about_of_xml');
   ] in
   generate_catcher ~namespaces ~attr_producer ~data_producer
                    (fun ~pos x -> `Image x)
@@ -373,7 +379,7 @@ type item' = [
   | `Title of title
   | `Link of link
   | `Description of description
-  | `About of string
+  | `About of Uri.t
 ]
 
 let make_item ~pos (l : [< item' ] list) =
@@ -392,7 +398,7 @@ let make_item ~pos (l : [< item' ] list) =
     | Some (`Description d) -> Some d
     | _ -> None
   in let about = match find (function `About _ -> true | _ -> false) l with
-    | Some (`About u) -> (Uri.of_string u)
+    | Some (`About u) -> u
     | _ ->
       raise (Error.Error (pos,
                             "Item elements MUST have a 'about' \
@@ -406,7 +412,7 @@ let item_of_xml =
     ("description", description_of_xml);
   ] in
   let attr_producer = [
-    ("about", (fun a -> `About a));
+    ("about", about_of_xml);
   ] in
   generate_catcher
     ~namespaces
@@ -421,7 +427,7 @@ let item_of_xml' =
     ("description", description_of_xml');
   ] in
   let attr_producer = [
-    ("about", (fun a -> `About a));
+    ("about", about_of_xml');
   ] in
   generate_catcher ~namespaces ~attr_producer ~data_producer
                    (fun ~pos x -> `Item x)
@@ -436,7 +442,7 @@ type textinput =
   }
 
 type textinput' = [
-  | `About of string
+  | `About of Uri.t
   | `Title of title
   | `Description of description
   | `Name of name
@@ -466,7 +472,7 @@ let make_textinput ~pos (l : [< textinput' ] list) =
                             "<textinput> elements MUST contains exactly one \
                              <link> element"))
   in let about = match find (function `About _ -> true | _ -> false) l with
-    | Some (`About u) -> (Uri.of_string u)
+    | Some (`About u) -> u
     | _ ->
       raise (Error.Error (pos,
                             "Textinput elements MUST have a 'about' \
@@ -481,7 +487,7 @@ let textinput_of_xml =
     ("link", link_of_xml);
   ] in
   let attr_producer = [
-    ("about", (fun a -> `About a))
+    ("about", about_of_xml)
   ] in
   generate_catcher
     ~namespaces
@@ -497,7 +503,7 @@ let textinput_of_xml' =
     ("link", link_of_xml');
   ] in
   let attr_producer = [
-    ("about", (fun a -> `About a))
+    ("about", about_of_xml')
   ] in
   generate_catcher ~namespaces ~attr_producer ~data_producer
                    (fun ~pos x -> `TextInput x)
@@ -555,16 +561,18 @@ let rdf_of_xml' =
   ] in
   generate_catcher ~namespaces ~data_producer (fun ~pos x -> x)
 
-let parse input =
+let parse ?xmlbase input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, datas) when tag_is tag "RDF" ->
-      rdf_of_xml (pos, tag, datas)
+     rdf_of_xml ~xmlbase (pos, tag, datas)
   | _ -> raise (Error.Error ((0, 0),
                          "document MUST contains exactly one \
                           <rdf> element"))
 
-let unsafe input =
+type uri = Uri.t option * string
+
+let unsafe ?xmlbase input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, datas) when tag_is tag "RDF" ->
-     `RDF(rdf_of_xml' (pos, tag, datas))
+     `RDF(rdf_of_xml' xmlbase (pos, tag, datas))
   | _ -> `RDF []

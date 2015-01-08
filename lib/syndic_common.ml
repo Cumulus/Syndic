@@ -5,6 +5,17 @@ module XML = struct
 
   exception Ignore_namespace
 
+  type node = Xmlm.pos * Xmlm.tag * t list
+
+  let xmlbase_tag = (Xmlm.ns_xml, "base")
+
+  let xmlbase_of_attr ~xmlbase attr =
+    try
+      let new_base = List.assoc xmlbase_tag attr in
+      Some(Syndic_xml.resolve ~xmlbase (Uri.of_string new_base))
+    with Not_found ->
+      xmlbase
+
   let generate_catcher
       ?(namespaces=[""])
       ?(attr_producer=[])
@@ -19,33 +30,41 @@ module XML = struct
       try Some (List.assoc name map)
       with _ -> None
     in
-    let rec catch_attr acc pos = function
+    let rec catch_attr ~xmlbase acc pos = function
       | attr :: r -> begin
           match get_producer (get_attr_name attr) attr_producer with
           | Some f when in_namespaces attr ->
-              catch_attr ((f (get_attr_value attr)) :: acc) pos r
-          | _ -> catch_attr acc pos r end
+             let acc = (f ~xmlbase (get_attr_value attr)) :: acc in
+             catch_attr ~xmlbase acc pos r
+          | _ -> catch_attr ~xmlbase acc pos r end
       | [] -> acc
     in
-    let rec catch_datas acc = function
+    let rec catch_datas ~xmlbase acc = function
       | Node (pos, tag, datas) :: r ->
         begin match get_producer (get_tag_name tag) data_producer with
           | Some f when in_namespaces tag ->
-              catch_datas ((f (pos, tag, datas)) :: acc) r
-          | _ -> catch_datas acc r end
+             let acc = (f ~xmlbase (pos, tag, datas)) :: acc in
+             catch_datas ~xmlbase acc r
+          | _ -> catch_datas ~xmlbase acc r end
       | Data (pos, str) :: r ->
         begin match leaf_producer with
-          | Some f -> catch_datas ((f pos str) :: acc) r
-          | None -> catch_datas acc r end
+          | Some f -> catch_datas ~xmlbase ((f ~xmlbase pos str) :: acc) r
+          | None -> catch_datas ~xmlbase acc r end
       | [] -> acc
     in
-    let generate (pos, tag, datas) =
-      maker ~pos (catch_attr (catch_datas [] datas) pos (get_attrs tag))
+    let generate ~xmlbase ((pos, tag, datas): node) =
+      (* The spec says that "The base URI for a URI reference
+         appearing in any other attribute value, including default
+         attribute values, is the base URI of the element bearing the
+         attribute" so get xml:base first. *)
+      let xmlbase = xmlbase_of_attr ~xmlbase (get_attrs tag) in
+      let acc = catch_attr ~xmlbase [] pos (get_attrs tag) in
+      maker ~pos (catch_datas ~xmlbase acc datas)
     in generate
 
   let dummy_of_xml ~ctor =
-    let leaf_producer pos data = ctor data in
-    let head ~pos = function [] -> ctor ""
+    let leaf_producer ~xmlbase pos data = ctor ~xmlbase data in
+    let head ~pos = function [] -> ctor ~xmlbase:None ""
                            | x :: r -> x in
     generate_catcher ~leaf_producer head
 end

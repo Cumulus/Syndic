@@ -475,13 +475,19 @@ val feed :
   ?subtitle:subtitle ->
   id:id -> title:title -> updated:updated -> entry list -> feed
 
-val parse : Xmlm.input -> feed
+val parse : ?xmlbase: Uri.t -> Xmlm.input -> feed
 (** [parse xml] returns the feed corresponding to [xml].  Beware that
-    [xml] is mutable, so when the parsing fails, one have to create a
-    new copy of [xml] to use it with another function.
+    [xml] is mutable, so when the parsing fails, one has to create a
+    new copy of [xml] to use it with another function.  If you
+    retrieve [xml] from a URL, you should use that URL as [~xmlbase].
 
     Raise [Error.Expected], [Expected_Data] or [Error.Duplicate_Link]
-    if [xml] is not a valid Atom document. *)
+    if [xml] is not a valid Atom document.
+
+    @param xmlbase default xml:base to resolve relative URLs (of
+    course xml:base attributes in the XML Atom document take
+    precedence over this).
+    See {{:http://www.w3.org/TR/xmlbase/}XML Base}. *)
 
 val to_xml : feed -> Syndic_xml.t
 (** [to_xml f] converts the feed [f] to an XML tree. *)
@@ -502,10 +508,15 @@ val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
 
 (**/**)
 
-type person = [ `Email of string | `Name of string | `URI of string ] list
+type uri = Uri.t option * string
+(** An URI is given by (xmlbase, uri).  The value of [xmlbase], if not
+    [None], gives the base URI against which [uri] must be resolved if
+    it is relative. *)
+
+type person = [ `Email of string | `Name of string | `URI of uri ] list
 
 (** Analysis without verification, enjoy ! *)
-val unsafe : Xmlm.input ->
+val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
   [> `Feed of
        [> `Author of person
        | `Category of
@@ -542,11 +553,11 @@ val unsafe : Xmlm.input ->
                  | `Contributor of person
                  | `Generator of
                       [> `Content of string
-                      | `URI of string
+                      | `URI of uri
                       | `Version of string ]
                         list
                  | `ID of string list
-                 | `Icon of [> `URI of string ] list
+                 | `Icon of [> `URI of uri ] list
                  | `Link of
                       [> `HREF of string
                       | `HREFLang of string
@@ -555,7 +566,7 @@ val unsafe : Xmlm.input ->
                       | `Title of string
                       | `Type of string ]
                         list
-                 | `Logo of [> `URI of string ] list
+                 | `Logo of [> `URI of uri ] list
                  | `Rights of Syndic_xml.t list
                  | `Subtitle of Syndic_xml.t list
                  | `Title of Syndic_xml.t list
@@ -566,10 +577,10 @@ val unsafe : Xmlm.input ->
             | `Updated of [> `Date of string ] list ]
               list
        | `Generator of
-            [> `Content of string | `URI of string | `Version of string ]
+            [> `Content of string | `URI of uri | `Version of string ]
               list
        | `ID of string list
-       | `Icon of [> `URI of string ] list
+       | `Icon of [> `URI of uri ] list
        | `Link of
             [> `HREF of string
             | `HREFLang of string
@@ -578,7 +589,7 @@ val unsafe : Xmlm.input ->
             | `Title of string
             | `Type of string ]
               list
-       | `Logo of [> `URI of string ] list
+       | `Logo of [> `URI of uri ] list
        | `Rights of Syndic_xml.t list
        | `Subtitle of Syndic_xml.t list
        | `Title of Syndic_xml.t list

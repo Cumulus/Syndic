@@ -4,6 +4,10 @@ type t =
   | Node of Xmlm.pos * Xmlm.tag * t list
   | Data of Xmlm.pos * string
 
+let resolve ~xmlbase uri = match xmlbase with
+  | None -> uri
+  | Some b -> Uri.resolve "" b uri
+
 let of_xmlm input =
   let el tag datas = Node (Xmlm.pos input, tag, datas) in
   let data data = Data (Xmlm.pos input, data) in

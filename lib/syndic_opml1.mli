@@ -102,7 +102,7 @@ type opml =
     body : body;
   }
 
-val parse : Xmlm.input -> opml
+val parse : ?xmlbase: Uri.t -> Xmlm.input -> opml
 (** [parse i] takes [i] and returns an opml record which is the OCaml
     representation of the OPML document. *)
 
@@ -116,7 +116,12 @@ val output : opml -> Xmlm.dest -> unit
 
 (**/**)
 
-val unsafe : Xmlm.input ->
+type uri = Uri.t option * string
+(** An URI is given by (xmlbase, uri).  The value of [xmlbase], if not
+    [None], gives the base URI against which [uri] must be resolved if
+    it is relative. *)
+
+val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
   [> `Opml of
        [> `Body of
             [> `Outline of
@@ -125,8 +130,8 @@ val unsafe : Xmlm.input ->
                  | `IsBreakpoint of string
                  | `IsComment of string
                  | `Outline of 'a
-                 | `XML_url of string
-                 | `HTML_url of string
+                 | `XML_url of uri
+                 | `HTML_url of uri
                  | `Attr of string * string ]
                    list as 'a ]
               list

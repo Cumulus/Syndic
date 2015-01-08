@@ -1,15 +1,21 @@
 module XML : sig
   type t = Syndic_xml.t
 
+  type node = Xmlm.pos * Xmlm.tag * t list
+
   val generate_catcher :
     ?namespaces:string list ->
-    ?attr_producer:(string * (string -> 'a)) list ->
-    ?data_producer:(string * (Xmlm.pos * Xmlm.tag * t list -> 'a)) list ->
-    ?leaf_producer:(Xmlm.pos -> string -> 'a) ->
-    (pos: Xmlm.pos -> 'a list -> 'b) -> Xmlm.pos * Xmlm.tag * t list -> 'b
+    ?attr_producer: (string * (xmlbase: Uri.t option -> string -> 'a)) list ->
+    ?data_producer: (string * (xmlbase: Uri.t option -> node -> 'a)) list ->
+    ?leaf_producer: (xmlbase: Uri.t option -> Xmlm.pos -> string -> 'a) ->
+    (pos: Xmlm.pos -> 'a list -> 'b) ->
+    xmlbase: Uri.t option -> node -> 'b
 
-  val dummy_of_xml : ctor:(string -> 'a) ->
-    Xmlm.pos * Xmlm.tag * t list -> 'a
+  val dummy_of_xml : ctor:(xmlbase: Uri.t option -> string -> 'a) ->
+                     xmlbase: Uri.t option -> node -> 'a
+
+  val xmlbase_of_attr :
+    xmlbase: Uri.t option -> Xmlm.attribute list -> Uri.t option
 end
 
 module Util : sig
