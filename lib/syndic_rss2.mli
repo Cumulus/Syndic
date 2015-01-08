@@ -175,6 +175,7 @@ type story =
 type item =
   {
     story: story;
+    content: string;
     link: Uri.t option;
     author:  string option;
     category: category option;
@@ -190,12 +191,14 @@ type item =
     the link points to the full story.  An item may also be complete
     in itself, if so, the description contains the text
     (entity-encoded HTML is allowed; see examples), and the link and
-    title may be omitted.  All elements of an item are optional, {b
-    however at least one of title or description must be present.}
+    title may be omitted.
 
     - [title]       : The title of the item.
     - [link]        : The URL of the item.
     - [description] : The item synopsis.
+    - [content]     : The possible full story ([""] if not present).
+                      (Extension of RSS2, see
+                      http://purl.org/rss/1.0/modules/content/)
     - [author]      : Email address of the author of the item.
     - [category]    : Includes the item in one or more categories.
     - [comments]    : URL of a page for comments relating to the item.
@@ -350,6 +353,7 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
             | `Category of [> `Data of string | `Domain of string ] list
             | `Comments of string
             | `Description of string
+            | `Content of string
             | `Enclosure of
                  [> `Length of string | `Mime of string | `URL of uri ] list
             | `Guid of [> `Data of string | `Permalink of string ] list

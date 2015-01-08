@@ -450,6 +450,7 @@ type story =
 type item =
   {
     story: story;
+    content: string;
     link: Uri.t option;
     author:  string option; (* e-mail *)
     category: category option;
@@ -463,6 +464,7 @@ type item =
 type item' = [
   | `Title of string
   | `Description of string
+  | `Content of string
   | `Link of Uri.t
   | `Author of string (* e-mail *)
   | `Category of category
@@ -484,6 +486,9 @@ let make_item ~pos (l : _ list) =
     | _, _ -> raise (Error.Error (pos,
                                   "Item expected <title> or <description> tag"))
   in
+  let content = match find (function `Content _ -> true | _ -> false) l with
+    | Some(`Content c) -> c
+    | _ -> "" in
   let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link l) -> l
     | _ -> None
@@ -517,6 +522,7 @@ let make_item ~pos (l : _ list) =
     | _ -> None
   in
   `Item ({ story;
+           content;
            link;
            author;
            category;
@@ -535,6 +541,9 @@ let item_title_of_xml ~xmlbase (pos, tag, datas) =
 let item_description_of_xml ~xmlbase (pos, tag, datas) =
   `Description(try get_leaf datas
                with Not_found -> "")
+
+let item_content_of_xml ~xmlbase (pos, tag, datas) =
+  `Content(try get_leaf datas with Not_found -> "")
 
 let item_link_of_xml ~xmlbase (pos, tag, datas) =
   `Link(try Some(XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
@@ -558,10 +567,15 @@ let item_pubdate_of_xml ~xmlbase (pos, tag, datas) =
                             "The content of <pubDate> MUST be \
                              a non-empty string"))
 
+let item_namespaces = [""; "http://purl.org/rss/1.0/modules/content/"]
+
 let item_of_xml =
   let data_producer = [
     ("title", item_title_of_xml);
     ("description", item_description_of_xml);
+    (* <content:encoded> where
+       xmlns:content="http://purl.org/rss/1.0/modules/content/" *)
+    ("encoded", item_content_of_xml);
     ("link", item_link_of_xml);
     ("author", item_author_of_xml);
     ("category", category_of_xml);
@@ -571,12 +585,13 @@ let item_of_xml =
     ("pubDate", item_pubdate_of_xml);
     ("source", source_of_xml);
   ] in
-  generate_catcher ~data_producer make_item
+  generate_catcher ~data_producer make_item ~namespaces:item_namespaces
 
 let item_of_xml' =
   let data_producer = [
     ("title", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Title a));
     ("description", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Description a));
+    ("encoded", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Content a));
     ("link", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Link(xmlbase, a)));
     ("author", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Author a));
     ("category", category_of_xml');
@@ -587,6 +602,7 @@ let item_of_xml' =
     ("source", source_of_xml');
   ] in
   generate_catcher ~data_producer (fun ~pos x -> `Item x)
+                   ~namespaces:item_namespaces
 
 type channel =
   {
