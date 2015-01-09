@@ -466,11 +466,13 @@ let add_attr name opt to_string attr =
 let id_string (s: string) = s
 
 let rec outline_to_xml o =
+  (* isComment and isBreakpoint:  absent <=> false *)
+  let attr = if o.is_comment then (n "isComment", "true") :: o.attrs
+             else o.attrs in
+  let attr = if o.is_breakpoint then (n "isBreakpoint", "true") :: attr
+             else attr in
   let attr =
-    ((n "text", o.text)
-     :: (n "isComment", o.is_comment |> string_of_bool)
-     :: (n "isBreakpoint", o.is_breakpoint |> string_of_bool)
-     :: o.attrs)
+    ((n "text", o.text) :: attr)
     |> add_attr "type" o.typ id_string
     |> add_attr "xmlUrl" o.xml_url Uri.to_string
     |> add_attr "htmlUrl" o.html_url Uri.to_string in
