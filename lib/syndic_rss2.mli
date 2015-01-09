@@ -360,7 +360,7 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
             | `Content of string
             | `Enclosure of
                  [> `Length of string | `Mime of string | `URL of uri ] list
-            | `Guid of [> `Data of string | `Permalink of string ] list
+            | `Guid of [> `Data of uri | `Permalink of string ] list
             | `Link of uri
             | `PubDate of string
             | `Source of [> `Data of string | `URL of uri ] list

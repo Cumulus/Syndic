@@ -380,28 +380,31 @@ type guid =
   }
 
 type guid' = [
-  | `Data of string
+  | `Data of Uri.t option * string
   | `Permalink of string
 ]
 
 (* Some RSS2 server output <guid isPermaLink="false"></guid> ! *)
 let make_guid ~pos (l : [< guid' ] list) =
-  let data = match find (function `Data _ -> true | _ -> false) l with
-    | Some (`Data u) -> u
-    | _ -> ""
-  in
   let permalink = match find (function `Permalink _ -> true | _ -> false) l with
     | Some (`Permalink b) -> bool_of_string b
     | _ -> true (* cf. RFC *)
   in
-  (* FIXME: It is not clear that the GUID should be interpreted as an
-     URI to be resolved using xml:base. *)
-  `Guid(if data = "" then None
-        else Some({ data = Uri.of_string data;  permalink } : guid))
+  match find (function `Data _ -> true | _ -> false) l with
+  | Some (`Data(xmlbase, u)) ->
+     if u = "" then `Guid None
+     else
+       (* When the GUID is declared as a permlink, resolve it using xml:base *)
+       let data =
+         if permalink then XML.resolve ~xmlbase (Uri.of_string u)
+         else Uri.of_string u in
+       `Guid(Some({ data;  permalink } : guid))
+  | _ ->
+     `Guid None
 
 let guid_of_xml, guid_of_xml' =
   let attr_producer = [ ("isPermalink", (fun ~xmlbase a -> `Permalink a)); ] in
-  let leaf_producer ~xmlbase pos data = `Data data in
+  let leaf_producer ~xmlbase pos data = `Data(xmlbase, data) in
   generate_catcher ~attr_producer ~leaf_producer make_guid,
   generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Guid x)
 
