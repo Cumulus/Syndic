@@ -69,15 +69,17 @@ let get_html_content html =
 
 type text_construct =
   | Text of string
-  | Html of string
-  | Xhtml of Syndic_xml.t list
+  | Html of Uri.t option * string
+  | Xhtml of Uri.t option * Syndic_xml.t list
 
 let text_construct_of_xml
-    ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
+      ~xmlbase
+      ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
+  let xmlbase = xmlbase_of_attr ~xmlbase attr in
   match find (fun a -> attr_is a "type") attr with
-  | Some(_, "html") -> Html(get_html_content data)
+  | Some(_, "html") -> Html(xmlbase, get_html_content data)
   | Some(_, "application/xhtml+xml")
-  | Some(_, "xhtml") -> Xhtml(get_xml_content data data)
+  | Some(_, "xhtml") -> Xhtml(xmlbase, get_xml_content data data)
   | _ -> Text(get_leaf data)
 
 
@@ -480,7 +482,7 @@ let published_of_xml, published_of_xml' =
 
 type rights = text_construct
 
-let rights_of_xml ~xmlbase a = `Rights(text_construct_of_xml a)
+let rights_of_xml ~xmlbase a = `Rights(text_construct_of_xml ~xmlbase a)
 
 (* atomRights = element atom:rights { atomTextConstruct } *)
 let rights_of_xml' ~xmlbase
@@ -489,7 +491,7 @@ let rights_of_xml' ~xmlbase
 
 type title = text_construct
 
-let title_of_xml ~xmlbase a = `Title(text_construct_of_xml a)
+let title_of_xml ~xmlbase a = `Title(text_construct_of_xml ~xmlbase a)
 
 (* atomTitle = element atom:title { atomTextConstruct } *)
 let title_of_xml' ~xmlbase
@@ -498,7 +500,7 @@ let title_of_xml' ~xmlbase
 
 type subtitle = text_construct
 
-let subtitle_of_xml ~xmlbase a = `Subtitle(text_construct_of_xml a)
+let subtitle_of_xml ~xmlbase a = `Subtitle(text_construct_of_xml ~xmlbase a)
 
 (* atomSubtitle = element atom:subtitle { atomTextConstruct } *)
 let subtitle_of_xml' ~xmlbase
@@ -782,7 +784,7 @@ let content_of_xml' ~xmlbase
 type summary = text_construct
 
 (* atomSummary = element atom:summary { atomTextConstruct } *)
-let summary_of_xml ~xmlbase a = `Summary(text_construct_of_xml a)
+let summary_of_xml ~xmlbase a = `Summary(text_construct_of_xml ~xmlbase a)
 
 let summary_of_xml' ~xmlbase ((_, (_, _), data): Xmlm.pos * Xmlm.tag * t list) =
   `Summary data
@@ -1238,18 +1240,25 @@ let unsafe ?xmlbase input =
 (* Tag with the Atom namespace *)
 let atom name : Xmlm.tag = ((atom_ns, name), [])
 
+let add_attr_xmlbase ~xmlbase attrs =
+  match xmlbase with
+  | Some u -> ((Xmlm.ns_xml, "base"), Uri.to_string u) :: attrs
+  | None -> attrs
+
 let text_construct_to_xml tag_name (t: text_construct) =
   match t with
   | Text t ->
      XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "text"]),
               [XML.Data(dummy_pos, t)])
-  | Html t ->
-     XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "html"]),
+  | Html(xmlbase, t) ->
+     let attr = add_attr_xmlbase ~xmlbase [("", "type"), "html"] in
+     XML.Node(dummy_pos, ((atom_ns, tag_name), attr),
               [XML.Data(dummy_pos, t)])
-  | Xhtml x ->
+  | Xhtml(xmlbase, x) ->
      let div = XML.Node(dummy_pos,
                         ((xhtml_ns, "div"), [("", "xmlns"), xhtml_ns]), x) in
-     XML.Node(dummy_pos, ((atom_ns, tag_name), [("", "type"), "xhtml"]), [div])
+     let attr = add_attr_xmlbase ~xmlbase [("", "type"), "xhtml"] in
+     XML.Node(dummy_pos, ((atom_ns, tag_name), attr), [div])
 
 let person_to_xml name (a: author) =
   XML.Node(dummy_pos, atom name,
@@ -1311,11 +1320,6 @@ let source_to_xml (s: source) =
     |> add_node_option (text_construct_to_xml "subtitle") s.subtitle
     |> add_node_date (atom "updated") s.updated in
   XML.Node(dummy_pos, atom "source", nodes)
-
-let add_attr_xmlbase ~xmlbase attrs =
-  match xmlbase with
-  | Some u -> ((Xmlm.ns_xml, "base"), Uri.to_string u) :: attrs
-  | None -> attrs
 
 let content_to_xml (c: content) =
   match c with

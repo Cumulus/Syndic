@@ -8,8 +8,10 @@ module Error : module type of Syndic_error
     content of Text constructs is Language-Sensitive. *)
 type text_construct =
   | Text of string (** [Text(content)] *)
-  | Html of string (** [Html(content)] where the content is left unparsed. *)
-  | Xhtml of Syndic_xml.t list (** [Xhtml(content)] *)
+  | Html of Uri.t option * string
+  (** [Html(xmlbase, content)] where the content is left unparsed. *)
+  | Xhtml of Uri.t option * Syndic_xml.t list
+  (** [Xhtml(xmlbase, content)] *)
 
 type author =
   {
