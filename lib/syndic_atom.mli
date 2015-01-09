@@ -326,7 +326,8 @@ type mime = string
     {{: http://tools.ietf.org/html/rfc4287#section-4.1.3} See RFC 4287 § 4.1.3}
 
     - [Text], [Html], [Xhtml] or [Mime] means that the content was
-      part of the document and is provided as an argument.
+      part of the document and is provided as an argument.  The first
+      argument to [Html] and [Xhtml] is the possible xml:base value.
       {{:http://tools.ietf.org/html/rfc4287#section-3.1.1}
       See RFC 4287 § 3.1.1}
     - [Src(m, iri)] means that the content is to be found at [iri] and
@@ -337,14 +338,13 @@ type mime = string
       (mapped from an IRI, if necessary) is dereferenced, if the
       server providing that content also provides a media type, the
       server-provided media type is authoritative.
-
-    {{: http://tools.ietf.org/html/rfc4287#section-4.1.3.2}
-    See RFC 4287 § 4.1.3.2 }
+      See {{: http://tools.ietf.org/html/rfc4287#section-4.1.3.2}
+      RFC 4287 § 4.1.3.2}
  *)
 type content =
   | Text of string
-  | Html of string
-  | Xhtml of Syndic_xml.t list
+  | Html of Uri.t option * string
+  | Xhtml of Uri.t option * Syndic_xml.t list
   | Mime of mime * string
   | Src of mime option * Uri.t
 

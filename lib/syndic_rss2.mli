@@ -168,14 +168,16 @@ type source =
  *)
 
 type story =
-  | All of string * string  (** [All(title, description)] *)
+  | All of string * Uri.t option * string
+  (** [All(title, xmlbase, description)] *)
   | Title of string
-  | Description of string
+  | Description of Uri.t option * string
+  (** [Description(xmlbase, description)] *)
 
 type item =
   {
     story: story;
-    content: string;
+    content: Uri.t option * string;
     link: Uri.t option;
     author:  string option;
     category: category option;
@@ -195,10 +197,12 @@ type item =
 
     - [title]       : The title of the item.
     - [link]        : The URL of the item.
-    - [description] : The item synopsis.
+    - [story]       : The item synopsis.
     - [content]     : The possible full story ([""] if not present).
                       (Extension of RSS2, see
                       http://purl.org/rss/1.0/modules/content/)
+                      The first element of the couple is the possible value
+                      of xml:base.  It can be used to resolve URIs.
     - [author]      : Email address of the author of the item.
     - [category]    : Includes the item in one or more categories.
     - [comments]    : URL of a page for comments relating to the item.

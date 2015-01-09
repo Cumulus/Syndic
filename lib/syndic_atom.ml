@@ -699,8 +699,8 @@ type mime = string
 
 type content =
   | Text of string
-  | Html of string
-  | Xhtml of Syndic_xml.t list
+  | Html of Uri.t option * string
+  | Xhtml of Uri.t option * Syndic_xml.t list
   | Mime of mime * string
   | Src of mime option * Uri.t
 
@@ -764,8 +764,8 @@ let content_of_xml ~xmlbase
       *  | none *)
      `Content(match find (fun a -> attr_is a "type") attr with
               | Some (_, "text") | None -> Text(get_leaf data)
-              | Some (_, "html") -> Html(get_html_content data)
-              | Some (_, "xhtml") -> Xhtml(get_xml_content data data)
+              | Some (_, "html") -> Html(xmlbase, get_html_content data)
+              | Some (_, "xhtml") -> Xhtml(xmlbase, get_xml_content data data)
               | Some (_, mime) -> Mime(mime, get_leaf data))
 
 let content_of_xml' ~xmlbase
@@ -1312,19 +1312,25 @@ let source_to_xml (s: source) =
     |> add_node_date (atom "updated") s.updated in
   XML.Node(dummy_pos, atom "source", nodes)
 
+let add_attr_xmlbase ~xmlbase attrs =
+  match xmlbase with
+  | Some u -> ((Xmlm.ns_xml, "base"), Uri.to_string u) :: attrs
+  | None -> attrs
+
 let content_to_xml (c: content) =
   match c with
   | Text t ->
      XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), "text"]),
               [XML.Data(dummy_pos, t)])
-  | Html t ->
-     XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), "html"]),
+  | Html(xmlbase, t) ->
+     let attrs = add_attr_xmlbase ~xmlbase [("", "type"), "html"] in
+     XML.Node(dummy_pos, ((atom_ns, "content"), attrs),
               [XML.Data(dummy_pos, t)])
-  | Xhtml x ->
+  | Xhtml(xmlbase, x) ->
      let div = XML.Node(dummy_pos,
                         ((xhtml_ns, "div"), [("", "xmlns"), xhtml_ns]), x) in
-     XML.Node(dummy_pos,
-              ((atom_ns, "content"), [("", "type"), "xhtml"]), [div])
+     let attrs = add_attr_xmlbase ~xmlbase [("", "type"), "xhtml"] in
+     XML.Node(dummy_pos, ((atom_ns, "content"), attrs), [div])
   | Mime(mime, d) ->
      XML.Node(dummy_pos, ((atom_ns, "content"), [("", "type"), mime]),
               [XML.Data(dummy_pos, d)])

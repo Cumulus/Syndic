@@ -443,14 +443,14 @@ let source_of_xml' =
   generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Source x)
 
 type story =
-  | All of string * string
+  | All of string * Uri.t option * string
   | Title of string
-  | Description of string
+  | Description of Uri.t option * string
 
 type item =
   {
     story: story;
-    content: string;
+    content: Uri.t option * string;
     link: Uri.t option;
     author:  string option; (* e-mail *)
     category: category option;
@@ -463,8 +463,8 @@ type item =
 
 type item' = [
   | `Title of string
-  | `Description of string
-  | `Content of string
+  | `Description of Uri.t option * string (* xmlbase, description *)
+  | `Content of Uri.t option * string
   | `Link of Uri.t
   | `Author of string (* e-mail *)
   | `Category of category
@@ -480,15 +480,15 @@ let make_item ~pos (l : _ list) =
       find (function `Title _ -> true | _ -> false) l,
       find (function `Description _ -> true | _ -> false) l
     with
-    | Some (`Title t), Some (`Description d) -> All (t, d)
+    | Some (`Title t), Some (`Description(x, d)) -> All (t, x, d)
     | Some (`Title t), _ -> Title t
-    | _, Some (`Description d) -> Description d
+    | _, Some (`Description(x, d)) -> Description(x, d)
     | _, _ -> raise (Error.Error (pos,
                                   "Item expected <title> or <description> tag"))
   in
   let content = match find (function `Content _ -> true | _ -> false) l with
-    | Some(`Content c) -> c
-    | _ -> "" in
+    | Some(`Content(x, c)) -> x, c
+    | _ -> (None, "") in
   let link = match find (function `Link _ -> true | _ -> false) l with
     | Some (`Link l) -> l
     | _ -> None
@@ -539,11 +539,11 @@ let item_title_of_xml ~xmlbase (pos, tag, datas) =
                              a non-empty string"))
 
 let item_description_of_xml ~xmlbase (pos, tag, datas) =
-  `Description(try get_leaf datas
-               with Not_found -> "")
+  `Description(xmlbase, try get_leaf datas
+                        with Not_found -> "")
 
 let item_content_of_xml ~xmlbase (pos, tag, datas) =
-  `Content(try get_leaf datas with Not_found -> "")
+  `Content(xmlbase, try get_leaf datas with Not_found -> "")
 
 let item_link_of_xml ~xmlbase (pos, tag, datas) =
   `Link(try Some(XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
@@ -964,25 +964,30 @@ let entry_of_item (it: item) : Atom.entry =
                    label = None } ]
     | None -> [] in
   let (title: Atom.title), content = match it.story with
-    | All(t, d) ->
-       let c = if it.content = "" then d else it.content in
-       Atom.Text t, Some(Atom.Html c)
+    | All(t, xmlbase, d) ->
+       let content = match it.content with
+         | (_, "") -> Some(Atom.Html(xmlbase, d))
+         | (x, c) -> Some(Atom.Html(x, d)) in
+       Atom.Text t, content
     | Title t ->
-       let c = if it.content = "" then None
-               else Some(Atom.Html it.content) in
-       Atom.Text t, c
-    | Description d ->
-       let c = if it.content = "" then d else it.content in
-       Atom.Text "", Some(Atom.Html c) in
+       let content = match it.content with
+         | (_, "") -> None
+         | (x, c) -> Some(Atom.Html(x, c)) in
+       Atom.Text t, content
+    | Description(xmlbase, d) ->
+       let content = match it.content with
+         | (_, "") -> Some(Atom.Html(xmlbase, d))
+         | (x, c) -> Some(Atom.Html(x, c)) in
+       Atom.Text "", content in
   let id = match it.guid with
     | Some g -> Uri.to_string g.data
     | None -> match it.link with
              | Some l -> Uri.to_string l
              | None ->
                 let s = match it.story with
-                  | All(t, d) -> t ^ d
+                  | All(t, _, d) -> t ^ d
                   | Title t -> t
-                  | Description d -> d in
+                  | Description(_, d) -> d in
                 Digest.to_hex (Digest.string s) in
   let links = match it.link with
     | Some l -> [ { Atom.href = l;  rel = Atom.Alternate;
