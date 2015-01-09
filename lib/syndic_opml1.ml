@@ -234,7 +234,7 @@ type outline =
     is_breakpoint : bool; (* see common attributes *)
     xml_url : Uri.t option;
     html_url : Uri.t option;
-    attrs : (string * string) list;
+    attrs : Xmlm.attribute list;
     outlines : outline list
   }
 
@@ -254,7 +254,7 @@ let rec outline_of_node ~xmlbase ((pos, ((_, attributes)), datas): node) =
   and outlines = ref [] in
   (* Get xml:base first as it must be used the these attributes too. *)
   let xmlbase = xmlbase_of_attr ~xmlbase attributes in
-  let process_attrs (name, v) = match name with
+  let process_attrs ((name, v) as attr) = match name with
     | (_, "text") -> text := v
     | (_, "type") -> typ := Some v
     | (_, "isComment") ->
@@ -271,8 +271,8 @@ let rec outline_of_node ~xmlbase ((pos, ((_, attributes)), datas): node) =
     | (_, "htmlUrl") ->
        (try html_url := Some( XML.resolve ~xmlbase (Uri.of_string v))
         with _ -> raise(Error.Error(pos, "<htmlUrl> content must be an URL")))
-    | (_, name) ->
-       attrs := (name, v) :: !attrs in
+    | _ ->
+       attrs := attr :: !attrs in
   List.iter process_attrs attributes;
   let process_outlines = function
     | XML.Node (p, (((ns, name), _) as t), d) ->
@@ -467,10 +467,13 @@ let id_string (s: string) = s
 
 let rec outline_to_xml o =
   let attr =
-    [(n "text", o.text);
-     (n "isComment", o.is_comment |> string_of_bool);
-     (n "isBreakpoint", o.is_breakpoint |> string_of_bool) ]
-    |> add_attr "type" o.typ id_string in
+    ((n "text", o.text)
+     :: (n "isComment", o.is_comment |> string_of_bool)
+     :: (n "isBreakpoint", o.is_breakpoint |> string_of_bool)
+     :: o.attrs)
+    |> add_attr "type" o.typ id_string
+    |> add_attr "xmlUrl" o.xml_url Uri.to_string
+    |> add_attr "htmlUrl" o.html_url Uri.to_string in
   XML.Node(dummy_pos, (n "outline", attr),
            List.map outline_to_xml o.outlines)
 

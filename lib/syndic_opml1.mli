@@ -74,7 +74,7 @@ type outline =
     html_url : Uri.t option;
     (** Link to the HTML data associated to this outline, typically the
         HTML pages rendering the news feed. *)
-    attrs: (string * string) list;
+    attrs: Xmlm.attribute list;
     (** Association list of additional attributes in the outline. *)
     outlines : outline list;
     (** List of [outline] elements that are considered sub-items of
@@ -83,7 +83,7 @@ type outline =
 
 val outline : ?typ: string -> ?is_comment: bool -> ?is_breakpoint: bool ->
               ?xml_url: Uri.t -> ?html_url: Uri.t ->
-              ?attrs:(string * string) list -> ?outlines: outline list ->
+              ?attrs: Xmlm.attribute list -> ?outlines: outline list ->
               string -> outline
 (** [outline text] returns an outline.
 
