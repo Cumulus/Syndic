@@ -1,6 +1,6 @@
 OASISFormat:            0.4
 Name:                   syndic
-Version:                1.1
+Version:                1.2
 Synopsis:               RSS and Atom feed parsing
 Authors:                Romain Calascibetta, Christophe Troestler
 Maintainers:            Romain Calascibetta <romain.calascibetta@gmail.com>
