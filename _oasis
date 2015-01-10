@@ -34,3 +34,9 @@ Executable main
   Path:                 bin
   MainIs:               main.ml
   BuildDepends:         syndic
+
+
+SourceRepository master
+  Type:       git
+  Location:   https://github.com/Cumulus/Syndic.git
+  Browser:    https://github.com/Cumulus/Syndic
