@@ -1,7 +1,9 @@
 OASISFormat:            0.4
 Name:                   syndic
 Version:                1.2
-Synopsis:               RSS and Atom feed parsing
+Synopsis:               RSS1, RSS2, Atom and OPML1 parsing
+Description:            Pure OCaml Library for parsing and writing
+  various types of feeds and subscriber lists.
 Authors:                Romain Calascibetta, Christophe Troestler
 Maintainers:            Romain Calascibetta <romain.calascibetta@gmail.com>
 Homepage:               https://github.com/Cumulus/Syndic
