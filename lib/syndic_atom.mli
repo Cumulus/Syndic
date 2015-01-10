@@ -1,5 +1,5 @@
 (** [Syndic.Atom]: {{: http://tools.ietf.org/html/rfc4287} RFC 4287}
-    compliant. *)
+    compliant Atom parser. *)
 
 module Error : module type of Syndic_error
 
@@ -21,17 +21,9 @@ type author =
   }
 (** Describes a person, corporation, or similar entity (hereafter,
     'person') that indicates the author of the entry or feed.
-
-    If an atom:entry element does not contain atom:author elements, then
-    the atom:author elements of the contained atom:source element are
-    considered to apply.  In an Atom Feed Document, the atom:author
-    elements of the containing atom:feed element are considered to apply
-    to the entry if there are no atom:author elements in the locations
-    described above.
-
-    {{: http://tools.ietf.org/html/rfc4287#section-3.2} See RFC 4287 § 3.2}
-
-    Person constructs allow extension Metadata elements (see Section 6.4).
+    {{: http://tools.ietf.org/html/rfc4287#section-3.2} See RFC 4287 § 3.2}.
+    Person constructs allow extension Metadata elements
+    (see {{: http://tools.ietf.org/html/rfc4287#section-6.4}Section 6.4}).
 
    They are used for authors
    ({{:http://tools.ietf.org/html/rfc4287#section-4.2.1} See RFC 4287 § 4.2.1})
@@ -50,7 +42,7 @@ type category =
 (** The [category] element conveys information about a category
     associated with an entry or feed.  This specification assigns no
     meaning to the content (if any) of this element.
-    {{:http://tools.ietf.org/html/rfc4287#section-4.2.2} See RFC 4287 § 4.2.2}
+    {{:http://tools.ietf.org/html/rfc4287#section-4.2.2} See RFC 4287 § 4.2.2}.
 
     - [term] is a string that identifies the category to
       which the entry or feed belongs.
@@ -62,11 +54,9 @@ type category =
       See RFC 4287 § 4.2.2.3}
     - [label], if present, is a human-readable label for display in
       end-user applications.  The content of the "label" attribute is
-      Language-Sensitive.  Entities such as "&amp;" and "&lt;"
-      represent their corresponding characters ("&" and "<",
-      respectively), not markup.
-
-    {{: http://tools.ietf.org/html/rfc4287#section-4.2.2.1} See RFC 4287 § 4.2.2.1 }
+      Language-Sensitive.
+      {{: http://tools.ietf.org/html/rfc4287#section-4.2.2.1}
+      See RFC 4287 § 4.2.2.1}
  *)
 
 val category : ?scheme:Uri.t -> ?label:string -> string -> category
@@ -80,16 +70,12 @@ type generator =
 (** The [generator] element's content identifies the agent used to
     generate a feed, for debugging and other purposes.
     - [content] is a human-readable name for the generating agent.
-      Entities such as "&amp;" and "&lt;" represent their corresponding
-      characters ("&" and "<" respectively), not markup.
-    - [uri], if present, MUST be an IRI reference [RFC3987].  When
-      dereferenced, the resulting URI (mapped from an IRI, if
-      necessary) SHOULD produce a representation that is relevant to
-      that agent.
+    - [uri], if present, SHOULD produce a representation that is
+      relevant to that agent.
     - [version], if present, indicates the version of the generating
       agent.
 
-    {{: http://tools.ietf.org/html/rfc4287#section-4.2.4} See RFC 4287 § 4.2.4 }
+    See {{: http://tools.ietf.org/html/rfc4287#section-4.2.4}RFC 4287 § 4.2.4}.
  *)
 
 val generator : ?uri:Uri.t -> ?version:string -> string -> generator
@@ -161,8 +147,8 @@ type link =
 
     - [href] contains the link's IRI.  The value MUST be a IRI
       reference [RFC3987].
-      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.3}
-      See RFC 4287 § 4.2.7.3 }
+      See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.1}
+      RFC 4287 § 4.2.7.1}.
     - [type_media] is an advisory media type: it is a hint about the
       type of the representation that is expected to be returned when
       the value of the href attribute is dereferenced.  Note that the
@@ -170,22 +156,19 @@ type link =
       with the representation.  Link elements MAY have a type
       attribute, whose value MUST conform to the syntax of a MIME
       media type [MIMEREG].
-      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.4}
-      See RFC 4287 § 4.2.7.4 }
+      See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.3}
+      RFC 4287 § 4.2.7.3 }
     - [hreflang] describes the language of the resource pointed to by
       the href attribute.  When used together with the
       rel="alternate", it implies a translated version of the
       entry. Link elements MAY have an hreflang attribute, whose value
       MUST be a language tag [RFC3066].
-      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.5}
-      See RFC 4287 § 4.2.7.5 }
+      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.4}
+      See RFC 4287 § 4.2.7.4 }
     - [title] conveys human-readable information about the link.  The
-      content of the "title" attribute is Language-Sensitive. Entities
-      such as "&amp;" and "&lt;" represent their corresponding
-      characters ("&" and "<", respectively), not markup. Link
-      elements MAY have a title attribute.
-      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.6}
-      See RFC 4287 § 4.2.7.6 }
+      content of the "title" attribute is Language-Sensitive.
+      See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.5}
+      RFC 4287 § 4.2.7.5}.
     - [length] indicates an advisory length of the linked content in
       octets; it is a hint about the content length of the
       representation returned when the IRI in the href attribute is
@@ -193,9 +176,8 @@ type link =
       attribute does not override the actual content length of the
       representation as reported by the underlying protocol.  Link
       elements MAY have a length attribute.
-
-    {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.1}
-    See RFC 4287 § 4.2.7.1 }
+      See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.6}
+      RFC 4287 § 4.2.7.6}.
  *)
 
 val link :

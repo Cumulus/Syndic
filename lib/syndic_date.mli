@@ -1,7 +1,13 @@
+(** Minimal date module required by Syndic. *)
+
 type t = CalendarLib.Calendar.t
+(** A date with time. *)
 
 val epoch : t
+(** The POSIX time, i.e. Thursday, 1 January 1970 00:00:00 (UTC). *)
+
 val compare : t -> t -> int
+(** Compare dates in increasing order. *)
 
 val of_rfc822 : string -> t
 val to_rfc822 : t -> string
@@ -9,11 +15,9 @@ val to_rfc822 : t -> string
 val of_rfc3339 : string -> t
 val to_rfc3339 : t -> string
 
-(* Convenience functions *)
-
+(** Month of the year. *)
 type month =
   Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec
-(** Month of the year. *)
 
 val string_of_month : month -> string
 (** Return the 3 letters identifying the month in English. *)

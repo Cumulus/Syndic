@@ -1,4 +1,4 @@
-(** Common module for XML parsing *)
+(** Common module for XML parsing. *)
 
 type dtd = string option
 (** The type for the optional

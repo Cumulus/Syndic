@@ -280,6 +280,9 @@ let make_generator ~pos (l : [< generator'] list) =
   in
   `Generator({ version; uri; content; } : generator)
 
+(* URI, if present, MUST be an IRI reference [RFC3987].  The
+   definition of "IRI" excludes relative references but we resolve it
+   anyway in case this is not respected by the generator. *)
 let generator_uri_of_xml ~xmlbase a =
   `URI(XML.resolve ~xmlbase (Uri.of_string a))
 
@@ -909,7 +912,7 @@ let make_entry ~pos l =
   let authors =
     List.fold_left
       (fun acc -> function `Author x -> x :: acc | _ -> acc) [] l in
-  (* atomSource? (pass the authors known so far) *)
+  (* atomSource? *)
   let sources = List.fold_left
                   (fun acc -> function `Source x -> x :: acc | _ -> acc) [] l in
   let source = match sources with
@@ -922,13 +925,17 @@ let make_entry ~pos l =
   let authors = match authors, source with
     | a0 :: a, _ -> a0, a
     | [], Some(s: source) ->
+       (* If an atom:entry element does not contain atom:author
+          elements, then the atom:author elements of the contained
+          atom:source element are considered to apply.
+          http://tools.ietf.org/html/rfc4287#section-4.2.1 *)
        (match s.authors with
         | a0 :: a -> a0, a
         | [] ->
            let msg = "<entry> does not contain an <author> and its <source> \
                       neither does" in
            raise (Error.Error (pos, msg)))
-    | [], None -> dummy_author, [] (* unacceptable value *)
+    | [], None -> dummy_author, [] (* unacceptable value, see fix_author below *)
   (* atomCategory* *)
   in let categories = List.fold_left
       (fun acc -> function `Category x -> x :: acc | _ -> acc) [] l
@@ -1134,6 +1141,10 @@ let make_feed ~pos (l : _ list) =
   let fix_author pos (e: entry) =
     match e.authors with
     | (a, []) when a.name = "" ->
+       (* In an Atom Feed Document, the atom:author elements of the
+          containing atom:feed element are considered to apply to the
+          entry if there are no atom:author elements in the locations
+          described above.  http://tools.ietf.org/html/rfc4287#section-4.2.1 *)
        (match authors with
         | a0 :: a -> { e with authors = (a0, a) }
         | [] ->
