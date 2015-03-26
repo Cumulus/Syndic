@@ -479,6 +479,10 @@ val to_xml : feed -> Syndic_xml.t
 val output : feed -> Xmlm.dest -> unit
 (** [output f dest] writes the XML tree of the feed [f] to [dest]. *)
 
+val write : feed -> string -> unit
+(** [write f fname] writes the XML tree of the feed [f] to the file
+    named [fname]. *)
+
 
 val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
                 ?title:text_construct ->

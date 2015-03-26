@@ -1398,6 +1398,15 @@ let output feed dest =
   let o = Xmlm.make_output dest ~decl:true ~ns_prefix:output_ns_prefix in
   XML.to_xmlm (to_xml feed) o
 
+let write feed fname =
+  let fh = open_out fname in
+  try
+    output feed (`Channel fh);
+    close_out fh
+  with e ->
+    close_out fh;
+    raise e
+
 
 (* Feed aggregation *)
 

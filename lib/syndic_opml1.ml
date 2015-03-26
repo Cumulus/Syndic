@@ -488,3 +488,12 @@ let to_xml (o: opml) =
 let output opml dest =
   let o = Xmlm.make_output dest ~decl:true in
   XML.to_xmlm (to_xml opml) o
+
+let write opml fname =
+  let fh = open_out fname in
+  try
+    output opml (`Channel fh);
+    close_out fh
+  with e ->
+    close_out fh;
+    raise e

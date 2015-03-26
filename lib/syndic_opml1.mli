@@ -113,6 +113,10 @@ val output : opml -> Xmlm.dest -> unit
 (** [output opml dest] writes the XML tree of the OPML document [opml]
     to [dest]. *)
 
+val write : opml -> string -> unit
+(** [write opml fname] writes the XML tree of the OPML document [opml]
+    to the file named [fname].  *)
+
 
 (**/**)
 
