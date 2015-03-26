@@ -3,6 +3,8 @@
 
 module Error : module type of Syndic_error
 
+(** {2 Structure of Atom document} *)
+
 (** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}.
     It contains human-readable text, usually in small quantities.  The
     content of Text constructs is Language-Sensitive. *)
@@ -459,6 +461,8 @@ val feed :
   ?subtitle:subtitle ->
   id:id -> title:title -> updated:updated -> entry list -> feed
 
+(** {2 Input and output} *)
+
 val parse : ?xmlbase: Uri.t -> Xmlm.input -> feed
 (** [parse xml] returns the feed corresponding to [xml].  Beware that
     [xml] is mutable, so when the parsing fails, one has to create a
@@ -484,14 +488,30 @@ val write : feed -> string -> unit
     named [fname]. *)
 
 
+(** {2 Convenience functions} *)
+
+val ascending : entry -> entry -> int
+(** Compare entries so that older dates (for the [update] field) are
+    smaller. *)
+
+val descending : entry -> entry -> int
+(** Compare entries so that more recent dates (for the [update] field)
+    are smaller. *)
+
 val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
                 ?title:text_construct ->
+                ?sort:[`Newest_first | `Oldest_first | `None] ->
+                ?n: int ->
                 (Uri.t option * feed) list -> feed
 (** [aggregate feeds] returns a single feed containing all the posts
     in [feeds].  Each element of [feeds] has the form [(uri, feed)]
     where [uri], if given, is supposed to be the location of [feed].
     It is used to add Alternate links to the entries sources showing
-    their origin. *)
+    their origin.
+
+    @param sort whether to sort the entries of the final feed.  The default
+                is [`Newest_first] because it is generally desired.
+    @param n number of entries of the (sorted) aggregated feed to return. *)
 
 
 (**/**)

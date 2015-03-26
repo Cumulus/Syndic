@@ -1407,6 +1407,13 @@ let write feed fname =
     close_out fh;
     raise e
 
+(* Comparing entries *)
+
+let ascending (e1: entry) (e2: entry) =
+  Date.compare e1.updated e2.updated
+
+let descending (e1: entry) (e2: entry) =
+  Date.compare e2.updated e1.updated
 
 (* Feed aggregation *)
 
@@ -1464,8 +1471,16 @@ let entries_of_feeds feeds =
 let more_recent d1 (e: entry) =
   if Date.compare d1 e.updated >= 0 then d1 else e.updated
 
-let aggregate ?id ?updated ?subtitle ?(title=default_title) feeds : feed =
+let aggregate ?id ?updated ?subtitle ?(title=default_title)
+              ?(sort = `Newest_first) ?n feeds : feed =
   let entries = entries_of_feeds feeds in
+  let entries = match sort with
+    | `Newest_first -> List.sort descending entries
+    | `Oldest_first -> List.sort ascending entries
+    | `None -> entries in
+  let entries = match n with
+    | Some n -> take entries n
+    | None -> entries in
   let id = match id with
     | Some id -> id
     | None ->

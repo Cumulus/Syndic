@@ -81,6 +81,11 @@ module Util = struct
                 | None -> filter_map tl f
                 | Some x -> x :: filter_map tl f
 
+  let rec take l n = match l with
+    | [] -> []
+    | e :: tl -> if n > 0 then e :: take tl (n-1) else []
+
+
   let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
   let datas_has_leaf = List.exists (function | XML.Data _ -> true | _ -> false)
