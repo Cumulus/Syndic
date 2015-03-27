@@ -120,11 +120,11 @@ val write : opml -> string -> unit
 
 val of_atom : head: head -> Syndic_atom.feed list -> opml
 (** [of_atom ~head feeds] returns the OPML list of authors of the atom
-    feeds.  The name associated to a feed is the name of the first
-    author in the feed authors list or, if empty, the one of the first
-    post.  It is important that the feeds contain a link entry with
-    [rel = Self] for the OPML document to be able to create a
-    [xml_url] entry pointing to the feed.
+    feeds.  The [text] is the name associated to a feed, i.e. the name
+    of the first author in the feed authors list or, if empty, the one
+    of the first post.  It is important that the feeds contain a link
+    entry with [rel = Self] for the OPML document to be able to create
+    a [xml_url] entry pointing to the feed.
 
     As a special convention, if the length of the [rel = Self] link is
     present and negative, the property [is_comment] is set to [true]. *)
