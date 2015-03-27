@@ -340,12 +340,14 @@ let body_of_xml' =
     ~data_producer
     (fun ~pos x -> `Body x)
 
-type opml =
+type t =
   {
     version : string;
     head : head;
     body : body
   }
+
+type opml = t (* FIXME: @deprecated *)
 
 type opml' =  [
   | `Version of string
@@ -480,7 +482,7 @@ let rec outline_to_xml o =
            List.map outline_to_xml o.outlines)
 
 
-let to_xml (o: opml) =
+let to_xml (o: t) =
   XML.Node(dummy_pos, (n"opml", [n"version", o.version]),
            [node "head" (head_to_xml o.head);
             node "body" (List.map outline_to_xml o.body)  ])

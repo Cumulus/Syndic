@@ -94,7 +94,7 @@ val outline : ?typ: string -> ?is_comment: bool -> ?is_breakpoint: bool ->
 
 type body = outline list (** List of outline elements. *)
 
-type opml =
+type t =
   {
     version : string;
     (** The version of OPML document (should be 1.0 or 1.1) *)
@@ -102,23 +102,23 @@ type opml =
     body : body;
   }
 
-val parse : ?xmlbase: Uri.t -> Xmlm.input -> opml
+val parse : ?xmlbase: Uri.t -> Xmlm.input -> t
 (** [parse i] takes [i] and returns an opml record which is the OCaml
     representation of the OPML document. *)
 
-val to_xml : opml -> Syndic_xml.t
+val to_xml : t -> Syndic_xml.t
 (** [to_xml opml] converts the OPML document [opml] to an XML tree. *)
 
-val output : opml -> Xmlm.dest -> unit
+val output : t -> Xmlm.dest -> unit
 (** [output opml dest] writes the XML tree of the OPML document [opml]
     to [dest]. *)
 
-val write : opml -> string -> unit
+val write : t -> string -> unit
 (** [write opml fname] writes the XML tree of the OPML document [opml]
     to the file named [fname].  *)
 
 
-val of_atom : head: head -> Syndic_atom.feed list -> opml
+val of_atom : head: head -> Syndic_atom.feed list -> t
 (** [of_atom ~head feeds] returns the OPML list of authors of the atom
     feeds.  The [text] is the name associated to a feed, i.e. the name
     of the first author in the feed authors list or, if empty, the one
@@ -167,3 +167,6 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
        | `Version of string ]
          list ]
 (** Analysis without verification. *)
+
+type opml = t
+(** @deprecated *)
