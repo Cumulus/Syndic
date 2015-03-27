@@ -1044,7 +1044,7 @@ let entry_of_item (it: item) : Atom.entry =
                | None -> Date.epoch);
   }
 
-let to_atom (ch: channel) : Atom.feed =
+let to_atom ?self (ch: channel) : Atom.feed =
   let contributors = match ch.webMaster with
     | Some p -> [ { Atom.name = "Webmaster";  uri = None;  email = Some p } ]
     | None -> [] in
@@ -1052,6 +1052,15 @@ let to_atom (ch: channel) : Atom.feed =
     | Some p -> { Atom.name = "Managing Editor";  uri = None;  email = Some p }
                :: contributors
     | None -> contributors in
+  let links = [ { Atom.href = ch.link;  rel = Atom.Related;
+                  type_media = Some "text/html";  hreflang = None;
+                  title = Some ch.title;  length = None } ] in
+  let links = match self with
+    | Some self -> { Atom.href = self;  rel = Atom.Self;
+                    type_media = Some "application/rss+xml";  hreflang = None;
+                    title = Some ch.title;  length = None
+                  } :: links
+    | None -> links in
   let updated =
     let d = List.map (fun (it: item) -> it.pubDate) ch.items in
     let d = List.sort cmp_date_opt (ch.lastBuildDate :: d) in
@@ -1070,9 +1079,7 @@ let to_atom (ch: channel) : Atom.feed =
                                     version = None;  uri = None });
     icon = None;
     id = Uri.to_string ch.link; (* FIXME: Best we can do? *)
-    links = [ { Atom.href = ch.link;  rel = Atom.Related;
-                type_media = Some "text/html";  hreflang = None;
-                title = None;  length = None } ];
+    links;
     logo = map_option ch.image (fun i -> i.url);
     rights = map_option ch.copyright (fun c -> (Atom.Text c: Atom.rights));
     subtitle = None;

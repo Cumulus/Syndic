@@ -317,9 +317,14 @@ val parse : ?xmlbase: Uri.t -> Xmlm.input -> channel
     [Error.Item_expectation] if [xml] is not a valid RSS2 document. *)
 
 
-val to_atom : channel -> Syndic_atom.feed
+val to_atom : ?self: Uri.t -> channel -> Syndic_atom.feed
 (** [to_atom ch] returns an Atom feed that (mostly) contains the same
-    information. *)
+    information.
+
+    @param self the URI from where the current feed was retrieved.
+    Contrarily to Atom, RSS2 has no provision to store the URI of the
+    feed itself.  Giving this information will add an entry to the
+    [links] field of Atom feed with [rel = Self]. *)
 
 
 (**/**)
