@@ -518,9 +518,10 @@ val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
                 is [`Newest_first] because it is generally desired.
     @param n number of entries of the (sorted) aggregated feed to return. *)
 
-val set_self : feed -> Uri.t -> feed
+val set_self : feed -> ?hreflang: string -> ?length: int -> Uri.t -> feed
 (** [set_self feed url] add or replace the URI in the self link of the
-    feed. *)
+    feed.  You can also set the [hreflang] and [length] of the self
+    link. *)
 
 
 (**/**)

@@ -1266,17 +1266,23 @@ let parse ?self ?xmlbase input =
                    } :: feed.links in
        { feed with links = links }
 
-let set_self feed url =
+let set_self feed ?hreflang ?length url =
   match List.partition (fun l -> l.rel = Self) feed.links with
   | (l :: _), links ->
-     let links = { l with href = url } :: links in
-     { feed with links = links }
+     let hreflang = match hreflang with
+       | None -> l.hreflang
+       | Some _ -> hreflang in
+     let length = match length with
+       | None -> l.length
+       | Some _ -> length in
+     let self = { l with href = url;  hreflang;  length } in
+     { feed with links = self :: links }
   | ([], links) ->
     let links = { href = url;  rel = Self;
                   type_media = Some "application/atom+xml";
-                  hreflang = None;
+                  hreflang;
                   title = Some(string_of_text_construct feed.title);
-                  length = None
+                  length = length;
                 } :: links in
     { feed with links = links }
 
