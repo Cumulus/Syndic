@@ -506,12 +506,13 @@ val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
                 ?title:text_construct ->
                 ?sort:[`Newest_first | `Oldest_first | `None] ->
                 ?n: int ->
-                (Uri.t option * feed) list -> feed
+                feed list -> feed
 (** [aggregate feeds] returns a single feed containing all the posts
-    in [feeds].  Each element of [feeds] has the form [(uri, feed)]
-    where [uri], if given, is supposed to be the location of [feed].
-    It is used to add Alternate links to the entries sources showing
-    their origin.
+    in [feeds].  In order to track the origin of each post in the
+    aggrated feed, it is recommended that each feed in [feeds]
+    possesses a link with [rel = Self] so that the [source] added to
+    each entry contains a link to the original feed.  If an entry
+    contains a [source], il will {i not} be overwritten.
 
     @param sort whether to sort the entries of the final feed.  The default
                 is [`Newest_first] because it is generally desired.
@@ -519,7 +520,7 @@ val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
 
 val set_self : feed -> Uri.t -> feed
 (** [set_self feed url] add or replace the URI in the self link of the
-    feed *)
+    feed. *)
 
 
 (**/**)

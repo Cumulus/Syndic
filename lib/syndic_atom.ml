@@ -1475,16 +1475,7 @@ let is_alternate_Atom (l: link) =
   | None -> false
   | Some ty -> ty = "application/atom+xml" && l.rel = Alternate
 
-let add_entries_of_feed entries (uri_opt, feed) : entry list =
-  (* Add an Alternate link with the original URI if we know it and it
-     is not already provided. *)
-  let links = match uri_opt with
-    | None -> feed.links
-    | Some uri ->
-       if List.exists is_alternate_Atom feed.links then feed.links
-       else
-         link ~type_media:"application/atom+xml" ~rel:Alternate uri
-         :: feed.links in
+let add_entries_of_feed entries feed : entry list =
   let source_of_feed =
     Some { authors = feed.authors;
            categories = feed.categories;
@@ -1492,7 +1483,7 @@ let add_entries_of_feed entries (uri_opt, feed) : entry list =
            generator = feed.generator;
            icon = feed.icon;
            id = feed.id;
-           links;
+           links = feed.links;
            logo = feed.logo;
            rights = feed.rights;
            subtitle = feed.subtitle;
@@ -1500,11 +1491,9 @@ let add_entries_of_feed entries (uri_opt, feed) : entry list =
            updated = Some feed.updated;
          } in
   let add_entry entries (e: entry) =
-    let source = match e.source with
-      | Some s -> e.source (* if a source is present, assume it has
-                             been well designed. *)
-      | None -> source_of_feed in
-    { e with source = source } :: entries in
+    match e.source with
+    | Some s -> e :: entries (* if a source is present, do not overwrite it. *)
+    | None -> { e with source = source_of_feed } :: entries in
   List.fold_left add_entry entries feed.entries
 
 let entries_of_feeds feeds =
