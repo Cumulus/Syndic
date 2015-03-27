@@ -497,3 +497,53 @@ let write opml fname =
   with e ->
     close_out fh;
     raise e
+
+
+(* Creation from atom feeds *)
+
+(* Remove all tags *)
+let rec add_to_buffer buf = function
+  | XML.Node (_, _, subs) -> List.iter (add_to_buffer buf) subs
+  | XML.Data (_, d) -> Buffer.add_string buf d
+
+let xhtml_to_string ~buf xhtml =
+  Buffer.clear buf;
+  List.iter (add_to_buffer buf) xhtml;
+  Buffer.contents buf
+
+let string_of_text_construct ~buf = function
+  (* FIXME: Once we use a proper HTML library, we probably would like
+     to parse the HTML and remove the tags *)
+  | (Syndic_atom.Text s: Syndic_atom.text_construct)
+  | Syndic_atom.Html(_,s) -> s
+  | Syndic_atom.Xhtml(_, x) -> xhtml_to_string ~buf x
+
+let rec first_non_empty = function
+  | a :: tl -> if a.Syndic_atom.name = "" then first_non_empty tl
+              else a.Syndic_atom.name
+  | [] -> ""
+
+let outine_of_feed ~buf (f: Syndic_atom.feed) =
+  let open Syndic_atom in
+  let author = match f.authors with
+    | _ :: _ -> first_non_empty f.authors
+    | [] -> match f.entries with
+           | e :: _ -> let a0, a = e.authors in
+                      if a0.name = "" then first_non_empty a
+                      else a0.name
+           | [] -> "" in
+  let title = string_of_text_construct ~buf f.title in
+  let xml_url, is_comment =
+    try let l = List.find (fun l -> l.rel = Self) f.links in
+        let is_comment = match l.length with
+          | Some len -> len < 0
+          | None -> false in
+        Some l.href, is_comment
+    with Not_found -> None, false in
+  outline ~typ:"rss" ~is_comment ~attrs:[("", "title"), title]
+          ?xml_url author
+
+let of_atom ~head feeds =
+  let buf = Buffer.create 1024 in
+  { version = "1.1";  head;
+    body = List.map (outine_of_feed ~buf) feeds }
