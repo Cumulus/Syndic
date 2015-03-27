@@ -7,6 +7,11 @@ type t = CalendarLib.Calendar.t
 let epoch = Calendar.make 1970 1 1  0 0 0
 let compare = CalendarLib.Calendar.compare
 
+let max d1 d2 =
+  if compare d1 d2 < 0 then d2 else d1
+let min d1 d2 =
+  if compare d1 d2 < 0 then d1 else d2
+
 let month_to_int = Hashtbl.create 12
 
 let () =

@@ -9,6 +9,13 @@ val epoch : t
 val compare : t -> t -> int
 (** Compare dates in increasing order. *)
 
+val max : t -> t -> t
+(** [max d1 d2] return the maximum (i.e. more recent) of the dates
+    [d1] and [d2]. *)
+val min : t -> t -> t
+(** [min d1 d2] return the minimum (i.e. less recent) of the dates
+    [d1] and [d2]. *)
+
 val of_rfc822 : string -> t
 val to_rfc822 : t -> string
 
