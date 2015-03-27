@@ -1266,7 +1266,7 @@ let parse ?self ?xmlbase input =
                    } :: feed.links in
        { feed with links = links }
 
-let set_self feed ?hreflang ?length url =
+let set_self_link feed ?hreflang ?length url =
   match List.partition (fun l -> l.rel = Self) feed.links with
   | (l :: _), links ->
      let hreflang = match hreflang with
@@ -1285,6 +1285,11 @@ let set_self feed ?hreflang ?length url =
                   length = length;
                 } :: links in
     { feed with links = links }
+
+let get_self_link feed =
+  try Some(List.find (fun l -> l.rel = Self) feed.links)
+  with Not_found -> None
+
 
 let unsafe ?xmlbase input =
   match XML.of_xmlm input |> snd with
