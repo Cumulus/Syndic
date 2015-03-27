@@ -463,7 +463,7 @@ val feed :
 
 (** {2 Input and output} *)
 
-val parse : ?xmlbase: Uri.t -> Xmlm.input -> feed
+val parse : ?self: Uri.t -> ?xmlbase: Uri.t -> Xmlm.input -> feed
 (** [parse xml] returns the feed corresponding to [xml].  Beware that
     [xml] is mutable, so when the parsing fails, one has to create a
     new copy of [xml] to use it with another function.  If you
@@ -475,7 +475,11 @@ val parse : ?xmlbase: Uri.t -> Xmlm.input -> feed
     @param xmlbase default xml:base to resolve relative URLs (of
     course xml:base attributes in the XML Atom document take
     precedence over this).
-    See {{:http://www.w3.org/TR/xmlbase/}XML Base}. *)
+    See {{:http://www.w3.org/TR/xmlbase/}XML Base}.
+
+    @param self the URI from where the current feed was retrieved.
+    Giving this information will add an entry to [links] with
+    [rel = Self] unless one already exists. *)
 
 val to_xml : feed -> Syndic_xml.t
 (** [to_xml f] converts the feed [f] to an XML tree. *)
@@ -512,6 +516,10 @@ val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
     @param sort whether to sort the entries of the final feed.  The default
                 is [`Newest_first] because it is generally desired.
     @param n number of entries of the (sorted) aggregated feed to return. *)
+
+val set_self : feed -> Uri.t -> feed
+(** [set_self feed url] add or replace the URI in the self link of the
+    feed *)
 
 
 (**/**)

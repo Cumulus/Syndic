@@ -1228,15 +1228,57 @@ let feed_of_xml' =
   generate_catcher ~namespaces ~data_producer (fun ~pos x -> x)
 
 
+(* Remove all tags *)
+let rec add_to_buffer buf = function
+  | XML.Node (_, _, subs) -> List.iter (add_to_buffer buf) subs
+  | XML.Data (_, d) -> Buffer.add_string buf d
 
-let parse ?xmlbase input =
-  match XML.of_xmlm input |> snd with
-  | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
-     feed_of_xml ~xmlbase (pos, tag, datas)
-  | _ -> raise (Error.Error ((0, 0),
-                         "document MUST contains exactly one \
-                          <feed> element"))
-(* FIXME: the spec says that an entry can appear as the top-level element *)
+let xhtml_to_string xhtml =
+  let buf = Buffer.create 128 in
+  List.iter (add_to_buffer buf) xhtml;
+  Buffer.contents buf
+
+let string_of_text_construct = function
+  (* FIXME: Once we use a proper HTML library, we probably would like
+     to parse the HTML and remove the tags *)
+  | (Text s: text_construct) | Html(_,s) -> s
+  | Xhtml(_, x) -> xhtml_to_string x
+
+let parse ?self ?xmlbase input =
+  let feed = match XML.of_xmlm input |> snd with
+    | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
+       feed_of_xml ~xmlbase (pos, tag, datas)
+    | _ -> raise (Error.Error ((0, 0),
+                              "document MUST contains exactly one \
+                               <feed> element")) in
+  (* FIXME: the spec says that an entry can appear as the top-level element *)
+  match self with
+  | None -> feed
+  | Some self ->
+     if List.exists (fun l -> l.rel = Self) feed.links then
+       feed
+     else
+       let links = { href = self;  rel = Self;
+                     type_media = Some "application/atom+xml";
+                     hreflang = None;
+                     title = Some(string_of_text_construct feed.title);
+                     length = None
+                   } :: feed.links in
+       { feed with links = links }
+
+let set_self feed url =
+  match List.partition (fun l -> l.rel = Self) feed.links with
+  | (l :: _), links ->
+     let links = { l with href = url } :: links in
+     { feed with links = links }
+  | ([], links) ->
+    let links = { href = url;  rel = Self;
+                  type_media = Some "application/atom+xml";
+                  hreflang = None;
+                  title = Some(string_of_text_construct feed.title);
+                  length = None
+                } :: links in
+    { feed with links = links }
 
 let unsafe ?xmlbase input =
   match XML.of_xmlm input |> snd with
