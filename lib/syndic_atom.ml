@@ -92,6 +92,8 @@ type author =
 
 let dummy_author = { name = "";  uri = None;  email = None }
 
+let not_empty_author a = a.name <> "" || a.uri <> None || a.email <> None
+
 let author ?uri ?email name =
   { uri ; email ; name }
 
@@ -1298,6 +1300,58 @@ let unsafe ?xmlbase input =
   | _ -> `Feed []
 
 
+let remove_empty_authors a = List.filter not_empty_author a
+
+(* [normalize_authors a authors] returns (a', authors') where
+   [authors'] is [authors] where the empty authors and the author [a]
+   have been removed and [a'] is [a] possibly completed with the
+   information found for [a] in [authors]. *)
+let rec normalize_authors (a: author) = function
+  | [] -> (a, [])
+  | a0 :: tl ->
+     if not_empty_author a0 then
+       if a0.name = a.name then (* Merge [a0] and [a]. *)
+         let uri = match a.uri with
+           | None -> a0.uri
+           | Some _ -> a.uri in
+         let email = match a.email with
+           | None -> a0.email
+           | Some _ -> a.email in
+         normalize_authors { name = a.name;  uri;  email } tl
+       else
+         let a', authors' = normalize_authors a tl in
+         (a', a0 :: authors')
+     else
+       normalize_authors a tl (* drop the empty author *)
+
+let set_main_author_entry author (e: entry) =
+  (* If the entry has a source, then [author] should be ignored and
+     the one from the [source] should be used instead. *)
+  let author, author_ok, source = match e.source with
+    | None -> author, true, None
+    | Some s ->
+       let s_authors = remove_empty_authors s.authors in
+       let s_contributors = remove_empty_authors s.contributors in
+       let s = Some { s with authors = s_authors;
+                             contributors = s_contributors } in
+       (* A source exists.  If it contains no author, one should not
+          change the entry authors with [author] because that may
+          wrongly attribute the post. *)
+       match s_authors with
+       | [] -> author, false, s
+       | s_author :: _ -> s_author, true, s in
+  let a0, a = e.authors in
+  let authors = match remove_empty_authors (a0 :: a) with
+    | a0 :: a -> a0, a
+    | [] -> (if author_ok then author else dummy_author), [] in
+  let contributors = remove_empty_authors e.contributors in
+  { e with authors; contributors; source }
+
+let set_main_author feed author =
+  let author, authors = normalize_authors author feed.authors in
+  let contributors = remove_empty_authors feed.contributors in
+  let entries = List.map (set_main_author_entry author) feed.entries in
+  { feed with authors = (author :: authors);  contributors;  entries }
 
 (* Conversion to XML *)
 

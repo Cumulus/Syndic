@@ -528,6 +528,13 @@ val set_self_link : feed -> ?hreflang: string -> ?length: int -> Uri.t -> feed
 val get_self_link : feed -> link option
 (** [get_self feed] return the self link of the feed, if any is present. *)
 
+val set_main_author : feed -> author -> feed
+(** [set_main_author feed author] will add [author] in front of the
+    list of authors of the [feed] (if an author with the same name
+    already exists, the optional information are merged, the ones in
+    [author] taking precedence).  Also remove all empty authors (name
+    = "" and no URI, no email) and replace them with [author] if no
+    author is left and an authors is mandatory. *)
 
 
 (**/**)
