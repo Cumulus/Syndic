@@ -958,8 +958,14 @@ let cmp_date_opt d1 d2 = match d1, d2 with
 
 let entry_of_item (it: item) : Atom.entry =
   let author = match it.author with
-    | Some a -> { Atom.name = a;  uri = None;  email = Some a }
-    | None -> { Atom.name = "";  uri = None;  email = None } in
+    | Some a ->
+       let email = if String.contains a '@' then Some a else None in
+       { Atom.name = a;  uri = None;  email }
+    | None ->
+       (* If no author is specified for the item, there is little one
+          can do just using the RSS2 feed.  The user will have to set
+          it using Atom convenience functions. *)
+       { Atom.name = "";  uri = None;  email = None } in
   let categories =
     match it.category with
     | Some c -> [ { Atom.term = c.data;
