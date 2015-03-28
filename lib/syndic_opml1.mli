@@ -169,4 +169,4 @@ val unsafe : ?xmlbase: Uri.t -> Xmlm.input ->
 (** Analysis without verification. *)
 
 type opml = t
-(** @deprecated *)
+(** @deprecated Use Syndic.Opml1.t instead. *)
