@@ -495,12 +495,14 @@ val write : feed -> string -> unit
 (** {2 Convenience functions} *)
 
 val ascending : entry -> entry -> int
-(** Compare entries so that older dates (for the [update] field) are
-    smaller. *)
+(** Compare entries so that older dates are smaller.  The date of the
+    entry is taken from the [published] field, if available, or
+    otherwise [updated] is used. *)
 
 val descending : entry -> entry -> int
-(** Compare entries so that more recent dates (for the [update] field)
-    are smaller. *)
+(** Compare entries so that more recent dates are smaller.  The date
+    of the entry is taken from the [published] field, if available, or
+    otherwise [updated] is used. *)
 
 val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
                 ?title:text_construct ->

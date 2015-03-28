@@ -1462,11 +1462,16 @@ let write feed fname =
 
 (* Comparing entries *)
 
+let entry_date e =
+  match e.published with
+  | Some d -> d
+  | None -> e.updated
+
 let ascending (e1: entry) (e2: entry) =
-  Date.compare e1.updated e2.updated
+  Date.compare (entry_date e1) (entry_date e2)
 
 let descending (e1: entry) (e2: entry) =
-  Date.compare e2.updated e1.updated
+  Date.compare (entry_date e2) (entry_date e1)
 
 (* Feed aggregation *)
 
