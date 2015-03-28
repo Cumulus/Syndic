@@ -998,11 +998,13 @@ let entry_of_item (it: item) : Atom.entry =
                   | Title t -> t
                   | Description(_, d) -> d in
                 Digest.to_hex (Digest.string s) in
-  let links = match it.link with
-    | Some l -> [ { Atom.href = l;  rel = Atom.Alternate;
-                   type_media = None;  hreflang = None;  title = None;
-                   length = None } ]
-    | None -> [] in
+  let links = match it.guid, it.link with
+    | Some g, _ when g.permalink -> [Atom.link g.data ~rel:Atom.Alternate]
+    | _, Some l -> [ Atom.link l ~rel:Atom.Alternate ]
+    | Some g, _ -> (* Sometimes the guid sets [l.permalink = false] but is
+                     nonetheless the only URI we have. *)
+       [Atom.link g.data ~rel:Atom.Alternate]
+    | None, None -> [] in
   let links = match it.comments with
     | Some l -> { Atom.href = l;  rel = Atom.Related;
                  type_media = None;  hreflang = None;  title = None;
