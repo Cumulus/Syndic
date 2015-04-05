@@ -37,8 +37,21 @@ Executable main
   MainIs:               main.ml
   BuildDepends:         syndic
 
-
 SourceRepository master
   Type:       git
   Location:   https://github.com/Cumulus/Syndic.git
   Browser:    https://github.com/Cumulus/Syndic
+
+Test test
+  Run$:                 flag(tests)
+  TestTools:            test
+  Command:              $test
+  WorkingDirectory:     .
+
+Executable test
+  Path:                 test
+  Build$:               flag(tests)
+  Install:              false
+  CompiledObject:       best
+  MainIs:               test.ml
+  BuildDepends:         syndic, lwt, cohttp.lwt, lwt.ppx, lambda-term
