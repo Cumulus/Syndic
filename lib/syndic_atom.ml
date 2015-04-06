@@ -1388,10 +1388,10 @@ let author_to_xml a = person_to_xml "author" a
 let contributor_to_xml a = person_to_xml "contributor" a
 
 let category_to_xml (c: category) =
-  XML.Node(dummy_pos, atom "category",
-           [node_data (tag "term") c.term]
-           |> add_node_uri (tag "scheme") c.scheme
-           |> add_node_data (tag "label") c.label)
+  let attrs = [("", "term"), c.term]
+              |> add_attr_uri ("", "scheme") c.scheme
+              |> add_attr ("", "label") c.label in
+  XML.Node(dummy_pos, ((atom_ns, "category"), attrs), [])
 
 let generator_to_xml (g: generator) =
   let attr = [] |> add_attr ("", "version") g.version
