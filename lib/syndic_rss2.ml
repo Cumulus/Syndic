@@ -956,11 +956,72 @@ let cmp_date_opt d1 d2 = match d1, d2 with
   | None, Some _ -> -1
   | None, None -> 0
 
+(* Assume ASCII or a superset like UTF-8. *)
+let valid_local_part =
+  let is_valid c =
+    let c = Char.unsafe_chr c in
+    ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')
+    || c = '.' (* shouldn't be the 1st char and not appear twice consecutively *)
+    || c = '!' || c = '#' || c = '$' || c = '%' || c = '&' || c = '\''
+    || c = '*' || c = '+' || c = '-' || c = '/' || c = '=' || c = '?'
+    || c = '^' || c = '_' || c = '`' || c = '{' || c = '|' || c =  '}'
+    || c = '~' in
+  Array.init 256 is_valid
+
+let is_valid_local_part c =
+  valid_local_part.(Char.code c)
+
+let valid_domain_part =
+  let is_valid c =
+    let c = Char.unsafe_chr c in
+    ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')
+    || c = '.' || c = '.' in
+  Array.init 256 is_valid
+
+let is_valid_domain_part c =
+  valid_domain_part.(Char.code c)
+
+(* Valid range [s.[i]], [i0 ≤ i < i1]. *)
+let sub_no_braces s i0 i1 =
+  let i0 = if s.[i0] = '(' then i0 + 1 else i0 in
+  let i1 = if s.[i1 - 1] = ')' then i1 - 1 else i1 in
+  String.sub s i0 (i1 - i0)
+
+(* The item author sometimes contains the name and email under the form
+   "name <email>" or "email (name)".  Try to extract both compnents. *)
+let extract_name_email a =
+  try
+    let i = String.index a '@' in
+    let len = String.length a in
+    let i0 = ref(i-1) in
+    while !i0 >= 0 && is_valid_local_part a.[!i0] do decr i0 done;
+    incr i0; (* !i0 >= 0 is the first char of the possible email. *)
+    let i1 = ref(i+1) in
+    while !i1 < len && is_valid_domain_part a.[!i1] do incr i1 done;
+    if !i0 < i && i + 1 < !i1 then (
+      let email = String.sub a !i0 (!i1 - !i0) in
+      if !i0 > 0 && a.[!i0 - 1] = '<' then decr i0;
+      if !i1 < len && a.[!i1] = '>' then incr i1;
+      let name =
+        if !i0 <= 0 then
+          if !i1 >= len then email (* no name *)
+          else sub_no_braces a !i1 len
+        else (* !i0 > 0 *)
+          let name0 = String.trim(String.sub a 0 !i0) in
+          if !i1 >= len then name0
+          else name0 ^ String.sub a !i1 (len - !i1)
+      in
+      (name, Some email)
+    )
+    else (a, None)
+  with Not_found ->
+    (a, None)
+
 let entry_of_item ch_link (it: item) : Atom.entry =
   let author = match it.author with
     | Some a ->
-       let email = if String.contains a '@' then Some a else None in
-       { Atom.name = a;  uri = None;  email }
+       let name, email = extract_name_email a in
+       { Atom.name = name;  uri = None;  email }
     | None ->
        (* If no author is specified for the item, there is little one
           can do just using the RSS2 feed.  The user will have to set
