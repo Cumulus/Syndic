@@ -1572,7 +1572,7 @@ let entries_of_feeds feeds =
 let more_recent d1 (e: entry) =
   if Date.compare d1 e.updated >= 0 then d1 else e.updated
 
-let aggregate ?id ?updated ?subtitle ?(title=default_title)
+let aggregate ?self ?id ?updated ?subtitle ?(title=default_title)
               ?(sort = `Newest_first) ?n feeds : feed =
   let entries = entries_of_feeds feeds in
   let entries = match sort with
@@ -1592,6 +1592,10 @@ let aggregate ?id ?updated ?subtitle ?(title=default_title)
        let d = Digest.to_hex (Digest.string (Buffer.contents b)) in
        (* FIXME: use urn:uuid *)
        Uri.of_string ("urn:md5:" ^ d) in
+  let links = match self with
+    | Some u -> [link u ~title:(string_of_text_construct title)
+                     ~rel:Self ~type_media:"application/atom+xml"]
+    | None -> [] in
   let updated = match updated with
     | Some d -> d
     | None ->
@@ -1604,7 +1608,7 @@ let aggregate ?id ?updated ?subtitle ?(title=default_title)
     generator = Some syndic_generator;
     icon = Some ocaml_icon;
     id;
-    links = [];  logo = None;
+    links;  logo = None;
     rights = None;
     subtitle = subtitle;
     title;

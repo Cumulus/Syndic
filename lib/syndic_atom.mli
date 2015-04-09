@@ -519,7 +519,8 @@ val descending : entry -> entry -> int
     of the entry is taken from the [published] field, if available, or
     otherwise [updated] is used. *)
 
-val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
+val aggregate : ?self: Uri.t -> ?id:id ->
+                ?updated:updated -> ?subtitle:subtitle ->
                 ?title:text_construct ->
                 ?sort:[`Newest_first | `Oldest_first | `None] ->
                 ?n: int ->
@@ -531,6 +532,12 @@ val aggregate : ?id:id -> ?updated:updated -> ?subtitle:subtitle ->
     each entry contains a link to the original feed.  If an entry
     contains a [source], il will {i not} be overwritten.
 
+    @param self The preferred URI for retrieving this aggregayed Atom
+                Feed.  While not mandatory, it is good practice to set
+                this.
+
+    @param id the universally unique identifier for the aggregated feed.
+              If it is not provided a URN is built from the [feeds] IDs.
     @param sort whether to sort the entries of the final feed.  The default
                 is [`Newest_first] because it is generally desired.
     @param n number of entries of the (sorted) aggregated feed to return. *)
