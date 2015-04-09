@@ -1067,8 +1067,9 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
     | _, Some l -> [ Atom.link l ~rel:Atom.Alternate ]
     | Some g, _ -> (* Sometimes the guid sets [l.permalink = false] but is
                      nonetheless the only URI we have. *)
-       [Atom.link g.data ~rel:Atom.Alternate]
-    | None, None -> [] in
+       if looks_like_a_link g.data then [Atom.link g.data ~rel:Atom.Alternate]
+       else []
+    | _, None -> [] in
   let links = match it.comments with
     | Some l -> { Atom.href = l;  rel = Atom.Related;
                  type_media = None;  hreflang = None;  title = None;
