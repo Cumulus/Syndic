@@ -1011,6 +1011,10 @@ let extract_name_email a =
   with Not_found ->
     (a, None)
 
+let looks_like_a_link u =
+  (Uri.scheme u = Some "http" || Uri.scheme u = Some "https")
+  && (match Uri.host u with None | Some "" -> false | Some _ -> true)
+
 let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
   let author = match it.author with
     | Some a ->
@@ -1044,7 +1048,11 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
          | (x, c) -> Some(Atom.Html(x, c)) in
        Atom.Text "", content in
   let id = match it.guid with
-    | Some g -> g.data
+    | Some g ->
+       if g.permalink || looks_like_a_link g.data then g.data
+       else
+         let d = Digest.to_hex (Digest.string(Uri.to_string g.data)) in
+         Uri.with_fragment ch_link (Some d)
     | None -> match it.link with
              | Some l -> l
              | None ->
@@ -1081,7 +1089,7 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
            contributors = [];
            generator = None;
            icon = None;
-           id;
+           id = ch_link; (* declared as the ID of the whole channel *)
            links = [ { Atom.href = s.url;  rel = Atom.Related;
                        type_media = None;  hreflang = None;  title = None;
                        length = None} ];
