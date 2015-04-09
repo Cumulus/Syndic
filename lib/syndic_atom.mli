@@ -110,26 +110,33 @@ type id = string
  *)
 
 
-(** {!link} elements MAY have a "rel" attribute that indicates the
-    link relation type.  {b If the "rel" attribute is not present, the
-    link element MUST be interpreted as if the link relation type is
-    "alternate".}
-
-    {b The value of "rel" MUST be a string that is non-empty and
-    matches either the "isegment-nz-nc" or the "IRI" production in
-    [RFC3987].}  Note that use of a relative reference other than a
-    simple name is not allowed.
-
-    {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.2}
-    See RFC 4287 § 4.2.7.2 }
- *)
+(** Indicates the link relation type.
+    See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.2}
+    RFC 4287 § 4.2.7.2}.  *)
 type rel =
-  | Alternate
-  | Related
-  | Self
+  | Alternate (** Signifies that the URI in the value of the link
+                  [href] field identifies an alternate version of the
+                  resource described by the containing element. *)
+  | Related (** Signifies that the URI in the value of the link [href]
+                field identifies a resource related to the resource
+                described by the containing element. *)
+  | Self (** Signifies that the URI in the value of the link [href]
+             field identifies a resource equivalent to the containing
+             element. *)
   | Enclosure
-  | Via
+     (** Signifies that the IRI in the value of the link [href] field
+         identifies a related resource that is potentially large in
+         size and might require special handling.  When [Enclosure] is
+         specified, the length attribute SHOULD be provided. *)
+  | Via (** Signifies that the IRI in the value of the link [href]
+            field identifies a resource that is the source of the
+            information provided in the containing element. *)
   | Link of Uri.t
+     (** The URI MUST be non-empty and match either the
+         "isegment-nz-nc" or the "IRI" production in
+         {{:http://tools.ietf.org/html/rfc3987} RFC3987}.  Note that
+         use of a relative reference other than a simple name is not
+         allowed. *)
 
 
 type link =
@@ -142,31 +149,30 @@ type link =
     length : int option;
   }
 (** [link] defines a reference from an entry or feed to a Web
-    resource.  This specification assigns no meaning to the content
-    (if any) of this element.
-    {{: http://tools.ietf.org/html/rfc4287#section-4.2.7}
-    See RFC 4287 § 4.2.7 }
+    resource.
+    See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7}
+    RFC 4287 § 4.2.7}.
 
     - [href] contains the link's IRI.  The value MUST be a IRI
-      reference [RFC3987].
+      reference, {{:http://tools.ietf.org/html/rfc3987} RFC3987}.
       See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.1}
       RFC 4287 § 4.2.7.1}.
     - [type_media] is an advisory media type: it is a hint about the
       type of the representation that is expected to be returned when
       the value of the href attribute is dereferenced.  Note that the
       type attribute does not override the actual media type returned
-      with the representation.  Link elements MAY have a type
-      attribute, whose value MUST conform to the syntax of a MIME
-      media type [MIMEREG].
+      with the representation.  The value of [type_media], if given,
+      MUST conform to the syntax of a MIME media type,
+      {{:http://tools.ietf.org/html/rfc4287#ref-MIMEREG} MIMEREG}.
       See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.3}
-      RFC 4287 § 4.2.7.3 }
+      RFC 4287 § 4.2.7.3}.
     - [hreflang] describes the language of the resource pointed to by
       the href attribute.  When used together with the
-      rel="alternate", it implies a translated version of the
-      entry. Link elements MAY have an hreflang attribute, whose value
-      MUST be a language tag [RFC3066].
-      {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.4}
-      See RFC 4287 § 4.2.7.4 }
+      [rel=Alternate], it implies a translated version of the
+      entry.  The value of [hreflang] MUST be a language tag,
+      {{:http://tools.ietf.org/html/rfc3066} RFC3066}.
+      See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.4}
+      RFC 4287 § 4.2.7.4}.
     - [title] conveys human-readable information about the link.  The
       content of the "title" attribute is Language-Sensitive.
       See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.5}
@@ -176,15 +182,24 @@ type link =
       representation returned when the IRI in the href attribute is
       mapped to a URI and dereferenced.  Note that the length
       attribute does not override the actual content length of the
-      representation as reported by the underlying protocol.  Link
-      elements MAY have a length attribute.
+      representation as reported by the underlying protocol.
       See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.6}
       RFC 4287 § 4.2.7.6}.
  *)
 
 val link :
   ?type_media:string -> ?hreflang:string -> ?title:string -> ?length:int ->
-  rel:rel -> Uri.t -> link
+  ?rel:rel -> Uri.t -> link
+(** [link uri] creates a link element.
+
+    @param rel The [rel] attribute of the link.  It defaults to
+    [Alternate] since {{:http://tools.ietf.org/html/rfc4287#section-4.2.7.2}
+    RFC 4287 § 4.2.7.2} says that {i if the "rel" attribute is not
+    present, the link element MUST be interpreted as if the link
+    relation type is "alternate".}
+
+    The other optional arguments all default to [None] (i.e., not
+    specified). *)
 
 type logo = Uri.t
 (** [logo] is an IRI reference [RFC3987] that identifies an image that

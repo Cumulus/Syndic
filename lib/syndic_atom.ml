@@ -26,7 +26,7 @@ type link =
     length: int option;
   }
 
-let link ?type_media ?hreflang ?title ?length ~rel href =
+let link ?type_media ?hreflang ?title ?length ?(rel=Alternate) href =
   { href ; rel ; type_media ; hreflang ; title ; length }
 
 type link' = [
