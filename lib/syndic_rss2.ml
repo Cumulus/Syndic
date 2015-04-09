@@ -950,12 +950,6 @@ let map_option o f = match o with
   | None -> None
   | Some v -> Some(f v)
 
-let cmp_date_opt d1 d2 = match d1, d2 with
-  | Some d1, Some d2 -> Date.compare d1 d2
-  | Some _, None -> 1
-  | None, Some _ -> -1
-  | None, None -> 0
-
 (* Assume ASCII or a superset like UTF-8. *)
 let valid_local_part =
   let is_valid c =
@@ -1017,7 +1011,7 @@ let extract_name_email a =
   with Not_found ->
     (a, None)
 
-let entry_of_item ch_link (it: item) : Atom.entry =
+let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
   let author = match it.author with
     | Some a ->
        let name, email = extract_name_email a in
@@ -1111,8 +1105,19 @@ let entry_of_item ch_link (it: item) : Atom.entry =
     title;
     updated = (match it.pubDate with
                | Some d -> d
-               | None -> Date.epoch);
+               | None -> ch_updated);
   }
+
+
+let more_recent_of_item date (it: item) =
+  match date, it.pubDate with
+  | _, None -> date
+  | None, Some _ -> it.pubDate
+  | Some d, Some di -> if Date.compare d di >= 0 then date else it.pubDate
+
+let max_date_opt d = function
+  | None -> d
+  | Some d' -> Date.max d d'
 
 let to_atom ?self (ch: channel) : Atom.feed =
   let contributors = match ch.webMaster with
@@ -1132,12 +1137,9 @@ let to_atom ?self (ch: channel) : Atom.feed =
                   } :: links
     | None -> links in
   let updated =
-    let d = List.map (fun (it: item) -> it.pubDate) ch.items in
-    let d = List.sort cmp_date_opt (ch.lastBuildDate :: d) in
-    match d with
-    | Some d :: _ -> d
-    | None :: _ -> Date.epoch
-    | [] -> assert false in
+    match List.fold_left more_recent_of_item None ch.items with
+    | None -> max_date_opt Date.epoch ch.lastBuildDate
+    | Some d -> max_date_opt d ch.lastBuildDate in
   { Atom.authors = [];
     categories = (match ch.category with
                   | None -> []
@@ -1155,5 +1157,5 @@ let to_atom ?self (ch: channel) : Atom.feed =
     subtitle = None;
     title = Atom.Text ch.title;
     updated;
-    entries = List.map (entry_of_item ch.link) ch.items;
+    entries = List.map (entry_of_item ch.link updated) ch.items;
   }
