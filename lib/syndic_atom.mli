@@ -94,7 +94,7 @@ type icon = Uri.t
     {{:http://tools.ietf.org/html/rfc4287#section-4.2.5} See RFC 4287 § 4.2.5}
  *)
 
-type id = string
+type id = Uri.t
 (** The [id] element conveys a permanent, universally unique
     identifier for an entry or feed.
 

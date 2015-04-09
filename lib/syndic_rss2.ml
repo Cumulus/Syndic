@@ -956,7 +956,7 @@ let cmp_date_opt d1 d2 = match d1, d2 with
   | None, Some _ -> -1
   | None, None -> 0
 
-let entry_of_item (it: item) : Atom.entry =
+let entry_of_item ch_link (it: item) : Atom.entry =
   let author = match it.author with
     | Some a ->
        let email = if String.contains a '@' then Some a else None in
@@ -989,15 +989,16 @@ let entry_of_item (it: item) : Atom.entry =
          | (x, c) -> Some(Atom.Html(x, c)) in
        Atom.Text "", content in
   let id = match it.guid with
-    | Some g -> Uri.to_string g.data
+    | Some g -> g.data
     | None -> match it.link with
-             | Some l -> Uri.to_string l
+             | Some l -> l
              | None ->
                 let s = match it.story with
                   | All(t, _, d) -> t ^ d
                   | Title t -> t
                   | Description(_, d) -> d in
-                Digest.to_hex (Digest.string s) in
+                let d = Digest.to_hex (Digest.string s) in
+                Uri.with_fragment ch_link (Some d) in
   let links = match it.guid, it.link with
     | Some g, _ when g.permalink -> [Atom.link g.data ~rel:Atom.Alternate]
     | _, Some l -> [ Atom.link l ~rel:Atom.Alternate ]
@@ -1086,12 +1087,12 @@ let to_atom ?self (ch: channel) : Atom.feed =
                            (fun g -> { Atom.content = g;
                                     version = None;  uri = None });
     icon = None;
-    id = Uri.to_string ch.link; (* FIXME: Best we can do? *)
+    id = ch.link; (* FIXME: Best we can do? *)
     links;
     logo = map_option ch.image (fun i -> i.url);
     rights = map_option ch.copyright (fun c -> (Atom.Text c: Atom.rights));
     subtitle = None;
     title = Atom.Text ch.title;
     updated;
-    entries = List.map entry_of_item ch.items;
+    entries = List.map (entry_of_item ch.link) ch.items;
   }

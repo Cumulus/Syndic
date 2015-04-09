@@ -337,12 +337,12 @@ let icon_of_xml' =
   generate_catcher ~leaf_producer (fun ~pos x -> `Icon x)
 
 
-type id = string
+type id = Uri.t
 
 let make_id ~pos (l : string list) =
   (* (atomUri) *)
   let id = match l with
-    | u :: _ -> u
+    | u :: _ -> Uri.of_string u
     | [] -> raise (Error.Error (pos,
                             "The content of <id> MUST be \
                              a non-empty string"))
@@ -1425,7 +1425,7 @@ let add_node_date tag date nodes =
 
 let source_to_xml (s: source) =
   let nodes =
-    (node_data (atom "id") s.id
+    (node_data (atom "id") (Uri.to_string s.id)
      :: text_construct_to_xml "title" s.title
      :: List.map author_to_xml s.authors)
     |> add_nodes_rev_map category_to_xml s.categories
@@ -1464,7 +1464,7 @@ let content_to_xml (c: content) =
 let entry_to_xml (e: entry) =
   let (a0, a) = e.authors in
   let nodes =
-    (node_data (atom "id") e.id
+    (node_data (atom "id") (Uri.to_string e.id)
      :: text_construct_to_xml "title" e.title
      :: node_data (atom "updated") (Date.to_rfc3339 e.updated)
      :: author_to_xml a0 :: List.map author_to_xml a)
@@ -1480,7 +1480,7 @@ let entry_to_xml (e: entry) =
 
 let to_xml (f: feed) =
   let nodes =
-    (node_data (atom "id") f.id
+    (node_data (atom "id") (Uri.to_string f.id)
      :: text_construct_to_xml "title" f.title
      :: node_data (atom "updated") (Date.to_rfc3339 f.updated)
      :: List.map entry_to_xml f.entries)
@@ -1587,8 +1587,11 @@ let aggregate ?id ?updated ?subtitle ?(title=default_title)
     | None ->
        (* Collect all ids of the entries and "digest" them. *)
        let b = Buffer.create 4096 in
-       List.iter (fun (e: entry) -> Buffer.add_string b e.id) entries;
-       Digest.to_hex (Digest.string (Buffer.contents b)) in
+       let add_id (e: entry) = Buffer.add_string b (Uri.to_string e.id) in
+       List.iter add_id entries;
+       let d = Digest.to_hex (Digest.string (Buffer.contents b)) in
+       (* FIXME: use urn:uuid *)
+       Uri.of_string ("urn:md5:" ^ d) in
   let updated = match updated with
     | Some d -> d
     | None ->
