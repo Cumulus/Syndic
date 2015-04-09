@@ -403,7 +403,7 @@ let make_guid ~pos (l : [< guid' ] list) =
      `Guid None
 
 let guid_of_xml, guid_of_xml' =
-  let attr_producer = [ ("isPermalink", (fun ~xmlbase a -> `Permalink a)); ] in
+  let attr_producer = [ ("isPermaLink", (fun ~xmlbase a -> `Permalink a)); ] in
   let leaf_producer ~xmlbase pos data = `Data(xmlbase, data) in
   generate_catcher ~attr_producer ~leaf_producer make_guid,
   generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Guid x)
