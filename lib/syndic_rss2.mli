@@ -198,7 +198,7 @@ type item =
     - [title]       : The title of the item.
     - [link]        : The URL of the item.
     - [story]       : The item synopsis.
-    - [content]     : The possible full story ([""] if not present).
+    - [content]     : The possible full story ([(_,"")] if not present).
                       (Extension of RSS2, see
                       http://purl.org/rss/1.0/modules/content/)
                       The first element of the couple is the possible value

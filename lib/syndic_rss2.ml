@@ -1044,8 +1044,8 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
   let (title: Atom.title), content = match it.story with
     | All(t, xmlbase, d) ->
        let content = match it.content with
-         | (_, "") -> Some(Atom.Html(xmlbase, d))
-         | (x, c) -> Some(Atom.Html(x, d)) in
+         | (_, "") -> if d = "" then None else Some(Atom.Html(xmlbase, d))
+         | (x, c) -> Some(Atom.Html(x, c)) in
        Atom.Text t, content
     | Title t ->
        let content = match it.content with
@@ -1054,7 +1054,7 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
        Atom.Text t, content
     | Description(xmlbase, d) ->
        let content = match it.content with
-         | (_, "") -> Some(Atom.Html(xmlbase, d))
+         | (_, "") -> if d = "" then None else Some(Atom.Html(xmlbase, d))
          | (x, c) -> Some(Atom.Html(x, c)) in
        Atom.Text "", content in
   let id = match it.guid with
