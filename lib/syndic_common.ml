@@ -110,7 +110,7 @@ module Util = struct
 
   let add_attr name v_opt attr =
     match v_opt with
-    | None -> attr
+    | None | Some "" -> attr
     | Some v -> (name, v) :: attr
 
   let add_attr_uri name v_opt attr =
