@@ -1063,15 +1063,18 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
        else
          let d = Digest.to_hex (Digest.string(Uri.to_string g.data)) in
          Uri.with_fragment ch_link (Some d)
-    | None -> match it.link with
-             | Some l -> l
-             | None ->
-                let s = match it.story with
-                  | All(t, _, d) -> t ^ d
-                  | Title t -> t
-                  | Description(_, d) -> d in
-                let d = Digest.to_hex (Digest.string s) in
-                Uri.with_fragment ch_link (Some d) in
+    | None ->
+       (* The [it.link] may not be a permanent link and may also be
+          used by other items.  We use a digest to make it unique. *)
+       let link = match it.link with
+         | Some l -> l
+         | None -> ch_link in
+       let s = match it.story with
+         | All(t, _, d) -> t ^ d
+         | Title t -> t
+         | Description(_, d) -> d in
+       let d = Digest.to_hex (Digest.string s) in
+       Uri.with_fragment link (Some d) in
   let links = match it.guid, it.link with
     | Some g, _ when g.permalink -> [Atom.link g.data ~rel:Atom.Alternate]
     | _, Some l -> [ Atom.link l ~rel:Atom.Alternate ]
