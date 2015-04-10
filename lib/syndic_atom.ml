@@ -1240,11 +1240,12 @@ let xhtml_to_string xhtml =
   List.iter (add_to_buffer buf) xhtml;
   Buffer.contents buf
 
-let string_of_text_construct = function
+let opt_string_of_text_construct = function
   (* FIXME: Once we use a proper HTML library, we probably would like
      to parse the HTML and remove the tags *)
-  | (Text s: text_construct) | Html(_,s) -> s
-  | Xhtml(_, x) -> xhtml_to_string x
+  | (Text s: text_construct) | Html(_,s) -> if s = "" then None else Some s
+  | Xhtml(_, x) -> let s = xhtml_to_string x in
+                   if s = "" then None else Some s
 
 let parse ?self ?xmlbase input =
   let feed = match XML.of_xmlm input |> snd with
@@ -1263,7 +1264,7 @@ let parse ?self ?xmlbase input =
        let links = { href = self;  rel = Self;
                      type_media = Some "application/atom+xml";
                      hreflang = None;
-                     title = Some(string_of_text_construct feed.title);
+                     title = opt_string_of_text_construct feed.title;
                      length = None
                    } :: feed.links in
        { feed with links = links }
@@ -1283,7 +1284,7 @@ let set_self_link feed ?hreflang ?length url =
     let links = { href = url;  rel = Self;
                   type_media = Some "application/atom+xml";
                   hreflang;
-                  title = Some(string_of_text_construct feed.title);
+                  title = opt_string_of_text_construct feed.title;
                   length = length;
                 } :: links in
     { feed with links = links }
@@ -1593,7 +1594,7 @@ let aggregate ?self ?id ?updated ?subtitle ?(title=default_title)
        (* FIXME: use urn:uuid *)
        Uri.of_string ("urn:md5:" ^ d) in
   let links = match self with
-    | Some u -> [link u ~title:(string_of_text_construct title)
+    | Some u -> [link u ?title:(opt_string_of_text_construct title)
                      ~rel:Self ~type_media:"application/atom+xml"]
     | None -> [] in
   let updated = match updated with
