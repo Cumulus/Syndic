@@ -1269,6 +1269,16 @@ let parse ?self ?xmlbase input =
                    } :: feed.links in
        { feed with links = links }
 
+let read ?self ?xmlbase fname =
+  let fh = open_in fname in
+  try
+    let x = parse ?self ?xmlbase (Xmlm.make_input (`Channel fh)) in
+    close_in fh;
+    x
+  with e ->
+    close_in fh;
+    raise e
+
 let set_self_link feed ?hreflang ?length url =
   match List.partition (fun l -> l.rel = Self) feed.links with
   | (l :: _), links ->

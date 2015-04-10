@@ -316,6 +316,9 @@ val parse : ?xmlbase: Uri.t -> Xmlm.input -> channel
     Raise [Error.Expected], [Error.Size_Exceeded] or
     [Error.Item_expectation] if [xml] is not a valid RSS2 document. *)
 
+val read : ?xmlbase: Uri.t -> string -> channel
+(** [read fname] reads the file name [fname] and parses it.
+    For the optional parameters, see {!parse}. *)
 
 val to_atom : ?self: Uri.t -> channel -> Syndic_atom.feed
 (** [to_atom ch] returns an Atom feed that (mostly) contains the same

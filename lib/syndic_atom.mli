@@ -496,6 +496,10 @@ val parse : ?self: Uri.t -> ?xmlbase: Uri.t -> Xmlm.input -> feed
     Giving this information will add an entry to [links] with
     [rel = Self] unless one already exists. *)
 
+val read : ?self: Uri.t -> ?xmlbase: Uri.t -> string -> feed
+(** [read fname] reads the file name [fname] and parses it.
+    For the optional parameters, see {!parse}. *)
+
 val to_xml : feed -> Syndic_xml.t
 (** [to_xml f] converts the feed [f] to an XML tree. *)
 

@@ -569,6 +569,16 @@ let parse ?xmlbase input =
                          "document MUST contains exactly one \
                           <rdf> element"))
 
+let read ?xmlbase fname =
+  let fh = open_in fname in
+  try
+    let x = parse ?xmlbase (Xmlm.make_input (`Channel fh)) in
+    close_in fh;
+    x
+  with e ->
+    close_in fh;
+    raise e
+
 type uri = Uri.t option * string
 
 let unsafe ?xmlbase input =

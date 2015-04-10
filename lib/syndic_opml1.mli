@@ -106,6 +106,10 @@ val parse : ?xmlbase: Uri.t -> Xmlm.input -> t
 (** [parse i] takes [i] and returns an opml record which is the OCaml
     representation of the OPML document. *)
 
+val read : ?xmlbase: Uri.t -> string -> t
+(** [read fname] reads the file name [fname] and parses it.
+    For the optional parameters, see {!parse}. *)
+
 val to_xml : t -> Syndic_xml.t
 (** [to_xml opml] converts the OPML document [opml] to an XML tree. *)
 

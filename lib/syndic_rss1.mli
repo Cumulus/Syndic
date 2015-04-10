@@ -292,6 +292,9 @@ val parse : ?xmlbase: Uri.t -> Xmlm.input -> rdf
     RSS1 document are resolved.  It is superseded by xml:base present
     in the document (if any). *)
 
+val read : ?xmlbase: Uri.t -> string -> rdf
+(** [read fname] reads the file name [fname] and parses it.
+    For the optional parameters, see {!parse}. *)
 
 (**/**)
 
