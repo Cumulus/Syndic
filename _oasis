@@ -55,4 +55,4 @@ Executable test
   Install:              false
   CompiledObject:       best
   MainIs:               test.ml
-  BuildDepends:         syndic, lwt, cohttp.lwt, lwt.ppx, lambda-term
+  BuildDepends:         syndic, lwt, cohttp.lwt, lwt.ppx
