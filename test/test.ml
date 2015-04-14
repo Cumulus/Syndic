@@ -5,7 +5,9 @@ module CLB = Cohttp_lwt_body
 
 type result =
   | Ok
-  | Error of string
+  | SyndicError of (Xmlm.pos * string)
+  | W3CError of (Xmlm.pos * string) list
+  | AnotherError of exn
 
 exception Is_not_a_file
 
@@ -56,18 +58,73 @@ let tests : ([> src ] * [< fmt ] * result) list =
     (`Uri (Uri.of_string "http://ocaml.org/feed.xml"), `Atom, Ok);
   ]
 
-let%lwt () =
-  Lwt_list.map_p
-    (fun (src, fmt, result) ->
-       Printf.printf "[%s] %s:%!"
-         (string_of_fmt fmt)
-         (string_of_src src);
-       get src
-       >>= (fun src ->
-         try%lwt let _ = parse fmt (Xmlm.make_input src) in Lwt.return Ok
-         with exn -> Lwt.return (Error (Printexc.to_string exn)))
-       >>= function
-         | Ok -> Lwt.return (Printf.printf " Ok.\n%!")
-         | Error str -> Lwt.return (Printf.printf " %s.\n%!" str))
-    tests
-  >>= fun _ -> Lwt.return ()
+let () =
+  Printexc.register_printer
+    (function Syndic_error.Error _ as exn ->
+                Some (Syndic_error.to_string exn)
+            | _ -> None)
+
+module Printf =
+  struct
+    include Printf
+
+    let add_list ?(sep="") add_data ch lst =
+      let rec aux = function
+        | [] -> ()
+        | [ x ] -> add_data ch x
+        | x :: r ->
+          Printf.fprintf ch "%a%s" add_data x sep; aux r
+      in aux lst
+
+  end
+
+let state, switch =
+  let e = ref false in
+  (fun () -> !e),
+  (fun () -> e := true)
+
+let make_test (src, fmt, result) =
+  Printf.printf "-+-+-+-+-+- [%s] %s -+-+-+-+-+-\n%!"
+    (string_of_fmt fmt)
+    (string_of_src src);
+  get src
+  >>= fun xmlm_source ->
+  Lwt.catch
+    (fun () -> let _ = parse fmt (Xmlm.make_input xmlm_source) in Lwt.return Ok)
+    (function Syndic_error.Error (pos, err) ->
+              get (`Uri (Syndic.W3C.url src))
+              >>= fun xmlm_source ->
+              Lwt.return (Syndic.W3C.parse (Xmlm.make_input xmlm_source))
+              >>= (function [] -> Lwt.return (SyndicError (pos, err))
+                          | errors ->
+                            Lwt.return (W3CError (List.map Syndic.W3C.to_error errors)))
+            | exn -> Lwt.return (AnotherError exn))
+  >>= function SyndicError (pos, err) ->
+               Printf.printf "Syndic: %s\n%!"
+                 (Syndic_error.to_string (Syndic_error.Error (pos, err)));
+
+               switch ();
+
+               Lwt.return ()
+             | W3CError errors ->
+               let add_error ch (pos, err) =
+                 Printf.fprintf ch "W3C: %s"
+                   (Syndic_error.Error (pos, err) |> Syndic_error.to_string)
+               in
+               Printf.printf "%a%!"
+                 (Printf.add_list ~sep:"\n" add_error) errors;
+               Lwt.return ()
+             | AnotherError exn ->
+               Printf.printf "Error: %s\n%!"
+                 (Printexc.to_string exn);
+
+               switch ();
+
+               Lwt.return ()
+             | Ok ->
+               Printf.printf "This document is valid!\n%!";
+               Lwt.return ()
+
+let () =
+  Lwt_unix.run (Lwt_list.map_s make_test tests >>= fun _ -> Lwt.return ());
+  if state () then exit 1 else exit 0
