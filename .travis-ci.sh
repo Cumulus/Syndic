@@ -8,7 +8,7 @@ opam update
 opam install oasis ocamlfind calendar xmlm uri
 eval `opam config env`
 
-./configure
+./configure --enable-tests
 make
 
 if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
