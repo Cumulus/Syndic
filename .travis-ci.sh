@@ -26,7 +26,7 @@ if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
   git checkout gh-pages
   git merge master --commit -m "Merge master into gh-pages"
 
-  ./configure --enable-tests
+  ./configure
   make doc
 
   git add -f doc/
