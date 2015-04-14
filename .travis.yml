@@ -1,5 +1,6 @@
-env:
-  global:
-  - secure: "mv/uFbJc/hh1hfhnn1HxkL2ryTXvqgiqzCsAVNUhKofQMvZSTi2SiuGB+rMg7cC4NkvCMFiL/7xLdLb6dUHx3BKNsur0kLlUINlg45ZQbz/QjZT9+/t49+UNQv7AcTxsU6JpoA9RFrXv14oRhQjPNYApRmO+HaA4mcOJBC930nI="
 language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
 script: bash -ex .travis-ci.sh
+env:
+  - OCAML_VERSION=latest
+  - DEPENDS=oasis ocamlfind calendar xmlm uri
