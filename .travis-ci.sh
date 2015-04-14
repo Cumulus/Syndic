@@ -10,6 +10,7 @@ eval `opam config env`
 
 ./configure --enable-tests
 make
+make test
 
 if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
      && [ "$TRAVIS_PULL_REQUEST" == "false" ] \
