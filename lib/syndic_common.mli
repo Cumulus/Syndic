@@ -20,6 +20,7 @@ end
 
 module Util : sig
   val find : ('a -> bool) -> 'a list -> 'a option
+  val recursive_find : (XML.t -> bool) -> XML.t -> XML.t option
   val filter_map : 'a list -> ('a -> 'b option) -> 'b list
   val take : 'a list -> int -> 'a list
 

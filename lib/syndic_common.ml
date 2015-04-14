@@ -74,6 +74,21 @@ end
 module Util = struct
   let find f l = try Some (List.find f l) with Not_found -> None
 
+  exception Found of XML.t
+
+  let rec recursive_find f root =
+    let rec aux = function
+      | [] -> None
+      | x :: r when f x -> raise (Found x)
+      | XML.Node (_, _, x) :: r ->
+        aux x |> (function
+          | Some x -> raise (Found x) (* assert false ? *)
+          | None -> aux r)
+      | XML.Data _ :: r -> aux r
+    in try aux [root]
+       with Found x -> Some x
+          | _ -> None
+
   let rec filter_map l f =
     match l with
     | [] -> []
