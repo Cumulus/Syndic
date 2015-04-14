@@ -34,8 +34,8 @@ let get = function
 let parse ?xmlbase = function
   | `Rss1 -> fun src -> `Rss1 (Syndic.Rss1.parse ?xmlbase src)
   | `Rss2 -> fun src -> `Rss2 (Syndic.Rss2.parse ?xmlbase src)
-  | `Atom -> fun src -> `Atom (Syndic.Rss2.parse ?xmlbase src)
-  | `Opml1 -> fun src -> `Opml1 (Syndic.Rss2.parse ?xmlbase src)
+  | `Atom -> fun src -> `Atom (Syndic.Atom.parse ?xmlbase src)
+  | `Opml1 -> fun src -> `Opml1 (Syndic.Opml1.parse ?xmlbase src)
 
 let string_of_src = function
   | `Uri uri -> Printf.sprintf "'%s'" (Uri.to_string uri)
