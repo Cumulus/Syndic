@@ -1,10 +1,10 @@
 sh .travis-ocaml.sh
 
-depends={DEPENDS:-""}
+DEPENDS="oasis ocamlfind calendar xmlm uri"
 
 # Install the external dependencies
-echo "opam install ${depends}"
-opam install ${depends}
+echo "opam install ${DEPENDS}"
+opam install ${DEPENDS}
 
 ./configure
 make
