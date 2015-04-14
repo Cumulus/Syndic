@@ -1,5 +1,7 @@
 sh .travis-ocaml.sh
 
+export OPAMYES=1
+
 DEPENDS="oasis ocamlfind calendar xmlm uri"
 
 # Install the external dependencies
