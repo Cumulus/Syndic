@@ -1,12 +1,12 @@
-sh .travis-ocaml.sh
+echo "yes" | sudo add-apt-repository ppa:avsm/ppa
+sudo apt-get update -qq
+sudo apt-get install ocaml ocaml-native-compilers camlp4-extra opam opam
 
 export OPAMYES=1
-
-DEPENDS="oasis ocamlfind calendar xmlm uri"
-
-# Install the external dependencies
-echo "opam install ${DEPENDS}"
-opam install ${DEPENDS}
+opam init
+opam update
+opam install oasis ocamlfind calendar xmlm uri
+eval `opam config env`
 
 ./configure
 make
