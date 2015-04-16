@@ -22,11 +22,11 @@ type link =
     rel: rel;
     type_media: string option;
     hreflang: string option;
-    title: string option;
+    title: string;
     length: int option;
   }
 
-let link ?type_media ?hreflang ?title ?length ?(rel=Alternate) href =
+let link ?type_media ?hreflang ?(title="") ?length ?(rel=Alternate) href =
   { href ; rel ; type_media ; hreflang ; title ; length }
 
 type link' = [
@@ -398,8 +398,8 @@ let make_link ~pos (l : [< link'] list) =
   in
   (* attribute title { text }? *)
   let title = match find (function `Title _ -> true | _ -> false) l with
-    | Some (`Title s) -> Some s
-    | _ -> None
+    | Some (`Title s) -> s
+    | _ -> ""
   in
   (* attribute length { text }? *)
   let length = match find (function `Length _ -> true | _ -> false) l with
@@ -1240,12 +1240,11 @@ let xhtml_to_string xhtml =
   List.iter (add_to_buffer buf) xhtml;
   Buffer.contents buf
 
-let opt_string_of_text_construct = function
+let string_of_text_construct = function
   (* FIXME: Once we use a proper HTML library, we probably would like
      to parse the HTML and remove the tags *)
-  | (Text s: text_construct) | Html(_,s) -> if s = "" then None else Some s
-  | Xhtml(_, x) -> let s = xhtml_to_string x in
-                   if s = "" then None else Some s
+  | (Text s: text_construct) | Html(_,s) -> s
+  | Xhtml(_, x) -> xhtml_to_string x
 
 let parse ?self ?xmlbase input =
   let feed = match XML.of_xmlm input |> snd with
@@ -1264,7 +1263,7 @@ let parse ?self ?xmlbase input =
        let links = { href = self;  rel = Self;
                      type_media = Some "application/atom+xml";
                      hreflang = None;
-                     title = opt_string_of_text_construct feed.title;
+                     title = string_of_text_construct feed.title;
                      length = None
                    } :: feed.links in
        { feed with links = links }
@@ -1294,7 +1293,7 @@ let set_self_link feed ?hreflang ?length url =
     let links = { href = url;  rel = Self;
                   type_media = Some "application/atom+xml";
                   hreflang;
-                  title = opt_string_of_text_construct feed.title;
+                  title = string_of_text_construct feed.title;
                   length = length;
                 } :: links in
     { feed with links = links }
@@ -1422,8 +1421,9 @@ let link_to_xml (l: link) =
   let attr = [("", "href"), Uri.to_string l.href;
               ("", "rel"), string_of_rel l.rel ]
              |> add_attr ("", "type") l.type_media
-             |> add_attr ("", "hreflang") l.hreflang
-             |> add_attr ("", "title") l.title in
+             |> add_attr ("", "hreflang") l.hreflang in
+  let attr = if l.title = "" then attr
+             else (("", "title"), l.title) :: attr in
   let attr = match l.length with
     | Some len -> (("", "length"), string_of_int len) :: attr
     | None -> attr in
@@ -1604,7 +1604,7 @@ let aggregate ?self ?id ?updated ?subtitle ?(title=default_title)
        (* FIXME: use urn:uuid *)
        Uri.of_string ("urn:md5:" ^ d) in
   let links = match self with
-    | Some u -> [link u ?title:(opt_string_of_text_construct title)
+    | Some u -> [link u ~title:(string_of_text_construct title)
                      ~rel:Self ~type_media:"application/atom+xml"]
     | None -> [] in
   let updated = match updated with

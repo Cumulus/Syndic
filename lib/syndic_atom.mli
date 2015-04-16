@@ -145,7 +145,7 @@ type link =
     rel : rel;
     type_media : string option;
     hreflang : string option;
-    title : string option;
+    title : string;
     length : int option;
   }
 (** [link] defines a reference from an entry or feed to a Web
@@ -175,6 +175,7 @@ type link =
       RFC 4287 § 4.2.7.4}.
     - [title] conveys human-readable information about the link.  The
       content of the "title" attribute is Language-Sensitive.
+      The value [""] means that no title is provided.
       See {{: http://tools.ietf.org/html/rfc4287#section-4.2.7.5}
       RFC 4287 § 4.2.7.5}.
     - [length] indicates an advisory length of the linked content in

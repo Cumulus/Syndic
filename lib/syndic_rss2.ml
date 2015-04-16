@@ -1085,14 +1085,14 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
     | _, None -> [] in
   let links = match it.comments with
     | Some l -> { Atom.href = l;  rel = Atom.Related;
-                 type_media = None;  hreflang = None;  title = None;
+                 type_media = None;  hreflang = None;  title = "";
                  length = None }
                :: links
     | None -> links in
   let links = match it.enclosure with
     | Some e -> { Atom.href = e.url;  rel = Atom.Enclosure;
                  type_media = Some e.mime;
-                 hreflang = None;  title = None;  length = Some e.length }
+                 hreflang = None;  title = "";  length = Some e.length }
                :: links
     | None -> links in
   let source = match it.source with
@@ -1105,7 +1105,7 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
            icon = None;
            id = ch_link; (* declared as the ID of the whole channel *)
            links = [ { Atom.href = s.url;  rel = Atom.Related;
-                       type_media = None;  hreflang = None;  title = None;
+                       type_media = None;  hreflang = None;  title = "";
                        length = None} ];
            logo = None;
            rights = None;
@@ -1151,11 +1151,11 @@ let to_atom ?self (ch: channel) : Atom.feed =
     | None -> contributors in
   let links = [ { Atom.href = ch.link;  rel = Atom.Related;
                   type_media = Some "text/html";  hreflang = None;
-                  title = Some ch.title;  length = None } ] in
+                  title = ch.title;  length = None } ] in
   let links = match self with
     | Some self -> { Atom.href = self;  rel = Atom.Self;
                     type_media = Some "application/rss+xml";  hreflang = None;
-                    title = Some ch.title;  length = None
+                    title = ch.title;  length = None
                   } :: links
     | None -> links in
   let updated =
