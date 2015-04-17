@@ -20,7 +20,7 @@ val url : [< `Data of string | `Uri of Uri.t ] -> Uri.t
 (** Generate url for the W3C Feed Validator API returning a SOAP 12
     output. *)
 
-val to_error : error -> Xmlm.pos * string
+val to_error : error -> Error.t
 
 val parse : Xmlm.input -> error list
 (** [parse i] takes [i] and returns a list of error, result of

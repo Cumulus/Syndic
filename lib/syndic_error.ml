@@ -1,6 +1,8 @@
 open Printf
 
-exception Error of Xmlm.pos * string
+type t = Xmlm.pos * string
+
+exception Error of t
 
 let to_string = function
   | Error (pos, str) ->
