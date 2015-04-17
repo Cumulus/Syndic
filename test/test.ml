@@ -12,10 +12,8 @@ type result =
 exception Is_not_a_file
 
 type src =
-  [
-    | `String of string
-    | `Uri of Uri.t
-  ]
+  [ `Data of string
+  | `Uri of Uri.t  ]
 
 type fmt =
   [
@@ -25,13 +23,12 @@ type fmt =
     | `Opml1
   ]
 
-let get = function
+let get : src -> Xmlm.source Lwt.t = function
   | `Uri src ->
     CLU.Client.get src
     >>= fun (response, body) -> CLB.to_string body
     >>= fun data -> Lwt.return (`String (0, data))
-  | `String data -> Lwt.return (`String (0, data))
-  | _ -> raise (Invalid_argument "Not implemented yet")
+  | `Data data -> Lwt.return (`String (0, data))
 
 let parse ?xmlbase = function
   | `Rss1 -> fun src -> `Rss1 (Syndic.Rss1.parse ?xmlbase src)
@@ -41,7 +38,7 @@ let parse ?xmlbase = function
 
 let string_of_src = function
   | `Uri uri -> Printf.sprintf "'%s'" (Uri.to_string uri)
-  | `String data ->
+  | `Data data ->
     let buffer = Buffer.create 16 in
     Buffer.add_string buffer (String.sub data 0 16);
     Buffer.add_string buffer "...";
