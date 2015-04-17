@@ -16,8 +16,9 @@ type error =
                           or content which triggered the message. *)
   }
 
-val url : [< `String of string | `Uri of Uri.t ] -> Uri.t
-(** Generate url to go to W3C Feed Validator API. *)
+val url : [< `Data of string | `Uri of Uri.t ] -> Uri.t
+(** Generate url for the W3C Feed Validator API returning a SOAP 12
+    output. *)
 
 val to_error : error -> Xmlm.pos * string
 

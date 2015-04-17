@@ -30,7 +30,7 @@ type error =
   }
 
 let url = function
-  | `String data ->
+  | `Data data ->
     Uri.of_string
       ("http://validator.w3.org/feed/check.cgi?output=soap12&rawdata="
        ^ data)
