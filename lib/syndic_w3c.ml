@@ -87,6 +87,7 @@ let errorlist_of_xml =
   ] in
   generate_catcher
     ~data_producer
+    ~xmlbase:None
     make_errorlist
 
 let find_errorlist l =
@@ -96,7 +97,7 @@ let find_errorlist l =
 let to_error { line; column; text; _ } =
   ((line, column), text)
 
-let parse ?xmlbase input =
+let parse input =
   match (XML.of_xmlm input |> snd) |> find_errorlist with
-  | Some (XML.Node (p, t, d)) -> errorlist_of_xml ~xmlbase (p, t, d)
+  | Some (XML.Node (p, t, d)) -> errorlist_of_xml (p, t, d)
   | _ -> []

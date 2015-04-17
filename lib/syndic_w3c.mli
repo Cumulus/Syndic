@@ -22,6 +22,6 @@ val url : [< `Data of string | `Uri of Uri.t ] -> Uri.t
 
 val to_error : error -> Xmlm.pos * string
 
-val parse : ?xmlbase: Uri.t -> Xmlm.input -> error list
+val parse : Xmlm.input -> error list
 (** [parse i] takes [i] and returns a list of error, result of
     {{:http://validator.w3.org/feed/docs/soap} W3C Feed Validator}. *)
