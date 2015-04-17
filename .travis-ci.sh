@@ -5,11 +5,12 @@ sudo apt-get install ocaml ocaml-native-compilers camlp4-extra opam opam
 export OPAMYES=1
 opam init
 opam update
-opam install oasis ocamlfind calendar xmlm uri
+opam install oasis ocamlfind calendar xmlm uri lwt cohttp
 eval `opam config env`
 
-./configure
+./configure --enable-tests
 make
+make test
 
 if [ "$TRAVIS_REPO_SLUG" == "Cumulus/Syndic" ] \
      && [ "$TRAVIS_PULL_REQUEST" == "false" ] \

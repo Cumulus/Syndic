@@ -1,7 +1,9 @@
 S lib
 S src
+S test
 
 B _build/lib
 B _build/src
+B _build/test
 
-PKG xmlm uri calendar
+PKG xmlm uri calendar lwt cohttp
