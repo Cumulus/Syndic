@@ -18,7 +18,7 @@ type error =
 
 val url : [< `Data of string | `Uri of Uri.t ] -> Uri.t
 (** Generate url for the W3C Feed Validator API returning a SOAP 12
-    output. *)
+    output.  Thus URL is supposed to be used with GET. *)
 
 val to_error : error -> Error.t
 

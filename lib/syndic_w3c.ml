@@ -33,7 +33,7 @@ let url = function
   | `Data data ->
     Uri.of_string
       ("http://validator.w3.org/feed/check.cgi?output=soap12&rawdata="
-       ^ data)
+       ^ (Uri.pct_encode data ~component:`Query_value))
   | `Uri uri ->
     Uri.of_string
       ("http://validator.w3.org/feed/check.cgi?output=soap12&url="
