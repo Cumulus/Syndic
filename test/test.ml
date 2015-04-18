@@ -16,18 +16,16 @@ type src =
   | `Uri of Uri.t  ]
 
 type fmt =
-  [
-    | `Atom
-    | `Rss1
-    | `Rss2
-    | `Opml1
-  ]
+  [ `Atom
+  | `Rss1
+  | `Rss2
+  | `Opml1 ]
 
 let get : src -> Xmlm.source Lwt.t = function
   | `Uri src ->
-    CLU.Client.get src
-    >>= fun (response, body) -> CLB.to_string body
-    >>= fun data -> Lwt.return (`String (0, data))
+     CLU.Client.get src
+     >>= fun (response, body) -> CLB.to_string body
+     >>= fun data -> Lwt.return (`String (0, data))
   | `Data data -> Lwt.return (`String (0, data))
 
 let parse ?xmlbase = function
@@ -39,10 +37,10 @@ let parse ?xmlbase = function
 let string_of_src = function
   | `Uri uri -> Printf.sprintf "'%s'" (Uri.to_string uri)
   | `Data data ->
-    let buffer = Buffer.create 16 in
-    Buffer.add_string buffer (String.sub data 0 16);
-    Buffer.add_string buffer "...";
-    Buffer.contents buffer
+     let buffer = Buffer.create 16 in
+     Buffer.add_string buffer (String.sub data 0 16);
+     Buffer.add_string buffer "...";
+     Buffer.contents buffer
 
 let string_of_fmt = function
   | `Rss1 -> "RSS 1.0"
