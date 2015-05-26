@@ -56,3 +56,11 @@ Executable test
   CompiledObject:       best
   MainIs:               test.ml
   BuildDepends:         syndic, lwt, cohttp.lwt
+
+Executable test_decisions
+  Path:                 test
+  Build$:               flag(tests)
+  Install:              false
+  CompiledObject:       best
+  MainIs:               test_decisions.ml
+  BuildDepends:         syndic, lwt, cohttp.lwt
