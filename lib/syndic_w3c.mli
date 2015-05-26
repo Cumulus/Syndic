@@ -1,7 +1,17 @@
 module Error : module type of Syndic_error
 
-type error =
+type error
+type warning
+
+type 'a kind
+(** Distinguishes an error from a warning. *)
+
+val error : error kind
+val warning : warning kind
+
+type 'a t =
   {
+    kind    : 'a kind; (** Error or warning. *)
     line    : int;    (** Within the source code of the validated document,
                           refers to the line where the error was
                           detected. *)
@@ -20,8 +30,8 @@ val url : [< `Data of string | `Uri of Uri.t ] -> Uri.t
 (** Generate url for the W3C Feed Validator API returning a SOAP 12
     output.  Thus URL is supposed to be used with GET. *)
 
-val to_error : error -> Error.t
+val to_error : _ t -> Error.t
 
-val parse : Xmlm.input -> error list
+val parse : Xmlm.input -> error t list * warning t list
 (** [parse i] takes [i] and returns a list of error, result of
     {{:http://validator.w3.org/feed/docs/soap} W3C Feed Validator}. *)

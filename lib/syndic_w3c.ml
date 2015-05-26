@@ -13,8 +13,15 @@ type error' = [
   | `Value of string
 ]
 
-type error =
+type error
+type warning
+type 'a kind = Error | Warning
+let error = Error
+let warning = Warning
+
+type 'a t =
   {
+    kind    : 'a kind; (** Error or warning. *)
     line    : int;    (** Within the source code of the validated document,
                           refers to the line where the error was
                           detected. *)
@@ -29,17 +36,16 @@ type error =
                           or content which triggered the message. *)
   }
 
-let url = function
-  | `Data data ->
-    Uri.of_string
-      ("http://validator.w3.org/feed/check.cgi?output=soap12&rawdata="
-       ^ (Uri.pct_encode data ~component:`Query_value))
-  | `Uri uri ->
-    Uri.of_string
-      ("http://validator.w3.org/feed/check.cgi?output=soap12&url="
-       ^ (Uri.to_string uri))
+let feed_url = Uri.of_string "http://validator.w3.org/feed/check.cgi"
 
-let make_error ~pos (l : [< error'] list) =
+let url d =
+  let q = ["output", ["soap12"]] in
+  let q = match d with
+    | `Data data -> ("rawdata", [data]) :: q
+    | `Uri uri -> ["url", [Uri.to_string uri]] in
+  Uri.with_query feed_url q
+
+let make_error ~kind ~pos (l : [< error'] list) =
   let line = match find (function `Line _ -> true | _ -> false) l with
     | Some (`Line line) -> (try int_of_string line with _ -> 0)
     | _ -> 0
@@ -64,26 +70,36 @@ let make_error ~pos (l : [< error'] list) =
     | Some (`Value value) -> value
     | _ -> ""
   in
-  ({ line; column; text; element; parent; value; } : error)
+  ({ kind; line; column; text; element; parent; value; } : _ t)
 
-let error_of_xml =
-  let data_producer = [
+let error_data_producer = [
     "line", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Line a);
     "column", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Column a);
     "text", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Text a);
     "element", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Element a);
     "parent", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Parent a);
     "value", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Value a);
-  ] in
-  generate_catcher
-    ~data_producer
-    make_error
+  ]
 
-let make_errorlist ~pos (l : error list) = l
+let error_of_xml ~kind =
+  generate_catcher
+    ~data_producer:error_data_producer
+    (make_error ~kind)
+
+let make_errorlist ~pos (l : _ t list) = l
 
 let errorlist_of_xml =
   let data_producer = [
-    "error", error_of_xml;
+    "error", error_of_xml ~kind:Error;
+  ] in
+  generate_catcher
+    ~data_producer
+    ~xmlbase:None
+    make_errorlist
+
+let errorlist_of_xml =
+  let data_producer = [
+    "warning", error_of_xml ~kind:Warning;
   ] in
   generate_catcher
     ~data_producer
@@ -94,10 +110,19 @@ let find_errorlist l =
   recursive_find
     (function XML.Node (_, t, _) -> tag_is t "errorlist" | _ -> false) l
 
+let find_warninglist l =
+  recursive_find
+    (function XML.Node (_, t, _) -> tag_is t "warninglist" | _ -> false) l
+
 let to_error { line; column; text; _ } =
   ((line, column), text)
 
 let parse input =
-  match (XML.of_xmlm input |> snd) |> find_errorlist with
-  | Some (XML.Node (p, t, d)) -> errorlist_of_xml (p, t, d)
-  | _ -> []
+  let _, xml = XML.of_xmlm input in
+  let err = match find_errorlist xml with
+    | Some (XML.Node (p, t, d)) -> errorlist_of_xml (p, t, d)
+    | _ -> [] in
+  let warn = match find_warninglist xml with
+    | Some (XML.Node (p, t, d)) -> errorlist_of_xml (p, t, d)
+    | _ -> [] in
+  err, warn

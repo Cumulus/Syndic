@@ -4,7 +4,7 @@ let () =
 
   Printexc.record_backtrace true;
 
-  try let lst = W3C.parse (Xmlm.make_input (`Channel stdin)) in
+  try let lst, _ = W3C.parse (Xmlm.make_input (`Channel stdin)) in
       List.iter
         (fun (_, err) -> Printf.printf "E: %s\n%!" err)
         (List.map Syndic.W3C.to_error lst)

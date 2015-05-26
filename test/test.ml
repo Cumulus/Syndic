@@ -89,7 +89,7 @@ let make_test (src, fmt, result) =
     (function Syndic_error.Error (pos, err) ->
               get (`Uri (Syndic.W3C.url src))
               >>= fun xmlm_source ->
-              Lwt.return (Syndic.W3C.parse (Xmlm.make_input xmlm_source))
+              Lwt.return (snd(Syndic.W3C.parse (Xmlm.make_input xmlm_source)))
               >>= (function [] -> Lwt.return (SyndicError (pos, err))
                           | errors ->
                             Lwt.return (W3CError (List.map Syndic.W3C.to_error errors)))
