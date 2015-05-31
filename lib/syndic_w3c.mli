@@ -1,3 +1,5 @@
+(** [Syndic.W3C]: invoke and parse the result of the W3C validator.  *)
+
 module Error : module type of Syndic_error
 
 type error
