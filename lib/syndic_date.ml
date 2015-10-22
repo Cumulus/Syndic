@@ -41,7 +41,7 @@ let of_rfc822 s =
       (* FIXME: this should be made more robust. *)
       let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i)
       and zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
-      let tz = Calendar.Time.(Period.make zh zm (Second.from_int 0)) in
+      let tz = Calendar.Time.(Period.make (-zh) zm (Second.from_int 0)) in
       Calendar.(create date (Time.add t tz))
   in
   try
@@ -72,7 +72,7 @@ let of_rfc3339 s =
     else
       let tz =
         let open Calendar.Time in
-        sscanf z "%i:%i" (fun h m -> Period.make h m (Second.from_int 0)) in
+        sscanf z "%i:%i" (fun h m -> Period.make (-h) m (Second.from_int 0)) in
       Calendar.(create date (Time.add t tz))
   in
   (* Sometimes, the seconds have a decimal point
