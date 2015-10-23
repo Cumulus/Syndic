@@ -39,10 +39,16 @@ let of_rfc822 s =
       Calendar.(create date t)
     else
       (* FIXME: this should be made more robust. *)
-      let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i)
-      and zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
-      let tz = Calendar.Time.(Period.make (-zh) zm (Second.from_int 0)) in
-      Calendar.(create date (Time.add t tz))
+      let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i) in
+      let zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
+      let tz_sign = if zh < 0 then -1 else 1 in
+      let tz_offset =
+	if zh < 0 then tz_sign * (((-zh) * 3600) + (zm * 60))
+	else tz_sign * ((zh * 3600) + (zm * 60))
+      in
+      let rt = Calendar.(create date t) in
+      let tz = Time_Zone.UTC_Plus (tz_offset / 3600) in
+      Calendar.convert rt tz Time_Zone.UTC
   in
   try
     if 'A' <= s.[0] && s.[0] <= 'Z' then (
