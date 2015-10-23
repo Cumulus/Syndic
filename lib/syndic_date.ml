@@ -39,10 +39,18 @@ let of_rfc822 s =
       Calendar.(create date t)
     else
       (* FIXME: this should be made more robust. *)
-      let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i)
-      and zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
-      let tz = Calendar.Time.(Period.make zh zm (Second.from_int 0)) in
-      Calendar.(create date (Time.add t tz))
+      let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i) in
+      let zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
+      let tz_sign = if zh < 0 then -1 else 1 in
+      let tz_offset =
+	if zh < 0 then tz_sign * (((-zh) * 3600) + (zm * 60))
+	else tz_sign * ((zh * 3600) + (zm * 60))
+      in
+      let rt = Calendar.(create date t) in
+      (* XXX: We lose minutes with this conversion, but Calendar does not
+         propose to handle minutes. *)
+      let tz = Time_Zone.UTC_Plus (tz_offset / 3600) in
+      Calendar.convert rt tz Time_Zone.UTC
   in
   try
     if 'A' <= s.[0] && s.[0] <= 'Z' then (
@@ -70,10 +78,17 @@ let of_rfc3339 s =
     if z = "" || z.[0] = 'Z' then
       Calendar.(create date t)
     else
-      let tz =
+      let tz_offset =
         let open Calendar.Time in
-        sscanf z "%i:%i" (fun h m -> Period.make h m (Second.from_int 0)) in
-      Calendar.(create date (Time.add t tz))
+        sscanf z "%i:%i" (fun h m ->
+	  let tz_sign = if h < 0 then -1 else 1 in
+	  if h < 0 then tz_sign * (((-h) * 3600) + (m * 60))
+	  else tz_sign * ((h * 3600) + (m * 60))) in
+      (* XXX: We lose minutes with this conversion, but Calendar does not
+         propose to handle minutes. *)
+      let tz = Time_Zone.UTC_Plus (tz_offset / 3600) in
+      let rt = Calendar.(create date t) in
+      Calendar.convert rt tz Time_Zone.UTC
   in
   (* Sometimes, the seconds have a decimal point
      See https://forge.ocamlcore.org/tracker/index.php?func=detail&aid=1414&group_id=83&atid=418 *)
