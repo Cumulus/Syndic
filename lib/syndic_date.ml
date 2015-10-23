@@ -47,6 +47,8 @@ let of_rfc822 s =
 	else tz_sign * ((zh * 3600) + (zm * 60))
       in
       let rt = Calendar.(create date t) in
+      (* XXX: We lose minutes with this conversion, but Calendar does not
+         propose to handle minutes. *)
       let tz = Time_Zone.UTC_Plus (tz_offset / 3600) in
       Calendar.convert rt tz Time_Zone.UTC
   in
@@ -82,6 +84,8 @@ let of_rfc3339 s =
 	  let tz_sign = if h < 0 then -1 else 1 in
 	  if h < 0 then tz_sign * (((-h) * 3600) + (m * 60))
 	  else tz_sign * ((h * 3600) + (m * 60))) in
+      (* XXX: We lose minutes with this conversion, but Calendar does not
+         propose to handle minutes. *)
       let tz = Time_Zone.UTC_Plus (tz_offset / 3600) in
       let rt = Calendar.(create date t) in
       Calendar.convert rt tz Time_Zone.UTC
