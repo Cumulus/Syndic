@@ -5,3 +5,5 @@ sudo: true
 env:
   - PACKAGE="syndic" OCAML_VERSION=4.02 TESTS=true
   - PACKAGE="syndic" OCAML_VERSION=4.01 TESTS=true
+  global:
+    secure: P2npPkd5gMklBsWxF9fG22BapaeOxvQK/W2IVcjgtv9mYqp66a3qhKNks6vEgc57AFafNV0kwlmwv+DgA0KOOiC0fQwgR7rPYsYje9J1FJ+0K+SFqJsQweTSWCscEweh0dthNtchEOXyf0A58p9du67y4yA+1la1NYAl+Je7P5s=

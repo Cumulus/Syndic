@@ -22,11 +22,11 @@ Library syndic
                         Syndic_w3c
   InternalModules:      Syndic_common, Syndic_conf
 
-Document "Syndic"
+Document "syndic"
   Type:                 ocamlbuild (0.4)
   BuildTools:           ocamldoc
   Title:                "Syndic"
-  PostCommand:          cp Syndic.docdir/*.html doc/
+  PostCommand:          cp doc/* syndic.docdir/
   XOCamlbuildPath:      lib
   XOCamlbuildLibraries: syndic
   XOCamlbuildExtraArgs:
