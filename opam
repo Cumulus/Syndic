@@ -27,6 +27,7 @@ depends: [
   "cohttp" {test}
   "lwt" {test}
   "ocamlfind" {build}
+  "oasis" {build}
   "uri" {>= "1.9"}
   "xmlm" {>= "1.2.0"}
 ]
