@@ -24,6 +24,8 @@ build-doc: ["ocaml" "setup.ml" "-doc"]
 
 depends: [
   "calendar" {>= "2.03.2"}
+  "ssl" {test}
+  "tls" {test}
   "cohttp" {test}
   "lwt" {test}
   "ocamlfind" {build}
