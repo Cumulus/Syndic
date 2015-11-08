@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Syndic_xml.html">
+<link rel="next" href="Syndic_w3c.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_error</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Syndic_xml.html" title="Syndic_xml">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Syndic_w3c.html" title="Syndic_w3c">Next</a>
+</div>
+<h1>Module <a href="type_Syndic_error.html">Syndic_error</a></h1>
+
+<pre><span class="keyword">module</span> Syndic_error: <code class="code"><span class="keyword">sig</span></code> <a href="Syndic_error.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+The common signature that all error modules must (at least) satisfy.<br>
+</div>
+<hr width="100%">
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = <code class="type">Xmlm.pos * string</code> </pre>
+
+
+<pre><span id="EXCEPTIONError"><span class="keyword">exception</span> Error</span> <span class="keyword">of</span> <code class="type"><a href="Syndic_error.html#TYPEt">t</a></code></pre>
+
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type">exn -> string</code></pre></body></html>

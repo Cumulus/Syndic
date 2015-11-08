@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Syndic_opml1.html">
+<link rel="next" href="Syndic_xml.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_date</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Syndic_opml1.html" title="Syndic_opml1">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Syndic_xml.html" title="Syndic_xml">Next</a>
+</div>
+<h1>Module <a href="type_Syndic_date.html">Syndic_date</a></h1>
+
+<pre><span class="keyword">module</span> Syndic_date: <code class="code"><span class="keyword">sig</span></code> <a href="Syndic_date.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+Minimal date module required by Syndic.<br>
+</div>
+<hr width="100%">
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = <code class="type">CalendarLib.Calendar.t</code> </pre>
+<div class="info ">
+A date with time.<br>
+</div>
+
+
+<pre><span id="VALepoch"><span class="keyword">val</span> epoch</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a></code></pre><div class="info ">
+The POSIX time, i.e. Thursday, 1 January 1970 00:00:00 (UTC).<br>
+</div>
+
+<pre><span id="VALcompare"><span class="keyword">val</span> compare</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> <a href="Syndic_date.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+Compare dates in increasing order.<br>
+</div>
+
+<pre><span id="VALmax"><span class="keyword">val</span> max</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> <a href="Syndic_date.html#TYPEt">t</a> -> <a href="Syndic_date.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">max d1 d2</code> return the maximum (i.e. more recent) of the dates
+    <code class="code">d1</code> and <code class="code">d2</code>.<br>
+</div>
+
+<pre><span id="VALmin"><span class="keyword">val</span> min</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> <a href="Syndic_date.html#TYPEt">t</a> -> <a href="Syndic_date.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">min d1 d2</code> return the minimum (i.e. less recent) of the dates
+    <code class="code">d1</code> and <code class="code">d2</code>.<br>
+</div>
+
+<pre><span id="VALof_rfc822"><span class="keyword">val</span> of_rfc822</span> : <code class="type">string -> <a href="Syndic_date.html#TYPEt">t</a></code></pre>
+<pre><span id="VALto_rfc822"><span class="keyword">val</span> to_rfc822</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> string</code></pre>
+<pre><span id="VALof_rfc3339"><span class="keyword">val</span> of_rfc3339</span> : <code class="type">string -> <a href="Syndic_date.html#TYPEt">t</a></code></pre>
+<pre><span id="VALto_rfc3339"><span class="keyword">val</span> to_rfc3339</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> string</code></pre>
+<pre><code><span id="TYPEmonth"><span class="keyword">type</span> <code class="type"></code>month</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Jan"><span class="constructor">Jan</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Feb"><span class="constructor">Feb</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Mar"><span class="constructor">Mar</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Apr"><span class="constructor">Apr</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.May"><span class="constructor">May</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Jun"><span class="constructor">Jun</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Jul"><span class="constructor">Jul</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Aug"><span class="constructor">Aug</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Sep"><span class="constructor">Sep</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Oct"><span class="constructor">Oct</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Nov"><span class="constructor">Nov</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmonth.Dec"><span class="constructor">Dec</span></span></code></td>
+
+</tr></table>
+
+<div class="info ">
+Month of the year.<br>
+</div>
+
+
+<pre><span id="VALstring_of_month"><span class="keyword">val</span> string_of_month</span> : <code class="type"><a href="Syndic_date.html#TYPEmonth">month</a> -> string</code></pre><div class="info ">
+Return the 3 letters identifying the month in English.<br>
+</div>
+
+<pre><span id="VALyear"><span class="keyword">val</span> year</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+Return the 4 digit year of the date.<br>
+</div>
+
+<pre><span id="VALmonth"><span class="keyword">val</span> month</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> <a href="Syndic_date.html#TYPEmonth">month</a></code></pre><div class="info ">
+Return the month of the date.<br>
+</div>
+
+<pre><span id="VALday"><span class="keyword">val</span> day</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+Return the day of the month (1..31).<br>
+</div>
+
+<pre><span id="VALhour"><span class="keyword">val</span> hour</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALminute"><span class="keyword">val</span> minute</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALsecond"><span class="keyword">val</span> second</span> : <code class="type"><a href="Syndic_date.html#TYPEt">t</a> -> float</code></pre></body></html>

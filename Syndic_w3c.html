@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Syndic_error.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_w3c</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Syndic_error.html" title="Syndic_error">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Syndic_w3c.html">Syndic_w3c</a></h1>
+
+<pre><span class="keyword">module</span> Syndic_w3c: <code class="code"><span class="keyword">sig</span></code> <a href="Syndic_w3c.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+<code class="code"><span class="constructor">Syndic</span>.<span class="constructor">W3C</span></code>: invoke and parse the result of the W3C validator.<br>
+</div>
+<hr width="100%">
+
+<pre><span class="keyword">module</span> <a href="Syndic_w3c.Error.html">Error</a>: <code class="type">module type of <a href="Syndic_error.html">Syndic_error</a></code></pre>
+<pre><span id="TYPEerror"><span class="keyword">type</span> <code class="type"></code>error</span> </pre>
+
+
+<pre><span id="TYPEwarning"><span class="keyword">type</span> <code class="type"></code>warning</span> </pre>
+
+
+<pre><span id="TYPEkind"><span class="keyword">type</span> <code class="type">'a</code> kind</span> </pre>
+<div class="info ">
+Distinguishes an error from a warning.<br>
+</div>
+
+
+<pre><span id="VALerror"><span class="keyword">val</span> error</span> : <code class="type"><a href="Syndic_w3c.html#TYPEerror">error</a> <a href="Syndic_w3c.html#TYPEkind">kind</a></code></pre>
+<pre><span id="VALwarning"><span class="keyword">val</span> warning</span> : <code class="type"><a href="Syndic_w3c.html#TYPEwarning">warning</a> <a href="Syndic_w3c.html#TYPEkind">kind</a></code></pre>
+<pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type">'a</code> t</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.kind">kind</span>&nbsp;: <code class="type">'a <a href="Syndic_w3c.html#TYPEkind">kind</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Error or warning.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.line">line</span>&nbsp;: <code class="type">int</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Within the source code of the validated document,
+                          refers to the line where the error was
+                          detected.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.column">column</span>&nbsp;: <code class="type">int</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Within the source code of the validated document,
+                          refers to the line where the column was
+                          detected.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.text">text</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+The actual error message.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.element">element</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Element in the feed where the message was
+                          triggered.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.parent">parent</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+In the feed, parent of the element.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.value">value</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If applicable the value of the element, attribute
+                          or content which triggered the message.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+}
+
+
+
+<pre><span id="VALurl"><span class="keyword">val</span> url</span> : <code class="type">[< `Data of string | `Uri of Uri.t ] -> Uri.t</code></pre><div class="info ">
+Generate url for the W3C Feed Validator API returning a SOAP 12
+    output.  Thus URL is supposed to be used with GET.<br>
+</div>
+
+<pre><span id="VALto_error"><span class="keyword">val</span> to_error</span> : <code class="type">'a <a href="Syndic_w3c.html#TYPEt">t</a> -> Error.t</code></pre>
+<pre><span id="VALparse"><span class="keyword">val</span> parse</span> : <code class="type">Xmlm.input -><br>       <a href="Syndic_w3c.html#TYPEerror">error</a> <a href="Syndic_w3c.html#TYPEt">t</a> list * <a href="Syndic_w3c.html#TYPEwarning">warning</a> <a href="Syndic_w3c.html#TYPEt">t</a> list</code></pre><div class="info ">
+<code class="code">parse i</code> takes <code class="code">i</code> and returns a list of error, result of
+    <a href="http://validator.w3.org/feed/docs/soap"> W3C Feed Validator</a>.<br>
+</div>
+</body></html>

@@ -1,0 +1,516 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Syndic.html">
+<link rel="next" href="Syndic_rss2.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_rss1</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Syndic.html" title="Syndic">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Syndic_rss2.html" title="Syndic_rss2">Next</a>
+</div>
+<h1>Module <a href="type_Syndic_rss1.html">Syndic_rss1</a></h1>
+
+<pre><span class="keyword">module</span> Syndic_rss1: <code class="code"><span class="keyword">sig</span></code> <a href="Syndic_rss1.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+<code class="code"><span class="constructor">Syndic</span>.<span class="constructor">Rss1</span></code>: compliant with
+    <a href=" http://web.resource.org/rss/1.0/spec"> RSS 1.0</a>.<br>
+</div>
+<hr width="100%">
+
+<pre><span class="keyword">module</span> <a href="Syndic_rss1.Error.html">Error</a>: <code class="type">module type of <a href="Syndic_error.html">Syndic_error</a></code></pre>
+<pre><span id="TYPEtitle"><span class="keyword">type</span> <code class="type"></code>title</span> = <code class="type">string</code> </pre>
+<div class="info ">
+A descriptive title for the channel, image, item and textinput.
+    See RSS 1.0
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.3.1"> § 5.3.1</a>,
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.4.1"> § 5.4.1</a>,
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.5.1"> § 5.5.1</a>, and
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.6.1"> § 5.6.1</a>.
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;title&gt;{title}&lt;/title&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;<span class="keyword">for</span>&nbsp;all<br>
+<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)<br>
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;40&nbsp;(characters)&nbsp;<span class="keyword">for</span>&nbsp;channel,&nbsp;image&nbsp;<span class="keyword">and</span>&nbsp;textinput<br>
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;100&nbsp;<span class="keyword">for</span>&nbsp;item<br>
+</code></pre><br>
+</div>
+
+
+<pre><span id="TYPEname"><span class="keyword">type</span> <code class="type"></code>name</span> = <code class="type">string</code> </pre>
+<div class="info ">
+The text input field's (variable) name.
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.6.3"> See RSS 1.0 § 5.6.3</a>.
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;name&gt;{textinput_varname}&lt;/name&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;<span class="keyword">if</span>&nbsp;textinput<br>
+<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)<br>
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;500<br>
+</code></pre><br>
+</div>
+
+
+<pre><span id="TYPEdescription"><span class="keyword">type</span> <code class="type"></code>description</span> = <code class="type">string</code> </pre>
+<div class="info ">
+This can be<ul>
+<li>a brief description of the channel's content, function, source, etc.
+      <a href=" http://web.resource.org/rss/1.0/spec#s5.3.3"> See RSS 1.0 § 5.3.3</a>;</li>
+<li>or a brief description/abstract of the item.
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.5.3"> See RSS 1.0 § 5.5.3</a>;</li>
+<li>or a brief description of the textinput field's purpose. For
+    example: "Subscribe to our newsletter for..." or "Search our site's
+    archive of..."
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.6.2"> See RSS 1.0 § 5.6.2</a>.</li>
+</ul>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;description&gt;{description}&lt;/description&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;only&nbsp;<span class="keyword">for</span>&nbsp;channel&nbsp;<span class="keyword">and</span>&nbsp;textinput<br>
+<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)<br>
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;500&nbsp;<span class="keyword">for</span>&nbsp;channel&nbsp;<span class="keyword">and</span>&nbsp;item<br>
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;100&nbsp;<span class="keyword">for</span>&nbsp;textinput<br>
+</code></pre><br>
+</div>
+
+
+<pre><span id="TYPEchannel_image"><span class="keyword">type</span> <code class="type"></code>channel_image</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+Establishes an RDF association between the optional image element
+    <code class="code">5.4</code> and this particular RSS channel.  The rdf:resource's 
+    must be the same as the image element's rdf:about .
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.3.4"> See RSS 1.0 § 5.3.4</a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;image&nbsp;rdf:resource=<span class="string">"{image_uri}"</span>&nbsp;/&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;only&nbsp;<span class="keyword">if</span>&nbsp;image&nbsp;element&nbsp;present<br>
+<span class="constructor">Model</span>:&nbsp;<span class="constructor">Empty</span><br>
+</code></pre><br>
+</div>
+
+
+<pre><span id="TYPEurl"><span class="keyword">type</span> <code class="type"></code>url</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+The URL of the image to used in the "src" attribute of the
+    channel's image tag when rendered as HTML.
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.4.2"> See RSS 1.0 § 5.4.2</a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;url&gt;{image_url}&lt;/url&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;<span class="keyword">if</span>&nbsp;the&nbsp;image&nbsp;element&nbsp;is&nbsp;present<br>
+<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)<br>
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;500<br>
+</code></pre><br>
+</div>
+
+
+<pre><span id="TYPElink"><span class="keyword">type</span> <code class="type"></code>link</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+This can be<ul>
+<li>The URL to which an HTML rendering of the channel title will link,
+    commonly the parent site's home or news page.
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.3.2"> See RSS 1.0 § 5.3.2</a></li>
+<li>Or the URL to which an HTML rendering of the channel image will
+    link.  This, as with the channel's title link, is commonly the
+    parent site's home or news page.
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.4.3"> See RSS 1.0 § 5.4.3</a></li>
+<li>Or the item's URL.
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.5.2"> See RSS 1.0 § 5.5.2</a></li>
+<li>Or the URL to which a textinput submission will be directed (using GET).
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.6.4"> See RSS 1.0 § 5.6.4</a></li>
+</ul>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;link&gt;{link}&lt;/link&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;<span class="keyword">for</span>&nbsp;all<br>
+<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)<br>
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;500<br>
+</code></pre><br>
+</div>
+
+
+<pre><span id="TYPEitems"><span class="keyword">type</span> <code class="type"></code>items</span> = <code class="type">Uri.t list</code> </pre>
+<div class="info ">
+An RDF table of contents, associating the document's items <code class="code">5.5</code>
+    with this particular RSS channel.  Each item's rdf:resource
+     must be the same as the associated item element's
+    rdf:about .
+<p>
+
+    An RDF Seq (sequence) is used to contain all the items rather than
+    an RDF Bag to denote item order for rendering and reconstruction.
+<p>
+
+    Note that items appearing in the document but not as members of
+    the channel level items sequence are likely to be discarded by RDF
+    parsers.
+<p>
+
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.3.5"> See RSS 1.0 § 5.3.5</a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;items&gt;&lt;rdf:<span class="constructor">Seq</span>&gt;&lt;rdf:li&nbsp;resource=<span class="string">"{item_uri}"</span>&nbsp;/&gt;&nbsp;...&nbsp;&lt;/rdf:<span class="constructor">Seq</span>&gt;&lt;/items&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span><br>
+</code></pre><br>
+</div>
+
+
+<pre><span id="TYPEchannel_textinput"><span class="keyword">type</span> <code class="type"></code>channel_textinput</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+Establishes an RDF association between the optional textinput
+    element <code class="code">5.6</code> and this particular RSS channel.  The
+     rdf:resource must be the same as the textinput
+    element's rdf:about .
+<p>
+
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.3.6"> See RSS 1.0 § 5.3.6</a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;textinput&nbsp;rdf:resource=<span class="string">"{textinput_uri}"</span>&nbsp;/&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;only&nbsp;<span class="keyword">if</span>&nbsp;texinput&nbsp;element&nbsp;present<br>
+<span class="constructor">Model</span>:&nbsp;<span class="constructor">Empty</span><br>
+</code></pre><br>
+</div>
+
+
+<pre><code><span id="TYPEchannel"><span class="keyword">type</span> <code class="type"></code>channel</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.about">about</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+must be unique<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.title">title</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.link">link</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPElink">link</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.description">description</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEdescription">description</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.image">image</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEchannel_image">channel_image</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.items">items</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEitems">items</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTchannel.textinput">textinput</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEchannel_textinput">channel_textinput</a> option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+The channel element contains metadata describing the channel
+    itself, including a title, brief description, and URL link to the
+    described resource (the channel provider's home page, for
+    instance).  The {resource} URL of the channel element's
+    rdf:about attribute must be unique with respect to any other
+    rdf:about attributes in the RSS document and is a URI which
+    identifies the channel.  Most commonly, this is either the URL of
+    the homepage being described or a URL where the RSS file can be
+    found.
+<p>
+
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.3"> See RSS 1.0 § 5.3</a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;channel&nbsp;rdf:about=<span class="string">"{resource}"</span>&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span><br>
+<span class="constructor">Required</span>&nbsp;<span class="constructor">Attribute</span>(s):&nbsp;rdf:about<br>
+<span class="constructor">Model</span>:&nbsp;(title,&nbsp;link,&nbsp;description,&nbsp;image?,&nbsp;items,&nbsp;textinput?)<br>
+</code></pre><br>
+</div>
+
+
+<pre><code><span id="TYPEimage"><span class="keyword">type</span> <code class="type"></code>image</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.about">about</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.title">title</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.url">url</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEurl">url</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTimage.link">link</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPElink">link</a></code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+An image to be associated with an HTML rendering of the channel.
+    This image should be of a format supported by the majority of Web
+    browsers. While the later 0.91 specification allowed for a width
+    of 1–144 and height of 1–400, convention (and the 0.9
+    specification) dictate 88×31.
+<p>
+
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.4"> See RSS 1.0 § 5.4</a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;image&nbsp;rdf:about=<span class="string">"{image_uri}"</span>&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Optional</span>;&nbsp;<span class="keyword">if</span>&nbsp;present,&nbsp;must&nbsp;also&nbsp;be&nbsp;present&nbsp;<span class="keyword">in</span>&nbsp;channel&nbsp;element&nbsp;[5.3.4]<br>
+<span class="constructor">Required</span>&nbsp;<span class="constructor">Attribute</span>(s):&nbsp;rdf:about<br>
+<span class="constructor">Model</span>:&nbsp;(title,&nbsp;url,&nbsp;link)<br>
+</code></pre><br>
+</div>
+
+
+<pre><code><span id="TYPEitem"><span class="keyword">type</span> <code class="type"></code>item</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.about">about</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.title">title</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.link">link</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPElink">link</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTitem.description">description</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEdescription">description</a> option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+While commonly a news headline, with RSS 1.0's modular
+    extensibility, this can be just about anything: discussion
+    posting, job listing, software patch -- any object with a URI.
+    There may be a minimum of one item per RSS document.  While RSS
+    1.0 does not enforce an upper limit, for backward compatibility
+    with RSS 0.9 and 0.91, a maximum of fifteen items is recommended.
+<p>
+
+    <code class="code">about</code> must be unique with respect to any other rdf:about
+    attributes in the RSS document and is a URI which identifies the
+    item.  The value of <code class="code">about</code> should be identical to the value of
+    the <code class="code">link</code>, if possible.
+<p>
+
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.5"> See RSS 1.0 § 5.5</a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;item&nbsp;rdf:about=<span class="string">"{item_uri}"</span>&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;&gt;=&nbsp;1<br>
+<span class="constructor">Recommendation</span>&nbsp;(<span class="keyword">for</span>&nbsp;backward&nbsp;compatibility&nbsp;<span class="keyword">with</span>&nbsp;0.9x):&nbsp;1-15<br>
+<span class="constructor">Required</span>&nbsp;<span class="constructor">Attribute</span>(s):&nbsp;rdf:about<br>
+<span class="constructor">Model</span>:&nbsp;(title,&nbsp;link,&nbsp;description?)<br>
+</code></pre><br>
+</div>
+
+
+<pre><code><span id="TYPEtextinput"><span class="keyword">type</span> <code class="type"></code>textinput</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.about">about</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.title">title</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.description">description</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEdescription">description</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.name">name</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEname">name</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtextinput.link">link</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPElink">link</a></code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+The textinput element affords a method for submitting form data to
+    an arbitrary URL — usually located at the parent website.  The
+    form processor at the receiving end only is assumed to handle the
+    HTTP GET method.
+<p>
+
+    The field is typically used as a search box or subscription form
+    — among others.  While this is of some use when RSS documents are
+    rendered as channels (see MNN) and accompanied by human readable
+    title and description, the ambiguity in automatic determination of
+    meaning of this overloaded element renders it otherwise not
+    particularly useful. RSS 1.0 therefore suggests either deprecation
+    or augmentation with some form of resource discovery of this
+    element in future versions while maintaining it for backward
+    compatiblity with RSS 0.9.
+<p>
+
+    <code class="code">about</code> must be unique with respect to any other rdf:about
+    attributes in the RSS document and is a URI which identifies the
+    textinput.  <code class="code">about</code> should be identical to the value of the
+    <code class="code">link</code>, if possible.
+<p>
+
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.6"> See RSS 1.0 § 5.6 </a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;textinput&nbsp;rdf:about=<span class="string">"{textinput_uri}"</span>&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Optional</span>;&nbsp;<span class="keyword">if</span>&nbsp;present,&nbsp;must&nbsp;also&nbsp;be&nbsp;present&nbsp;<span class="keyword">in</span>&nbsp;channel&nbsp;element&nbsp;[5.3.6]<br>
+<span class="constructor">Required</span>&nbsp;<span class="constructor">Attribute</span>(s):&nbsp;rdf:about<br>
+<span class="constructor">Model</span>:&nbsp;(title,&nbsp;description,&nbsp;name,&nbsp;link)<br>
+</code></pre><br>
+</div>
+
+
+<pre><code><span id="TYPErdf"><span class="keyword">type</span> <code class="type"></code>rdf</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrdf.channel">channel</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEchannel">channel</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrdf.image">image</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEimage">image</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrdf.item">item</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEitem">item</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrdf.textinput">textinput</span>&nbsp;: <code class="type"><a href="Syndic_rss1.html#TYPEtextinput">textinput</a> option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+The outermost level in every RSS 1.0 compliant document is the RDF
+    element.  The opening RDF tag assocaties the rdf: namespace prefix
+    with the RDF syntax schema and establishes the RSS 1.0 schema as
+    the default namespace for the document.
+<p>
+
+    While any valid namespace prefix may be used, document creators
+    are advised to consider "rdf:" normative. Those wishing to be
+    strictly backward-compatible with RSS 0.9 must use "rdf:".
+<p>
+
+    <a href=" http://web.resource.org/rss/1.0/spec#s5.2"> See RSS 1.0 § 5.2</a>
+<p>
+
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;rdf:<span class="constructor">RDF</span>&nbsp;xmlns:rdf=<span class="string">"http://www.w3.org/1999/02/22-rdf-syntax-ns#"</span>&nbsp;xmlns=<span class="string">"http://purl.org/rss/1.0/"</span>&gt;<br>
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;exactly&nbsp;<span class="keyword">as</span>&nbsp;shown,&nbsp;aside&nbsp;from&nbsp;any&nbsp;additional&nbsp;namespace&nbsp;declarations<br>
+<span class="constructor">Model</span>:&nbsp;(channel,&nbsp;image?,&nbsp;item+,&nbsp;textinput?)<br>
+</code></pre><br>
+</div>
+
+
+<pre><span id="VALparse"><span class="keyword">val</span> parse</span> : <code class="type">?xmlbase:Uri.t -> Xmlm.input -> <a href="Syndic_rss1.html#TYPErdf">rdf</a></code></pre><div class="info ">
+<code class="code">parse xml</code> returns the RDF corresponding to <code class="code">xml</code>.<br>
+<b>Raises</b> <code>Error.raise_expectation</code> if <code class="code">xml</code> is not a valid RSS1
+    document.<br>
+</div>
+<div class="param_info"><code class="code">xmlbase</code> : the base URI against which relative URIs in the XML
+    RSS1 document are resolved.  It is superseded by xml:base present
+    in the document (if any).</div>
+
+<pre><span id="VALread"><span class="keyword">val</span> read</span> : <code class="type">?xmlbase:Uri.t -> string -> <a href="Syndic_rss1.html#TYPErdf">rdf</a></code></pre><div class="info ">
+<code class="code">read fname</code> reads the file name <code class="code">fname</code> and parses it.
+    For the optional parameters, see <a href="Syndic_rss1.html#VALparse"><code class="code"><span class="constructor">Syndic_rss1</span>.parse</code></a>.<br>
+</div>
+</body></html>

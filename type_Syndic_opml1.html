@@ -1,0 +1,114 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_opml1</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">module</span>&nbsp;<span class="constructor">Error</span>&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">sig</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t&nbsp;=&nbsp;<span class="constructor">Xmlm</span>.pos&nbsp;*&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Error</span>&nbsp;<span class="keyword">of</span>&nbsp;t<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_string&nbsp;:&nbsp;exn&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;head&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;date_created&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;date_modified&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;owner_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;owner_email&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;expansion_state&nbsp;:&nbsp;int&nbsp;list;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vert_scroll_state&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;window_top&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;window_left&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;window_bottom&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;window_right&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;head&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?date_created:<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?expansion_state:int&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?vert_scroll_state:int&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?window_top:int&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?window_left:int&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?window_bottom:int&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?window_right:int&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;date_modified:<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;owner_name:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;owner_email:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_opml1</span>.head<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;outline&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;text&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;typ&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is_comment&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is_breakpoint&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xml_url&nbsp;:&nbsp;<span class="constructor">Uri</span>.t&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;html_url&nbsp;:&nbsp;<span class="constructor">Uri</span>.t&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;attrs&nbsp;:&nbsp;<span class="constructor">Xmlm</span>.attribute&nbsp;list;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;outlines&nbsp;:&nbsp;<span class="constructor">Syndic_opml1</span>.outline&nbsp;list;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;outline&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?typ:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?is_comment:bool&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?is_breakpoint:bool&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?xml_url:<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?html_url:<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?attrs:<span class="constructor">Xmlm</span>.attribute&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?outlines:<span class="constructor">Syndic_opml1</span>.outline&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_opml1</span>.outline<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;body&nbsp;=&nbsp;<span class="constructor">Syndic_opml1</span>.outline&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;version&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;head&nbsp;:&nbsp;<span class="constructor">Syndic_opml1</span>.head;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;body&nbsp;:&nbsp;<span class="constructor">Syndic_opml1</span>.body;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;parse&nbsp;:&nbsp;?xmlbase:<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.input&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_opml1</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;read&nbsp;:&nbsp;?xmlbase:<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_opml1</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_xml&nbsp;:&nbsp;<span class="constructor">Syndic_opml1</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;output&nbsp;:&nbsp;<span class="constructor">Syndic_opml1</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.dest&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;write&nbsp;:&nbsp;<span class="constructor">Syndic_opml1</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_atom&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;head:<span class="constructor">Syndic_opml1</span>.head&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_atom</span>.feed&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_opml1</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;uri&nbsp;=&nbsp;<span class="constructor">Uri</span>.t&nbsp;option&nbsp;*&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;unsafe&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?xmlbase:<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Xmlm</span>.input&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Opml</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Body</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Outline</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Attr</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;*&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">HTML_url</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_opml1</span>.uri<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">IsBreakpoint</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">IsComment</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Outline</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="keywordsign">'</span>a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Text</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Type</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">XML_url</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_opml1</span>.uri&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;<span class="keyword">as</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Head</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">DateCreated</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">DateModified</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">ExpansionSate</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">OwnerEmail</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">OwnerName</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Title</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">VertScrollState</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">WindowBottom</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">WindowLeft</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">WindowRight</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">WindowTop</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Version</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;opml&nbsp;=&nbsp;<span class="constructor">Syndic_opml1</span>.t<br>
+<span class="keyword">end</span></code></body></html>

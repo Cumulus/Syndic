@@ -1,0 +1,349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Syndic_atom.html">
+<link rel="next" href="Syndic_date.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_opml1</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Syndic_atom.html" title="Syndic_atom">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Syndic_date.html" title="Syndic_date">Next</a>
+</div>
+<h1>Module <a href="type_Syndic_opml1.html">Syndic_opml1</a></h1>
+
+<pre><span class="keyword">module</span> Syndic_opml1: <code class="code"><span class="keyword">sig</span></code> <a href="Syndic_opml1.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+<code class="code"><span class="constructor">Syndic</span>.<span class="constructor">Opml1</span></code>: compliant with
+    <a href="http://dev.opml.org/spec1.html"> OPML 1.0</a>.
+<p>
+
+    The purpose of the <i>Outline Processor Markup Language</i>, or OPML,
+    is to provide a way to exchange information between outliners and
+    Internet services that can be browsed or controlled through an
+    outliner.  Outlines can be used for specifications, legal briefs,
+    product plans, presentations, screenplays, directories, diaries,
+    discussion groups, chat systems and stories.<br>
+</div>
+<hr width="100%">
+
+<pre><span class="keyword">module</span> <a href="Syndic_opml1.Error.html">Error</a>: <code class="type">module type of <a href="Syndic_error.html">Syndic_error</a></code></pre>
+<pre><code><span id="TYPEhead"><span class="keyword">type</span> <code class="type"></code>head</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.title">title</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Title of the document.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.date_created">date_created</span>&nbsp;: <code class="type"><a href="Syndic_date.html#TYPEt">Syndic_date.t</a> option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+A date-time indicating when the document was created.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.date_modified">date_modified</span>&nbsp;: <code class="type"><a href="Syndic_date.html#TYPEt">Syndic_date.t</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+A date-time indicating when the document was last modified.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.owner_name">owner_name</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Owner of the document.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.owner_email">owner_email</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Email address of the owner of the document.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.expansion_state">expansion_state</span>&nbsp;: <code class="type">int list</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+A comma-separated list of line numbers that are expanded.  The
+        line numbers in the list tell you which headlines to expand.
+        The order is important.  For each element in the list, X,
+        starting at the first summit, navigate flatdown X times and
+        expand.  Repeat for each element in the list.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.vert_scroll_state">vert_scroll_state</span>&nbsp;: <code class="type">int option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+A number saying which line of the outline is displayed on the
+        top line of the window. This number is calculated with the
+        expansion state already applied.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.window_top">window_top</span>&nbsp;: <code class="type">int option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Pixel location of the top edge of the window.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.window_left">window_left</span>&nbsp;: <code class="type">int option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Pixel location of the left edge of the window.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.window_bottom">window_bottom</span>&nbsp;: <code class="type">int option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Pixel location of the bottom edge of the window.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThead.window_right">window_right</span>&nbsp;: <code class="type">int option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Pixel location of the right edge of the window.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+}
+
+
+
+<pre><span id="VALhead"><span class="keyword">val</span> head</span> : <code class="type">?date_created:<a href="Syndic_date.html#TYPEt">Syndic_date.t</a> -><br>       ?expansion_state:int list -><br>       ?vert_scroll_state:int -><br>       ?window_top:int -><br>       ?window_left:int -><br>       ?window_bottom:int -><br>       ?window_right:int -><br>       date_modified:<a href="Syndic_date.html#TYPEt">Syndic_date.t</a> -><br>       owner_name:string -> owner_email:string -> string -> <a href="Syndic_opml1.html#TYPEhead">head</a></code></pre><div class="info ">
+<code class="code">head ~date_modified ~owner_name ~owner_email title</code> returns a
+    head.  By default, all optional arguments leave the corresponding
+    fields empty.<br>
+</div>
+
+<pre><code><span id="TYPEoutline"><span class="keyword">type</span> <code class="type"></code>outline</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutline.text">text</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+String that's displayed when the outline is being browsed or edited.
+        There is no specific limit on the length of the text attribute.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutline.typ">typ</span>&nbsp;: <code class="type">string option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+"Type" of outline.
+        Says how other attributes of the <code class="code">outline</code> are interpreted.
+        This is application dependent.  For example, for news feed,
+        it is common to have "rss" as the value of this field.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutline.is_comment">is_comment</span>&nbsp;: <code class="type">bool</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Indicates whether the outline is commented or not.  By convention
+        if an outline is commented, all subordinate outlines are considered
+        to be commented as well.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutline.is_breakpoint">is_breakpoint</span>&nbsp;: <code class="type">bool</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Indicates whether a breakpoint is set on this outline.  This
+        attribute is mainly necessary for outlines used to edit scripts
+        that execute.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutline.xml_url">xml_url</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Link to the XML data associated to this outline, typically the
+        RSS feed.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutline.html_url">html_url</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Link to the HTML data associated to this outline, typically the
+        HTML pages rendering the news feed.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutline.attrs">attrs</span>&nbsp;: <code class="type">Xmlm.attribute list</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Association list of additional attributes in the outline.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutline.outlines">outlines</span>&nbsp;: <code class="type"><a href="Syndic_opml1.html#TYPEoutline">outline</a> list</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+List of <code class="code">outline</code> elements that are considered sub-items of
+        the current outline.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+}
+
+
+
+<pre><span id="VALoutline"><span class="keyword">val</span> outline</span> : <code class="type">?typ:string -><br>       ?is_comment:bool -><br>       ?is_breakpoint:bool -><br>       ?xml_url:Uri.t -><br>       ?html_url:Uri.t -><br>       ?attrs:Xmlm.attribute list -><br>       ?outlines:<a href="Syndic_opml1.html#TYPEoutline">outline</a> list -> string -> <a href="Syndic_opml1.html#TYPEoutline">outline</a></code></pre><div class="info ">
+<code class="code">outline text</code> returns an outline.<br>
+</div>
+<div class="param_info"><code class="code">is_comment</code> : Default: <code class="code"><span class="keyword">false</span></code>.</div>
+<div class="param_info"><code class="code">is_breakpoint</code> : Default: <code class="code"><span class="keyword">false</span></code>.
+<p>
+
+    All the other parameters are bu default empty.</div>
+
+<pre><span id="TYPEbody"><span class="keyword">type</span> <code class="type"></code>body</span> = <code class="type"><a href="Syndic_opml1.html#TYPEoutline">outline</a> list</code> </pre>
+<div class="info ">
+List of outline elements.<br>
+</div>
+
+
+<pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.version">version</span>&nbsp;: <code class="type">string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+The version of OPML document (should be 1.0 or 1.1)<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.head">head</span>&nbsp;: <code class="type"><a href="Syndic_opml1.html#TYPEhead">head</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.body">body</span>&nbsp;: <code class="type"><a href="Syndic_opml1.html#TYPEbody">body</a></code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><span id="VALparse"><span class="keyword">val</span> parse</span> : <code class="type">?xmlbase:Uri.t -> Xmlm.input -> <a href="Syndic_opml1.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">parse i</code> takes <code class="code">i</code> and returns an opml record which is the OCaml
+    representation of the OPML document.<br>
+</div>
+
+<pre><span id="VALread"><span class="keyword">val</span> read</span> : <code class="type">?xmlbase:Uri.t -> string -> <a href="Syndic_opml1.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">read fname</code> reads the file name <code class="code">fname</code> and parses it.
+    For the optional parameters, see <a href="Syndic_opml1.html#VALparse"><code class="code"><span class="constructor">Syndic_opml1</span>.parse</code></a>.<br>
+</div>
+
+<pre><span id="VALto_xml"><span class="keyword">val</span> to_xml</span> : <code class="type"><a href="Syndic_opml1.html#TYPEt">t</a> -> <a href="Syndic_xml.html#TYPEt">Syndic_xml.t</a></code></pre><div class="info ">
+<code class="code">to_xml opml</code> converts the OPML document <code class="code">opml</code> to an XML tree.<br>
+</div>
+
+<pre><span id="VALoutput"><span class="keyword">val</span> output</span> : <code class="type"><a href="Syndic_opml1.html#TYPEt">t</a> -> Xmlm.dest -> unit</code></pre><div class="info ">
+<code class="code">output opml dest</code> writes the XML tree of the OPML document <code class="code">opml</code>
+    to <code class="code">dest</code>.<br>
+</div>
+
+<pre><span id="VALwrite"><span class="keyword">val</span> write</span> : <code class="type"><a href="Syndic_opml1.html#TYPEt">t</a> -> string -> unit</code></pre><div class="info ">
+<code class="code">write opml fname</code> writes the XML tree of the OPML document <code class="code">opml</code>
+    to the file named <code class="code">fname</code>.<br>
+</div>
+
+<pre><span id="VALof_atom"><span class="keyword">val</span> of_atom</span> : <code class="type">head:<a href="Syndic_opml1.html#TYPEhead">head</a> -> <a href="Syndic_atom.html#TYPEfeed">Syndic_atom.feed</a> list -> <a href="Syndic_opml1.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_atom ~head feeds</code> returns the OPML list of authors of the atom
+    feeds.  The <code class="code">text</code> is the name associated to a feed, i.e. the name
+    of the first author in the feed authors list or, if empty, the one
+    of the first post.  It is important that the feeds contain a link
+    entry with <code class="code">rel = Self</code> for the OPML document to be able to create
+    a <code class="code">xml_url</code> entry pointing to the feed.
+<p>
+
+    As a special convention, if the length of the <code class="code">rel = Self</code> link is
+    present and negative, the property <code class="code">is_comment</code> is set to <code class="code"><span class="keyword">true</span></code>.<br>
+</div>
+</body></html>

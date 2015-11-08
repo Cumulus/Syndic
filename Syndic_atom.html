@@ -1,0 +1,1067 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Syndic_rss2.html">
+<link rel="next" href="Syndic_opml1.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><link title="Structure of Atom document" rel="Section" href="#2_StructureofAtomdocument">
+<link title="Input and output" rel="Section" href="#2_Inputandoutput">
+<link title="Convenience functions" rel="Section" href="#2_Conveniencefunctions">
+<title>Syndic_atom</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Syndic_rss2.html" title="Syndic_rss2">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Syndic_opml1.html" title="Syndic_opml1">Next</a>
+</div>
+<h1>Module <a href="type_Syndic_atom.html">Syndic_atom</a></h1>
+
+<pre><span class="keyword">module</span> Syndic_atom: <code class="code"><span class="keyword">sig</span></code> <a href="Syndic_atom.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+<code class="code"><span class="constructor">Syndic</span>.<span class="constructor">Atom</span></code>: <a href=" http://tools.ietf.org/html/rfc4287"> RFC 4287</a>
+    compliant Atom parser.<br>
+</div>
+<hr width="100%">
+
+<pre><span class="keyword">module</span> <a href="Syndic_atom.Error.html">Error</a>: <code class="type">module type of <a href="Syndic_error.html">Syndic_error</a></code></pre><br>
+<h2 id="2_StructureofAtomdocument">Structure of Atom document</h2><br>
+
+<pre><code><span id="TYPEtext_construct"><span class="keyword">type</span> <code class="type"></code>text_construct</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtext_construct.Text"><span class="constructor">Text</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<code class="code"><span class="constructor">Text</span>(content)</code><br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtext_construct.Html"><span class="constructor">Html</span></span> <span class="keyword">of</span> <code class="type">Uri.t option * string</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<code class="code"><span class="constructor">Html</span>(xmlbase, content)</code> where the content is left unparsed.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtext_construct.Xhtml"><span class="constructor">Xhtml</span></span> <span class="keyword">of</span> <code class="type">Uri.t option * <a href="Syndic_xml.html#TYPEt">Syndic_xml.t</a> list</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<code class="code"><span class="constructor">Xhtml</span>(xmlbase, content)</code><br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info ">
+A <a href="http://tools.ietf.org/html/rfc4287#section-3.1">text construct</a>.
+    It contains human-readable text, usually in small quantities.  The
+    content of Text constructs is Language-Sensitive.<br>
+</div>
+
+
+<pre><code><span id="TYPEauthor"><span class="keyword">type</span> <code class="type"></code>author</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTauthor.name">name</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTauthor.uri">uri</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTauthor.email">email</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+Describes a person, corporation, or similar entity (hereafter,
+    'person') that indicates the author of the entry or feed.
+    <a href=" http://tools.ietf.org/html/rfc4287#section-3.2"> See RFC 4287 § 3.2</a>.
+    Person constructs allow extension Metadata elements
+    (see <a href=" http://tools.ietf.org/html/rfc4287#section-6.4">Section 6.4</a>).
+<p>
+
+   They are used for authors
+   (<a href="http://tools.ietf.org/html/rfc4287#section-4.2.1"> See RFC 4287 § 4.2.1</a>)
+   and contributors
+   (<a href="http://tools.ietf.org/html/rfc4287#section-4.2.3"> See RFC 4287 § 4.2.3</a>)<br>
+</div>
+
+
+<pre><span id="VALauthor"><span class="keyword">val</span> author</span> : <code class="type">?uri:Uri.t -> ?email:string -> string -> <a href="Syndic_atom.html#TYPEauthor">author</a></code></pre>
+<pre><code><span id="TYPEcategory"><span class="keyword">type</span> <code class="type"></code>category</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcategory.term">term</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcategory.scheme">scheme</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcategory.label">label</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+The <code class="code">category</code> element conveys information about a category
+    associated with an entry or feed.  This specification assigns no
+    meaning to the content (if any) of this element.
+    <a href="http://tools.ietf.org/html/rfc4287#section-4.2.2"> See RFC 4287 § 4.2.2</a>.
+<p>
+<ul>
+<li><code class="code">term</code> is a string that identifies the category to
+      which the entry or feed belongs.
+      <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.2.2">
+      See RFC 4287 § 4.2.2.2</a></li>
+<li><code class="code">scheme</code>, if present, is an IRI that identifies a categorization
+      scheme.
+      <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.2.3">
+      See RFC 4287 § 4.2.2.3</a></li>
+<li><code class="code">label</code>, if present, is a human-readable label for display in
+      end-user applications.  The content of the "label" attribute is
+      Language-Sensitive.
+      <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.2.1">
+      See RFC 4287 § 4.2.2.1</a></li>
+</ul>
+<br>
+</div>
+
+
+<pre><span id="VALcategory"><span class="keyword">val</span> category</span> : <code class="type">?scheme:Uri.t -> ?label:string -> string -> <a href="Syndic_atom.html#TYPEcategory">category</a></code></pre>
+<pre><code><span id="TYPEgenerator"><span class="keyword">type</span> <code class="type"></code>generator</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTgenerator.version">version</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTgenerator.uri">uri</span>&nbsp;: <code class="type">Uri.t option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTgenerator.content">content</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+The <code class="code">generator</code> element's content identifies the agent used to
+    generate a feed, for debugging and other purposes.<ul>
+<li><code class="code">content</code> is a human-readable name for the generating agent.</li>
+<li><code class="code">uri</code>, if present, SHOULD produce a representation that is
+      relevant to that agent.</li>
+<li><code class="code">version</code>, if present, indicates the version of the generating
+      agent.</li>
+</ul>
+
+    See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.4">RFC 4287 § 4.2.4</a>.<br>
+</div>
+
+
+<pre><span id="VALgenerator"><span class="keyword">val</span> generator</span> : <code class="type">?uri:Uri.t -> ?version:string -> string -> <a href="Syndic_atom.html#TYPEgenerator">generator</a></code></pre>
+<pre><span id="TYPEicon"><span class="keyword">type</span> <code class="type"></code>icon</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+The <code class="code">icon</code> element's content is an IRI reference <code class="code"><span class="constructor">RFC3987</span></code> that
+    identifies an image that provides iconic visual identification for
+    a feed.
+<p>
+
+    The image SHOULD have an aspect ratio of one (horizontal) to one
+    (vertical) and SHOULD be suitable for presentation at a small
+    size.
+<p>
+
+    <a href="http://tools.ietf.org/html/rfc4287#section-4.2.5"> See RFC 4287 § 4.2.5</a><br>
+</div>
+
+
+<pre><span id="TYPEid"><span class="keyword">type</span> <code class="type"></code>id</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+The <code class="code">id</code> element conveys a permanent, universally unique
+    identifier for an entry or feed.
+<p>
+
+    Its content MUST be an IRI, as defined by <code class="code"><span class="constructor">RFC3987</span></code>. Note that the
+    definition of "IRI" excludes relative references.  Though the IRI
+    might use a dereferencable scheme, Atom Processors MUST NOT assume
+    it can be dereferenced.
+<p>
+
+    There is more information in the RFC but they are not necessary
+    here, at least, they can not be checked here.
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.6"> See RFC 4287 § 4.2.6 </a><br>
+</div>
+
+
+<pre><code><span id="TYPErel"><span class="keyword">type</span> <code class="type"></code>rel</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Alternate"><span class="constructor">Alternate</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Signifies that the URI in the value of the link
+                  <code class="code">href</code> field identifies an alternate version of the
+                  resource described by the containing element.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Related"><span class="constructor">Related</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Signifies that the URI in the value of the link <code class="code">href</code>
+                field identifies a resource related to the resource
+                described by the containing element.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Self"><span class="constructor">Self</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Signifies that the URI in the value of the link <code class="code">href</code>
+             field identifies a resource equivalent to the containing
+             element.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Enclosure"><span class="constructor">Enclosure</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Signifies that the IRI in the value of the link <code class="code">href</code> field
+         identifies a related resource that is potentially large in
+         size and might require special handling.  When <code class="code"><span class="constructor">Enclosure</span></code> is
+         specified, the length attribute SHOULD be provided.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Via"><span class="constructor">Via</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Signifies that the IRI in the value of the link <code class="code">href</code>
+            field identifies a resource that is the source of the
+            information provided in the containing element.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTrel.Link"><span class="constructor">Link</span></span> <span class="keyword">of</span> <code class="type">Uri.t</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+The URI MUST be non-empty and match either the
+         "isegment-nz-nc" or the "IRI" production in
+         <a href="http://tools.ietf.org/html/rfc3987"> RFC3987</a>.  Note that
+         use of a relative reference other than a simple name is not
+         allowed.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info ">
+Indicates the link relation type.
+    See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.2">
+    RFC 4287 § 4.2.7.2</a>.<br>
+</div>
+
+
+<pre><code><span id="TYPElink"><span class="keyword">type</span> <code class="type"></code>link</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.href">href</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.rel">rel</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPErel">rel</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.type_media">type_media</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.hreflang">hreflang</span>&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.title">title</span>&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlink.length">length</span>&nbsp;: <code class="type">int option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<code class="code">link</code> defines a reference from an entry or feed to a Web
+    resource.
+    See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7">
+    RFC 4287 § 4.2.7</a>.
+<p>
+<ul>
+<li><code class="code">href</code> contains the link's IRI.  The value MUST be a IRI
+      reference, <a href="http://tools.ietf.org/html/rfc3987"> RFC3987</a>.
+      See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.1">
+      RFC 4287 § 4.2.7.1</a>.</li>
+<li><code class="code">type_media</code> is an advisory media type: it is a hint about the
+      type of the representation that is expected to be returned when
+      the value of the href attribute is dereferenced.  Note that the
+      type attribute does not override the actual media type returned
+      with the representation.  The value of <code class="code">type_media</code>, if given,
+      MUST conform to the syntax of a MIME media type,
+      <a href="http://tools.ietf.org/html/rfc4287#ref-MIMEREG"> MIMEREG</a>.
+      See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.3">
+      RFC 4287 § 4.2.7.3</a>.</li>
+<li><code class="code">hreflang</code> describes the language of the resource pointed to by
+      the href attribute.  When used together with the
+      <code class="code">rel=<span class="constructor">Alternate</span></code>, it implies a translated version of the
+      entry.  The value of <code class="code">hreflang</code> MUST be a language tag,
+      <a href="http://tools.ietf.org/html/rfc3066"> RFC3066</a>.
+      See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.4">
+      RFC 4287 § 4.2.7.4</a>.</li>
+<li><code class="code">title</code> conveys human-readable information about the link.  The
+      content of the "title" attribute is Language-Sensitive.
+      The value <code class="code"><span class="string">""</span></code> means that no title is provided.
+      See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.5">
+      RFC 4287 § 4.2.7.5</a>.</li>
+<li><code class="code">length</code> indicates an advisory length of the linked content in
+      octets; it is a hint about the content length of the
+      representation returned when the IRI in the href attribute is
+      mapped to a URI and dereferenced.  Note that the length
+      attribute does not override the actual content length of the
+      representation as reported by the underlying protocol.
+      See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.7.6">
+      RFC 4287 § 4.2.7.6</a>.</li>
+</ul>
+<br>
+</div>
+
+
+<pre><span id="VALlink"><span class="keyword">val</span> link</span> : <code class="type">?type_media:string -><br>       ?hreflang:string -><br>       ?title:string -><br>       ?length:int -> ?rel:<a href="Syndic_atom.html#TYPErel">rel</a> -> Uri.t -> <a href="Syndic_atom.html#TYPElink">link</a></code></pre><div class="info ">
+<code class="code">link uri</code> creates a link element.<br>
+</div>
+<div class="param_info"><code class="code">rel</code> : The <code class="code">rel</code> attribute of the link.  It defaults to
+    <code class="code"><span class="constructor">Alternate</span></code> since <a href="http://tools.ietf.org/html/rfc4287#section-4.2.7.2">
+    RFC 4287 § 4.2.7.2</a> says that <i>if the "rel" attribute is not
+    present, the link element MUST be interpreted as if the link
+    relation type is "alternate".</i>
+<p>
+
+    The other optional arguments all default to <code class="code"><span class="constructor">None</span></code> (i.e., not
+    specified).</div>
+
+<pre><span id="TYPElogo"><span class="keyword">type</span> <code class="type"></code>logo</span> = <code class="type">Uri.t</code> </pre>
+<div class="info ">
+<code class="code">logo</code> is an IRI reference <code class="code"><span class="constructor">RFC3987</span></code> that identifies an image that
+    provides visual identification for a feed.
+<p>
+
+    The image SHOULD have an aspect ratio of 2 (horizontal) to 1 (vertical).
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.8"> See RFC 4287 § 4.2.8</a><br>
+</div>
+
+
+<pre><span id="TYPEpublished"><span class="keyword">type</span> <code class="type"></code>published</span> = <code class="type"><a href="Syndic_date.html#TYPEt">Syndic_date.t</a></code> </pre>
+<div class="info ">
+<code class="code">published</code> is a Date construct indicating an instant in time
+    associated with an event early in the life cycle of the entry.
+<p>
+
+    Typically, <code class="code">published</code> will be associated with the initial
+    creation or first availability of the resource.
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.9"> See RFC 4287 § 4.2.9</a><br>
+</div>
+
+
+<pre><span id="TYPErights"><span class="keyword">type</span> <code class="type"></code>rights</span> = <code class="type"><a href="Syndic_atom.html#TYPEtext_construct">text_construct</a></code> </pre>
+<div class="info ">
+<code class="code">rights</code> is a Text construct that conveys information about rights
+    held in and over an entry or feed.
+    The <code class="code">rights</code> element SHOULD NOT be used to convey machine-readable
+    licensing information.
+<p>
+
+    If an atom:entry element does not contain an atom:rights element,
+    then the atom:rights element of the containing atom:feed element,
+    if present, is considered to apply to the entry.
+<p>
+
+    See <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.10">
+    RFC 4287 § 4.2.10 </a><br>
+</div>
+
+
+<pre><span id="TYPEtitle"><span class="keyword">type</span> <code class="type"></code>title</span> = <code class="type"><a href="Syndic_atom.html#TYPEtext_construct">text_construct</a></code> </pre>
+<div class="info ">
+<code class="code">title</code> is a Text construct that conveys a human-readable title
+    for an entry or feed.
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.14">
+    See RFC 4287 § 4.2.14 </a><br>
+</div>
+
+
+<pre><span id="TYPEsubtitle"><span class="keyword">type</span> <code class="type"></code>subtitle</span> = <code class="type"><a href="Syndic_atom.html#TYPEtext_construct">text_construct</a></code> </pre>
+<div class="info ">
+<code class="code">subtitle</code> is a Text construct that conveys a human-readable
+    description or subtitle for a feed.
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.12">
+    See RFC 4287 § 4.2.12 </a><br>
+</div>
+
+
+<pre><span id="TYPEupdated"><span class="keyword">type</span> <code class="type"></code>updated</span> = <code class="type"><a href="Syndic_date.html#TYPEt">Syndic_date.t</a></code> </pre>
+<div class="info ">
+<code class="code">updated</code> is a Date construct indicating the most recent instant
+    in time when an entry or feed was modified in a way the publisher
+    considers significant.  Therefore, not all modifications
+    necessarily result in a changed <code class="code">updated</code> value.
+<p>
+
+    Publishers MAY change the value of this element over time.
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.15">
+    See RFC 4287 § 4.2.15 </a><br>
+</div>
+
+
+<pre><code><span id="TYPEsource"><span class="keyword">type</span> <code class="type"></code>source</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.authors">authors</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.categories">categories</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEcategory">category</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.contributors">contributors</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEauthor">author</a> list</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.3">
+        See RFC 4287 § 4.2.3 </a><br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.generator">generator</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEgenerator">generator</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.icon">icon</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEicon">icon</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.id">id</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEid">id</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.links">links</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPElink">link</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.logo">logo</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPElogo">logo</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.rights">rights</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPErights">rights</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.subtitle">subtitle</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEsubtitle">subtitle</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.title">title</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsource.updated">updated</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEupdated">updated</a> option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+If an <a href="Syndic_atom.html#VALentry"><code class="code"><span class="constructor">Syndic_atom</span>.entry</code></a> is copied from one feed into another feed, then
+    the source <a href="Syndic_atom.html#VALfeed"><code class="code"><span class="constructor">Syndic_atom</span>.feed</code></a>'s metadata (all child elements of atom:feed
+    other than the atom:entry elements) MAY be preserved within the
+    copied entry by adding an atom:source child element, if it is not
+    already present in the entry, and including some or all of the
+    source feed's Metadata elements as the atom:source element's
+    children. Such metadata SHOULD be preserved if the source
+    atom:feed contains any of the child elements atom:author,
+    atom:contributor, atom:rights, or atom:category and those child
+    elements are not present in the source atom:entry.
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.11">
+    See RFC 4287 § 4.2.11 </a>
+<p>
+
+    The atom:source element is designed to allow the aggregation of
+    entries from different feeds while retaining information about an
+    entry's source feed.  For this reason, Atom Processors that are
+    performing such aggregation SHOULD include at least the required
+    feed-level Metadata fields (<code class="code">id</code>, <code class="code">title</code>, and <code class="code">updated</code>) in the
+    <code class="code">source</code> element.
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.1.2">
+    See RFC 4287 § 4.1.2 for more details.</a><br>
+</div>
+
+
+<pre><span id="VALsource"><span class="keyword">val</span> source</span> : <code class="type">?categories:<a href="Syndic_atom.html#TYPEcategory">category</a> list -><br>       ?contributors:<a href="Syndic_atom.html#TYPEauthor">author</a> list -><br>       ?generator:<a href="Syndic_atom.html#TYPEgenerator">generator</a> -><br>       ?icon:<a href="Syndic_atom.html#TYPEicon">icon</a> -><br>       ?links:<a href="Syndic_atom.html#TYPElink">link</a> list -><br>       ?logo:<a href="Syndic_atom.html#TYPElogo">logo</a> -><br>       ?rights:<a href="Syndic_atom.html#TYPErights">rights</a> -><br>       ?subtitle:<a href="Syndic_atom.html#TYPEsubtitle">subtitle</a> -><br>       ?updated:<a href="Syndic_atom.html#TYPEupdated">updated</a> -><br>       authors:<a href="Syndic_atom.html#TYPEauthor">author</a> list -><br>       id:<a href="Syndic_atom.html#TYPEid">id</a> -> title:<a href="Syndic_atom.html#TYPEtitle">title</a> -> <a href="Syndic_atom.html#TYPEsource">source</a></code></pre>
+<pre><span id="TYPEmime"><span class="keyword">type</span> <code class="type"></code>mime</span> = <code class="type">string</code> </pre>
+<div class="info ">
+A MIME type that conform to the syntax of a MIME media type, but
+    MUST NOT be a composite type (see Section 4.2.6 of <code class="code"><span class="constructor">MIMEREG</span></code>).
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.1.3.1">
+    See RFC 4287 § 4.1.3.1 </a><br>
+</div>
+
+
+<pre><code><span id="TYPEcontent"><span class="keyword">type</span> <code class="type"></code>content</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontent.Text"><span class="constructor">Text</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontent.Html"><span class="constructor">Html</span></span> <span class="keyword">of</span> <code class="type">Uri.t option * string</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontent.Xhtml"><span class="constructor">Xhtml</span></span> <span class="keyword">of</span> <code class="type">Uri.t option * <a href="Syndic_xml.html#TYPEt">Syndic_xml.t</a> list</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontent.Mime"><span class="constructor">Mime</span></span> <span class="keyword">of</span> <code class="type"><a href="Syndic_atom.html#TYPEmime">mime</a> * string</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontent.Src"><span class="constructor">Src</span></span> <span class="keyword">of</span> <code class="type"><a href="Syndic_atom.html#TYPEmime">mime</a> option * Uri.t</code></code></td>
+
+</tr></table>
+
+<div class="info ">
+<code class="code">content</code> either contains or links to the content of the entry.
+    The value of <code class="code">content</code> is Language-Sensitive.
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.1.3"> See RFC 4287 § 4.1.3</a>
+<p>
+<ul>
+<li><code class="code"><span class="constructor">Text</span></code>, <code class="code"><span class="constructor">Html</span></code>, <code class="code"><span class="constructor">Xhtml</span></code> or <code class="code"><span class="constructor">Mime</span></code> means that the content was
+      part of the document and is provided as an argument.  The first
+      argument to <code class="code"><span class="constructor">Html</span></code> and <code class="code"><span class="constructor">Xhtml</span></code> is the possible xml:base value.
+      <a href="http://tools.ietf.org/html/rfc4287#section-3.1.1">
+      See RFC 4287 § 3.1.1</a></li>
+<li><code class="code"><span class="constructor">Src</span>(m, iri)</code> means that the content is to be found at <code class="code">iri</code> and
+      has MIME type <code class="code">m</code>.  Atom Processors MAY use the IRI to retrieve
+      the content and MAY choose to ignore remote content or to
+      present it in a different manner than local content.  The value
+      of <code class="code">m</code> is advisory; that is to say, when the corresponding URI
+      (mapped from an IRI, if necessary) is dereferenced, if the
+      server providing that content also provides a media type, the
+      server-provided media type is authoritative.
+      See <a href=" http://tools.ietf.org/html/rfc4287#section-4.1.3.2">
+      RFC 4287 § 4.1.3.2</a></li>
+</ul>
+<br>
+</div>
+
+
+<pre><span id="TYPEsummary"><span class="keyword">type</span> <code class="type"></code>summary</span> = <code class="type"><a href="Syndic_atom.html#TYPEtext_construct">text_construct</a></code> </pre>
+<div class="info ">
+<code class="code">summary</code> is a Text construct that conveys a short summary,
+    abstract, or excerpt of an entry.
+<p>
+
+    It is not advisable for <code class="code">summary</code> to duplicate <a href="Syndic_atom.html#TYPEtitle"><code class="code"><span class="constructor">Syndic_atom</span>.title</code></a> or
+    <a href="Syndic_atom.html#TYPEcontent"><code class="code"><span class="constructor">Syndic_atom</span>.content</code></a> because Atom Processors might assume there is a
+    useful summary when there is none.
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.2.13">
+    See RFC 4287 § 4.2.13 </a><br>
+</div>
+
+
+<pre><code><span id="TYPEentry"><span class="keyword">type</span> <code class="type"></code>entry</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.authors">authors</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEauthor">author</a> * <a href="Syndic_atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.categories">categories</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEcategory">category</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.content">content</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEcontent">content</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.contributors">contributors</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.id">id</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEid">id</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.links">links</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPElink">link</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.published">published</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEpublished">published</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.rights">rights</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPErights">rights</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.source">source</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEsource">source</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.summary">summary</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEsummary">summary</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.title">title</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTentry.updated">updated</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEupdated">updated</a></code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<code class="code">entry</code> represents an individual entry, acting as a container for
+    metadata and data associated with the entry.  This element can
+    appear as a child of the atom:feed element, or it can appear as
+    the document (i.e., top-level) element of a stand-alone Atom Entry
+    Document.
+<p>
+
+    The specification mandates that each entry contains an author
+    unless it contains some sources or the feed contains an author
+    element.  This library ensures that the authors are properly
+    dispatched to all locations.
+<p>
+
+    The following child elements are defined by this specification
+    (note that it requires the presence of some of these elements):
+<p>
+<ul>
+<li>if <code class="code">content = <span class="constructor">None</span></code>, then <code class="code">links</code> MUST contain at least one
+      element with a rel attribute value of <code class="code"><span class="constructor">Alternate</span></code>.</li>
+<li>There MUST NOT be more than one element of <code class="code">links</code> with a rel
+      attribute value of <code class="code"><span class="constructor">Alternate</span></code> that has the same combination of
+      type and hreflang attribute values.</li>
+<li>There MAY be additional elements of <code class="code">links</code> beyond those
+      described above.</li>
+<li>There MUST be an <code class="code">summary</code> in either of the following cases:
+      <ul>
+<li>the atom:entry contains an atom:content that has a "src"
+         attribute (and is thus empty).</li>
+<li>the atom:entry contains content that is encoded in Base64;
+         i.e., the "type" attribute of atom:content is a MIME media
+         type <code class="code"><span class="constructor">MIMEREG</span></code>, but is not an XML media type <code class="code"><span class="constructor">RFC3023</span></code>, does
+         not begin with "text/", and does not end with "/xml" or
+         "+xml".</li>
+</ul>
+</li>
+</ul>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.1.2"> See RFC 4287 § 4.1.2</a><br>
+</div>
+
+
+<pre><span id="VALentry"><span class="keyword">val</span> entry</span> : <code class="type">?categories:<a href="Syndic_atom.html#TYPEcategory">category</a> list -><br>       ?content:<a href="Syndic_atom.html#TYPEcontent">content</a> -><br>       ?contributors:<a href="Syndic_atom.html#TYPEauthor">author</a> list -><br>       ?links:<a href="Syndic_atom.html#TYPElink">link</a> list -><br>       ?published:<a href="Syndic_atom.html#TYPEpublished">published</a> -><br>       ?rights:<a href="Syndic_atom.html#TYPErights">rights</a> -><br>       ?source:<a href="Syndic_atom.html#TYPEsource">source</a> -><br>       ?summary:<a href="Syndic_atom.html#TYPEsummary">summary</a> -><br>       id:<a href="Syndic_atom.html#TYPEid">id</a> -><br>       authors:<a href="Syndic_atom.html#TYPEauthor">author</a> * <a href="Syndic_atom.html#TYPEauthor">author</a> list -><br>       title:<a href="Syndic_atom.html#TYPEtitle">title</a> -><br>       updated:<a href="Syndic_atom.html#TYPEupdated">updated</a> -> unit -> <a href="Syndic_atom.html#TYPEentry">entry</a></code></pre>
+<pre><code><span id="TYPEfeed"><span class="keyword">type</span> <code class="type"></code>feed</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.authors">authors</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.categories">categories</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEcategory">category</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.contributors">contributors</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEauthor">author</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.generator">generator</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEgenerator">generator</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.icon">icon</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEicon">icon</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.id">id</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEid">id</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.links">links</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPElink">link</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.logo">logo</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPElogo">logo</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.rights">rights</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPErights">rights</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.subtitle">subtitle</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEsubtitle">subtitle</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.title">title</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEtitle">title</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.updated">updated</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEupdated">updated</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfeed.entries">entries</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEentry">entry</a> list</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+<code class="code">feed</code> is the document (i.e., top-level) element of an Atom Feed
+    Document, acting as a container for metadata and data associated
+    with the feed. Its element children consist of metadata elements
+    followed by zero or more atom:entry child elements.
+<p>
+<ul>
+<li>one of the <code class="code">links</code> SHOULD have a <code class="code">rel</code> attribute value of
+      <code class="code"><span class="constructor">Self</span></code>.  This is the preferred URI for retrieving Atom Feed
+      Documents representing this Atom feed.</li>
+<li>There MUST NOT be more than one element of <code class="code">links</code> with a rel
+      attribute value of <code class="code"><span class="constructor">Alternate</span></code> that has the same combination of
+      type and hreflang attribute values.</li>
+<li>There may be additional elements in <code class="code">links</code> beyond those
+      described above.</li>
+</ul>
+
+    If multiple <a href="Syndic_atom.html#VALentry"><code class="code"><span class="constructor">Syndic_atom</span>.entry</code></a> elements with the same <a href="Syndic_atom.html#TYPEid"><code class="code"><span class="constructor">Syndic_atom</span>.id</code></a> value appear
+    in an Atom Feed Document, they represent the same entry.  Their
+    <a href="Syndic_atom.html#TYPEupdated"><code class="code"><span class="constructor">Syndic_atom</span>.updated</code></a> timestamps SHOULD be different.  If an Atom Feed
+    Document contains multiple entries with the same <a href="Syndic_atom.html#TYPEid"><code class="code"><span class="constructor">Syndic_atom</span>.id</code></a>, Atom
+    Processors MAY choose to display all of them or some subset of
+    them. One typical behavior would be to display only the entry with
+    the latest <a href="Syndic_atom.html#TYPEupdated"><code class="code"><span class="constructor">Syndic_atom</span>.updated</code></a> timestamp.
+<p>
+
+    <a href=" http://tools.ietf.org/html/rfc4287#section-4.1.1"> See RFC 4287 § 4.1.1</a><br>
+</div>
+
+
+<pre><span id="VALfeed"><span class="keyword">val</span> feed</span> : <code class="type">?authors:<a href="Syndic_atom.html#TYPEauthor">author</a> list -><br>       ?categories:<a href="Syndic_atom.html#TYPEcategory">category</a> list -><br>       ?contributors:<a href="Syndic_atom.html#TYPEauthor">author</a> list -><br>       ?generator:<a href="Syndic_atom.html#TYPEgenerator">generator</a> -><br>       ?icon:<a href="Syndic_atom.html#TYPEicon">icon</a> -><br>       ?links:<a href="Syndic_atom.html#TYPElink">link</a> list -><br>       ?logo:<a href="Syndic_atom.html#TYPElogo">logo</a> -><br>       ?rights:<a href="Syndic_atom.html#TYPErights">rights</a> -><br>       ?subtitle:<a href="Syndic_atom.html#TYPEsubtitle">subtitle</a> -><br>       id:<a href="Syndic_atom.html#TYPEid">id</a> -><br>       title:<a href="Syndic_atom.html#TYPEtitle">title</a> -><br>       updated:<a href="Syndic_atom.html#TYPEupdated">updated</a> -> <a href="Syndic_atom.html#TYPEentry">entry</a> list -> <a href="Syndic_atom.html#TYPEfeed">feed</a></code></pre><br>
+<h2 id="2_Inputandoutput">Input and output</h2><br>
+
+<pre><span id="VALparse"><span class="keyword">val</span> parse</span> : <code class="type">?self:Uri.t -> ?xmlbase:Uri.t -> Xmlm.input -> <a href="Syndic_atom.html#TYPEfeed">feed</a></code></pre><div class="info ">
+<code class="code">parse xml</code> returns the feed corresponding to <code class="code">xml</code>.  Beware that
+    <code class="code">xml</code> is mutable, so when the parsing fails, one has to create a
+    new copy of <code class="code">xml</code> to use it with another function.  If you
+    retrieve <code class="code">xml</code> from a URL, you should use that URL as <code class="code">~xmlbase</code>.
+<p>
+
+    Raise <code class="code"><span class="constructor">Error</span>.<span class="constructor">Expected</span></code>, <code class="code"><span class="constructor">Expected_Data</span></code> or <code class="code"><span class="constructor">Error</span>.<span class="constructor">Duplicate_Link</span></code>
+    if <code class="code">xml</code> is not a valid Atom document.<br>
+</div>
+<div class="param_info"><code class="code">self</code> : the URI from where the current feed was retrieved.
+    Giving this information will add an entry to <code class="code">links</code> with
+    <code class="code">rel = Self</code> unless one already exists.</div>
+<div class="param_info"><code class="code">xmlbase</code> : default xml:base to resolve relative URLs (of
+    course xml:base attributes in the XML Atom document take
+    precedence over this).
+    See <a href="http://www.w3.org/TR/xmlbase/">XML Base</a>.</div>
+
+<pre><span id="VALread"><span class="keyword">val</span> read</span> : <code class="type">?self:Uri.t -> ?xmlbase:Uri.t -> string -> <a href="Syndic_atom.html#TYPEfeed">feed</a></code></pre><div class="info ">
+<code class="code">read fname</code> reads the file name <code class="code">fname</code> and parses it.
+    For the optional parameters, see <a href="Syndic_atom.html#VALparse"><code class="code"><span class="constructor">Syndic_atom</span>.parse</code></a>.<br>
+</div>
+
+<pre><span id="VALto_xml"><span class="keyword">val</span> to_xml</span> : <code class="type"><a href="Syndic_atom.html#TYPEfeed">feed</a> -> <a href="Syndic_xml.html#TYPEt">Syndic_xml.t</a></code></pre><div class="info ">
+<code class="code">to_xml f</code> converts the feed <code class="code">f</code> to an XML tree.<br>
+</div>
+
+<pre><span id="VALoutput"><span class="keyword">val</span> output</span> : <code class="type"><a href="Syndic_atom.html#TYPEfeed">feed</a> -> Xmlm.dest -> unit</code></pre><div class="info ">
+<code class="code">output f dest</code> writes the XML tree of the feed <code class="code">f</code> to <code class="code">dest</code>.<br>
+</div>
+
+<pre><span id="VALwrite"><span class="keyword">val</span> write</span> : <code class="type"><a href="Syndic_atom.html#TYPEfeed">feed</a> -> string -> unit</code></pre><div class="info ">
+<code class="code">write f fname</code> writes the XML tree of the feed <code class="code">f</code> to the file
+    named <code class="code">fname</code>.<br>
+</div>
+<br>
+<h2 id="2_Conveniencefunctions">Convenience functions</h2><br>
+
+<pre><span id="VALascending"><span class="keyword">val</span> ascending</span> : <code class="type"><a href="Syndic_atom.html#TYPEentry">entry</a> -> <a href="Syndic_atom.html#TYPEentry">entry</a> -> int</code></pre><div class="info ">
+Compare entries so that older dates are smaller.  The date of the
+    entry is taken from the <code class="code">published</code> field, if available, or
+    otherwise <code class="code">updated</code> is used.<br>
+</div>
+
+<pre><span id="VALdescending"><span class="keyword">val</span> descending</span> : <code class="type"><a href="Syndic_atom.html#TYPEentry">entry</a> -> <a href="Syndic_atom.html#TYPEentry">entry</a> -> int</code></pre><div class="info ">
+Compare entries so that more recent dates are smaller.  The date
+    of the entry is taken from the <code class="code">published</code> field, if available, or
+    otherwise <code class="code">updated</code> is used.<br>
+</div>
+
+<pre><span id="VALaggregate"><span class="keyword">val</span> aggregate</span> : <code class="type">?self:Uri.t -><br>       ?id:<a href="Syndic_atom.html#TYPEid">id</a> -><br>       ?updated:<a href="Syndic_atom.html#TYPEupdated">updated</a> -><br>       ?subtitle:<a href="Syndic_atom.html#TYPEsubtitle">subtitle</a> -><br>       ?title:<a href="Syndic_atom.html#TYPEtext_construct">text_construct</a> -><br>       ?sort:[ `Newest_first | `None | `Oldest_first ] -><br>       ?n:int -> <a href="Syndic_atom.html#TYPEfeed">feed</a> list -> <a href="Syndic_atom.html#TYPEfeed">feed</a></code></pre><div class="info ">
+<code class="code">aggregate feeds</code> returns a single feed containing all the posts
+    in <code class="code">feeds</code>.  In order to track the origin of each post in the
+    aggrated feed, it is recommended that each feed in <code class="code">feeds</code>
+    possesses a link with <code class="code">rel = Self</code> so that the <code class="code">source</code> added to
+    each entry contains a link to the original feed.  If an entry
+    contains a <code class="code">source</code>, il will <i>not</i> be overwritten.<br>
+</div>
+<div class="param_info"><code class="code">self</code> : The preferred URI for retrieving this aggregayed Atom
+                Feed.  While not mandatory, it is good practice to set
+                this.</div>
+<div class="param_info"><code class="code">id</code> : the universally unique identifier for the aggregated feed.
+              If it is not provided a URN is built from the <code class="code">feeds</code> IDs.</div>
+<div class="param_info"><code class="code">sort</code> : whether to sort the entries of the final feed.  The default
+                is <code class="code"><span class="keywordsign">`</span><span class="constructor">Newest_first</span></code> because it is generally desired.</div>
+<div class="param_info"><code class="code">n</code> : number of entries of the (sorted) aggregated feed to return.</div>
+
+<pre><span id="VALset_self_link"><span class="keyword">val</span> set_self_link</span> : <code class="type"><a href="Syndic_atom.html#TYPEfeed">feed</a> -><br>       ?hreflang:string -> ?length:int -> Uri.t -> <a href="Syndic_atom.html#TYPEfeed">feed</a></code></pre><div class="info ">
+<code class="code">set_self feed url</code> add or replace the URI in the self link of the
+    feed.  You can also set the <code class="code">hreflang</code> and <code class="code">length</code> of the self
+    link.<br>
+</div>
+
+<pre><span id="VALget_self_link"><span class="keyword">val</span> get_self_link</span> : <code class="type"><a href="Syndic_atom.html#TYPEfeed">feed</a> -> <a href="Syndic_atom.html#TYPElink">link</a> option</code></pre><div class="info ">
+<code class="code">get_self feed</code> return the self link of the feed, if any is present.<br>
+</div>
+
+<pre><span id="VALset_main_author"><span class="keyword">val</span> set_main_author</span> : <code class="type"><a href="Syndic_atom.html#TYPEfeed">feed</a> -> <a href="Syndic_atom.html#TYPEauthor">author</a> -> <a href="Syndic_atom.html#TYPEfeed">feed</a></code></pre><div class="info ">
+<code class="code">set_main_author feed author</code> will add <code class="code">author</code> in front of the
+    list of authors of the <code class="code">feed</code> (if an author with the same name
+    already exists, the optional information are merged, the ones in
+    <code class="code">author</code> taking precedence).  Also remove all empty authors (name
+    = "" and no URI, no email) and replace them with <code class="code">author</code> if no
+    author is left and an authors is mandatory.<br>
+</div>
+</body></html>

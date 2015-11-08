@@ -1,0 +1,50 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_date</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t&nbsp;=&nbsp;<span class="constructor">CalendarLib</span>.<span class="constructor">Calendar</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;epoch&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;compare&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;max&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_date</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;min&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_date</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_rfc822&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_date</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_rfc822&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_rfc3339&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_date</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_rfc3339&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;month&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Jan</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Feb</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Mar</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Apr</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">May</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Jun</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Jul</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Aug</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Sep</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Oct</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Nov</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Dec</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_month&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.month&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;year&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;month&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_date</span>.month<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;day&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;hour&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;minute&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;second&nbsp;:&nbsp;<span class="constructor">Syndic_date</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;float<br>
+<span class="keyword">end</span></code></body></html>

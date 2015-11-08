@@ -1,0 +1,108 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_rss1</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">module</span>&nbsp;<span class="constructor">Error</span>&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">sig</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t&nbsp;=&nbsp;<span class="constructor">Xmlm</span>.pos&nbsp;*&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Error</span>&nbsp;<span class="keyword">of</span>&nbsp;t<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_string&nbsp;:&nbsp;exn&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;title&nbsp;=&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;name&nbsp;=&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;description&nbsp;=&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;channel_image&nbsp;=&nbsp;<span class="constructor">Uri</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;url&nbsp;=&nbsp;<span class="constructor">Uri</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;link&nbsp;=&nbsp;<span class="constructor">Uri</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;items&nbsp;=&nbsp;<span class="constructor">Uri</span>.t&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;channel_textinput&nbsp;=&nbsp;<span class="constructor">Uri</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;channel&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;about&nbsp;:&nbsp;<span class="constructor">Uri</span>.t;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.title;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;link&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.description;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;image&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.channel_image&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;items&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.items;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;textinput&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.channel_textinput&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;image&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;about&nbsp;:&nbsp;<span class="constructor">Uri</span>.t;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.title;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;url&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.url;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;link&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.link;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;item&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;about&nbsp;:&nbsp;<span class="constructor">Uri</span>.t;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.title;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;link&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.description&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;textinput&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;about&nbsp;:&nbsp;<span class="constructor">Uri</span>.t;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.title;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.description;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.name;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;link&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.link;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;rdf&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;channel&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.channel;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;image&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.image&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;item&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.item&nbsp;list;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;textinput&nbsp;:&nbsp;<span class="constructor">Syndic_rss1</span>.textinput&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;parse&nbsp;:&nbsp;?xmlbase:<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.input&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_rss1</span>.rdf<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;read&nbsp;:&nbsp;?xmlbase:<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_rss1</span>.rdf<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;uri&nbsp;=&nbsp;<span class="constructor">Uri</span>.t&nbsp;option&nbsp;*&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;unsafe&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?xmlbase:<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Xmlm</span>.input&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">RDF</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Channel</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">About</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Description</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Image</span>&nbsp;<span class="keyword">of</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">URI</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri&nbsp;]&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Items</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Seq</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Li</span>&nbsp;<span class="keyword">of</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">URI</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri&nbsp;]&nbsp;list&nbsp;]&nbsp;list&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Link</span>&nbsp;<span class="keyword">of</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">URI</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri&nbsp;]&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">TextInput</span>&nbsp;<span class="keyword">of</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">URI</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri&nbsp;]&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Title</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;list&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Image</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">About</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Link</span>&nbsp;<span class="keyword">of</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">URI</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri&nbsp;]&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Title</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">URL</span>&nbsp;<span class="keyword">of</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">URI</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri&nbsp;]&nbsp;list&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Item</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">About</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Description</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Link</span>&nbsp;<span class="keyword">of</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">URI</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri&nbsp;]&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Title</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;list&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">TextInput</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">About</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Description</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Link</span>&nbsp;<span class="keyword">of</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">URI</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_rss1</span>.uri&nbsp;]&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Name</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Title</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;list&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;]<br>
+<span class="keyword">end</span></code></body></html>

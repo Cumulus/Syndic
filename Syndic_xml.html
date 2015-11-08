@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Syndic_date.html">
+<link rel="next" href="Syndic_error.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Syndic" rel="Chapter" href="Syndic.html">
+<link title="Syndic_rss1" rel="Chapter" href="Syndic_rss1.html">
+<link title="Syndic_rss2" rel="Chapter" href="Syndic_rss2.html">
+<link title="Syndic_atom" rel="Chapter" href="Syndic_atom.html">
+<link title="Syndic_opml1" rel="Chapter" href="Syndic_opml1.html">
+<link title="Syndic_date" rel="Chapter" href="Syndic_date.html">
+<link title="Syndic_xml" rel="Chapter" href="Syndic_xml.html">
+<link title="Syndic_error" rel="Chapter" href="Syndic_error.html">
+<link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_xml</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Syndic_date.html" title="Syndic_date">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Syndic_error.html" title="Syndic_error">Next</a>
+</div>
+<h1>Module <a href="type_Syndic_xml.html">Syndic_xml</a></h1>
+
+<pre><span class="keyword">module</span> Syndic_xml: <code class="code"><span class="keyword">sig</span></code> <a href="Syndic_xml.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+Common module for XML parsing.<br>
+</div>
+<hr width="100%">
+
+<pre><span id="TYPEdtd"><span class="keyword">type</span> <code class="type"></code>dtd</span> = <code class="type">string option</code> </pre>
+<div class="info ">
+The type for the optional
+    <a href="http://www.w3.org/TR/REC-xml/#dt-doctype">DTD</a>.<br>
+</div>
+
+
+<pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.Node"><span class="constructor">Node</span></span> <span class="keyword">of</span> <code class="type">Xmlm.pos * Xmlm.tag * <a href="Syndic_xml.html#TYPEt">t</a> list</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.Data"><span class="constructor">Data</span></span> <span class="keyword">of</span> <code class="type">Xmlm.pos * string</code></code></td>
+
+</tr></table>
+
+<div class="info ">
+A XML tree.<br>
+</div>
+
+
+<pre><span id="VALresolve"><span class="keyword">val</span> resolve</span> : <code class="type">xmlbase:Uri.t option -> Uri.t -> Uri.t</code></pre><div class="info ">
+<code class="code">resolve base uri</code> resolve the <code class="code">uri</code> against the possible base.<br>
+</div>
+
+<pre><span id="VALget_position"><span class="keyword">val</span> get_position</span> : <code class="type"><a href="Syndic_xml.html#TYPEt">t</a> -> Xmlm.pos</code></pre>
+<pre><span id="VALof_xmlm"><span class="keyword">val</span> of_xmlm</span> : <code class="type">Xmlm.input -> <a href="Syndic_xml.html#TYPEdtd">dtd</a> * <a href="Syndic_xml.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_xmlm doc</code> converts an XML document <code class="code">doc</code> into a DTD and a
+    tree representing the document.<br>
+</div>
+
+<pre><span id="VALto_xmlm"><span class="keyword">val</span> to_xmlm</span> : <code class="type">?dtd:string -> <a href="Syndic_xml.html#TYPEt">t</a> -> Xmlm.output -> unit</code></pre>
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type">?ns_prefix:(string -> string option) -> <a href="Syndic_xml.html#TYPEt">t</a> -> string</code></pre>
+<pre><span id="VALto_buffer"><span class="keyword">val</span> to_buffer</span> : <code class="type">?ns_prefix:(string -> string option) -> <a href="Syndic_xml.html#TYPEt">t</a> -> Buffer.t -> unit</code></pre></body></html>
