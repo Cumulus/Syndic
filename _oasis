@@ -27,7 +27,7 @@ Document "syndic"
   BuildTools:           ocamldoc
   Title:                "Syndic"
   PostCommand:          cp doc/* syndic.docdir/
-  XOCamlbuildPath:      lib
+  XOCamlbuildPath:      .
   XOCamlbuildLibraries: syndic
   XOCamlbuildExtraArgs:
     "-docflags '-colorize-code -keep-code -charset utf-8'"
