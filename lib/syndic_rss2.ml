@@ -6,14 +6,248 @@ module Atom = Syndic_atom
 module Date = Syndic_date
 module Error = Syndic_error
 
-type image =
+type story =
+  | All of string * Uri.t option * string
+  | Title of string
+  | Description of Uri.t option * string
+
+module Relax =
+struct
+  type ('url, 'title, 'link) image =
+    {
+      url   : pos:Xmlm.pos -> Uri.t option -> 'url;
+      title : pos:Xmlm.pos -> string option -> 'title;
+      link  : pos:Xmlm.pos -> Uri.t option -> 'link;
+    }
+
+  let image : (Uri.t, string, Uri.t) image =
+    {
+      url   = (fun ~pos -> function
+               | Some uri -> uri
+               | None -> raise (Error.Error (pos, "<image> elements MUST \
+                                                   contains exactly one \
+                                                   <url> element")));
+      title = (fun ~pos -> function
+               | Some title -> title
+               | None -> raise (Error.Error (pos, "<image> elements MUST \
+                                                   contains exactly one \
+                                                   <title> element")));
+      link  = (fun ~pos -> function
+               | Some link -> link
+               | None -> raise (Error.Error (pos, "<image> elements MUST \
+                                                   contains exactly one \
+                                                   <link> element")));
+    }
+
+  type ('domain, 'port, 'path, 'uri, 'procedure, 'protocol) cloud =
+    {
+      registerProcedure : pos:Xmlm.pos -> string option -> 'procedure;
+      protocol          : pos:Xmlm.pos -> string option -> 'protocol;
+      domain            : pos:Xmlm.pos -> string option -> 'domain;
+      port              : pos:Xmlm.pos -> string option -> 'port;
+      path              : pos:Xmlm.pos -> string option -> 'path;
+      uri               : pos:Xmlm.pos -> 'domain -> 'port -> 'path -> 'uri;
+    }
+
+  let cloud : (string, int, string, Uri.t, string, string) cloud =
+    {
+      registerProcedure = (fun ~pos -> function
+                           | Some p -> p
+                           | None -> raise (Error.Error (pos,
+                                            "<cloud> elements MUST hava a \
+                                             registerProcedure attribute")));
+      protocol          = (fun ~pos -> function
+                           | Some p -> p
+                           | None -> raise (Error.Error (pos,
+                                            "<cloud> elements MUST have a protocol \
+                                             attribute")));
+      domain            = (fun ~pos -> function
+                           | Some d -> d
+                           | None -> raise (Error.Error (pos,
+                                            "<cloud> elements MUST have a domain \
+                                             attribute")));
+      port              = (fun ~pos -> function
+                           | Some p ->
+                             (try int_of_string p
+                              with exn -> raise (Error.Error (pos,
+                                          "attribute port of <cloud> elements MUST be \
+                                           an int")))
+                           | None -> raise (Error.Error (pos,
+                                            "<cloud> elements MUST have a port \
+                                             attribute")));
+      path              = (fun ~pos -> function
+                           | Some p -> p
+                           | None -> raise (Error.Error (pos,
+                                            "<cloud> elements MUST have a path attribute")));
+      uri               = (fun ~pos domain port path -> Uri.make ~host:domain ~port ~path ());
+    }
+
+  type ('title, 'description, 'name, 'link) textinput =
+    {
+      title       : pos:Xmlm.pos -> string option -> 'title;
+      description : pos:Xmlm.pos -> string option -> 'description;
+      name        : pos:Xmlm.pos -> string option -> 'name;
+      link        : pos:Xmlm.pos -> Uri.t option -> 'link;
+    }
+
+  let textinput : (string, string, string, Uri.t) textinput =
+    {
+      title       = (fun ~pos -> function
+                     | Some s -> s
+                     | None -> raise (Error.Error (pos, "<textinput> elements \
+                                                         MUST contains exactly \
+                                                         one <title> element")));
+      description = (fun ~pos -> function
+                     | Some s -> s
+                     | None -> raise (Error.Error (pos, "<textinput>
+                                                         elements MUST \
+                                                         contains exactly \
+                                                         one \
+                                                         <description> \
+                                                         element")));
+      name        = (fun ~pos -> function
+                     | Some s -> s
+                     | None -> raise (Error.Error (pos, "<textinput> elements \
+                                                         MUST contains exactly \
+                                                         one <name> element")));
+      link        = (fun ~pos -> function
+                     | Some uri -> uri
+                     | None -> raise (Error.Error (pos, "<textinput> elements \
+                                                         MUST contains exactly \
+                                                         one <link> element")));
+    }
+
+  type ('url, 'length, 'mime) enclosure =
+    {
+      url    : pos:Xmlm.pos -> Uri.t option -> 'url;
+      length : pos:Xmlm.pos -> string option -> 'length;
+      mime   : pos:Xmlm.pos -> string option -> 'mime;
+    }
+
+  let enclosure : (Uri.t, int, string) enclosure =
+    {
+      url    = (fun ~pos -> function
+                | Some uri -> uri
+                | None -> raise (Error.Error (pos, "<enclosure> elements \
+                                                    MUST have a 'url' \
+                                                    attribute")));
+      length = (fun ~pos -> function
+                | None -> raise (Error.Error (pos, "<enclosure> elements \
+                                                    MUST have a 'length'
+                                                    attribute"))
+                | Some i ->
+                  try int_of_string i
+                  with exn -> raise (Error.Error (pos, "the attribute \
+                                                        'length' for the \
+                                                        element \
+                                                        <enclosure> MUST \
+                                                        be an integer")));
+      mime   = (fun ~pos -> function
+                | Some m -> m
+                | None -> raise (Error.Error (pos, "<enclosure> elements \
+                                                    MUST have a 'mime'
+                                                    attribute")));
+    }
+
+  type ('data, 'url) source =
+    {
+      data : pos:Xmlm.pos -> string option -> 'data;
+      url  : pos:Xmlm.pos -> Uri.t option -> 'url;
+    }
+
+  let source : (string, Uri.t) source =
+    {
+      data = (fun ~pos -> function
+              | Some s -> s
+              | None -> raise (Error.Error (pos, "The content of <source> \
+                                                  MUST be a non-empty \
+                                                  string")));
+      url  = (fun ~pos -> function
+              | Some u -> u
+              | None -> raise (Error.Error (pos, "<source> elements MUST \
+                                                  have a 'url' attribute")));
+    }
+
+  type ('story,
+        'url_enclosure, 'length_enclosure, 'mime_enclosure,
+        'data_source, 'url_source) item =
+    {
+      story     : pos:Xmlm.pos -> string option -> (Uri.t option * string) option -> 'story;
+      enclosure : ('url_enclosure, 'length_enclosure, 'mime_enclosure) enclosure;
+      source    : ('data_source, 'url_source) source;
+    }
+
+  let item : (story, Uri.t, int, string, string, Uri.t) item =
+    {
+      story     = (fun ~pos title description -> match title, description with
+                   | Some title, Some (xmlbase, description) ->
+                     All (title, xmlbase, description)
+                   | Some title, _ ->
+                     Title title
+                   | _, Some (xmlbase, description) ->
+                     Description (xmlbase, description)
+                   | _ -> raise (Error.Error (pos, "<item> elements expected <title> \
+                                                    or <description> tag")));
+      enclosure = enclosure;
+      source    = source;
+    }
+
+  type ('title, 'link, 'description,
+        'domain_cloud, 'port_cloud, 'path_cloud, 'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+        'url_image, 'title_image, 'link_image,
+        'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+        'story_item,
+        'url_enclosure, 'length_enclosure, 'mime_enclosure,
+        'data_source, 'url_source) channel =
+    {
+      title       : pos:Xmlm.pos -> string option -> 'title;
+      link        : pos:Xmlm.pos -> Uri.t option -> 'link;
+      description : pos:Xmlm.pos -> string option -> 'description;
+      cloud       : ('domain_cloud, 'port_cloud, 'path_cloud, 'uri_cloud, 'procedure_cloud, 'protocol_cloud) cloud;
+      image       : ('url_image, 'title_image, 'link_image) image;
+      textInput   : ('title_textinput, 'description_textinput, 'name_textinput, 'link_textinput) textinput;
+      item        : ('story_item, 'url_enclosure, 'length_enclosure, 'mime_enclosure, 'data_source, 'url_source) item;
+    }
+
+  let channel : (string, Uri.t, string,
+                 string, int, string, Uri.t, string, string,
+                 Uri.t, string, Uri.t,
+                 string, string, string, Uri.t,
+                 story,
+                 Uri.t, int, string,
+                 string, Uri.t) channel =
+    {
+      title       = (fun ~pos -> function
+                     | Some t -> t
+                     | None -> raise (Error.Error (pos, "<channel> elements \
+                                                         MUST contains exactly \
+                                                         one <title> element")));
+      link        = (fun ~pos -> function
+                     | Some l -> l
+                     | None -> raise (Error.Error (pos, "<channel> elements \
+                                                         MUST contains exactly \
+                                                         one <link> element")));
+      description = (fun ~pos -> function
+                     | Some d -> d
+                     | None -> raise (Error.Error (pos, "<channel> elements \
+                                                         MUST contains exactly \
+                                                         one <description> \
+                                                         element")));
+      cloud       = cloud;
+      image       = image;
+      textInput   = textinput;
+      item        = item;
+    }
+end
+
+type ('url, 'title, 'link) image =
   {
-    url: Uri.t;
-    title: string;
-    link: Uri.t;
-    width: int; (* default 88 *)
-    height: int; (* default 31 *)
-    description: string option;
+    url         : 'url;   (* Uri.t *)
+    title       : 'title; (* string *)
+    link        : 'link;  (* Uri.t *)
+    width       : int;    (* default 88 *)
+    height      : int;    (* default 31 *)
+    description : string option;
   }
 
 type image' = [
@@ -25,27 +259,23 @@ type image' = [
   | `Description of string
 ]
 
-let make_image ~pos (l : [< image' ] list) =
+let make_image :
+  type url title link. Xmlm.pos ->
+                       (url, title, link) Relax.image ->
+                       [< image' ] list ->
+                       [ `Image of (url, title, link) image ] =
+  fun pos relax l ->
   let url = match find (function `URL _ -> true | _ -> false) l with
-    | Some (`URL u) -> u
-    | _ ->
-      raise (Error.Error (pos,
-                            "<image> elements MUST contains exactly one \
-                             <url> element"))
+    | Some (`URL u) -> relax.Relax.url ~pos (Some u)
+    | _ -> relax.Relax.url ~pos None
   in
   let title = match find (function `Title _ -> true | _ -> false) l with
-    | Some (`Title t) -> t
-    | _ ->
-      raise (Error.Error (pos,
-                            "<image> elements MUST contains exactly one \
-                             <title> element"))
+    | Some (`Title t) -> relax.Relax.title ~pos (Some t)
+    | _ -> relax.Relax.title ~pos None
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
-    | Some (`Link l) -> l
-    | _ ->
-      raise (Error.Error (pos,
-                            "<image> elements MUST contains exactly one \
-                             <link> element"))
+    | Some (`Link l) -> relax.Relax.link ~pos (Some l)
+    | _ -> relax.Relax.link ~pos None
   in
   let width = match find (function `Width _ -> true | _ -> false) l with
     | Some (`Width w) -> w
@@ -60,12 +290,21 @@ let make_image ~pos (l : [< image' ] list) =
     | Some (`Description s) -> Some s
     | _ -> None
   in
-  `Image ({ url; title; link; width; height; description } : image)
+  `Image ({ url; title; link; width; height; description } : (url, title, link) image)
+
+let make_image
+  : type url title link.
+    pos:Xmlm.pos ->
+    (url, title, link) Relax.image ->
+    [< image' ] list ->
+    [ `Image of (url, title, link) image ]
+  = fun ~pos relax l -> make_image pos relax l
 
 let url_of_xml ~xmlbase a =
-  `URL(XML.resolve ~xmlbase (Uri.of_string a))
+  `URL (XML.resolve ~xmlbase (Uri.of_string a))
+  (* XXX: Uri.of_string would be not fail. *)
 
-let url_of_xml' ~xmlbase a = `URL(xmlbase, a)
+let url_of_xml' ~xmlbase a = `URL (xmlbase, a)
 
 let image_url_of_xml ~xmlbase (pos, tag, datas) =
   try url_of_xml ~xmlbase (get_leaf datas)
@@ -74,11 +313,11 @@ let image_url_of_xml ~xmlbase (pos, tag, datas) =
                              a non-empty string"))
 
 let image_title_of_xml ~xmlbase (pos, tag, datas) =
-  `Title(try get_leaf datas
-         with Not_found -> "")
+  `Title (try get_leaf datas
+          with Not_found -> "")
 
 let image_link_of_xml ~xmlbase (pos, tag, datas) =
-  try `Link(XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
+  try `Link (XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
   with Not_found -> raise (Error.Error (pos,
                             "The content of <link> MUST be \
                              a non-empty string"))
@@ -98,17 +337,17 @@ let image_size_of_xml ~max ~xmlbase (pos, tag, datas) =
                               an integer")))
 
 let image_width_of_xml ~xmlbase a =
-  `Width(image_size_of_xml ~max:144 ~xmlbase a)
+  `Width (image_size_of_xml ~max:144 ~xmlbase a)
 let image_height_of_xml ~xmlbase a =
-  `Height(image_size_of_xml ~max:400 ~xmlbase a)
+  `Height (image_size_of_xml ~max:400 ~xmlbase a)
 
 let image_description_of_xml ~xmlbase (pos, tag, datas) =
-  try `Description(get_leaf datas)
+  try `Description (get_leaf datas)
   with Not_found -> raise (Error.Error (pos,
                             "The content of <description> MUST be \
                              a non-empty string"))
 
-let image_of_xml =
+let image_of_xml relax_image =
   let data_producer = [
     ("url", image_url_of_xml);
     ("title", image_title_of_xml);
@@ -117,7 +356,7 @@ let image_of_xml =
     ("height", image_height_of_xml);
     ("description", image_description_of_xml);
   ] in
-  generate_catcher ~data_producer make_image
+  generate_catcher ~data_producer (fun ~pos -> make_image ~pos relax_image)
 
 let image_of_xml' =
   let data_producer = [
@@ -130,11 +369,12 @@ let image_of_xml' =
   ] in
   generate_catcher ~data_producer (fun ~pos x -> `Image x)
 
-type cloud = {
-  uri: Uri.t;
-  registerProcedure: string;
-  protocol: string;
-}
+type ('uri, 'procedure, 'protocol) cloud =
+  {
+    uri               : 'uri;       (* Uri.t *)
+    registerProcedure : 'procedure; (* string *)
+    protocol          : 'protocol;  (* string *)
+  }
 
 type cloud' = [
   | `Domain of string
@@ -144,45 +384,36 @@ type cloud' = [
   | `Protocol of string
 ]
 
-let make_cloud ~pos (l : [< cloud' ] list) =
+let make_cloud :
+  type domain port path uri procedure protocol.
+    Xmlm.pos ->
+    (domain, port, path, uri, procedure, protocol) Relax.cloud ->
+    [< cloud' ] list ->
+    [ `Cloud of (uri, procedure, protocol) cloud ] =
+  fun pos relax l ->
   let domain = match find (function `Domain _ -> true | _ -> false) l with
-    | Some (`Domain u) -> u
-    | _ ->
-      raise (Error.Error (pos,
-                            "Cloud elements MUST have a 'domain' \
-                             attribute"))
+    | Some (`Domain u) -> relax.Relax.domain ~pos (Some u)
+    | _ -> relax.Relax.domain ~pos None
   in
   let port = match find (function `Port _ -> true | _ -> false) l with
-    | Some (`Port p) -> (int_of_string p)
-    | _ ->
-      raise (Error.Error (pos,
-                            "Cloud elements MUST have a 'port' \
-                             attribute"))
+    | Some (`Port p) -> relax.Relax.port ~pos (Some p)
+    | _ -> relax.Relax.port ~pos None
   in
   let path = match find (function `Path _ -> true | _ -> false) l with
-    | Some (`Path p) -> p
-    | _ ->
-      raise (Error.Error (pos,
-                            "Cloud elements MUST have a 'path' \
-                             attribute"))
+    | Some (`Path p) -> relax.Relax.path ~pos (Some p)
+    | _ -> relax.Relax.path ~pos None
   in
   let registerProcedure =
     match find (function `RegisterProcedure _ -> true | _ -> false) l with
-    | Some (`RegisterProcedure r) -> r
-    | _ ->
-      raise (Error.Error (pos,
-                            "Cloud elements MUST have a 'registerProcedure' \
-                             attribute"))
+    | Some (`RegisterProcedure r) -> relax.Relax.registerProcedure ~pos (Some r)
+    | _ -> relax.Relax.registerProcedure ~pos None
   in
   let protocol = match find (function `Protocol _ -> true | _ -> false) l with
-    | Some (`Protocol p) -> p
-    | _ ->
-      raise (Error.Error (pos,
-                            "Cloud elements MUST have a 'protocol' \
-                             attribute"))
+    | Some (`Protocol p) -> relax.Relax.protocol ~pos (Some p)
+    | _ -> relax.Relax.protocol ~pos None
   in
-  let uri = Uri.make ~host:domain ~port ~path () in
-  `Cloud ({ uri; registerProcedure; protocol; } : cloud)
+  let uri = relax.Relax.uri ~pos domain port path in
+  `Cloud ({ uri; registerProcedure; protocol; } : (uri, procedure, protocol) cloud)
 
 let cloud_attr_producer = [
     ("domain", (fun ~xmlbase a -> `Domain a));
@@ -192,19 +423,28 @@ let cloud_attr_producer = [
     ("protocol", (fun ~xmlbase a -> `Protocol a));
   ]
 
-let cloud_of_xml =
-  generate_catcher ~attr_producer:cloud_attr_producer make_cloud
+let make_cloud
+  : type domain port path uri procedure protocol.
+    pos:Xmlm.pos ->
+    (domain, port, path, uri, procedure, protocol) Relax.cloud ->
+    [< cloud' ] list ->
+    [ `Cloud of (uri, procedure, protocol) cloud ]
+  = fun ~pos relax l -> make_cloud pos relax l
+
+let cloud_of_xml relax_cloud =
+  generate_catcher
+    ~attr_producer:cloud_attr_producer
+    (fun ~pos -> make_cloud ~pos relax_cloud)
 
 let cloud_of_xml' =
   generate_catcher ~attr_producer:cloud_attr_producer (fun ~pos x -> `Cloud x)
 
-
-type textinput =
+type ('title, 'description, 'name, 'link) textinput =
   {
-    title: string;
-    description: string;
-    name: string;
-    link: Uri.t;
+    title       : 'title;       (* string *)
+    description : 'description; (* string *)
+    name        : 'name;        (* string *)
+    link        : 'link;        (* Uri.t *)
   }
 
 type textinput' = [
@@ -214,37 +454,38 @@ type textinput' = [
   | `Link of Uri.t
 ]
 
-let make_textinput ~pos (l : [< textinput'] list) =
+let make_textinput :
+  type title description name link. Xmlm.pos ->
+                                    (title, description, name, link) Relax.textinput ->
+                                    [< textinput'] list ->
+                                    [ `TextInput of (title, description, name, link) textinput ] =
+  fun pos relax l ->
   let title = match find (function `Title _ -> true | _ -> false) l with
-    | Some (`Title t) -> t
-    | _ ->
-      raise (Error.Error (pos,
-                            "<textinput> elements MUST contains exactly one \
-                             <title> element"))
+    | Some (`Title t) -> relax.Relax.title ~pos (Some t)
+    | _ -> relax.Relax.title ~pos None
   in
   let description =
     match find (function `Description _ -> true | _ -> false) l with
-    | Some (`Description s) -> s
-    | _ ->
-      raise (Error.Error (pos,
-                            "<textinput> elements MUST contains exactly one \
-                             <description> element"))
+    | Some (`Description s) -> relax.Relax.description ~pos (Some s)
+    | _ -> relax.Relax.description ~pos None
   in
   let name = match find (function `Name _ -> true | _ -> false) l with
-    | Some (`Name s) -> s
-    | _ ->
-      raise (Error.Error (pos,
-                            "<textinput> elements MUST contains exactly one \
-                             <name> element"))
+    | Some (`Name s) -> relax.Relax.name ~pos (Some s)
+    | _ -> relax.Relax.name ~pos None
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
-    | Some (`Link u) -> u
-    | _ ->
-      raise (Error.Error (pos,
-                            "<textinput> elements MUST contains exactly one \
-                             <link> element"))
+    | Some (`Link u) -> relax.Relax.link ~pos (Some u)
+    | _ -> relax.Relax.link ~pos None
   in
-  `TextInput ({ title; description; name; link; } : textinput)
+  `TextInput ({ title; description; name; link; } : (title, description, name, link) textinput)
+
+let make_textinput
+  : type title description name link.
+    pos:Xmlm.pos ->
+    (title, description, name, link) Relax.textinput ->
+    [< textinput'] list ->
+    [ `TextInput of (title, description, name, link) textinput ]
+  = fun ~pos relax l -> make_textinput pos relax l
 
 let textinput_title_of_xml ~xmlbase (pos, tag, datas) =
   try `Title(get_leaf datas)
@@ -266,18 +507,19 @@ let textinput_name_of_xml ~xmlbase (pos, tag, datas) =
 
 let textinput_link_of_xml ~xmlbase (pos, tag, datas) =
   try `Link(XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
+      (* XXX: Uri.of_string would be not fail. *)
   with Not_found -> raise (Error.Error (pos,
                             "The content of <link> MUST be \
                              a non-empty string"))
 
-let textinput_of_xml =
+let textinput_of_xml relax_textinput =
   let data_producer = [
     ("title", textinput_title_of_xml);
     ("description", textinput_description_of_xml);
     ("name", textinput_name_of_xml);
     ("link", textinput_link_of_xml);
   ] in
-  generate_catcher ~data_producer make_textinput
+  generate_catcher ~data_producer (fun ~pos -> make_textinput ~pos relax_textinput)
 
 let textinput_of_xml' =
   let data_producer = [
@@ -290,8 +532,8 @@ let textinput_of_xml' =
 
 type category =
   {
-    data: string;
-    domain: Uri.t option;
+    data   : string; (* TODO: mandatory? *)
+    domain : Uri.t option;
   }
 
 type category' = [
@@ -320,11 +562,11 @@ let category_of_xml' =
   let leaf_producer ~xmlbase pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Category x)
 
-type enclosure =
+type ('url, 'length, 'mime) enclosure =
   {
-    url: Uri.t;
-    length: int;
-    mime: string;
+    url    : 'url;    (* Uri.t *)
+    length : 'length; (* int *)
+    mime   : 'mime;   (* string *)
   }
 
 type enclosure' = [
@@ -333,37 +575,41 @@ type enclosure' = [
   | `Mime of string
 ]
 
-let make_enclosure ~pos (l : [< enclosure' ] list) =
+let make_enclosure :
+  type url length mime. Xmlm.pos ->
+                        (url, length, mime) Relax.enclosure ->
+                        [< enclosure'] list ->
+                        [ `Enclosure of (url, length, mime) enclosure ] =
+  fun pos relax l ->
   let url = match find (function `URL _ -> true | _ -> false) l with
-    | Some (`URL u) -> u
-    | _ ->
-      raise (Error.Error (pos,
-                            "Enclosure elements MUST have a 'url' \
-                             attribute"))
+    | Some (`URL u) -> relax.Relax.url ~pos (Some u)
+    | _ -> relax.Relax.url ~pos None
   in
   let length = match find (function `Length _ -> true | _ -> false) l with
-    | Some (`Length l) -> int_of_string l
-    | _ ->
-      raise (Error.Error (pos,
-                            "Enclosure elements MUST have a 'length' \
-                             attribute"))
+    | Some (`Length l) -> relax.Relax.length ~pos (Some l)
+    | _ -> relax.Relax.length ~pos None
   in
   let mime = match find (function `Mime _ -> true | _ -> false) l with
-    | Some (`Mime m) -> m
-    | _ ->
-      raise (Error.Error (pos,
-                            "Enclosure elements MUST have a 'type' \
-                             attribute"))
+    | Some (`Mime m) -> relax.Relax.mime ~pos (Some m)
+    | _ -> relax.Relax.mime ~pos None
   in
-  `Enclosure ({ url; length; mime; } : enclosure)
+  `Enclosure ({ url; length; mime; } : (url, length, mime) enclosure)
 
-let enclosure_of_xml =
+let make_enclosure
+  : type url length mime.
+    pos:Xmlm.pos ->
+    (url, length, mime) Relax.enclosure ->
+    [< enclosure'] list ->
+    [ `Enclosure of (url, length, mime) enclosure ]
+  = fun ~pos relax l -> make_enclosure pos relax l
+
+let enclosure_of_xml relax_enclosure =
   let attr_producer = [
     ("url", url_of_xml);
     ("length", (fun ~xmlbase a -> `Length a));
     ("type", (fun ~xmlbase a -> `Mime a));
   ] in
-  generate_catcher ~attr_producer make_enclosure
+  generate_catcher ~attr_producer (fun ~pos -> make_enclosure ~pos relax_enclosure)
 
 let enclosure_of_xml' =
   let attr_producer = [
@@ -375,8 +621,8 @@ let enclosure_of_xml' =
 
 type guid =
   {
-    data: Uri.t; (* must be uniq *)
-    permalink: bool; (* default true *)
+    data      : Uri.t; (* Uri.t, must be uniq *)
+    permalink : bool;  (* default true *)
   }
 
 type guid' = [
@@ -387,7 +633,9 @@ type guid' = [
 (* Some RSS2 server output <guid isPermaLink="false"></guid> ! *)
 let make_guid ~pos (l : [< guid' ] list) =
   let permalink = match find (function `Permalink _ -> true | _ -> false) l with
-    | Some (`Permalink b) -> bool_of_string b
+    | Some (`Permalink b) ->
+      (try bool_of_string b with exn -> false)
+      (* XXX: it's possible to fail, in this case, we consider permalink = true. *)
     | _ -> true (* cf. RFC *)
   in
   match find (function `Data _ -> true | _ -> false) l with
@@ -401,6 +649,7 @@ let make_guid ~pos (l : [< guid' ] list) =
        `Guid(Some({ data;  permalink } : guid))
   | _ ->
      `Guid None
+(* XXX: no relax for GUID, this function should not fail. *)
 
 let guid_of_xml, guid_of_xml' =
   let attr_producer = [ ("isPermaLink", (fun ~xmlbase a -> `Permalink a)); ] in
@@ -408,10 +657,10 @@ let guid_of_xml, guid_of_xml' =
   generate_catcher ~attr_producer ~leaf_producer make_guid,
   generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Guid x)
 
-type source =
+type ('data, 'url) source =
   {
-    data: string;
-    url: Uri.t;
+    data : 'data; (* string *)
+    url  : 'url;  (* Uri.t *)
   }
 
 type source' = [
@@ -419,75 +668,96 @@ type source' = [
   | `URL of Uri.t
 ]
 
-let make_source ~pos (l : [< source' ] list) =
+let make_source :
+  type data url. Xmlm.pos ->
+                 (data, url) Relax.source ->
+                 [< source' ] list ->
+                 [ `Source of (data, url) source ] =
+  fun pos relax l ->
   let data = match find (function `Data _ -> true | _ -> false) l with
-    | Some (`Data s) -> s
-    | _  -> raise (Error.Error (pos,
-                            "The content of <source> MUST be \
-                             a non-empty string"))
+    | Some (`Data s) -> relax.Relax.data ~pos (Some s)
+    | _ -> relax.Relax.data ~pos None
   in
   let url = match find (function `URL _ -> true | _ -> false) l with
-    | Some (`URL u) -> u
-    | _ ->
-      raise (Error.Error (pos,
-                            "Source elements MUST have a 'url' \
-                             attribute"))
+    | Some (`URL u) -> relax.Relax.url ~pos (Some u)
+    | _ -> relax.Relax.url ~pos None
   in
-  `Source ({ data; url; } : source)
+  `Source ({ data; url; } : (data, url) source)
 
-let source_of_xml =
+let make_source
+  : type data url.
+    pos:Xmlm.pos ->
+    (data, url) Relax.source ->
+    [< source'] list ->
+    [ `Source of (data, url) source ]
+  = fun ~pos relax l -> make_source pos relax l
+
+let source_of_xml relax_source =
   let attr_producer = [ ("url", url_of_xml) ] in
   let leaf_producer ~xmlbase pos data = `Data data in
-  generate_catcher ~attr_producer ~leaf_producer make_source
+  generate_catcher ~attr_producer ~leaf_producer (fun ~pos -> make_source ~pos relax_source)
 
 let source_of_xml' =
   let attr_producer = [ ("url", url_of_xml') ] in
   let leaf_producer ~xmlbase pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Source x)
 
-type story =
-  | All of string * Uri.t option * string
-  | Title of string
-  | Description of Uri.t option * string
-
-type item =
+(* XXX: lolavicecompliké *)
+type ('story,
+      'url_enclosure, 'length_enclosure, 'mime_enclosure,
+      'data_source, 'url_source) item =
   {
-    story: story;
-    content: Uri.t option * string;
-    link: Uri.t option;
-    author:  string option; (* e-mail *)
-    category: category option;
-    comments: Uri.t option;
-    enclosure: enclosure option;
-    guid: guid option;
-    pubDate: Date.t option; (* date *)
-    source: source option;
+    story     : 'story;
+    content   : Uri.t option * string; (* default: (None, "") ? *)
+    link      : Uri.t option;
+    author    : string option; (* e-mail *)
+    category  : category option;
+    comments  : Uri.t option;
+    enclosure : ('url_enclosure, 'length_enclosure, 'mime_enclosure) enclosure option;
+    guid      : guid option;
+    pubDate   : Date.t option; (* date *)
+    source    : ('data_source, 'url_source) source option;
   }
 
-type item' = [
+type ('url_enclosure, 'length_enclosure, 'mime_enclosure,
+      'data_source, 'url_source) item' = [
   | `Title of string
   | `Description of Uri.t option * string (* xmlbase, description *)
   | `Content of Uri.t option * string
-  | `Link of Uri.t
+  | `Link of Uri.t option
   | `Author of string (* e-mail *)
   | `Category of category
   | `Comments of Uri.t
-  | `Enclosure of enclosure
-  | `Guid of guid
+  | `Enclosure of ('url_enclosure, 'length_enclosure, 'mime_enclosure) enclosure
+  | `Guid of guid option
   | `PubDate of Date.t
-  | `Source of source
+  | `Source of ('data_source, 'url_source) source
 ]
 
-let make_item ~pos (l : _ list) =
-  let story = match
+let make_item :
+  type story.
+  Xmlm.pos ->
+  (story,
+   'url_enclosure, 'length_enclosure, 'mime_enclosure,
+   'data_source, 'url_source) Relax.item ->
+  [< ('url_enclosure, 'length_enclosure, 'mime_enclosure,
+      'data_source, 'url_source) item'] list ->
+  [ `Item of (story,
+              'url_enclosure, 'length_enclosure, 'mime_enclosure,
+              'data_source, 'url_source) item ] =
+  fun pos relax l ->
+  let story : story = match
       find (function `Title _ -> true | _ -> false) l,
       find (function `Description _ -> true | _ -> false) l
     with
-    | Some (`Title t), Some (`Description(x, d)) -> All (t, x, d)
-    | Some (`Title t), _ -> Title t
-    | _, Some (`Description(x, d)) -> Description(x, d)
-    | _, _ -> raise (Error.Error (pos,
-                                  "Item expected <title> or <description> tag"))
+    | Some (`Title t), Some (`Description(x, d)) ->
+      (relax.Relax.story ~pos (Some t) (Some (x, d)) : story)
+    | Some (`Title t), _ ->
+      (relax.Relax.story ~pos (Some t) None : story)
+    | _, Some (`Description(x, d)) ->
+      (relax.Relax.story ~pos None (Some (x, d)) : story)
+    | _, _ ->
+      (relax.Relax.story ~pos None None : story)
   in
   let content = match find (function `Content _ -> true | _ -> false) l with
     | Some(`Content(x, c)) -> x, c
@@ -533,7 +803,22 @@ let make_item ~pos (l : _ list) =
            enclosure;
            guid;
            pubDate;
-           source; } : item)
+           source; } : (story,
+                        'url_enclosure, 'length_enclosure, 'mime_enclosure,
+                        'data_source, 'url_source) item)
+
+let make_item
+  : type story.
+    pos:Xmlm.pos ->
+    (story,
+     'url_enclosure, 'length_enclosure, 'mime_enclosure,
+     'data_source, 'url_source) Relax.item ->
+    [< ('url_encosure, 'length_enclosure, 'mime_enclosure,
+        'data_source, 'url_source) item'] list ->
+    [ `Item of (story,
+                'url_enclosure, 'length_enclosure, 'mime_enclosure,
+                'data_sourc, 'url_source) item ]
+  = fun ~pos relax l -> make_item pos relax l
 
 let item_title_of_xml ~xmlbase (pos, tag, datas) =
   try `Title(get_leaf datas)
@@ -572,8 +857,26 @@ let item_pubdate_of_xml ~xmlbase (pos, tag, datas) =
 
 let item_namespaces = [""; "http://purl.org/rss/1.0/modules/content/"]
 
-let item_of_xml =
-  let data_producer = [
+let item_of_xml
+  : type url_enclosure length_enclosure mime_enclosure data_source url_source.
+    ('story, url_enclosure, length_enclosure, mime_enclosure, data_source, url_source) Relax.item ->
+    (xmlbase:Uri.t option -> Syndic_common.XML.node ->
+      [ `Item of ('story, url_enclosure, length_enclosure, mime_enclosure, data_source, url_source) item])
+  = fun relax_item ->
+  let enclosure_of_xml
+    :> xmlbase:Uri.t option -> Syndic_common.XML.node ->
+       (url_enclosure, length_enclosure, mime_enclosure, data_source, url_source) item'
+    = enclosure_of_xml relax_item.Relax.enclosure in
+  let source_of_xml
+    :> xmlbase:Uri.t option -> Syndic_common.XML.node ->
+       (url_enclosure, length_enclosure, mime_enclosure, data_source, url_source) item'
+    = source_of_xml relax_item.Relax.source in
+  let data_producer
+    : (string * (xmlbase:Uri.t option -> Syndic_common.XML.node ->
+                 (url_enclosure, length_enclosure, mime_enclosure,
+                  data_source, url_source) item')) list
+    =
+  [
     ("title", item_title_of_xml);
     ("description", item_description_of_xml);
     (* <content:encoded> where
@@ -587,8 +890,10 @@ let item_of_xml =
     ("guid", guid_of_xml);
     ("pubDate", item_pubdate_of_xml);
     ("source", source_of_xml);
-  ] in
-  generate_catcher ~data_producer make_item ~namespaces:item_namespaces
+  ]
+  in
+  generate_catcher ~data_producer (fun ~pos -> make_item ~pos relax_item)
+                   ~namespaces:item_namespaces
 
 let item_of_xml' =
   let data_producer = [
@@ -607,31 +912,42 @@ let item_of_xml' =
   generate_catcher ~data_producer (fun ~pos x -> `Item x)
                    ~namespaces:item_namespaces
 
-type channel =
+type ('title, 'link, 'description,
+      'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+      'url_image, 'title_image, 'link_image,
+      'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+      'story_item,
+      'url_enclosure, 'length_enclosure, 'mime_enclosure,
+      'data_source, 'url_source) channel =
   {
-    title: string;
-    link: Uri.t;
-    description: string;
-    language: string option;
-    copyright: string option;
-    managingEditor: string option;
-    webMaster: string option;
-    pubDate: Date.t option;
-    lastBuildDate: Date.t option;
-    category: string option;
-    generator: string option;
-    docs: Uri.t option;
-    cloud: cloud option;
-    ttl: int option;
-    image: image option;
-    rating: int option;
-    textInput: textinput option;
-    skipHours: int option;
-    skipDays: int option;
-    items: item list;
+    title          : 'title;       (* string *)
+    link           : 'link;        (* Uri.t *)
+    description    : 'description; (* string *)
+    language       : string option;
+    copyright      : string option;
+    managingEditor : string option;
+    webMaster      : string option;
+    pubDate        : Date.t option;
+    lastBuildDate  : Date.t option;
+    category       : string option;
+    generator      : string option;
+    docs           : Uri.t option;
+    cloud          : ('uri_cloud, 'procedure_cloud, 'protocol_cloud) cloud option;
+    ttl            : int option;
+    image          : ('url_image, 'title_image, 'link_image) image option;
+    rating         : int option;
+    textInput      : ('title_textinput, 'description_textinput, 'name_textinput, 'link_textinput) textinput option;
+    skipHours      : int option;
+    skipDays       : int option;
+    items          : ('story_item, 'url_enclosure, 'length_enclosure, 'mime_enclosure, 'data_source, 'url_source) item list;
   }
 
-type channel' = [
+type ('uri_cloud, 'procedure_cloud, 'protocol_cloud,
+      'url_image, 'title_image, 'link_image,
+      'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+      'story_item,
+      'url_enclosure, 'length_enclosure, 'mime_enclosure,
+      'data_source, 'url_source) channel' = [
   | `Title of string
   | `Link of Uri.t
   | `Description of string
@@ -644,38 +960,52 @@ type channel' = [
   | `Category of string
   | `Generator of string
   | `Docs of Uri.t
-  | `Cloud of cloud
+  | `Cloud of ('uri_cloud, 'procedure_cloud, 'protocol_cloud) cloud
   | `TTL of int
-  | `Image of image
+  | `Image of ('url_image, 'title_image, 'link_image) image
   | `Rating of int
-  | `TextInput of textinput
+  | `TextInput of ('title_textinput, 'description_textinput, 'name_textinput, 'link_textinput) textinput
   | `SkipHours of int
   | `SkipDays of int
-  | `Item of item
+  | `Item of ('story_item, 'url_enclosure, 'length_enclosure, 'mime_enclosure, 'data_source, 'url_source) item
 ]
 
-let make_channel ~pos (l : [< channel' ] list) =
+let make_channel :
+  type title link description.
+  Xmlm.pos ->
+  (title, link, description,
+   'domain_cloud, 'port_cloud, 'path_cloud, 'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+   'url_image, 'title_image, 'link_image,
+   'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+   'story_item,
+   'url_enclosure, 'length_enclosure, 'mime_enclosure,
+   'data_source, 'url_source) Relax.channel ->
+  [< ('uri_cloud, 'procedure_cloud, 'protocol_cloud,
+      'url_image, 'title_image, 'link_image,
+      'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+      'story_item,
+      'url_enclosure, 'length_enclosure, 'mime_enclosure,
+      'data_source, 'url_source) channel' ] list ->
+  (title, link, description,
+   'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+   'url_image, 'title_image, 'link_image,
+   'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+   'story_item,
+   'url_enclosure, 'length_enclosure, 'mime_enclosure,
+   'data_source, 'url_source) channel =
+  fun pos relax l ->
   let title = match find (function `Title _ -> true | _ -> false) l with
-    | Some (`Title t) -> t
-    | _ ->
-      raise (Error.Error (pos,
-                            "<channel> elements MUST contains exactly one \
-                             <title> element"))
+    | Some (`Title t) -> relax.Relax.title ~pos (Some t)
+    | _ -> relax.Relax.title ~pos None
   in
   let link = match find (function `Link _ -> true | _ -> false) l with
-    | Some (`Link l) -> l
-    | _ ->
-      raise (Error.Error (pos,
-                            "<channel> elements MUST contains exactly one \
-                             <link> element"))
+    | Some (`Link l) -> relax.Relax.link ~pos (Some l)
+    | _ -> relax.Relax.link ~pos None
   in
   let description =
     match find (function `Description _ -> true | _ -> false) l with
-    | Some (`Description l) -> l
-    | _ ->
-      raise (Error.Error (pos,
-                            "<channel> elements MUST contains exactly one \
-                             <description> element"))
+    | Some (`Description l) -> relax.Relax.description ~pos (Some l)
+    | _ -> relax.Relax.description ~pos None
   in
   let language = match find (function `Language _ -> true | _ -> false) l with
     | Some (`Language a) -> Some a
@@ -764,7 +1094,13 @@ let make_channel ~pos (l : [< channel' ] list) =
      textInput;
      skipHours;
      skipDays;
-     items; } : channel)
+     items; } : (title, link, description,
+                 'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+                 'url_image, 'title_image, 'link_image,
+                 'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+                 'story_item,
+                 'url_enclosure, 'length_enclosure, 'mime_enclosure,
+                 'data_source, 'url_source) channel)
 
 let channel_title_of_xml ~xmlbase (pos, tag, datas) =
   try `Title(get_leaf datas)
@@ -860,7 +1196,91 @@ let channel_skipDays_of_xml ~xmlbase (pos, tag, datas) =
                             "The content of <skipDays> MUST be \
                              a non-empty string representing an integer"))
 
-let channel_of_xml =
+let make_channel
+  : type title link description.
+    pos:Xmlm.pos ->
+    (title, link, description,
+     'domain_cloud, 'port_cloud, 'path_cloud, 'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+     'url_image, 'title_image, 'link_image,
+     'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+     'story_item,
+     'url_enclosure, 'length_enclosure, 'mime_enclosure,
+     'data_source, 'url_source) Relax.channel ->
+    [< ('uri_cloud, 'procedure_cloud, 'protocol_cloud,
+        'url_image, 'title_image, 'link_image,
+        'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+        'story_item,
+        'url_enclosure, 'length_enclosure, 'mime_enclosure,
+        'data_source, 'url_source) channel' ] list ->
+    (title, link, description,
+     'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+     'url_image, 'title_image, 'link_image,
+     'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+     'story_item,
+     'url_enclosure, 'length_enclosure, 'mime_enclosure,
+     'data_source, 'url_source) channel
+  = fun ~pos relax l -> make_channel pos relax l
+
+let channel_of_xml
+  : type title link description
+         domain_cloud port_cloud path_cloud uri_cloud procedure_cloud protocol_cloud
+         url_image title_image link_image
+         title_textinput description_textinput name_textinput link_textinput
+         story_item
+         url_enclosure length_enclosure mime_enclosure
+         data_source url_source.
+    (title, link, description,
+     domain_cloud, port_cloud, path_cloud, uri_cloud, procedure_cloud, protocol_cloud,
+     url_image, title_image, link_image,
+     title_textinput, description_textinput, name_textinput, link_textinput,
+     story_item,
+     url_enclosure, length_enclosure, mime_enclosure,
+     data_source, url_source) Relax.channel ->
+    (xmlbase:Uri.t option -> Syndic_common.XML.node ->
+     (title, link, description,
+      uri_cloud, procedure_cloud, protocol_cloud,
+      url_image, title_image, link_image,
+      title_textinput, description_textinput, name_textinput, link_textinput,
+      story_item,
+      url_enclosure, length_enclosure, mime_enclosure,
+      data_source, url_source) channel)
+  = fun relax_channel ->
+  let cloud_of_xml
+    :> xmlbase:Uri.t option -> Syndic_common.XML.node ->
+       (uri_cloud, procedure_cloud, protocol_cloud,
+        url_image, title_image, link_image,
+        title_textinput, description_textinput, name_textinput, link_textinput,
+        story_item,
+        url_enclosure, length_enclosure, mime_enclosure,
+        data_source, url_source) channel'
+    = cloud_of_xml relax_channel.Relax.cloud in
+  let image_of_xml
+    :> xmlbase:Uri.t option -> Syndic_common.XML.node ->
+       (uri_cloud, procedure_cloud, protocol_cloud,
+        url_image, title_image, link_image,
+        title_textinput, description_textinput, name_textinput, link_textinput,
+        story_item,
+        url_enclosure, length_enclosure, mime_enclosure,
+        data_source, url_source) channel'
+    = image_of_xml relax_channel.Relax.image in
+  let textinput_of_xml
+    :> xmlbase:Uri.t option -> Syndic_common.XML.node ->
+       (uri_cloud, procedure_cloud, protocol_cloud,
+        url_image, title_image, link_image,
+        title_textinput, description_textinput, name_textinput, link_textinput,
+        story_item,
+        url_enclosure, length_enclosure, mime_enclosure,
+        data_source, url_source) channel'
+    = textinput_of_xml relax_channel.Relax.textInput in
+  let item_of_xml
+    :> xmlbase:Uri.t option -> Syndic_common.XML.node ->
+       (uri_cloud, procedure_cloud, protocol_cloud,
+        url_image, title_image, link_image,
+        title_textinput, description_textinput, name_textinput, link_textinput,
+        story_item,
+        url_enclosure, length_enclosure, mime_enclosure,
+        data_source, url_source) channel'
+    = item_of_xml relax_channel.Relax.item in
   let data_producer = [
     ("title", channel_title_of_xml);
     ("link", channel_link_of_xml);
@@ -883,7 +1303,7 @@ let channel_of_xml =
     ("skipdays", channel_skipDays_of_xml);
     ("item", item_of_xml);
   ] in
-  generate_catcher ~data_producer make_channel
+  generate_catcher ~data_producer (fun ~pos -> make_channel ~pos relax_channel)
 
 let channel_of_xml' =
   let data_producer = [
@@ -910,6 +1330,18 @@ let channel_of_xml' =
   ] in
   generate_catcher ~data_producer (fun ~pos x -> x)
 
+module Strict =
+struct
+  type nonrec item = (story, Uri.t, int, string, string, Uri.t) item
+  type nonrec channel = (string, Uri.t, string,
+                         Uri.t, string, string,
+                         Uri.t, string, Uri.t,
+                         string, string, string, Uri.t,
+                         story,
+                         Uri.t, int, string,
+                         string, Uri.t) channel
+end
+
 let find_channel l =
   find (function XML.Node(pos, tag, data) -> tag_is tag "channel"
                 | XML.Data _ -> false) l
@@ -918,10 +1350,10 @@ let parse ?xmlbase input =
   match XML.of_xmlm input |> snd with
   | XML.Node (pos, tag, data) ->
      if tag_is tag "channel" then
-       channel_of_xml ~xmlbase (pos, tag, data)
+       channel_of_xml ~xmlbase Relax.channel (pos, tag, data)
      else (
        match find_channel data with
-       | Some(XML.Node(p, t, d)) -> channel_of_xml ~xmlbase (p, t, d)
+       | Some(XML.Node(p, t, d)) -> channel_of_xml ~xmlbase Relax.channel (p, t, d)
        | Some(XML.Data _)
        | _ -> raise (Error.Error ((0, 0),
                               "document MUST contains exactly one \
@@ -1025,7 +1457,7 @@ let looks_like_a_link u =
   (Uri.scheme u = Some "http" || Uri.scheme u = Some "https")
   && (match Uri.host u with None | Some "" -> false | Some _ -> true)
 
-let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
+let entry_of_item ch_link ch_updated (it: Strict.item) : Atom.entry =
   let author = match it.author with
     | Some a ->
        let name, email = extract_name_email a in
@@ -1130,8 +1562,7 @@ let entry_of_item ch_link ch_updated (it: item) : Atom.entry =
                | None -> ch_updated);
   }
 
-
-let more_recent_of_item date (it: item) =
+let more_recent_of_item date (it: Strict.item) =
   match date, it.pubDate with
   | _, None -> date
   | None, Some _ -> it.pubDate
@@ -1141,7 +1572,7 @@ let max_date_opt d = function
   | None -> d
   | Some d' -> Date.max d d'
 
-let to_atom ?self (ch: channel) : Atom.feed =
+let to_atom ?self (ch: Strict.channel) : Atom.feed =
   let contributors = match ch.webMaster with
     | Some p -> [ { Atom.name = "Webmaster";  uri = None;  email = Some p } ]
     | None -> [] in

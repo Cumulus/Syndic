@@ -3,22 +3,99 @@
 
 module Error : module type of Syndic_error
 
-type image =
+type story =
+  | All of string * Uri.t option * string
+  (** [All(title, xmlbase, description)] *)
+  | Title of string
+  | Description of Uri.t option * string
+  (** [Description(xmlbase, description)] *)
+
+module Relax :
+sig
+  type ('url, 'title, 'link) image =
+  { url   : pos:Xmlm.pos -> Uri.t option -> 'url
+  ; title : pos:Xmlm.pos -> string option -> 'title
+  ; link  : pos:Xmlm.pos -> Uri.t option -> 'link }
+
+  val image : (Uri.t, string, Uri.t) image
+
+  type ('domain, 'port, 'path, 'uri, 'procedure, 'protocol) cloud =
+  { registerProcedure : pos:Xmlm.pos -> string option -> 'procedure
+  ; protocol          : pos:Xmlm.pos -> string option -> 'protocol
+  ; domain            : pos:Xmlm.pos -> string option -> 'domain
+  ; port              : pos:Xmlm.pos -> string option -> 'port
+  ; path              : pos:Xmlm.pos -> string option -> 'path
+  ; uri               : pos:Xmlm.pos -> 'domain -> 'port -> 'path -> 'uri }
+
+  val cloud : (string, int, string, Uri.t, string, string) cloud
+
+  type ('title, 'description, 'name, 'link) textinput =
+  { title       : pos:Xmlm.pos -> string option -> 'title
+  ; description : pos:Xmlm.pos -> string option -> 'description
+  ; name        : pos:Xmlm.pos -> string option -> 'name
+  ; link        : pos:Xmlm.pos -> Uri.t option -> 'link }
+
+  val textinput : (string, string, string, Uri.t) textinput
+
+  type ('url, 'length, 'mime) enclosure =
+  { url    : pos:Xmlm.pos -> Uri.t option -> 'url
+  ; length : pos:Xmlm.pos -> string option -> 'length
+  ; mime   : pos:Xmlm.pos -> string option -> 'mime }
+
+  val enclosure : (Uri.t, int, string) enclosure
+
+  type ('data, 'url) source =
+  { data : pos:Xmlm.pos -> string option -> 'data
+  ; url  : pos:Xmlm.pos -> Uri.t option -> 'url }
+
+  val source : (string, Uri.t) source
+
+  type ('story, 'url_enclosure, 'length_enclosure, 'mime_enclosure,
+        'data_source, 'url_source)
+       item =
+  { story     : pos:Xmlm.pos -> string option -> (Uri.t option * string) option -> 'story
+  ; enclosure : ('url_enclosure, 'length_enclosure, 'mime_enclosure) enclosure
+  ; source    : ('data_source, 'url_source) source }
+
+  val item : (story, Uri.t, int, string, string, Uri.t) item
+
+  type ('title, 'link, 'description, 'domain_cloud, 'port_cloud, 'path_cloud,
+        'uri_cloud, 'procedure_cloud, 'protocol_cloud, 'url_image,
+        'title_image, 'link_image, 'title_textinput, 'description_textinput,
+        'name_textinput, 'link_textinput, 'story_item, 'url_enclosure,
+        'length_enclosure, 'mime_enclosure, 'data_source, 'url_source)
+       channel =
+  { title       : pos:Xmlm.pos -> string option -> 'title
+  ; link        : pos:Xmlm.pos -> Uri.t option -> 'link
+  ; description : pos:Xmlm.pos -> string option -> 'description
+  ; cloud       : ('domain_cloud, 'port_cloud, 'path_cloud, 'uri_cloud, 'procedure_cloud, 'protocol_cloud) cloud
+  ; image       : ('url_image, 'title_image, 'link_image) image
+  ; textInput   : ('title_textinput, 'description_textinput, 'name_textinput, 'link_textinput) textinput
+  ; item        : ('story_item, 'url_enclosure, 'length_enclosure, 'mime_enclosure, 'data_source, 'url_source) item }
+
+  val channel :
+    (string, Uri.t, string, string, int, string, Uri.t, string, string,
+     Uri.t, string, Uri.t, string, string, string, Uri.t, story, Uri.t,
+     int, string, string, Uri.t)
+    channel
+end
+
+type ('url, 'title, 'link) image =
   {
-    url: Uri.t;    (** The URL of a GIF, JPEG or PNG image that represents
-                       the channel. *)
-    title: string; (** Describes the image.  It's used in the ALT
-                       attribute of the HTML <img> tag when the channel is
-                       rendered in HTML.  *)
-    link: Uri.t;   (** The URL of the site, when the channel is rendered,
-                       the image is a link to the site.  (Note, in practice
-                       the image [title] and [link] should have the same
-                       value as the {!channel}'s [title] and [link]. *)
-    width: int;    (** Width of the image in pixels.  Maximum value is 144,
-                       default value is 88. *)
-    height: int;   (** Height of the image in pixels.  Maximum value is 400,
-                       default value is 31. *)
-    description: string option;
+    url         : 'url;   (** The URL of a GIF, JPEG or PNG image that represents
+                              the channel. *)
+    title       : 'title; (** Describes the image.  It's used in the ALT
+                              attribute of the HTML <img> tag when the channel is
+                              rendered in HTML.  *)
+    link        : 'link;  (** The URL of the site, when the channel is rendered,
+                              the image is a link to the site.  (Note, in practice
+                              the image [title] and [link] should have the same
+                              value as the {!channel}'s [title] and [link]. *)
+    width       : int;    (** Width of the image in pixels.  Maximum value is 144,
+                              default value is 88. *)
+    height      : int;    (** Height of the image in pixels.  Maximum value is 400,
+                              default value is 31. *)
+    description : string option;
     (** contains text that is included in the TITLE attribute of the
         link formed around the image in the HTML rendering. *)
   }
@@ -29,11 +106,11 @@ type image =
     {{: http://www.rssboard.org/rss-specification#ltimagegtSubelementOfLtchannelgt} See RSS 2.0 about <image>}.
  *)
 
-type cloud =
+type ('uri, 'procedure, 'protocol) cloud =
   {
-    uri: Uri.t;  (** The URI of the cloud (domain, port, path). *)
-    registerProcedure: string;
-    protocol: string;
+    uri               : 'uri;       (** The URI of the cloud (domain, port, path). *)
+    registerProcedure : 'procedure;
+    protocol          : 'protocol;
   }
 (** [cloud] is an optional sub-element of {!channel}.  It specifies a
     web service that supports the rssCloud interface which can be
@@ -53,15 +130,15 @@ type cloud =
  *)
 
 
-type textinput =
+type ('title, 'description, 'name, 'link) textinput =
   {
-    title: string;       (** The label of the Submit button in the text
-                             input area.  *)
-    description: string; (** Explains the text input area. *)
-    name: string;        (** The name of the text object in the text
-                             input area. *)
-    link: Uri.t;         (** The URL of the CGI script that processes
-                             text input requests. *)
+    title       : 'title;       (** The label of the Submit button in the text
+                                    input area.  *)
+    description : 'description; (** Explains the text input area. *)
+    name        : 'name;        (** The name of the text object in the text
+                                    input area. *)
+    link        : 'link;        (** The URL of the CGI script that processes
+                                    text input requests. *)
   }
 (** A {!channel} may optionally contain a [textInput] sub-element,
     which contains four required sub-elements.
@@ -75,8 +152,8 @@ type textinput =
 
 type category =
   {
-    data: string;
-    domain: Uri.t option;
+    data   : string;
+    domain : Uri.t option;
   }
 (** [category] is an optional sub-element of {!item}.
     - [data] is A forward-slash-separated string that identifies a
@@ -98,11 +175,11 @@ type category =
     parts of the same domain.
  *)
 
-type enclosure =
+type ('url, 'length, 'mime) enclosure =
   {
-    url: Uri.t;
-    length: int;
-    mime: string;
+    url    : 'url;
+    length : 'length;
+    mime   : 'mime;
   }
 (** [enclosure] is an optional sub-element of {!item}.  It has three
     required attributes.
@@ -117,8 +194,8 @@ type enclosure =
 
 type guid =
   {
-    data: Uri.t;     (** Must be unique *)
-    permalink: bool; (** default [true] *)
+    data      : Uri.t; (** Must be unique *)
+    permalink : bool;  (** default [true] *)
   }
 (** [guid] is an optional sub-element of {!item}.  "guid" stands for
     globally unique identifier.  It's a string that uniquely
@@ -145,10 +222,10 @@ type guid =
     url, or a url to anything in particular.
  *)
 
-type source =
+type ('data, 'url) source =
   {
-    data: string;
-    url: Uri.t;
+    data : 'data;
+    url  : 'url;
   }
 (** [source] is an optional sub-element of {!item}.
     - [data] is the name of the RSS channel that the item came from,
@@ -167,25 +244,20 @@ type source =
     {[<source url="http://www.tomalak.org/links2.xml">Tomalak's Realm</source>]}
  *)
 
-type story =
-  | All of string * Uri.t option * string
-  (** [All(title, xmlbase, description)] *)
-  | Title of string
-  | Description of Uri.t option * string
-  (** [Description(xmlbase, description)] *)
-
-type item =
+type ('story,
+      'url_enclosure, 'length_enclosure, 'mime_enclosure,
+      'data_source, 'url_source) item =
   {
-    story: story;
-    content: Uri.t option * string;
-    link: Uri.t option;
-    author:  string option;
-    category: category option;
-    comments: Uri.t option;
-    enclosure: enclosure option;
-    guid: guid option;
-    pubDate: Syndic_date.t option;
-    source: source option;
+    story     : 'story;
+    content   : Uri.t option * string;
+    link      : Uri.t option;
+    author    : string option;
+    category  : category option;
+    comments  : Uri.t option;
+    enclosure : ('url_enclosure, 'length_enclosure, 'mime_enclosure) enclosure option;
+    guid      : guid option;
+    pubDate   : Syndic_date.t option;
+    source    : ('data_source, 'url_source) source option;
   }
 (** A {!channel} may contain any number of [item]s.  An item may
     represent a "story" — much like a story in a newspaper or
@@ -215,29 +287,35 @@ type item =
  *)
 
 
-type channel =
+type ('title, 'link, 'description,
+      'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+      'url_image, 'title_image, 'link_image,
+      'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+      'story_item,
+      'url_enclosure, 'length_enclosure, 'mime_enclosure,
+      'data_source, 'url_source) channel =
   {
-    title: string;
-    link: Uri.t;
-    description: string;
-    language: string option;
-    copyright: string option;
-    managingEditor: string option;
-    webMaster: string option;
-    pubDate: Syndic_date.t option;
-    lastBuildDate: Syndic_date.t option;
-    category: string option;
-    generator: string option;
-    docs: Uri.t option;
-    cloud: cloud option;
-    ttl: int option; (** {{:
-      http://www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt} See RSS 2.0 about <ttl> } *)
-    image: image option;
-    rating: int option; (* lol *)
-    textInput: textinput option;
-    skipHours: int option;
-    skipDays: int option;
-    items: item list;
+    title          : 'title;
+    link           : 'link;
+    description    : 'description;
+    language       : string option;
+    copyright      : string option;
+    managingEditor : string option;
+    webMaster      : string option;
+    pubDate        : Syndic_date.t option;
+    lastBuildDate  : Syndic_date.t option;
+    category       : string option;
+    generator      : string option;
+    docs           : Uri.t option;
+    cloud          : ('uri_cloud, 'procedure_cloud, 'protocol_cloud) cloud option;
+    ttl            : int option; (** {{                                                                                      :
+      http         : //www.rssboard.org/rss-specification#ltcloudgtSubelementOfLtchannelgt} See RSS 2.0 about <ttl> } *)
+    image          : ('url_image, 'title_image, 'link_image) image option;
+    rating         : int option; (* lol *)
+    textInput      : ('title_textinput, 'description_textinput, 'name_textinput, 'link_textinput) textinput option;
+    skipHours      : int option;
+    skipDays       : int option;
+    items          : ('story_item, 'url_enclosure, 'length_enclosure, 'mime_enclosure, 'data_source, 'url_source) item list;
   }
 (** Here's a list of the required channel elements, each with a brief
     description, an example, and where available, a pointer to a more
@@ -309,18 +387,25 @@ type channel =
     See RSS 2.0 about <channel>}
  *)
 
+module Strict :
+sig
+  type nonrec item = (story, Uri.t, int, string, string, Uri.t) item
+  type nonrec channel = (string, Uri.t, string, Uri.t, string, string, Uri.t, string, Uri.t, string, string, string, Uri.t, story, Uri.t, int, string, string, Uri.t) channel
+end
 
-val parse : ?xmlbase: Uri.t -> Xmlm.input -> channel
+
+
+val parse : ?xmlbase: Uri.t -> Xmlm.input -> Strict.channel
 (** [parse xml] returns the channel corresponding to [xml].
 
     Raise [Error.Expected], [Error.Size_Exceeded] or
     [Error.Item_expectation] if [xml] is not a valid RSS2 document. *)
 
-val read : ?xmlbase: Uri.t -> string -> channel
+val read : ?xmlbase: Uri.t -> string -> Strict.channel
 (** [read fname] reads the file name [fname] and parses it.
     For the optional parameters, see {!parse}. *)
 
-val to_atom : ?self: Uri.t -> channel -> Syndic_atom.feed
+val to_atom : ?self: Uri.t -> Strict.channel -> Syndic_atom.feed
 (** [to_atom ch] returns an Atom feed that (mostly) contains the same
     information.
 
