@@ -53,7 +53,8 @@ sig
   type ('story, 'url_enclosure, 'length_enclosure, 'mime_enclosure,
         'data_source, 'url_source)
        item =
-  { story     : pos:Xmlm.pos -> string option -> (Uri.t option * string) option -> 'story
+  { story     : pos:Xmlm.pos -> string option ->
+                (Uri.t option * string) option -> 'story
   ; enclosure : ('url_enclosure, 'length_enclosure, 'mime_enclosure) enclosure
   ; source    : ('data_source, 'url_source) source }
 
@@ -68,16 +69,21 @@ sig
   { title       : pos:Xmlm.pos -> string option -> 'title
   ; link        : pos:Xmlm.pos -> Uri.t option -> 'link
   ; description : pos:Xmlm.pos -> string option -> 'description
-  ; cloud       : ('domain_cloud, 'port_cloud, 'path_cloud, 'uri_cloud, 'procedure_cloud, 'protocol_cloud) cloud
+  ; cloud       : ('domain_cloud, 'port_cloud, 'path_cloud, 'uri_cloud,
+                   'procedure_cloud, 'protocol_cloud) cloud
   ; image       : ('url_image, 'title_image, 'link_image) image
-  ; textInput   : ('title_textinput, 'description_textinput, 'name_textinput, 'link_textinput) textinput
-  ; item        : ('story_item, 'url_enclosure, 'length_enclosure, 'mime_enclosure, 'data_source, 'url_source) item }
+  ; textInput   : ('title_textinput, 'description_textinput, 'name_textinput,
+                   'link_textinput) textinput
+  ; item        : ('story_item, 'url_enclosure, 'length_enclosure,
+                   'mime_enclosure, 'data_source, 'url_source) item }
 
   val channel :
     (string, Uri.t, string, string, int, string, Uri.t, string, string,
      Uri.t, string, Uri.t, string, string, string, Uri.t, story, Uri.t,
      int, string, string, Uri.t)
     channel
+
+  val ignore : pos:Xmlm.pos -> 'a -> 'a
 end
 
 type ('url, 'title, 'link) image =
@@ -390,10 +396,28 @@ type ('title, 'link, 'description,
 module Strict :
 sig
   type nonrec item = (story, Uri.t, int, string, string, Uri.t) item
-  type nonrec channel = (string, Uri.t, string, Uri.t, string, string, Uri.t, string, Uri.t, string, string, string, Uri.t, story, Uri.t, int, string, string, Uri.t) channel
+  type nonrec channel = (string, Uri.t, string, Uri.t, string, string, Uri.t,
+                         string, Uri.t, string, string, string, Uri.t, story,
+                         Uri.t, int, string, string, Uri.t) channel
 end
 
-
+val relax : ?xmlbase: Uri.t ->
+  ('title, 'link, 'description,
+   'domain_cloud, 'port_cloud, 'path_cloud, 'uri_cloud, 'procedure_cloud,
+                  'protocol_cloud,
+   'url_image, 'title_image, 'link_image,
+   'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+   'story_item,
+   'url_enclosure, 'length_enclosure, 'mime_enclosure,
+   'data_source, 'url_source) Relax.channel ->
+  Xmlm.input ->
+  ('title, 'link, 'description,
+   'uri_cloud, 'procedure_cloud, 'protocol_cloud,
+   'url_image, 'title_image, 'link_image,
+   'title_textinput, 'description_textinput, 'name_textinput, 'link_textinput,
+   'story_item,
+   'url_enclosure, 'length_enclosure, 'mime_enclosure,
+   'data_source, 'url_source) channel
 
 val parse : ?xmlbase: Uri.t -> Xmlm.input -> Strict.channel
 (** [parse xml] returns the channel corresponding to [xml].
