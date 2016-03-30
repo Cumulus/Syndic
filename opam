@@ -11,27 +11,35 @@ bug-reports:  "https://github.com/Cumulus/Syndic/issues"
 install:      ["ocaml" "setup.ml" "-install"]
 remove:       ["ocamlfind" "remove" "syndic"]
 
+substs: [ "lib/META" ]
+
 build: [
-  ["ocaml" "setup.ml" "-configure" "--prefix" prefix]
-  ["ocaml" "setup.ml" "-build"]
+  ["./configure"
+   "--disable-calendar" {ptime:installed}
+   "--%{ptime:enable}%-ptime"
+   "--prefix=%{prefix}%"]
+  [make]
 ]
 build-test: [
-  ["ocaml" "setup.ml" "-configure" "--enable-tests"]
-  ["ocaml" "setup.ml" "-build"]
-  ["ocaml" "setup.ml" "-test"]
+  ["./configure"
+   "--enable-tests"
+   "--disable-calendar" {ptime:installed}
+   "--%{ptime:enable}%-ptime"
+   "--prefix=%{prefix}%"]
+  [make "test"]
 ]
 build-doc: ["ocaml" "setup.ml" "-doc"]
 
 depends: [
-  "calendar" {>= "2.03.2"}
-  "ssl" {test}
-  "tls" {test}
-  "cohttp" {test}
-  "lwt" {test}
+  ("calendar" {>= "2.03.2"} | "ptime")
+  "ssl"       {test}
+  "tls"       {test}
+  "cohttp"    {test}
+  "lwt"       {test}
   "ocamlfind" {build}
-  "oasis" {build}
-  "uri" {>= "1.9"}
-  "xmlm" {>= "1.2.0"}
+  "oasis"     {build}
+  "uri"       {>= "1.9"}
+  "xmlm"      {>= "1.2.0"}
 ]
 
 available: [ocaml-version >= "4.01"]
