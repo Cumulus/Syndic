@@ -44,7 +44,7 @@ let subst_rule file args =
        let ifile = env (file ^ ".in") in
        let ic = open_in ifile in
        let ilen = in_channel_length ic in
-       let content = Bytes.create ilen in
+       let content = String.make ilen ' ' in
 
        really_input ic content 0 ilen;
 
