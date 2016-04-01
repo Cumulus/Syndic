@@ -40,6 +40,7 @@ depends: [
   "oasis"     {build}
   "uri"       {>= "1.9"}
   "xmlm"      {>= "1.2.0"}
+  "base-bytes"
 ]
 
 available: [ocaml-version >= "4.01"]
