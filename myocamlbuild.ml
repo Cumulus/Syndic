@@ -83,6 +83,9 @@ let () = dispatch
          link_rule
            "lib/ptime/syndic_date.ml"
            "lib/syndic_date.ml";
+         link_rule
+           "lib/ptime/syndic_date.mli"
+           "lib/syndic_date.mli";
        end;
 
        if has_calendar
@@ -97,6 +100,9 @@ let () = dispatch
          link_rule
            "lib/calendar/syndic_date.ml"
            "lib/syndic_date.ml";
+         link_rule
+           "lib/calendar/syndic_date.mli"
+           "lib/syndic_date.mli";
        end;
 
        dispatch_default After_hygiene
