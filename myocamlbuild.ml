@@ -78,6 +78,8 @@ let () = dispatch
            (S [A "-package"; A "ptime"]);
          flag ["ocaml"; "link"]
            (S [A "-package"; A "ptime"]);
+         flag ["ocaml"; "doc"]
+           (S [A "-package"; A "ptime"]);
 
 
          link_rule
@@ -96,6 +98,9 @@ let () = dispatch
            (S [A "-package"; A "calendar"]);
          flag ["ocaml"; "link"]
            (S [A "-package"; A "calendar"]);
+         flag ["ocaml"; "doc"]
+           (S [A "-package"; A "calendar"]);
+
 
          link_rule
            "lib/calendar/syndic_date.ml"
