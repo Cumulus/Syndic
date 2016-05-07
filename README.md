@@ -12,7 +12,7 @@ Build Requirements
 ==================
 
  * OCaml >= 4.01.0
- * Calendar >= 2.03.2
+ * Ptime >= 0.8.0
  * Xmlm >= 1.2.0
  * Uri >= 1.3.1
 
