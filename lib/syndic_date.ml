@@ -90,6 +90,8 @@ let of_rfc822 s =
 
 type month =
   Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec
+type day =
+  Thu | Fri | Sat | Sun | Mon | Tue | Wed
 
 let string_of_month = function
   | Jan -> "Jan"  | Feb -> "Feb"  | Mar -> "Mar"  | Apr -> "Apr"  | May -> "May"
@@ -103,17 +105,14 @@ let month_of_date =
   months.(i)
 
 (* RFC3339 date *)
-let of_rfc3339 s = Ptime.of_rfc3339 s
-  |> function Result.Ok (t, Some tz_offset_s, _) ->
-              Ptime.to_date_time ~tz_offset_s t
-              |> Ptime.of_date_time
-              |> (function Some x -> x
-                         | None -> invalid_arg(sprintf "Syndic.Date.of_string: cannot parse %S" s))
-            | Result.Ok (t, None, _) ->
-              Ptime.to_date_time t |> Ptime.of_date_time
-              |> (function Some x -> x
-                         | None -> invalid_arg(sprintf "Syndic.Date.of_string: cannot parse %S" s))
-            | _ -> invalid_arg(sprintf "Syndic.Date.of_string: cannot parse %S" s)
+let of_rfc3339 s =
+  match Ptime.of_rfc3339 s with
+  | Result.Error _ ->
+    invalid_arg (sprintf "Syndic.Date.of_string: cannot parse %S" s)
+  | Result.Ok (t, tz_offset_s, _) ->
+    (match Ptime.of_date_time @@ Ptime.to_date_time ?tz_offset_s t with
+     | Some x -> x
+     | None -> invalid_arg (sprintf "Syndic.Data.of_string: cannot part %S" s))
 
 let to_rfc3339 d =
   (* Example: 2014-03-19T15:51:25.050-07:00 *)
@@ -122,37 +121,35 @@ let to_rfc3339 d =
 (* Convenience functions *)
 
 let day_of_week =
-  let wday = [| `Thu; `Fri; `Sat; `Sun; `Mon; `Tue; `Wed |] in
+  let wday = [| Thu; Fri; Sat; Sun; Mon; Tue; Wed |] in
   fun t ->
     let i = fst Ptime.(Span.to_d_ps @@ to_span t) mod 7 in
     wday.(if i < 0 then 7 + i else i)
 
 let string_of_day = function
-  | `Thu -> "Thu" | `Fri -> "Fri" | `Sat -> "Sat" | `Sun -> "Sun"
-  | `Mon -> "Mon" | `Tue -> "Tue" | `Wed -> "Wed"
+  | Thu -> "Thu" | Fri -> "Fri" | Sat -> "Sat" | Sun -> "Sun"
+  | Mon -> "Mon" | Tue -> "Tue" | Wed -> "Wed"
 
 let year t =
-  Ptime.to_date t
-  |> fun (year, _, _) -> year
+  let (year, _, _) = Ptime.to_date t in year
 
 let month = month_of_date
 
 let day t =
-  Ptime.to_date_time t
-  |> fun ((_, _, day), _) -> day
+  let ((_, _, day), _) = Ptime.to_date_time t
+  in day
 
 let hour t =
-  Ptime.to_date_time t
-  |> fun (_, ((hh, _, _), _)) -> hh
+  let (_, ((hh, _, _), _)) = Ptime.to_date_time t
+  in hh
 
 let minute t =
-  Ptime.to_date_time t
-  |> fun (_, ((_, mm, _), _)) -> mm
+  let (_, ((_, mm, _), _)) = Ptime.to_date_time t
+  in mm
 
 let second t =
-  Ptime.to_date_time t
-  |> fun (_, ((_, _, ss), _)) -> ss
-  |> float_of_int
+  let (_, ((_, _, ss), _)) = Ptime.to_date_time t
+  in float_of_int ss
 
 let to_rfc822 t =
   (* Example: Sat, 25 Sep 2010 08:01:00 -0700 *)
