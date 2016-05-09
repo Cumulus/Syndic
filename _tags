@@ -1,4 +1,53 @@
 # OASIS_START
+# DO NOT EDIT (digest: c1b14cf7fcc0fc34b6c78350b922a8fa)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+true: annot, bin_annot
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library syndic
+"lib/syndic.cmxs": use_syndic
+<lib/*.ml{,i,y}>: package(ptime)
+<lib/*.ml{,i,y}>: package(uri)
+<lib/*.ml{,i,y}>: package(xmlm)
+# Executable main
+"bin/main.byte": package(ptime)
+"bin/main.byte": package(uri)
+"bin/main.byte": package(xmlm)
+"bin/main.byte": use_syndic
+<bin/*.ml{,i,y}>: package(ptime)
+<bin/*.ml{,i,y}>: package(uri)
+<bin/*.ml{,i,y}>: package(xmlm)
+<bin/*.ml{,i,y}>: use_syndic
+# Executable test
+<test/test.{native,byte}>: package(cohttp.lwt)
+<test/test.{native,byte}>: package(lwt)
+<test/test.{native,byte}>: package(ptime)
+<test/test.{native,byte}>: package(uri)
+<test/test.{native,byte}>: package(xmlm)
+<test/test.{native,byte}>: use_syndic
+# Executable test_decisions
+<test/test_decisions.{native,byte}>: package(cohttp.lwt)
+<test/test_decisions.{native,byte}>: package(lwt)
+<test/test_decisions.{native,byte}>: package(ptime)
+<test/test_decisions.{native,byte}>: package(uri)
+<test/test_decisions.{native,byte}>: package(xmlm)
+<test/test_decisions.{native,byte}>: use_syndic
+<test/*.ml{,i,y}>: package(cohttp.lwt)
+<test/*.ml{,i,y}>: package(lwt)
+<test/*.ml{,i,y}>: package(ptime)
+<test/*.ml{,i,y}>: package(uri)
+<test/*.ml{,i,y}>: package(xmlm)
+<test/*.ml{,i,y}>: use_syndic
 # OASIS_STOP
 true: annot
 true: safe_string

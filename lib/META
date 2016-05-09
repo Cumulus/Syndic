@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: 8c0f9a046f4244be8ae5f2a333ff68f0)
+version = "1.5"
+description = "RSS1, RSS2, Atom and OPML1 parsing"
+requires = "xmlm uri ptime"
+archive(byte) = "syndic.cma"
+archive(byte, plugin) = "syndic.cma"
+archive(native) = "syndic.cmxa"
+archive(native, plugin) = "syndic.cmxs"
+exists_if = "syndic.cma"
+# OASIS_STOP
+

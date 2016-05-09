@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: 3362d4f0c338a5e645ce28dcd24c027a)
+lib/Syndic
+lib/Syndic_rss1
+lib/Syndic_rss2
+lib/Syndic_atom
+lib/Syndic_opml1
+lib/Syndic_date
+lib/Syndic_xml
+lib/Syndic_error
+lib/Syndic_w3c
+# OASIS_STOP
