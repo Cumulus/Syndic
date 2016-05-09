@@ -17,4 +17,29 @@
 <link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic.W3C</title>
 </head>
 <body>
-<code class="code">(<span class="keyword">module</span>&nbsp;<span class="constructor">Syndic_w3c</span>)</code></body></html>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">module</span>&nbsp;<span class="constructor">Error</span>&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">sig</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t&nbsp;=&nbsp;<span class="constructor">Xmlm</span>.pos&nbsp;*&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Error</span>&nbsp;<span class="keyword">of</span>&nbsp;t<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_string&nbsp;:&nbsp;exn&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;error&nbsp;=&nbsp;<span class="constructor">Syndic_w3c</span>.error<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;warning&nbsp;=&nbsp;<span class="constructor">Syndic_w3c</span>.warning<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;kind&nbsp;=&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="constructor">Syndic_w3c</span>.kind<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;error&nbsp;:&nbsp;error&nbsp;kind<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;warning&nbsp;:&nbsp;warning&nbsp;kind<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;t&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="constructor">Syndic_w3c</span>.t&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;kind&nbsp;:&nbsp;<span class="keywordsign">'</span>a&nbsp;kind;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;line&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;text&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;element&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parent&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;url&nbsp;:&nbsp;[&lt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Data</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Uri</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Uri</span>.t&nbsp;]&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Uri</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_error&nbsp;:&nbsp;<span class="keywordsign">'</span>a&nbsp;t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Error</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;parse&nbsp;:&nbsp;<span class="constructor">Xmlm</span>.input&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;error&nbsp;t&nbsp;list&nbsp;*&nbsp;warning&nbsp;t&nbsp;list<br>
+<span class="keyword">end</span></code></body></html>
