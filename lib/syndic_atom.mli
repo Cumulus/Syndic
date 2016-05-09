@@ -7,7 +7,12 @@ module Error : module type of Syndic_error
 
 (** A {{:http://tools.ietf.org/html/rfc4287#section-3.1}text construct}.
     It contains human-readable text, usually in small quantities.  The
-    content of Text constructs is Language-Sensitive. *)
+    content of Text constructs is Language-Sensitive.
+
+    Since the constructors [Text], [Html] or [Xhtml] are shadowed by those of
+    the same name in the definition of {!type:content}, you may need a type
+    annotation to disambiguate the two.
+*)
 type text_construct =
   | Text of string (** [Text(content)] *)
   | Html of Uri.t option * string
