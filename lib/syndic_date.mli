@@ -1,6 +1,6 @@
 (** Minimal date module required by Syndic. *)
 
-type t = CalendarLib.Calendar.t
+type t = Ptime.t
 (** A date with time. *)
 
 val epoch : t
@@ -41,4 +41,3 @@ val day : t -> int
 val hour : t -> int
 val minute : t -> int
 val second : t -> float
-;;

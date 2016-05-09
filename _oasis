@@ -8,7 +8,7 @@ Authors:                Romain Calascibetta, Christophe Troestler
 Maintainers:            Romain Calascibetta <romain.calascibetta@gmail.com>
 Homepage:               https://github.com/Cumulus/Syndic
 License:                MIT
-Plugins:                META (0.3), DevFiles (0.3)
+Plugins:                DevFiles (0.4), META (0.4)
 BuildTools:             ocamlbuild
 OCamlVersion:           >= 4.01
 FilesAB:                lib/syndic_conf.ml.ab
@@ -16,7 +16,7 @@ AlphaFeatures:          ocamlbuild_more_args
 
 Library syndic
   Path:                 lib
-  BuildDepends:         xmlm (>= 1.2.0), uri (>= 1.9), calendar (>= 2.03.2)
+  BuildDepends:         xmlm (>= 1.2.0), uri (>= 1.9), ptime
   Modules:              Syndic, Syndic_rss1, Syndic_rss2, Syndic_atom,
                         Syndic_opml1, Syndic_date, Syndic_xml, Syndic_error,
                         Syndic_w3c
@@ -39,9 +39,9 @@ Executable main
   BuildDepends:         syndic
 
 SourceRepository master
-  Type:       git
-  Location:   https://github.com/Cumulus/Syndic.git
-  Browser:    https://github.com/Cumulus/Syndic
+  Type:                 git
+  Location:             https://github.com/Cumulus/Syndic.git
+  Browser:              https://github.com/Cumulus/Syndic
 
 Test test
   Run$:                 flag(tests)

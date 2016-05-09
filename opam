@@ -12,26 +12,28 @@ install:      ["ocaml" "setup.ml" "-install"]
 remove:       ["ocamlfind" "remove" "syndic"]
 
 build: [
-  ["ocaml" "setup.ml" "-configure" "--prefix" prefix]
-  ["ocaml" "setup.ml" "-build"]
+  ["./configure"
+   "--prefix=%{prefix}%"]
+  [make]
 ]
 build-test: [
-  ["ocaml" "setup.ml" "-configure" "--enable-tests"]
-  ["ocaml" "setup.ml" "-build"]
-  ["ocaml" "setup.ml" "-test"]
+  ["./configure"
+   "--enable-tests"
+   "--prefix=%{prefix}%"]
+  [make "test"]
 ]
 build-doc: ["ocaml" "setup.ml" "-doc"]
 
 depends: [
-  "calendar" {>= "2.03.2"}
-  "ssl" {test}
-  "tls" {test}
-  "cohttp" {test}
-  "lwt" {test}
+  "ssl"       {test}
+  "tls"       {test}
+  "cohttp"    {test}
+  "lwt"       {test}
   "ocamlfind" {build}
-  "oasis" {build}
-  "uri" {>= "1.9"}
-  "xmlm" {>= "1.2.0"}
+  "oasis"     {build}
+  "uri"       {>= "1.9"}
+  "xmlm"      {>= "1.2.0"}
+  "ptime"
 ]
 
 available: [ocaml-version >= "4.01"]

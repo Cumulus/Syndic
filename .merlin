@@ -6,4 +6,4 @@ B _build/lib
 B _build/src
 B _build/test
 
-PKG xmlm uri calendar lwt cohttp
+PKG xmlm uri calendar ptime lwt cohttp ocamlbuild oasis

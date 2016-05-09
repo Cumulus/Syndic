@@ -61,7 +61,7 @@ let tests : ([> src ] * [< fmt ] * result) list =
     (`Uri (Uri.of_string "http://ocaml.org/feed.xml"), `Atom, Ok);
     (`Uri (Uri.of_string "http://korben.info/feed"), `Rss2, Ok);
     (`Uri (Uri.of_string "http://linuxfr.org/journaux.atom"), `Atom, Ok);
-    (`Uri (Uri.of_string "https://www.reddit.com/r/ocaml/.rss"), `Rss2, Ok);
+    (`Uri (Uri.of_string "https://www.reddit.com/r/ocaml/.rss"), `Atom, Ok);
     (`Data ("<?xml version='1.0' encoding='utf-8'?> \
              <feed xmlns='http://www.w3.org/2015/Atom'> \
              <title></title></feed>"), `Atom, W3CError []);
