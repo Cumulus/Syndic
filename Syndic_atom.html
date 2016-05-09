@@ -37,7 +37,7 @@
 </div>
 <hr width="100%">
 
-<pre><span class="keyword">module</span> <a href="Syndic_atom.Error.html">Error</a>: <code class="type">module type of <a href="Syndic_error.html">Syndic_error</a></code></pre><br>
+<pre><span class="keyword">module</span> <a href="Syndic_atom.Error.html">Error</a>: <code class="type">module type of Syndic_error</code></pre><br>
 <h2 id="2_StructureofAtomdocument">Structure of Atom document</h2><br>
 
 <pre><code><span id="TYPEtext_construct"><span class="keyword">type</span> <code class="type"></code>text_construct</span> = </code></pre><table class="typetable">
@@ -46,30 +46,21 @@
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTtext_construct.Text"><span class="constructor">Text</span></span> <span class="keyword">of</span> <code class="type">string</code></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-<code class="code"><span class="constructor">Text</span>(content)</code><br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><code class="code"><span class="constructor">Text</span>(content)</code></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTtext_construct.Html"><span class="constructor">Html</span></span> <span class="keyword">of</span> <code class="type">Uri.t option * string</code></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-<code class="code"><span class="constructor">Html</span>(xmlbase, content)</code> where the content is left unparsed.<br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><code class="code"><span class="constructor">Html</span>(xmlbase, content)</code> where the content is left unparsed.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTtext_construct.Xhtml"><span class="constructor">Xhtml</span></span> <span class="keyword">of</span> <code class="type">Uri.t option * <a href="Syndic_xml.html#TYPEt">Syndic_xml.t</a> list</code></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-<code class="code"><span class="constructor">Xhtml</span>(xmlbase, content)</code><br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><code class="code"><span class="constructor">Xhtml</span>(xmlbase, content)</code></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr></table>
 
 <div class="info ">
@@ -254,75 +245,57 @@ The <code class="code">id</code> element conveys a permanent, universally unique
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTrel.Alternate"><span class="constructor">Alternate</span></span></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-Signifies that the URI in the value of the link
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Signifies that the URI in the value of the link
                   <code class="code">href</code> field identifies an alternate version of the
-                  resource described by the containing element.<br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+                  resource described by the containing element.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTrel.Related"><span class="constructor">Related</span></span></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-Signifies that the URI in the value of the link <code class="code">href</code>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Signifies that the URI in the value of the link <code class="code">href</code>
                 field identifies a resource related to the resource
-                described by the containing element.<br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+                described by the containing element.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTrel.Self"><span class="constructor">Self</span></span></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-Signifies that the URI in the value of the link <code class="code">href</code>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Signifies that the URI in the value of the link <code class="code">href</code>
              field identifies a resource equivalent to the containing
-             element.<br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+             element.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTrel.Enclosure"><span class="constructor">Enclosure</span></span></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-Signifies that the IRI in the value of the link <code class="code">href</code> field
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Signifies that the IRI in the value of the link <code class="code">href</code> field
          identifies a related resource that is potentially large in
          size and might require special handling.  When <code class="code"><span class="constructor">Enclosure</span></code> is
-         specified, the length attribute SHOULD be provided.<br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+         specified, the length attribute SHOULD be provided.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTrel.Via"><span class="constructor">Via</span></span></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-Signifies that the IRI in the value of the link <code class="code">href</code>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Signifies that the IRI in the value of the link <code class="code">href</code>
             field identifies a resource that is the source of the
-            information provided in the containing element.<br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+            information provided in the containing element.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
 <code><span class="keyword">|</span></code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTrel.Link"><span class="constructor">Link</span></span> <span class="keyword">of</span> <code class="type">Uri.t</code></code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-The URI MUST be non-empty and match either the
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >The URI MUST be non-empty and match either the
          "isegment-nz-nc" or the "IRI" production in
          <a href="http://tools.ietf.org/html/rfc3987"> RFC3987</a>.  Note that
          use of a relative reference other than a simple name is not
-         allowed.<br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+         allowed.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr></table>
 
 <div class="info ">
@@ -534,11 +507,8 @@ Indicates the link relation type.
 <code>&nbsp;&nbsp;</code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTsource.contributors">contributors</span>&nbsp;: <code class="type"><a href="Syndic_atom.html#TYPEauthor">author</a> list</code>;</code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-<a href=" http://tools.ietf.org/html/rfc4287#section-4.2.3">
-        See RFC 4287 § 4.2.3 </a><br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><a href=" http://tools.ietf.org/html/rfc4287#section-4.2.3">
+        See RFC 4287 § 4.2.3 </a></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
