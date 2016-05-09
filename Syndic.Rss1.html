@@ -26,9 +26,9 @@
 </div>
 <h1>Module <a href="type_Syndic.Rss1.html">Syndic.Rss1</a> (<a href="code_Syndic.Rss1.html">.ml</a>)</h1>
 
-<pre><span class="keyword">module</span> Rss1: <code class="type"><a href="Syndic_rss1.html">Syndic_rss1</a></code></pre><hr width="100%">
+<pre><span class="keyword">module</span> Rss1: <code class="type">Syndic_rss1</code></pre><hr width="100%">
 
-<pre><span class="keyword">module</span> <a href="Syndic_rss1.Error.html">Error</a>: <code class="type">module type of <a href="Syndic_error.html">Syndic_error</a></code></pre>
+<pre><span class="keyword">module</span> <a href="Syndic_rss1.Error.html">Error</a>: <code class="type">module type of Syndic_error</code></pre>
 <pre><span id="TYPEtitle"><span class="keyword">type</span> <code class="type"></code>title</span> = <code class="type">string</code> </pre>
 <div class="info ">
 A descriptive title for the channel, image, item and textinput.
@@ -188,10 +188,7 @@ Establishes an RDF association between the optional textinput
 <code>&nbsp;&nbsp;</code></td>
 <td align="left" valign="top" >
 <code><span id="TYPEELTchannel.about">about</span>&nbsp;: <code class="type">Uri.t</code>;</code></td>
-<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
-must be unique<br>
-</div>
-</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >must be unique</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
 <td align="left" valign="top" >
