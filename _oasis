@@ -33,6 +33,7 @@ Document "syndic"
     "-docflags '-colorize-code -keep-code -charset utf-8'"
 
 Executable main
+  Build$:               flag(tests)
   Install:              false
   Path:                 bin
   MainIs:               main.ml
