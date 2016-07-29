@@ -1,39 +1,39 @@
 opam-version: "1.2"
-name:         "syndic"
-version:      "1.4"
-dev-repo:     "git+https://github.com/Cumulus/Syndic.git"
-maintainer:   "Romain Calascibetta <romain.calascibetta@gmail.com>"
-author:       ["Romain Calascibetta" "Christophe Troestler"]
-license:      "MIT"
-homepage:     "https://github.com/Cumulus/Syndic"
-bug-reports:  "https://github.com/Cumulus/Syndic/issues"
-
-install:      ["ocaml" "setup.ml" "-install"]
-remove:       ["ocamlfind" "remove" "syndic"]
-
+name: "syndic"
+version: "1.5"
+maintainer: "Romain Calascibetta <romain.calascibetta@gmail.com>"
+authors: [ "Romain Calascibetta"
+           "Christophe Troestler" ]
+license: "MIT"
+homepage: "https://github.com/Cumulus/Syndic"
+dev-repo: "https://github.com/Cumulus/Syndic.git"
+bug-reports: "https://github.com/Cumulus/Syndic/issues"
 build: [
-  ["./configure"
-   "--prefix=%{prefix}%"]
-  [make]
+  ["oasis" "setup"]
+  ["ocaml" "setup.ml" "-configure" "--prefix" prefix]
+  ["ocaml" "setup.ml" "-build"]
+]
+install: ["ocaml" "setup.ml" "-install"]
+remove: [
+  ["ocamlfind" "remove" "syndic"]
 ]
 build-test: [
-  ["./configure"
-   "--enable-tests"
-   "--prefix=%{prefix}%"]
-  [make "test"]
+  ["oasis" "setup"]
+  ["ocaml" "setup.ml" "-configure" "--enable-tests"]
+  ["ocaml" "setup.ml" "-build"]
+  ["ocaml" "setup.ml" "-test"]
 ]
-build-doc: ["ocaml" "setup.ml" "-doc"]
-
+build-doc: [ "ocaml" "setup.ml" "-doc" ]
 depends: [
-  "ssl"       {test}
-  "tls"       {test}
-  "cohttp"    {test}
-  "lwt"       {test}
+  "cohttp" {test}
+  "lwt" {test}
+  "oasis" {build & >= "0.4"}
+  "ocamlbuild" {build}
   "ocamlfind" {build}
-  "oasis"     {build}
-  "uri"       {>= "1.9"}
-  "xmlm"      {>= "1.2.0"}
   "ptime"
+  "ssl" {test}
+  "tls" {test}
+  "uri" {>= "1.9"}
+  "xmlm" {>= "1.2.0"}
 ]
-
-available: [ocaml-version >= "4.01"]
+available: [ ocaml-version >= "4.01" ]

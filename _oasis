@@ -56,7 +56,7 @@ Executable test
   Install:              false
   CompiledObject:       best
   MainIs:               test.ml
-  BuildDepends:         syndic, lwt, cohttp.lwt
+  BuildDepends:         syndic, lwt, cohttp.lwt, ssl, tls
 
 Executable test_decisions
   Path:                 test
@@ -64,4 +64,4 @@ Executable test_decisions
   Install:              false
   CompiledObject:       best
   MainIs:               test_decisions.ml
-  BuildDepends:         syndic, lwt, cohttp.lwt
+  BuildDepends:         syndic, lwt, cohttp.lwt, ssl, tls

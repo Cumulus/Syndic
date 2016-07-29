@@ -6,6 +6,8 @@ DISTFILES = $(shell git ls-files)
 
 CONFIGUREFLAGS = --enable-tests
 
+default: build opam
+
 # OASIS_START
 # DO NOT EDIT (digest: a3c674b4239234cbbe53afe090018954)
 
@@ -50,6 +52,9 @@ configure:
 
 setup.ml: _oasis
 	oasis setup -setup-update dynamic
+
+opam: _oasis
+	oasis2opam --local -y
 
 # Make a tarball
 .PHONY: dist tar
