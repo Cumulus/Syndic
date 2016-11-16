@@ -1,4 +1,5 @@
 type dtd = string option
+module Error = Syndic_error
 
 type t =
   | Node of Xmlm.pos * Xmlm.tag * t list
@@ -11,7 +12,8 @@ let resolve ~xmlbase uri = match xmlbase with
 let of_xmlm input =
   let el tag datas = Node (Xmlm.pos input, tag, datas) in
   let data data = Data (Xmlm.pos input, data) in
-  Xmlm.input_doc_tree ~el ~data input
+  try Xmlm.input_doc_tree ~el ~data input
+  with Xmlm.Error(pos, e) -> raise(Error.Error(pos, Xmlm.error_message e))
 
 let get_position = function
   | Node (pos, _, _) -> pos
@@ -19,14 +21,18 @@ let get_position = function
 
 let rec t_to_xmlm t output =
   match t with
-  | Data (pos, d) -> Xmlm.output output (`Data d)
+  | Data (pos, d) ->
+     (try Xmlm.output output (`Data d)
+      with Xmlm.Error(pos, e) -> raise(Error.Error(pos, Xmlm.error_message e)))
   | Node (pos, tag, t_sub) ->
      Xmlm.output output (`El_start tag);
      List.iter (fun t -> t_to_xmlm t output) t_sub;
-     Xmlm.output output (`El_end)
+     try Xmlm.output output (`El_end)
+     with Xmlm.Error(pos, e) -> raise(Error.Error(pos, Xmlm.error_message e))
 
 let to_xmlm ?dtd t output =
-  Xmlm.output output (`Dtd dtd);
+  (try Xmlm.output output (`Dtd dtd)
+   with Xmlm.Error(pos, e) -> raise(Error.Error(pos, Xmlm.error_message e)));
   t_to_xmlm t output
 
 let to_buffer ?ns_prefix t b =
