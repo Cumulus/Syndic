@@ -17,22 +17,22 @@
 <link title="Syndic_w3c" rel="Chapter" href="Syndic_w3c.html"><title>Syndic_xml</title>
 </head>
 <body>
-<code class="code"><span class="keyword">sig</span>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;dtd&nbsp;=&nbsp;string&nbsp;option
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pos&nbsp;=&nbsp;<span class="constructor">Xmlm</span>.pos
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;tag&nbsp;=&nbsp;<span class="constructor">Xmlm</span>.tag
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t&nbsp;=
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Node</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_xml</span>.pos&nbsp;*&nbsp;<span class="constructor">Syndic_xml</span>.tag&nbsp;*&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;list
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Data</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_xml</span>.pos&nbsp;*&nbsp;string
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;resolve&nbsp;:&nbsp;xmlbase:<span class="constructor">Uri</span>.t&nbsp;option&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Uri</span>.t
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_position&nbsp;:&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.pos
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;input_of_channel&nbsp;:&nbsp;<span class="constructor">Pervasives</span>.in_channel&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.input
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_xmlm&nbsp;:&nbsp;<span class="constructor">Xmlm</span>.input&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.dtd&nbsp;*&nbsp;<span class="constructor">Syndic_xml</span>.t
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;make_output&nbsp;:
-&nbsp;&nbsp;&nbsp;&nbsp;?ns_prefix:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.dest&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.output
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_xmlm&nbsp;:&nbsp;?dtd:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.output&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_string&nbsp;:
-&nbsp;&nbsp;&nbsp;&nbsp;?ns_prefix:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_buffer&nbsp;:
-&nbsp;&nbsp;&nbsp;&nbsp;?ns_prefix:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Buffer</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;dtd&nbsp;=&nbsp;string&nbsp;option<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pos&nbsp;=&nbsp;<span class="constructor">Xmlm</span>.pos<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;tag&nbsp;=&nbsp;<span class="constructor">Xmlm</span>.tag<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Node</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_xml</span>.pos&nbsp;*&nbsp;<span class="constructor">Syndic_xml</span>.tag&nbsp;*&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Data</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Syndic_xml</span>.pos&nbsp;*&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;resolve&nbsp;:&nbsp;xmlbase:<span class="constructor">Uri</span>.t&nbsp;option&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Uri</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Uri</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_position&nbsp;:&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.pos<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;input_of_channel&nbsp;:&nbsp;<span class="constructor">Pervasives</span>.in_channel&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.input<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_xmlm&nbsp;:&nbsp;<span class="constructor">Xmlm</span>.input&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.dtd&nbsp;*&nbsp;<span class="constructor">Syndic_xml</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;make_output&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?ns_prefix:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.dest&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.output<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_xmlm&nbsp;:&nbsp;?dtd:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xmlm</span>.output&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_string&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?ns_prefix:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_buffer&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?ns_prefix:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Syndic_xml</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Buffer</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
 <span class="keyword">end</span></code></body></html>
