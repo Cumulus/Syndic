@@ -9,6 +9,11 @@ let resolve ~xmlbase uri = match xmlbase with
   | None -> uri
   | Some b -> Uri.resolve "" b uri
 
+(* Specialized version of the Xmlm.make_input one. *)
+let input_of_channel fh =
+  (* Xmlm.make_input does not raise any exception. *)
+  Xmlm.make_input (`Channel fh)
+
 let of_xmlm input =
   let el tag datas = Node (Xmlm.pos input, tag, datas) in
   let data data = Data (Xmlm.pos input, data) in
@@ -29,6 +34,11 @@ let rec t_to_xmlm t output =
      List.iter (fun t -> t_to_xmlm t output) t_sub;
      try Xmlm.output output (`El_end)
      with Xmlm.Error(pos, e) -> raise(Error.Error(pos, Xmlm.error_message e))
+
+(* Specialized version of the Xmlm one. *)
+let make_output ?ns_prefix dest =
+  (* Xmlm.make_output does not raise any exception. *)
+  Xmlm.make_output dest ~decl:true ?ns_prefix
 
 let to_xmlm ?dtd t output =
   (try Xmlm.output output (`Dtd dtd)

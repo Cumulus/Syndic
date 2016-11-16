@@ -1271,7 +1271,7 @@ let parse ?self ?xmlbase input =
 let read ?self ?xmlbase fname =
   let fh = open_in fname in
   try
-    let x = parse ?self ?xmlbase (Xmlm.make_input (`Channel fh)) in
+    let x = parse ?self ?xmlbase (XML.input_of_channel fh) in
     close_in fh;
     x
   with e ->
@@ -1513,7 +1513,7 @@ let output_ns_prefix s =
   if s = atom_ns || s = xhtml_ns then Some "" else None
 
 let output feed dest =
-  let o = Xmlm.make_output dest ~decl:true ~ns_prefix:output_ns_prefix in
+  let o = XML.make_output dest ~ns_prefix:output_ns_prefix in
   XML.to_xmlm (to_xml feed) o
 
 let write feed fname =

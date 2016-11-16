@@ -498,8 +498,7 @@ let to_xml (o: t) =
             node "body" (List.map outline_to_xml o.body)  ])
 
 let output opml dest =
-  let o = Xmlm.make_output dest ~decl:true in
-  XML.to_xmlm (to_xml opml) o
+  XML.to_xmlm (to_xml opml) (XML.make_output dest)
 
 let write opml fname =
   let fh = open_out fname in

@@ -572,7 +572,7 @@ let parse ?xmlbase input =
 let read ?xmlbase fname =
   let fh = open_in fname in
   try
-    let x = parse ?xmlbase (Xmlm.make_input (`Channel fh)) in
+    let x = parse ?xmlbase (XML.input_of_channel fh) in
     close_in fh;
     x
   with e ->

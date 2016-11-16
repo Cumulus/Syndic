@@ -14,9 +14,14 @@ val resolve : xmlbase: Uri.t option -> Uri.t -> Uri.t
 
 val get_position : t -> Xmlm.pos
 
+val input_of_channel : in_channel -> Xmlm.input
+
 val of_xmlm : Xmlm.input -> (dtd * t)
 (** [of_xmlm doc] converts an XML document [doc] into a DTD and a
     tree representing the document. *)
+
+val make_output : ?ns_prefix:(string -> string option) ->
+                  Xmlm.dest -> Xmlm.output
 
 val to_xmlm : ?dtd:string -> t -> Xmlm.output -> unit
 
