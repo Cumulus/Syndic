@@ -93,11 +93,11 @@ This can be a brief description of the channel's content, function, source, etc.
     example: "Subscribe to our newsletter for..." or "Search our site's
     archive of..."
     <a href=" http://web.resource.org/rss/1.0/spec#s5.6.2"> See RSS 1.0 § 5.6.2</a>.
-<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;description&gt;{description}&lt;/description&gt;<br>
-<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;only&nbsp;<span class="keyword">for</span>&nbsp;channel&nbsp;<span class="keyword">and</span>&nbsp;textinput<br>
-<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)<br>
-(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;500&nbsp;<span class="keyword">for</span>&nbsp;channel&nbsp;<span class="keyword">and</span>&nbsp;item<br>
-(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;100&nbsp;<span class="keyword">for</span>&nbsp;textinput<br>
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;description&gt;{description}&lt;/description&gt;
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;only&nbsp;<span class="keyword">for</span>&nbsp;channel&nbsp;<span class="keyword">and</span>&nbsp;textinput
+<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;500&nbsp;<span class="keyword">for</span>&nbsp;channel&nbsp;<span class="keyword">and</span>&nbsp;item
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;100&nbsp;<span class="keyword">for</span>&nbsp;textinput
 </code></pre>
 </div>
 </td></tr>
@@ -211,10 +211,10 @@ This can be The URL to which an HTML rendering of the channel title will link,
     <a href=" http://web.resource.org/rss/1.0/spec#s5.4.3"> See RSS 1.0 § 5.4.3</a>, Or the item's URL.
     <a href=" http://web.resource.org/rss/1.0/spec#s5.5.2"> See RSS 1.0 § 5.5.2</a>, Or the URL to which a textinput submission will be directed (using GET).
     <a href=" http://web.resource.org/rss/1.0/spec#s5.6.4"> See RSS 1.0 § 5.6.4</a>
-<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;link&gt;{link}&lt;/link&gt;<br>
-<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;<span class="keyword">for</span>&nbsp;all<br>
-<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)<br>
-(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;500<br>
+<pre class="codepre"><code class="code"><span class="constructor">Syntax</span>:&nbsp;&lt;link&gt;{link}&lt;/link&gt;
+<span class="constructor">Requirement</span>:&nbsp;<span class="constructor">Required</span>&nbsp;<span class="keyword">for</span>&nbsp;all
+<span class="constructor">Model</span>:&nbsp;(<span class="keywordsign">#</span><span class="constructor">PCDATA</span>)
+(<span class="constructor">Suggested</span>)&nbsp;<span class="constructor">Maximum</span>&nbsp;<span class="constructor">Length</span>:&nbsp;500
 </code></pre>
 </div>
 </td></tr>
@@ -246,6 +246,8 @@ The text input field's (variable) name.
 <tr><td><a href="Syndic_opml1.html#TYPEoutline">outline</a> [<a href="Syndic_opml1.html">Syndic_opml1</a>]</td>
 <td></td></tr>
 <tr><td align="left"><br>P</td></tr>
+<tr><td><a href="Syndic_xml.html#TYPEpos">pos</a> [<a href="Syndic_xml.html">Syndic_xml</a>]</td>
+<td></td></tr>
 <tr><td><a href="Syndic_atom.html#TYPEpublished">published</a> [<a href="Syndic_atom.html">Syndic_atom</a>]</td>
 <td><div class="info">
 <code class="code">published</code> is a Date construct indicating an instant in time
@@ -317,6 +319,8 @@ A date with time.
 <tr><td><a href="Syndic_w3c.html#TYPEt">t</a> [<a href="Syndic_w3c.html">Syndic_w3c</a>]</td>
 <td></td></tr>
 <tr><td><a href="Syndic_opml1.html#TYPEt">t</a> [<a href="Syndic_opml1.html">Syndic_opml1</a>]</td>
+<td></td></tr>
+<tr><td><a href="Syndic_xml.html#TYPEtag">tag</a> [<a href="Syndic_xml.html">Syndic_xml</a>]</td>
 <td></td></tr>
 <tr><td><a href="Syndic_atom.html#TYPEtext_construct">text_construct</a> [<a href="Syndic_atom.html">Syndic_atom</a>]</td>
 <td><div class="info">
