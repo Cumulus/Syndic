@@ -70,11 +70,11 @@ let get_html_content html =
 type text_construct =
   | Text of string
   | Html of Uri.t option * string
-  | Xhtml of Uri.t option * Syndic_xml.t list
+  | Xhtml of Uri.t option * XML.t list
 
 let text_construct_of_xml
       ~xmlbase
-      ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
+      ((pos, (tag, attr), data) : XML.pos * XML.tag * t list) =
   let xmlbase = xmlbase_of_attr ~xmlbase attr in
   match find (fun a -> attr_is a "type") attr with
   | Some(_, "html") -> Html(xmlbase, get_html_content data)
@@ -491,7 +491,7 @@ let rights_of_xml ~xmlbase a = `Rights(text_construct_of_xml ~xmlbase a)
 
 (* atomRights = element atom:rights { atomTextConstruct } *)
 let rights_of_xml' ~xmlbase
-                   ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
+                   ((pos, (tag, attr), data) : XML.pos * XML.tag * t list) =
   `Rights(data)
 
 type title = text_construct
@@ -500,7 +500,7 @@ let title_of_xml ~xmlbase a = `Title(text_construct_of_xml ~xmlbase a)
 
 (* atomTitle = element atom:title { atomTextConstruct } *)
 let title_of_xml' ~xmlbase
-                  ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
+                  ((pos, (tag, attr), data) : XML.pos * XML.tag * t list) =
   `Title data
 
 type subtitle = text_construct
@@ -509,7 +509,7 @@ let subtitle_of_xml ~xmlbase a = `Subtitle(text_construct_of_xml ~xmlbase a)
 
 (* atomSubtitle = element atom:subtitle { atomTextConstruct } *)
 let subtitle_of_xml' ~xmlbase
-                     ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
+                     ((pos, (tag, attr), data) : XML.pos * XML.tag * t list) =
   `Subtitle data
 
 type updated = Date.t
@@ -752,7 +752,7 @@ type content' = [
     | atomOutOfLineContent
  *)
 let content_of_xml ~xmlbase
-                   ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
+                   ((pos, (tag, attr), data) : XML.pos * XML.tag * t list) =
   (* MIME ::= attribute type { "text" | "html" }?
               | attribute type { "xhtml" }
               | attribute type { atomMediaType }? *)
@@ -776,7 +776,7 @@ let content_of_xml ~xmlbase
               | Some (_, mime) -> Mime(mime, get_leaf data))
 
 let content_of_xml' ~xmlbase
-                    ((pos, (tag, attr), data) : Xmlm.pos * Xmlm.tag * t list) =
+                    ((pos, (tag, attr), data) : XML.pos * XML.tag * t list) =
   let l = match find (fun a -> attr_is a "src") attr with
     | Some(_, src) -> [`SRC src]
     | None -> [] in
@@ -791,7 +791,7 @@ type summary = text_construct
 (* atomSummary = element atom:summary { atomTextConstruct } *)
 let summary_of_xml ~xmlbase a = `Summary(text_construct_of_xml ~xmlbase a)
 
-let summary_of_xml' ~xmlbase ((_, (_, _), data): Xmlm.pos * Xmlm.tag * t list) =
+let summary_of_xml' ~xmlbase ((_, (_, _), data): XML.pos * XML.tag * t list) =
   `Summary data
 
 type entry =
@@ -1366,7 +1366,7 @@ let set_main_author feed author =
 (* Conversion to XML *)
 
 (* Tag with the Atom namespace *)
-let atom name : Xmlm.tag = ((atom_ns, name), [])
+let atom name : XML.tag = ((atom_ns, name), [])
 
 let add_attr_xmlbase ~xmlbase attrs =
   match xmlbase with

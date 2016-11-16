@@ -1,9 +1,12 @@
 type dtd = string option
 module Error = Syndic_error
 
+type pos = Xmlm.pos
+type tag = Xmlm.tag
+
 type t =
-  | Node of Xmlm.pos * Xmlm.tag * t list
-  | Data of Xmlm.pos * string
+  | Node of pos * tag * t list
+  | Data of pos * string
 
 let resolve ~xmlbase uri = match xmlbase with
   | None -> uri

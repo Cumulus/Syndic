@@ -1,7 +1,7 @@
 module XML : sig
   type t = Syndic_xml.t
 
-  type node = Xmlm.pos * Xmlm.tag * t list
+  type node = Syndic_xml.pos * Syndic_xml.tag * t list
 
   val generate_catcher :
     ?namespaces:string list ->

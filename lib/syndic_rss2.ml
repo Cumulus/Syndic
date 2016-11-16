@@ -93,7 +93,7 @@ let image_size_of_xml ~max ~xmlbase (pos, tag, datas) =
   with Not_found -> raise (Error.Error (pos,
                             ("The content of <"^(get_tag_name tag)^"> MUST be \
                               a non-empty string")))
-     | Failure "int_of_string" -> raise (Error.Error (pos,
+     | Failure _ -> raise (Error.Error (pos,
                             ("The content of <"^(get_tag_name tag)^"> MUST be \
                               an integer")))
 

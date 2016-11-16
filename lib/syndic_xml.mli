@@ -4,15 +4,18 @@ type dtd = string option
 (** The type for the optional
     {{:http://www.w3.org/TR/REC-xml/#dt-doctype}DTD}. *)
 
+type pos = Xmlm.pos
+type tag = Xmlm.tag
+
 (** A XML tree. *)
 type t =
-  | Node of Xmlm.pos * Xmlm.tag * t list
-  | Data of Xmlm.pos * string
+  | Node of pos * tag * t list
+  | Data of pos * string
 
 val resolve : xmlbase: Uri.t option -> Uri.t -> Uri.t
 (** [resolve base uri] resolve the [uri] against the possible base. *)
 
-val get_position : t -> Xmlm.pos
+val get_position : t -> pos
 
 val input_of_channel : in_channel -> Xmlm.input
 

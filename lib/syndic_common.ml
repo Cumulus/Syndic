@@ -5,7 +5,7 @@ module XML = struct
 
   exception Ignore_namespace
 
-  type node = Xmlm.pos * Xmlm.tag * t list
+  type node = pos * tag * t list
 
   let xmlbase_tag = (Xmlm.ns_xml, "base")
 
@@ -24,8 +24,8 @@ module XML = struct
     let in_namespaces ((prefix, _), _) = List.mem prefix namespaces in
     let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name in
     let get_attr_value ((_, value) : Xmlm.attribute) = value in
-    let get_tag_name (((prefix, name), _) : Xmlm.tag) = name in
-    let get_attrs ((_, attrs) : Xmlm.tag) = attrs in
+    let get_tag_name (((prefix, name), _) : tag) = name in
+    let get_attrs ((_, attrs) : tag) = attrs in
     let get_producer name map =
       try Some (List.assoc name map)
       with _ -> None
@@ -101,16 +101,16 @@ module Util = struct
     | e :: tl -> if n > 0 then e :: take tl (n-1) else []
 
 
-  let tag_is (((prefix, name), attrs) : Xmlm.tag) = (=) name
+  let tag_is (((prefix, name), attrs) : XML.tag) = (=) name
   let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
   let datas_has_leaf = List.exists (function | XML.Data _ -> true | _ -> false)
   let get_leaf l  = match find (function XML.Data _ -> true | _ -> false) l with
     | Some (XML.Data (_, s)) -> s
     | _ -> raise Not_found
-  let get_attrs ((_, attrs) : Xmlm.tag) = attrs
+  let get_attrs ((_, attrs) : XML.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
-  let get_tag_name (((prefix, name), _) : Xmlm.tag) = name
+  let get_tag_name (((prefix, name), _) : XML.tag) = name
 
   let is_space c = c = ' ' || c = '\t' || c = '\n' || c = '\r'
 
