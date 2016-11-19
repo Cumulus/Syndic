@@ -995,7 +995,7 @@ let sub_no_braces s i0 i1 =
    "name <email>" or "email (name)".  Try to extract both compnents. *)
 let extract_name_email a =
   try
-    let i = String.index a '@' in
+    let i = String.index a '@' in (* or Not_found *)
     let len = String.length a in
     let i0 = ref(i-1) in
     while !i0 >= 0 && is_valid_local_part a.[!i0] do decr i0 done;
@@ -1006,6 +1006,7 @@ let extract_name_email a =
       let email = String.sub a !i0 (!i1 - !i0) in
       if !i0 > 0 && a.[!i0 - 1] = '<' then decr i0;
       if !i1 < len && a.[!i1] = '>' then incr i1;
+      while !i1 < len && a.[!i1] = ' ' do incr i1 done; (* skip spaces *)
       let name =
         if !i0 <= 0 then
           if !i1 >= len then email (* no name *)
