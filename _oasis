@@ -1,6 +1,6 @@
 OASISFormat:            0.4
 Name:                   syndic
-Version:                1.5.2
+Version:                1.5.3
 Synopsis:               RSS1, RSS2, Atom and OPML1 parsing
 Description:            Pure OCaml Library for parsing and writing
   various types of feeds and subscriber lists.
