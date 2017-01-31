@@ -102,7 +102,7 @@ let month_of_date =
   let months = [| Jan; Feb; Mar; Apr; May; Jun; Jul; Aug; Sep; Oct; Nov; Dec |] in
   fun t ->
   let (_, i, _) = Ptime.to_date t in
-  months.(i)
+  months.(i - 1)
 
 (* RFC3339 date *)
 let of_rfc3339 s =
