@@ -359,7 +359,7 @@ let id_of_xml, id_of_xml' =
   generate_catcher ~leaf_producer make_id,
   generate_catcher ~leaf_producer (fun ~pos x -> `ID x)
 
-let rel_of_string s = match String.lowercase (String.trim s) with
+let rel_of_string s = match String.lowercase_ascii (String.trim s) with
   | "alternate" -> Alternate
   | "related" -> Related
   | "self" -> Self
