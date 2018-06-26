@@ -17,6 +17,7 @@ depends: [
   "uri" {>= "1.9"}
   "xmlm" {>= "1.2.0"}
   "cohttp" {test & >= "1.0.0"}
+  "cohttp-lwt-unix" {test & >= "1.0.0"}
   "lwt"    {test}
   "ssl"    {test}
   "tls"    {test}
