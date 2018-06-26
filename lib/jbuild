@@ -2,3 +2,8 @@
  ((name syndic)
   (public_name syndic)
   (libraries (xmlm uri ptime))))
+
+(rule
+ ((targets (syndic_conf.ml))
+  (deps (conf/conf.ml))
+  (action (run ${OCAML} ${<} --version ${version:syndic} --homepage https://ocaml.org/ -o ${@}))))
