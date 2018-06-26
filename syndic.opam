@@ -9,6 +9,7 @@ dev-repo:     "git+https://github.com/Cumulus/Syndic.git"
 bug-reports:  "https://github.com/Cumulus/Syndic/issues"
 
 build: [[ "jbuilder" "build" "--only-packages" name "--root" "." "-j" jobs "@install" ]]
+build-test: [[ "jbuilder" "runtest" "-p" name ]]
 
 depends: [
   "jbuilder"
