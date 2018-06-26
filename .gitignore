@@ -7,3 +7,5 @@ doc/*.html
 *.docdir
 lib/syndic_conf.ml
 *.tar.gz
+.merlin
+*.install

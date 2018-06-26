@@ -1,7 +1,7 @@
 open Lwt
 
 module CLU = Cohttp_lwt_unix
-module CLB = Cohttp_lwt_body
+module CLB = Cohttp_lwt.Body
 
 type result =
   | Ok
@@ -69,8 +69,10 @@ let tests : ([> src ] * [< fmt ] * result) list =
 
 let () =
   Printexc.register_printer
-    (function Syndic_error.Error _ as exn ->
-                Some (Syndic_error.to_string exn)
+    (function Syndic.Rss1.Error.Error _ as exn -> Some (Syndic.Rss1.Error.to_string exn)
+            | Syndic.Rss2.Error.Error _ as exn -> Some (Syndic.Rss2.Error.to_string exn)
+            | Syndic.Atom.Error.Error _ as exn -> Some (Syndic.Atom.Error.to_string exn)
+            | Syndic.Opml1.Error.Error _ as exn -> Some (Syndic.Opml1.Error.to_string exn)
             | _ -> None)
 
 module Printf =
@@ -161,8 +163,8 @@ let result_equal a b = match a, b with
 let print_result p (r, e) =
   let add_error _ (pos, err) =
     print (left (gray_s "W3C:") left_columns);
-    print (Syndic_error.Error (pos, err)
-           |> Syndic_error.to_string)
+    print (Syndic.W3C.Error.Error (pos, err)
+           |> Syndic.W3C.Error.to_string)
   in
   match r with
   | SyndicError (pos, err) when result_equal r e ->
@@ -193,7 +195,10 @@ let make_test (src, fmt, result) =
   >>= fun xmlm_source ->
   Lwt.catch
     (fun () -> let _ = parse fmt (Xmlm.make_input xmlm_source) in Lwt.return Ok)
-    (function Syndic_error.Error (pos, err) ->
+    (function Syndic.Rss1.Error.Error (pos, err)
+            | Syndic.Rss2.Error.Error (pos, err)
+            | Syndic.Atom.Error.Error (pos, err)
+            | Syndic.Opml1.Error.Error (pos, err) ->
               get (`Uri (Syndic.W3C.url src))
               >>= fun xmlm_source ->
               Lwt.return (snd(Syndic.W3C.parse (Xmlm.make_input xmlm_source)))
@@ -226,5 +231,5 @@ let make_test (src, fmt, result) =
         Lwt.return ()
 
 let () =
-  Lwt_unix.run (Lwt_list.map_s make_test tests >>= fun _ -> Lwt.return ());
+  Lwt_main.run (Lwt_list.map_s make_test tests >>= fun _ -> Lwt.return ());
   if state () then exit 1 else exit 0

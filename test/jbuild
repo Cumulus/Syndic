@@ -1,0 +1,21 @@
+(executable
+ ((name test)
+  (modules (test))
+  (libraries (syndic cohttp-lwt-unix ssl tls))))
+
+(executable
+ ((name test_decisions)
+  (modules (test_decisions))
+  (libraries (syndic cohttp-lwt-unix ssl tls))))
+
+(alias
+ ((name runtest)
+  (package syndic)
+  (deps (test.exe))
+  (action (run ${exe:test.exe} -q --color=always))))
+
+(alias
+ ((name runtest)
+  (package syndic)
+  (deps (test_decisions.exe))
+  (action (run ${exe:test_decisions.exe} -q --color=always))))

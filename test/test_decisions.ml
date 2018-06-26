@@ -5,7 +5,7 @@ open Lwt
 open Syndic
 open Cohttp
 module Client = Cohttp_lwt_unix.Client
-module Body = Cohttp_lwt_body
+module Body = Cohttp_lwt.Body
 
 let check_feed data =
   printf "ATOM: %s\n" data;
