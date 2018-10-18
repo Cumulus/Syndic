@@ -1,3 +1,5 @@
+let () = Printexc.record_backtrace true
+
 open Lwt
 module CLU = Cohttp_lwt_unix
 module CLB = Cohttp_lwt.Body
@@ -56,8 +58,6 @@ let string_of_fmt = function
 
 let tests : ([> src] * [< fmt] * result) list =
   [ (`Uri (Uri.of_string "http://ocaml.org/feed.xml"), `Atom, Ok)
-  ; (`Uri (Uri.of_string "http://korben.info/feed"), `Rss2, Ok)
-  ; (`Uri (Uri.of_string "http://linuxfr.org/journaux.atom"), `Atom, Ok)
   ; (`Uri (Uri.of_string "https://www.reddit.com/r/ocaml/.rss"), `Atom, Ok)
   ; ( `Data
         "<?xml version='1.0' encoding='utf-8'?> <feed \
