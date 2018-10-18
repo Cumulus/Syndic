@@ -12,60 +12,54 @@ module XML = struct
   let xmlbase_of_attr ~xmlbase attr =
     try
       let new_base = List.assoc xmlbase_tag attr in
-      Some(Syndic_xml.resolve ~xmlbase (Uri.of_string new_base))
-    with Not_found ->
-      xmlbase
+      Some (Syndic_xml.resolve ~xmlbase (Uri.of_string new_base))
+    with Not_found -> xmlbase
 
-  let generate_catcher
-      ?(namespaces=[""])
-      ?(attr_producer=[])
-      ?(data_producer=[])
-      ?leaf_producer maker =
+  let generate_catcher ?(namespaces = [""]) ?(attr_producer = [])
+      ?(data_producer = []) ?leaf_producer maker =
     let in_namespaces ((prefix, _), _) = List.mem prefix namespaces in
     let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name in
     let get_attr_value ((_, value) : Xmlm.attribute) = value in
     let get_tag_name (((prefix, name), _) : tag) = name in
     let get_attrs ((_, attrs) : tag) = attrs in
     let get_producer name map =
-      try Some (List.assoc name map)
-      with _ -> None
+      try Some (List.assoc name map) with _ -> None
     in
     let rec catch_attr ~xmlbase acc pos = function
-      | attr :: r -> begin
-          match get_producer (get_attr_name attr) attr_producer with
-          | Some f when in_namespaces attr ->
-             let acc = (f ~xmlbase (get_attr_value attr)) :: acc in
-             catch_attr ~xmlbase acc pos r
-          | _ -> catch_attr ~xmlbase acc pos r end
+      | attr :: r -> (
+        match get_producer (get_attr_name attr) attr_producer with
+        | Some f when in_namespaces attr ->
+            let acc = f ~xmlbase (get_attr_value attr) :: acc in
+            catch_attr ~xmlbase acc pos r
+        | _ -> catch_attr ~xmlbase acc pos r )
       | [] -> acc
     in
     let rec catch_datas ~xmlbase acc = function
-      | Node (pos, tag, datas) :: r ->
-        begin match get_producer (get_tag_name tag) data_producer with
-          | Some f when in_namespaces tag ->
-             let acc = (f ~xmlbase (pos, tag, datas)) :: acc in
-             catch_datas ~xmlbase acc r
-          | _ -> catch_datas ~xmlbase acc r end
-      | Data (pos, str) :: r ->
-        begin match leaf_producer with
-          | Some f -> catch_datas ~xmlbase ((f ~xmlbase pos str) :: acc) r
-          | None -> catch_datas ~xmlbase acc r end
+      | Node (pos, tag, datas) :: r -> (
+        match get_producer (get_tag_name tag) data_producer with
+        | Some f when in_namespaces tag ->
+            let acc = f ~xmlbase (pos, tag, datas) :: acc in
+            catch_datas ~xmlbase acc r
+        | _ -> catch_datas ~xmlbase acc r )
+      | Data (pos, str) :: r -> (
+        match leaf_producer with
+        | Some f -> catch_datas ~xmlbase (f ~xmlbase pos str :: acc) r
+        | None -> catch_datas ~xmlbase acc r )
       | [] -> acc
     in
-    let generate ~xmlbase ((pos, tag, datas): node) =
-      (* The spec says that "The base URI for a URI reference
-         appearing in any other attribute value, including default
-         attribute values, is the base URI of the element bearing the
-         attribute" so get xml:base first. *)
+    let generate ~xmlbase ((pos, tag, datas) : node) =
+      (* The spec says that "The base URI for a URI reference appearing in any
+         other attribute value, including default attribute values, is the base
+         URI of the element bearing the attribute" so get xml:base first. *)
       let xmlbase = xmlbase_of_attr ~xmlbase (get_attrs tag) in
       let acc = catch_attr ~xmlbase [] pos (get_attrs tag) in
       maker ~pos (catch_datas ~xmlbase acc datas)
-    in generate
+    in
+    generate
 
   let dummy_of_xml ~ctor =
     let leaf_producer ~xmlbase pos data = ctor ~xmlbase data in
-    let head ~pos = function [] -> ctor ~xmlbase:None ""
-                           | x :: r -> x in
+    let head ~pos = function [] -> ctor ~xmlbase:None "" | x :: r -> x in
     generate_catcher ~leaf_producer head
 end
 
@@ -80,65 +74,64 @@ module Util = struct
     let rec aux = function
       | [] -> None
       | x :: r when f x -> raise (Found x)
-      | XML.Node (_, _, x) :: r ->
-        aux x |> (function
-          | Some x -> raise (Found x) (* assert false ? *)
-          | None -> aux r)
+      | XML.Node (_, _, x) :: r -> (
+          aux x
+          |> function
+          | Some x -> raise (Found x) (* assert false ? *) | None -> aux r )
       | XML.Data _ :: r -> aux r
-    in try aux [root]
-       with Found x -> Some x
-          | _ -> None
+    in
+    try aux [root] with Found x -> Some x | _ -> None
 
   let rec filter_map l f =
     match l with
     | [] -> []
-    | x :: tl -> match f x with
-                | None -> filter_map tl f
-                | Some x -> x :: filter_map tl f
+    | x :: tl -> (
+      match f x with None -> filter_map tl f | Some x -> x :: filter_map tl f )
 
-  let rec take l n = match l with
+  let rec take l n =
+    match l with
     | [] -> []
-    | e :: tl -> if n > 0 then e :: take tl (n-1) else []
+    | e :: tl -> if n > 0 then e :: take tl (n - 1) else []
 
+  let tag_is (((prefix, name), attrs) : XML.tag) = ( = ) name
+  let attr_is (((prefix, name), value) : Xmlm.attribute) = ( = ) name
+  let datas_has_leaf = List.exists (function XML.Data _ -> true | _ -> false)
 
-  let tag_is (((prefix, name), attrs) : XML.tag) = (=) name
-  let attr_is (((prefix, name), value) : Xmlm.attribute) = (=) name
-  let datas_has_leaf = List.exists (function | XML.Data _ -> true | _ -> false)
-  let get_leaf l  = match find (function XML.Data _ -> true | _ -> false) l with
+  let get_leaf l =
+    match find (function XML.Data _ -> true | _ -> false) l with
     | Some (XML.Data (_, s)) -> s
     | _ -> raise Not_found
+
   let get_attrs ((_, attrs) : XML.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value
   let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
   let get_tag_name (((prefix, name), _) : XML.tag) = name
-
   let is_space c = c = ' ' || c = '\t' || c = '\n' || c = '\r'
 
   let only_whitespace s =
     let r = ref true in
     let i = ref 0 and len = String.length s in
-    while !r && !i < len do r := is_space s.[!i]; incr i done;
+    while !r && !i < len do
+      r := is_space s.[!i] ;
+      incr i
+    done ;
     !r
-
 
   (* Output feeds to XML *)
 
   let add_attr name v_opt attr =
-    match v_opt with
-    | None | Some "" -> attr
-    | Some v -> (name, v) :: attr
+    match v_opt with None | Some "" -> attr | Some v -> (name, v) :: attr
 
   let add_attr_uri name v_opt attr =
-    match v_opt with
-    | None -> attr
-    | Some v -> (name, Uri.to_string v) :: attr
+    match v_opt with None -> attr | Some v -> (name, Uri.to_string v) :: attr
 
   let tag name = (("", name), [])
+  let dummy_pos = (0, 0)
 
-  let dummy_pos = (0,0) (* Do smarter positions make sense? *)
+  (* Do smarter positions make sense? *)
 
   let node_data tag content =
-    XML.Node(dummy_pos, tag, [XML.Data(dummy_pos, content)])
+    XML.Node (dummy_pos, tag, [XML.Data (dummy_pos, content)])
 
   let node_uri tag uri = node_data tag (Uri.to_string uri)
 
@@ -157,8 +150,5 @@ module Util = struct
     List.fold_left (fun nodes el -> f el :: nodes) nodes els
 
   let add_node_option f op nodes =
-    match op with
-    | None -> nodes
-    | Some v -> f v :: nodes
-
+    match op with None -> nodes | Some v -> f v :: nodes
 end
