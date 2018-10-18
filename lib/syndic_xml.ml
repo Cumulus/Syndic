@@ -24,10 +24,10 @@ let get_position = function Node (pos, _, _) -> pos | Data (pos, _) -> pos
 
 let rec t_to_xmlm t output =
   match t with
-  | Data (pos, d) -> (
+  | Data (_pos, d) -> (
     try Xmlm.output output (`Data d) with Xmlm.Error (pos, e) ->
       raise (Error.Error (pos, Xmlm.error_message e)) )
-  | Node (pos, tag, t_sub) -> (
+  | Node (_pos, tag, t_sub) -> (
       Xmlm.output output (`El_start tag) ;
       List.iter (fun t -> t_to_xmlm t output) t_sub ;
       try Xmlm.output output `El_end with Xmlm.Error (pos, e) ->

@@ -187,5 +187,5 @@ let to_rfc822 t =
   (* Example: Sat, 25 Sep 2010 08:01:00 -0700 *)
   let ds = day_of_week t |> string_of_day in
   let ms = month_of_date t |> string_of_month in
-  let (y, m, d), ((hh, mm, ss), t) = Ptime.to_date_time t in
+  let (y, _m, d), ((hh, mm, ss), t) = Ptime.to_date_time t in
   Printf.sprintf "%s, %d %s %d %02d:%02d:%02d %04d" ds d ms y hh mm ss t

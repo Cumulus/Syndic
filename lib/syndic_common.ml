@@ -3,8 +3,6 @@
 module XML = struct
   include Syndic_xml
 
-  exception Ignore_namespace
-
   type node = pos * tag * t list
 
   let xmlbase_tag = (Xmlm.ns_xml, "base")
@@ -18,9 +16,9 @@ module XML = struct
   let generate_catcher ?(namespaces = [""]) ?(attr_producer = [])
       ?(data_producer = []) ?leaf_producer maker =
     let in_namespaces ((prefix, _), _) = List.mem prefix namespaces in
-    let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name in
+    let get_attr_name (((_prefix, name), _) : Xmlm.attribute) = name in
     let get_attr_value ((_, value) : Xmlm.attribute) = value in
-    let get_tag_name (((prefix, name), _) : tag) = name in
+    let get_tag_name (((_prefix, name), _) : tag) = name in
     let get_attrs ((_, attrs) : tag) = attrs in
     let get_producer name map =
       try Some (List.assoc name map) with _ -> None
@@ -58,8 +56,8 @@ module XML = struct
     generate
 
   let dummy_of_xml ~ctor =
-    let leaf_producer ~xmlbase pos data = ctor ~xmlbase data in
-    let head ~pos = function [] -> ctor ~xmlbase:None "" | x :: r -> x in
+    let leaf_producer ~xmlbase _pos data = ctor ~xmlbase data in
+    let head ~pos:_ = function [] -> ctor ~xmlbase:None "" | x :: _ -> x in
     generate_catcher ~leaf_producer head
 end
 
@@ -70,10 +68,10 @@ module Util = struct
 
   exception Found of XML.t
 
-  let rec recursive_find f root =
+  let recursive_find f root =
     let rec aux = function
       | [] -> None
-      | x :: r when f x -> raise (Found x)
+      | x :: _ when f x -> raise (Found x)
       | XML.Node (_, _, x) :: r -> (
           aux x
           |> function
@@ -93,8 +91,8 @@ module Util = struct
     | [] -> []
     | e :: tl -> if n > 0 then e :: take tl (n - 1) else []
 
-  let tag_is (((prefix, name), attrs) : XML.tag) = ( = ) name
-  let attr_is (((prefix, name), value) : Xmlm.attribute) = ( = ) name
+  let tag_is (((_prefix, name), _attrs) : XML.tag) = ( = ) name
+  let attr_is (((_prefix, name), _value) : Xmlm.attribute) = ( = ) name
   let datas_has_leaf = List.exists (function XML.Data _ -> true | _ -> false)
 
   let get_leaf l =
@@ -104,8 +102,8 @@ module Util = struct
 
   let get_attrs ((_, attrs) : XML.tag) = attrs
   let get_value ((_, value) : Xmlm.attribute) = value
-  let get_attr_name (((prefix, name), _) : Xmlm.attribute) = name
-  let get_tag_name (((prefix, name), _) : XML.tag) = name
+  let get_attr_name (((_prefix, name), _) : Xmlm.attribute) = name
+  let get_tag_name (((_prefix, name), _) : XML.tag) = name
   let is_space c = c = ' ' || c = '\t' || c = '\n' || c = '\r'
 
   let only_whitespace s =

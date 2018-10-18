@@ -3,14 +3,13 @@
 open Printf
 open Lwt
 open Syndic
-open Cohttp
 module Client = Cohttp_lwt_unix.Client
 module Body = Cohttp_lwt.Body
 
 let check_feed data =
   printf "ATOM: %s\n" data ;
   Client.get (W3C.url (`Data data))
-  >>= fun (r, b) ->
+  >>= fun (_r, b) ->
   Body.to_string b
   >>= fun body ->
   let err, warn = `String (0, body) |> Xmlm.make_input |> W3C.parse in

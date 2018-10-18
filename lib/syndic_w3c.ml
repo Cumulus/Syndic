@@ -45,7 +45,7 @@ let url d =
   in
   Uri.with_query feed_url q
 
-let make_error ~kind ~pos (l : [< error'] list) =
+let make_error ~kind ~pos:_ (l : [< error'] list) =
   let line =
     match find (function `Line _ -> true | _ -> false) l with
     | Some (`Line line) -> ( try int_of_string line with _ -> 0 )
@@ -79,23 +79,23 @@ let make_error ~kind ~pos (l : [< error'] list) =
   ({kind; line; column; text; element; parent; value} : _ t)
 
 let error_data_producer =
-  [ ("line", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Line a))
-  ; ("column", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Column a))
-  ; ("text", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Text a))
-  ; ("element", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Element a))
-  ; ("parent", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Parent a))
-  ; ("value", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Value a)) ]
+  [ ("line", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Line a))
+  ; ("column", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Column a))
+  ; ("text", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Text a))
+  ; ("element", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Element a))
+  ; ("parent", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Parent a))
+  ; ("value", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Value a)) ]
 
 let error_of_xml ~kind =
   generate_catcher ~data_producer:error_data_producer (make_error ~kind)
 
-let make_errorlist ~pos (l : _ t list) = l
+let make_errorlist ~pos:_ (l : _ t list) = l
 
 let errorlist_of_xml =
   let data_producer = [("error", error_of_xml ~kind:Error)] in
   generate_catcher ~data_producer ~xmlbase:None make_errorlist
 
-let errorlist_of_xml =
+let warninglist_of_xml =
   let data_producer = [("warning", error_of_xml ~kind:Warning)] in
   generate_catcher ~data_producer ~xmlbase:None make_errorlist
 
@@ -120,7 +120,7 @@ let parse input =
   in
   let warn =
     match find_warninglist xml with
-    | Some (XML.Node (p, t, d)) -> errorlist_of_xml (p, t, d)
+    | Some (XML.Node (p, t, d)) -> warninglist_of_xml (p, t, d)
     | _ -> []
   in
   (err, warn)

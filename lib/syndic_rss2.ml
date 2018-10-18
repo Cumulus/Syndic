@@ -70,21 +70,21 @@ let make_image ~pos (l : [< image'] list) =
 let url_of_xml ~xmlbase a = `URL (XML.resolve ~xmlbase (Uri.of_string a))
 let url_of_xml' ~xmlbase a = `URL (xmlbase, a)
 
-let image_url_of_xml ~xmlbase (pos, tag, datas) =
+let image_url_of_xml ~xmlbase (pos, _tag, datas) =
   try url_of_xml ~xmlbase (get_leaf datas) with Not_found ->
     raise
       (Error.Error (pos, "The content of <uri> MUST be a non-empty string"))
 
-let image_title_of_xml ~xmlbase (pos, tag, datas) =
+let image_title_of_xml ~xmlbase:_ (_pos, _tag, datas) =
   `Title (try get_leaf datas with Not_found -> "")
 
-let image_link_of_xml ~xmlbase (pos, tag, datas) =
+let image_link_of_xml ~xmlbase (pos, _tag, datas) =
   try `Link (XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
   with Not_found ->
     raise
       (Error.Error (pos, "The content of <link> MUST be a non-empty string"))
 
-let image_size_of_xml ~max ~xmlbase (pos, tag, datas) =
+let image_size_of_xml ~max ~xmlbase:_ (pos, tag, datas) =
   try
     let size = int_of_string (get_leaf datas) in
     if size > max then
@@ -116,7 +116,7 @@ let image_width_of_xml ~xmlbase a =
 let image_height_of_xml ~xmlbase a =
   `Height (image_size_of_xml ~max:400 ~xmlbase a)
 
-let image_description_of_xml ~xmlbase (pos, tag, datas) =
+let image_description_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Description (get_leaf datas) with Not_found ->
     raise
       (Error.Error
@@ -136,13 +136,14 @@ let image_of_xml =
 let image_of_xml' =
   let data_producer =
     [ ("url", dummy_of_xml ~ctor:url_of_xml')
-    ; ("title", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Title a))
+    ; ("title", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Title a))
     ; ("link", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Link (xmlbase, a)))
-    ; ("width", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Width a))
-    ; ("height", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Height a))
-    ; ("description", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Description a)) ]
+    ; ("width", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Width a))
+    ; ("height", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Height a))
+    ; ("description", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Description a))
+    ]
   in
-  generate_catcher ~data_producer (fun ~pos x -> `Image x)
+  generate_catcher ~data_producer (fun ~pos:_ x -> `Image x)
 
 type cloud = {uri: Uri.t; registerProcedure: string; protocol: string}
 
@@ -194,18 +195,18 @@ let make_cloud ~pos (l : [< cloud'] list) =
   `Cloud ({uri; registerProcedure; protocol} : cloud)
 
 let cloud_attr_producer =
-  [ ("domain", fun ~xmlbase a -> `Domain a)
-  ; ("port", fun ~xmlbase a -> `Port a)
-  ; ("path", fun ~xmlbase a -> `Path a)
+  [ ("domain", fun ~xmlbase:_ a -> `Domain a)
+  ; ("port", fun ~xmlbase:_ a -> `Port a)
+  ; ("path", fun ~xmlbase:_ a -> `Path a)
   ; (* XXX: it's RFC compliant ? *)
-    ("registerProcedure", fun ~xmlbase a -> `RegisterProcedure a)
-  ; ("protocol", fun ~xmlbase a -> `Protocol a) ]
+    ("registerProcedure", fun ~xmlbase:_ a -> `RegisterProcedure a)
+  ; ("protocol", fun ~xmlbase:_ a -> `Protocol a) ]
 
 let cloud_of_xml =
   generate_catcher ~attr_producer:cloud_attr_producer make_cloud
 
 let cloud_of_xml' =
-  generate_catcher ~attr_producer:cloud_attr_producer (fun ~pos x -> `Cloud x)
+  generate_catcher ~attr_producer:cloud_attr_producer (fun ~pos:_ x -> `Cloud x)
 
 type textinput = {title: string; description: string; name: string; link: Uri.t}
 
@@ -255,23 +256,23 @@ let make_textinput ~pos (l : [< textinput'] list) =
   in
   `TextInput ({title; description; name; link} : textinput)
 
-let textinput_title_of_xml ~xmlbase (pos, tag, datas) =
+let textinput_title_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Title (get_leaf datas) with Not_found ->
     raise
       (Error.Error (pos, "The content of <title> MUST be a non-empty string"))
 
-let textinput_description_of_xml ~xmlbase (pos, tag, datas) =
+let textinput_description_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Description (get_leaf datas) with Not_found ->
     raise
       (Error.Error
          (pos, "The content of <description> MUST be a non-empty string"))
 
-let textinput_name_of_xml ~xmlbase (pos, tag, datas) =
+let textinput_name_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Name (get_leaf datas) with Not_found ->
     raise
       (Error.Error (pos, "The content of <name> MUST be a non-empty string"))
 
-let textinput_link_of_xml ~xmlbase (pos, tag, datas) =
+let textinput_link_of_xml ~xmlbase (pos, _tag, datas) =
   try `Link (XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
   with Not_found ->
     raise
@@ -288,17 +289,17 @@ let textinput_of_xml =
 
 let textinput_of_xml' =
   let data_producer =
-    [ ("title", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Title a))
-    ; ("description", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Description a))
-    ; ("name", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Name a))
+    [ ("title", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Title a))
+    ; ("description", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Description a))
+    ; ("name", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Name a))
     ; ("link", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Link (xmlbase, a))) ]
   in
-  generate_catcher ~data_producer (fun ~pos x -> `TextInput x)
+  generate_catcher ~data_producer (fun ~pos:_ x -> `TextInput x)
 
 type category = {data: string; domain: Uri.t option}
 type category' = [`Data of string | `Domain of Uri.t]
 
-let make_category ~pos (l : [< category'] list) =
+let make_category ~pos:_ (l : [< category'] list) =
   let data =
     match find (function `Data _ -> true | _ -> false) l with
     | Some (`Data s) -> s
@@ -313,15 +314,15 @@ let make_category ~pos (l : [< category'] list) =
 
 let category_of_xml =
   let attr_producer =
-    [("domain", fun ~xmlbase a -> `Domain (Uri.of_string a))]
+    [("domain", fun ~xmlbase:_ a -> `Domain (Uri.of_string a))]
   in
-  let leaf_producer ~xmlbase pos data = `Data data in
+  let leaf_producer ~xmlbase:_ _pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_category
 
 let category_of_xml' =
-  let attr_producer = [("domain", fun ~xmlbase a -> `Domain a)] in
-  let leaf_producer ~xmlbase pos data = `Data data in
-  generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Category x)
+  let attr_producer = [("domain", fun ~xmlbase:_ a -> `Domain a)] in
+  let leaf_producer ~xmlbase:_ _pos data = `Data data in
+  generate_catcher ~attr_producer ~leaf_producer (fun ~pos:_ x -> `Category x)
 
 type enclosure = {url: Uri.t; length: int; mime: string}
 type enclosure' = [`URL of Uri.t | `Length of string | `Mime of string]
@@ -354,24 +355,24 @@ let make_enclosure ~pos (l : [< enclosure'] list) =
 let enclosure_of_xml =
   let attr_producer =
     [ ("url", url_of_xml)
-    ; ("length", fun ~xmlbase a -> `Length a)
-    ; ("type", fun ~xmlbase a -> `Mime a) ]
+    ; ("length", fun ~xmlbase:_ a -> `Length a)
+    ; ("type", fun ~xmlbase:_ a -> `Mime a) ]
   in
   generate_catcher ~attr_producer make_enclosure
 
 let enclosure_of_xml' =
   let attr_producer =
     [ ("url", url_of_xml')
-    ; ("length", fun ~xmlbase a -> `Length a)
-    ; ("type", fun ~xmlbase a -> `Mime a) ]
+    ; ("length", fun ~xmlbase:_ a -> `Length a)
+    ; ("type", fun ~xmlbase:_ a -> `Mime a) ]
   in
-  generate_catcher ~attr_producer (fun ~pos x -> `Enclosure x)
+  generate_catcher ~attr_producer (fun ~pos:_ x -> `Enclosure x)
 
 type guid = {data: Uri.t; (* must be uniq *) permalink: bool (* default true *)}
 type guid' = [`Data of Uri.t option * string | `Permalink of string]
 
 (* Some RSS2 server output <guid isPermaLink="false"></guid> ! *)
-let make_guid ~pos (l : [< guid'] list) =
+let make_guid ~pos:_ (l : [< guid'] list) =
   let permalink =
     match find (function `Permalink _ -> true | _ -> false) l with
     | Some (`Permalink b) -> bool_of_string b
@@ -391,10 +392,10 @@ let make_guid ~pos (l : [< guid'] list) =
   | _ -> `Guid None
 
 let guid_of_xml, guid_of_xml' =
-  let attr_producer = [("isPermaLink", fun ~xmlbase a -> `Permalink a)] in
-  let leaf_producer ~xmlbase pos data = `Data (xmlbase, data) in
+  let attr_producer = [("isPermaLink", fun ~xmlbase:_ a -> `Permalink a)] in
+  let leaf_producer ~xmlbase _pos data = `Data (xmlbase, data) in
   ( generate_catcher ~attr_producer ~leaf_producer make_guid
-  , generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Guid x) )
+  , generate_catcher ~attr_producer ~leaf_producer (fun ~pos:_ x -> `Guid x) )
 
 type source = {data: string; url: Uri.t}
 type source' = [`Data of string | `URL of Uri.t]
@@ -419,13 +420,13 @@ let make_source ~pos (l : [< source'] list) =
 
 let source_of_xml =
   let attr_producer = [("url", url_of_xml)] in
-  let leaf_producer ~xmlbase pos data = `Data data in
+  let leaf_producer ~xmlbase:_ _pos data = `Data data in
   generate_catcher ~attr_producer ~leaf_producer make_source
 
 let source_of_xml' =
   let attr_producer = [("url", url_of_xml')] in
-  let leaf_producer ~xmlbase pos data = `Data data in
-  generate_catcher ~attr_producer ~leaf_producer (fun ~pos x -> `Source x)
+  let leaf_producer ~xmlbase:_ _pos data = `Data data in
+  generate_catcher ~attr_producer ~leaf_producer (fun ~pos:_ x -> `Source x)
 
 type story =
   | All of string * Uri.t option * string
@@ -445,6 +446,8 @@ type item =
   ; pubDate: Date.t option
   ; (* date *)
     source: source option }
+
+[@@@warning "-34"]
 
 type item' =
   [ `Title of string
@@ -529,34 +532,34 @@ let make_item ~pos (l : _ list) =
       ; source }
       : item )
 
-let item_title_of_xml ~xmlbase (pos, tag, datas) =
+let item_title_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Title (get_leaf datas) with Not_found ->
     raise
       (Error.Error (pos, "The content of <title> MUST be a non-empty string"))
 
-let item_description_of_xml ~xmlbase (pos, tag, datas) =
+let item_description_of_xml ~xmlbase (_pos, _tag, datas) =
   `Description (xmlbase, try get_leaf datas with Not_found -> "")
 
-let item_content_of_xml ~xmlbase (pos, tag, datas) =
+let item_content_of_xml ~xmlbase (_pos, _tag, datas) =
   `Content (xmlbase, try get_leaf datas with Not_found -> "")
 
-let item_link_of_xml ~xmlbase (pos, tag, datas) =
+let item_link_of_xml ~xmlbase (_pos, _tag, datas) =
   `Link
     ( try Some (XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
       with Not_found -> None )
 
-let item_author_of_xml ~xmlbase (pos, tag, datas) =
+let item_author_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Author (get_leaf datas) with Not_found ->
     raise
       (Error.Error (pos, "The content of <author> MUST be a non-empty string"))
 
-let item_comments_of_xml ~xmlbase (pos, tag, datas) =
+let item_comments_of_xml ~xmlbase (pos, _tag, datas) =
   try `Comments (XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
   with Not_found ->
     raise
       (Error.Error (pos, "The content of <comments> MUST be a non-empty string"))
 
-let item_pubdate_of_xml ~xmlbase (pos, tag, datas) =
+let item_pubdate_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `PubDate (Date.of_rfc822 (get_leaf datas)) with Not_found ->
     raise
       (Error.Error (pos, "The content of <pubDate> MUST be a non-empty string"))
@@ -583,20 +586,20 @@ let item_of_xml =
 
 let item_of_xml' =
   let data_producer =
-    [ ("title", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Title a))
-    ; ("description", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Description a))
-    ; ("encoded", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Content a))
+    [ ("title", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Title a))
+    ; ("description", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Description a))
+    ; ("encoded", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Content a))
     ; ("link", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Link (xmlbase, a)))
-    ; ("author", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Author a))
+    ; ("author", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Author a))
     ; ("category", category_of_xml')
-    ; ("comments", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Comments a))
+    ; ("comments", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Comments a))
     ; ("enclosure", enclosure_of_xml')
     ; ("guid", guid_of_xml')
-    ; ("pubdate", dummy_of_xml ~ctor:(fun ~xmlbase a -> `PubDate a))
+    ; ("pubdate", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `PubDate a))
     ; ("source", source_of_xml') ]
   in
   generate_catcher ~data_producer
-    (fun ~pos x -> `Item x)
+    (fun ~pos:_ x -> `Item x)
     ~namespaces:item_namespaces
 
 type channel =
@@ -778,72 +781,72 @@ let make_channel ~pos (l : [< channel'] list) =
     ; items }
     : channel )
 
-let channel_title_of_xml ~xmlbase (pos, tag, datas) =
+let channel_title_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Title (get_leaf datas) with Not_found ->
     raise
       (Error.Error (pos, "The content of <title> MUST be a non-empty string"))
 
-let channel_description_of_xml ~xmlbase (pos, tag, datas) =
+let channel_description_of_xml ~xmlbase:_ (_pos, _tag, datas) =
   `Description (try get_leaf datas with Not_found -> "")
 
-let channel_link_of_xml ~xmlbase (pos, tag, datas) =
+let channel_link_of_xml ~xmlbase (pos, _tag, datas) =
   try `Link (XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
   with Not_found ->
     raise
       (Error.Error (pos, "The content of <link> MUST be a non-empty string"))
 
-let channel_language_of_xml ~xmlbase (pos, tag, datas) =
+let channel_language_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Language (get_leaf datas) with Not_found ->
     raise
       (Error.Error (pos, "The content of <language> MUST be a non-empty string"))
 
-let channel_copyright_of_xml ~xmlbase (pos, tag, datas) =
+let channel_copyright_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Copyright (get_leaf datas) with Not_found ->
     raise
       (Error.Error
          (pos, "The content of <copyright> MUST be a non-empty string"))
 
-let channel_managingeditor_of_xml ~xmlbase (pos, tag, datas) =
+let channel_managingeditor_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `ManagingEditor (get_leaf datas) with Not_found ->
     raise
       (Error.Error
          (pos, "The content of <managingEditor> MUST be a non-empty string"))
 
-let channel_webmaster_of_xml ~xmlbase (pos, tag, datas) =
+let channel_webmaster_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `WebMaster (get_leaf datas) with Not_found ->
     raise
       (Error.Error
          (pos, "The content of <webMaster> MUST be a non-empty string"))
 
-let channel_pubdate_of_xml ~xmlbase (pos, tag, datas) =
+let channel_pubdate_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `PubDate (Date.of_rfc822 (get_leaf datas)) with Not_found ->
     raise
       (Error.Error (pos, "The content of <pubDate> MUST be a non-empty string"))
 
-let channel_lastbuilddate_of_xml ~xmlbase (pos, tag, datas) =
+let channel_lastbuilddate_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `LastBuildDate (Date.of_rfc822 (get_leaf datas)) with Not_found ->
     raise
       (Error.Error
          (pos, "The content of <lastBuildDate> MUST be a non-empty string"))
 
-let channel_category_of_xml ~xmlbase (pos, tag, datas) =
+let channel_category_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Category (get_leaf datas) with Not_found ->
     raise
       (Error.Error (pos, "The content of <category> MUST be a non-empty string"))
 
-let channel_generator_of_xml ~xmlbase (pos, tag, datas) =
+let channel_generator_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Generator (get_leaf datas) with Not_found ->
     raise
       (Error.Error
          (pos, "The content of <generator> MUST be a non-empty string"))
 
-let channel_docs_of_xml ~xmlbase (pos, tag, datas) =
+let channel_docs_of_xml ~xmlbase (pos, _tag, datas) =
   try `Docs (XML.resolve ~xmlbase (Uri.of_string (get_leaf datas)))
   with Not_found ->
     raise
       (Error.Error (pos, "The content of <docs> MUST be a non-empty string"))
 
-let channel_ttl_of_xml ~xmlbase (pos, tag, datas) =
+let channel_ttl_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `TTL (int_of_string (get_leaf datas)) with _ ->
     raise
       (Error.Error
@@ -851,7 +854,7 @@ let channel_ttl_of_xml ~xmlbase (pos, tag, datas) =
          , "The content of <ttl> MUST be a non-empty string representing an \
             integer" ))
 
-let channel_rating_of_xml ~xmlbase (pos, tag, datas) =
+let channel_rating_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `Rating (int_of_string (get_leaf datas)) with _ ->
     raise
       (Error.Error
@@ -859,7 +862,7 @@ let channel_rating_of_xml ~xmlbase (pos, tag, datas) =
          , "The content of <rating> MUST be a non-empty string representing \
             an integer" ))
 
-let channel_skipHours_of_xml ~xmlbase (pos, tag, datas) =
+let channel_skipHours_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `SkipHours (int_of_string (get_leaf datas)) with _ ->
     raise
       (Error.Error
@@ -867,7 +870,7 @@ let channel_skipHours_of_xml ~xmlbase (pos, tag, datas) =
          , "The content of <skipHours> MUST be a non-empty string \
             representing an integer" ))
 
-let channel_skipDays_of_xml ~xmlbase (pos, tag, datas) =
+let channel_skipDays_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `SkipDays (int_of_string (get_leaf datas)) with _ ->
     raise
       (Error.Error
@@ -902,34 +905,36 @@ let channel_of_xml =
 
 let channel_of_xml' =
   let data_producer =
-    [ ("title", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Title a))
+    [ ("title", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Title a))
     ; ("link", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Link (xmlbase, a)))
-    ; ("description", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Description a))
-    ; ("Language", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Language a))
-    ; ("copyright", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Copyright a))
+    ; ("description", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Description a))
+    ; ("Language", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Language a))
+    ; ("copyright", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Copyright a))
     ; ( "managingeditor"
-      , dummy_of_xml ~ctor:(fun ~xmlbase a -> `ManagingEditor a) )
-    ; ("webmaster", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WebMaster a))
-    ; ("pubdate", dummy_of_xml ~ctor:(fun ~xmlbase a -> `PubDate a))
-    ; ("lastbuilddate", dummy_of_xml ~ctor:(fun ~xmlbase a -> `LastBuildDate a))
-    ; ("category", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Category a))
-    ; ("generator", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Generator a))
-    ; ("docs", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Docs a))
+      , dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `ManagingEditor a) )
+    ; ("webmaster", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `WebMaster a))
+    ; ("pubdate", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `PubDate a))
+    ; ( "lastbuilddate"
+      , dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `LastBuildDate a) )
+    ; ("category", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Category a))
+    ; ("generator", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Generator a))
+    ; ("docs", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Docs a))
     ; ("cloud", cloud_of_xml')
-    ; ("ttl", dummy_of_xml ~ctor:(fun ~xmlbase a -> `TTL a))
+    ; ("ttl", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `TTL a))
     ; ("image", image_of_xml')
-    ; ("rating", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Rating a))
+    ; ("rating", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Rating a))
     ; ("textinput", textinput_of_xml')
-    ; ("skiphours", dummy_of_xml ~ctor:(fun ~xmlbase a -> `SkipHours a))
-    ; ("skipdays", dummy_of_xml ~ctor:(fun ~xmlbase a -> `SkipDays a))
+    ; ("skiphours", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `SkipHours a))
+    ; ("skipdays", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `SkipDays a))
     ; ("item", item_of_xml') ]
   in
-  generate_catcher ~data_producer (fun ~pos x -> x)
+  generate_catcher ~data_producer (fun ~pos:_ x -> x)
 
 let find_channel l =
   find
     (function
-      | XML.Node (pos, tag, data) -> tag_is tag "channel" | XML.Data _ -> false)
+      | XML.Node (_pos, tag, _data) -> tag_is tag "channel"
+      | XML.Data _ -> false)
     l
 
 let parse ?xmlbase input =

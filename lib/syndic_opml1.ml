@@ -37,13 +37,13 @@ let string_of_xml name (pos, _, datas) =
   try get_leaf datas with Not_found ->
     raise (Error.Error (pos, name ^ " must not be empty"))
 
-let title_of_xml ~xmlbase a = `Title (string_of_xml "<title>" a)
-let owner_name_of_xml ~xmlbase a = `OwnerName (string_of_xml "<ownerName>" a)
+let title_of_xml ~xmlbase:_ a = `Title (string_of_xml "<title>" a)
+let owner_name_of_xml ~xmlbase:_ a = `OwnerName (string_of_xml "<ownerName>" a)
 
-let owner_email_of_xml ~xmlbase a =
+let owner_email_of_xml ~xmlbase:_ a =
   `OwnerEmail (string_of_xml "<ownerEmail>" a)
 
-let expansion_state_of_xml ~xmlbase (pos, _, datas) =
+let expansion_state_of_xml ~xmlbase:_ (pos, _, datas) =
   let explode s =
     let rec aux acc i =
       if i = String.length s then acc else aux (s.[i] :: acc) (succ i)
@@ -81,16 +81,16 @@ let int_of_xml name (pos, _, datas) =
   | Not_found -> raise (Error.Error (pos, name ^ " must not be empty"))
   | Failure _ -> raise (Error.Error (pos, name ^ " must be an integer"))
 
-let vert_scroll_state_of_xml ~xmlbase a =
+let vert_scroll_state_of_xml ~xmlbase:_ a =
   `VertScrollState (int_of_xml "<vertScrollState>" a)
 
-let window_top_of_xml ~xmlbase a = `WindowTop (int_of_xml "<windowTop>" a)
-let window_left_of_xml ~xmlbase a = `WindowLeft (int_of_xml "<windowLeft>" a)
+let window_top_of_xml ~xmlbase:_ a = `WindowTop (int_of_xml "<windowTop>" a)
+let window_left_of_xml ~xmlbase:_ a = `WindowLeft (int_of_xml "<windowLeft>" a)
 
-let window_bottom_of_xml ~xmlbase a =
+let window_bottom_of_xml ~xmlbase:_ a =
   `WindowBottom (int_of_xml "<windowBotton>" a)
 
-let window_right_of_xml ~xmlbase a =
+let window_right_of_xml ~xmlbase:_ a =
   `WindowRight (int_of_xml "<windowRight>" a)
 
 type head' =
@@ -194,10 +194,10 @@ let date_of_xml name (pos, _, datas) =
   try Date.of_rfc822 d with _ ->
     raise (Error.Error (pos, sprintf "Date %S incorrect" d))
 
-let date_created_of_xml ~xmlbase a =
+let date_created_of_xml ~xmlbase:_ a =
   `DateCreated (date_of_xml "<dateCreated>" a)
 
-let date_modified_of_xml ~xmlbase a =
+let date_modified_of_xml ~xmlbase:_ a =
   `DateModified (date_of_xml "<dateModified>" a)
 
 let head_of_xml =
@@ -218,21 +218,22 @@ let head_of_xml =
 
 let head_of_xml' =
   let data_producer =
-    [ ("title", dummy_of_xml ~ctor:(fun ~xmlbase a -> `Title a))
-    ; ("dateCreated", dummy_of_xml ~ctor:(fun ~xmlbase a -> `DateCreated a))
-    ; ("dateModified", dummy_of_xml ~ctor:(fun ~xmlbase a -> `DateModified a))
-    ; ("ownerName", dummy_of_xml ~ctor:(fun ~xmlbase a -> `OwnerName a))
-    ; ("ownerEmail", dummy_of_xml ~ctor:(fun ~xmlbase a -> `OwnerEmail a))
+    [ ("title", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `Title a))
+    ; ("dateCreated", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `DateCreated a))
+    ; ("dateModified", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `DateModified a))
+    ; ("ownerName", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `OwnerName a))
+    ; ("ownerEmail", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `OwnerEmail a))
     ; ( "expansionState"
-      , dummy_of_xml ~ctor:(fun ~xmlbase a -> `ExpansionSate a) )
+      , dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `ExpansionSate a) )
     ; ( "vertScrollState"
-      , dummy_of_xml ~ctor:(fun ~xmlbase a -> `VertScrollState a) )
-    ; ("windowTop", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WindowTop a))
-    ; ("windowLeft", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WindowLeft a))
-    ; ("windowBottom", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WindowBottom a))
-    ; ("windowRight", dummy_of_xml ~ctor:(fun ~xmlbase a -> `WindowRight a)) ]
+      , dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `VertScrollState a) )
+    ; ("windowTop", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `WindowTop a))
+    ; ("windowLeft", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `WindowLeft a))
+    ; ("windowBottom", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `WindowBottom a))
+    ; ("windowRight", dummy_of_xml ~ctor:(fun ~xmlbase:_ a -> `WindowRight a))
+    ]
   in
-  generate_catcher ~data_producer (fun ~pos x -> `Head x)
+  generate_catcher ~data_producer (fun ~pos:_ x -> `Head x)
 
 type outline =
   { text: string
@@ -301,7 +302,7 @@ let rec outline_of_node ~xmlbase ((pos, (_, attributes), datas) : node) =
 
 let outline_of_xml ~xmlbase a = `Outline (outline_of_node ~xmlbase a)
 
-let rec outline_of_node' ~xmlbase ((pos, (_, attributes), datas) : node) =
+let rec outline_of_node' ~xmlbase ((_pos, (_, attributes), datas) : node) =
   let el = ref [] in
   let xmlbase = xmlbase_of_attr ~xmlbase attributes in
   let el_of_attrs (name, v) =
@@ -340,7 +341,7 @@ let body_of_xml =
 
 let body_of_xml' =
   let data_producer = [("outline", outline_of_xml')] in
-  generate_catcher ~data_producer (fun ~pos x -> `Body x)
+  generate_catcher ~data_producer (fun ~pos:_ x -> `Body x)
 
 type t = {version: string; head: head; body: body}
 type opml = t
@@ -372,14 +373,14 @@ let make_opml ~pos (l : [< opml'] list) =
   {version; head; body}
 
 let opml_of_xml =
-  let attr_producer = [("version", fun ~xmlbase a -> `Version a)] in
+  let attr_producer = [("version", fun ~xmlbase:_ a -> `Version a)] in
   let data_producer = [("head", head_of_xml); ("body", body_of_xml)] in
   generate_catcher ~attr_producer ~data_producer make_opml
 
 let opml_of_xml' =
-  let attr_producer = [("version", fun ~xmlbase a -> `Version a)] in
+  let attr_producer = [("version", fun ~xmlbase:_ a -> `Version a)] in
   let data_producer = [("head", head_of_xml'); ("body", body_of_xml')] in
-  generate_catcher ~attr_producer ~data_producer (fun ~pos x -> x)
+  generate_catcher ~attr_producer ~data_producer (fun ~pos:_ x -> x)
 
 let find_opml l =
   find (function XML.Node (_, t, _) -> tag_is t "opml" | _ -> false) l

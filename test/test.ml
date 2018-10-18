@@ -30,7 +30,7 @@ let get : src -> Xmlm.source Lwt.t = function
       timer ()
       >>= fun () ->
       CLU.Client.get src
-      >>= fun (response, body) ->
+      >>= fun (_response, body) ->
       CLB.to_string body >>= fun data -> Lwt.return (`String (0, data))
   | `Data data -> Lwt.return (`String (0, data))
 
@@ -168,9 +168,9 @@ let print_result p (r, e) =
     print (Syndic.W3C.Error.Error (pos, err) |> Syndic.W3C.Error.to_string)
   in
   match r with
-  | SyndicError (pos, err) when result_equal r e ->
+  | SyndicError (_pos, err) when result_equal r e ->
       (expected p "\nsyndic: %s") err
-  | SyndicError (pos, err) -> (error p "\nsyndic: %s") err
+  | SyndicError (_pos, err) -> (error p "\nsyndic: %s") err
   | W3CError errors when result_equal r e ->
       (expected p "\n%a") (Printf.add_list ~sep:"\n" add_error) errors
   | W3CError errors ->
@@ -207,18 +207,18 @@ let make_test (src, fmt, result) =
       | exn -> Lwt.return (AnotherError exn))
   >>= fun r ->
   match r with
-  | SyndicError (pos, err) ->
+  | SyndicError (_pos, _err) ->
       reset () ;
       print_result (src, fmt) (r, result) ;
       newline () ;
       switch () ;
       Lwt.return ()
-  | W3CError errors ->
+  | W3CError _errors ->
       reset () ;
       print_result (src, fmt) (r, result) ;
       newline () ;
       Lwt.return ()
-  | AnotherError exn ->
+  | AnotherError _exn ->
       reset () ;
       print_result (src, fmt) (r, result) ;
       newline () ;
