@@ -1,0 +1,32 @@
+opam-version: "2.0"
+name:         "syndic"
+maintainer:   "Romain Calascibetta <romain.calascibetta@gmail.com>"
+authors:      [ "Romain Calascibetta"
+                "Christophe Troestler" ]
+license:      "MIT"
+homepage:     "https://github.com/Cumulus/Syndic"
+dev-repo:     "git+https://github.com/Cumulus/Syndic.git"
+bug-reports:  "https://github.com/Cumulus/Syndic/issues"
+synopsis:     "RSS1, RSS2, Atom and OPML1 parsing"
+description: """
+Pure OCaml Library for parsing and writing various types of
+feeds and subscriber lists."""
+
+build: [
+  [ "dune" "subst" ]
+  [ "dune" "build" "-p" name "-j" jobs ]
+  [ "dune" "runtest" "-p" name ] {with-test}
+]
+
+depends: [
+  "ocaml" {>= "4.03.0"}
+  "dune"
+  "ptime"
+  "uri" {>= "1.9"}
+  "xmlm" {>= "1.2.0"}
+  "cohttp" {with-test & >= "1.0.0"}
+  "cohttp-lwt-unix" {with-test & >= "1.0.0"}
+  "lwt" {with-test}
+  "ssl" {with-test}
+  "tls" {with-test}
+]

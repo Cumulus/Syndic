@@ -1,4 +1,3 @@
-
 (** The common signature that all error modules must (at least) satisfy. *)
 
 type t = Xmlm.pos * string

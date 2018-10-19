@@ -1,0 +1,15 @@
+(executable
+ (name test)
+ (modules test)
+ (libraries syndic cohttp-lwt-unix ssl tls))
+
+(executable
+ (name test_decisions)
+ (modules test_decisions)
+ (libraries syndic cohttp-lwt-unix ssl tls))
+
+(alias
+ (name runtest)
+ (package syndic)
+ (deps (:test test.exe))
+ (action (run %{test} -q --color=always)))
