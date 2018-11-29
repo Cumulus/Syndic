@@ -1,7 +1,7 @@
 (executable
  (name test)
  (modules test)
- (libraries syndic cohttp-lwt-unix ssl tls))
+ (libraries syndic curl curl.lwt))
 
 (executable
  (name test_decisions)

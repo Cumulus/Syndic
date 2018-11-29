@@ -1,8 +1,6 @@
 let () = Printexc.record_backtrace true
 
 open Lwt
-module CLU = Cohttp_lwt_unix
-module CLB = Cohttp_lwt.Body
 
 type result =
   | Ok
@@ -15,25 +13,36 @@ exception Is_not_a_file
 type src = [`Data of string | `Uri of Uri.t]
 type fmt = [`Atom | `Rss1 | `Rss2 | `Opml1]
 
-let timer =
-  let already_used = ref false in
-  fun () ->
-    if !already_used then (
-      Lwt_unix.sleep 1.0
-      >>= fun () ->
-      already_used := true ;
-      Lwt.return () )
-    else (
-      already_used := true ;
-      Lwt.return () )
+let curl_setup_simple h =
+  let open Curl in
+  set_useragent h "Syndic" ;
+  set_nosignal h true ;
+  set_connecttimeout h 5 ;
+  set_timeout h 10 ;
+  set_followlocation h true ;
+  set_maxredirs h 10 ;
+  set_ipresolve h IPRESOLVE_V4 ;
+  set_encoding h CURL_ENCODING_ANY
+
+let download h =
+  let b = Buffer.create 16 in
+  Curl.set_writefunction h (fun s -> Buffer.add_string b s ; String.length s) ;
+  Lwt.bind (Curl_lwt.perform h) (fun code ->
+      Lwt.return (code, Buffer.contents b) )
+
+let get url =
+  let open Lwt.Infix in
+  let h = Curl.init () in
+  Curl.set_url h (Uri.to_string url) ;
+  curl_setup_simple h ;
+  Lwt.try_bind
+    (fun () -> download h)
+    (fun (_code, contents) -> Lwt.return (`String (0, contents)))
+    (fun exn -> Lwt.fail exn)
+  >>= fun ret -> Curl.cleanup h ; Lwt.return ret
 
 let get : src -> Xmlm.source Lwt.t = function
-  | `Uri src ->
-      timer ()
-      >>= fun () ->
-      CLU.Client.get src
-      >>= fun (_response, body) ->
-      CLB.to_string body >>= fun data -> Lwt.return (`String (0, data))
+  | `Uri src -> get src
   | `Data data -> Lwt.return (`String (0, data))
 
 let parse ?xmlbase = function
@@ -57,7 +66,10 @@ let string_of_fmt = function
   | `Opml1 -> "OPML 1.0"
 
 let tests : ([> src] * [< fmt] * result) list =
-  [ (`Uri (Uri.of_string "http://ocaml.org/feed.xml"), `Atom, Ok)
+  [ (`Uri (Uri.of_string "https://16andcounting.libsyn.com/rss"), `Rss2, Ok)
+  ; (`Uri (Uri.of_string "http://ocaml.org/feed.xml"), `Atom, Ok)
+  ; (`Uri (Uri.of_string "http://korben.info/feed"), `Rss2, Ok)
+  ; (`Uri (Uri.of_string "http://linuxfr.org/journaux.atom"), `Atom, Ok)
   ; (`Uri (Uri.of_string "https://www.reddit.com/r/ocaml/.rss"), `Atom, Ok)
   ; ( `Data
         "<?xml version='1.0' encoding='utf-8'?> <feed \
@@ -182,6 +194,7 @@ let print_result p (r, e) =
 
 let newline () = print "\n"
 let reset () = print "\r"
+let nbsp_entity = function "nbsp" -> Some " " | _ -> None
 
 let make_test (src, fmt, result) =
   print (left (yellow "...") left_columns) ;
@@ -190,7 +203,7 @@ let make_test (src, fmt, result) =
   >>= fun xmlm_source ->
   Lwt.catch
     (fun () ->
-      let _ = parse fmt (Xmlm.make_input xmlm_source) in
+      let _ = parse fmt (Xmlm.make_input ~entity:nbsp_entity xmlm_source) in
       Lwt.return Ok )
     (function
       | Syndic.Rss1.Error.Error (pos, err)
@@ -199,7 +212,10 @@ let make_test (src, fmt, result) =
        |Syndic.Opml1.Error.Error (pos, err) -> (
           get (`Uri (Syndic.W3C.url src))
           >>= fun xmlm_source ->
-          Lwt.return (snd (Syndic.W3C.parse (Xmlm.make_input xmlm_source)))
+          Lwt.return
+            (snd
+               (Syndic.W3C.parse
+                  (Xmlm.make_input ~entity:nbsp_entity xmlm_source)))
           >>= function
           | [] -> Lwt.return (SyndicError (pos, err))
           | errors ->
