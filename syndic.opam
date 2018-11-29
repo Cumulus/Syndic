@@ -24,9 +24,6 @@ depends: [
   "ptime"
   "uri" {>= "1.9"}
   "xmlm" {>= "1.2.0"}
-  "cohttp" {with-test & >= "1.0.0"}
-  "cohttp-lwt-unix" {with-test & >= "1.0.0"}
+  "ocurl" {with-test}
   "lwt" {with-test}
-  "ssl" {with-test}
-  "tls" {with-test}
 ]
