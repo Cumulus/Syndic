@@ -1,12 +1,12 @@
 (executable
  (name test)
  (modules test)
- (libraries syndic cohttp-lwt-unix ssl tls))
+ (libraries syndic cohttp-lwt-unix))
 
 (executable
  (name test_decisions)
  (modules test_decisions)
- (libraries syndic cohttp-lwt-unix ssl tls))
+ (libraries syndic cohttp-lwt-unix))
 
 (alias
  (name runtest)
