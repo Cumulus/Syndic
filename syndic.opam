@@ -27,6 +27,6 @@ depends: [
   "cohttp" {with-test & >= "1.0.0"}
   "cohttp-lwt-unix" {with-test & >= "1.0.0"}
   "lwt" {with-test}
-  "ssl" {with-test}
+  "nocrypto" {with-test & >= "0.5.4"}
   "tls" {with-test}
 ]
