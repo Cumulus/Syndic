@@ -1,6 +1,8 @@
 let () = Printexc.record_backtrace true
 
 open Lwt
+module CLU = Cohttp_lwt_unix
+module CLB = Cohttp_lwt.Body
 
 type result =
   | Ok
@@ -13,36 +15,25 @@ exception Is_not_a_file
 type src = [`Data of string | `Uri of Uri.t]
 type fmt = [`Atom | `Rss1 | `Rss2 | `Opml1]
 
-let curl_setup_simple h =
-  let open Curl in
-  set_useragent h "Syndic" ;
-  set_nosignal h true ;
-  set_connecttimeout h 5 ;
-  set_timeout h 10 ;
-  set_followlocation h true ;
-  set_maxredirs h 10 ;
-  set_ipresolve h IPRESOLVE_V4 ;
-  set_encoding h CURL_ENCODING_ANY
-
-let download h =
-  let b = Buffer.create 16 in
-  Curl.set_writefunction h (fun s -> Buffer.add_string b s ; String.length s) ;
-  Lwt.bind (Curl_lwt.perform h) (fun code ->
-      Lwt.return (code, Buffer.contents b) )
-
-let get url =
-  let open Lwt.Infix in
-  let h = Curl.init () in
-  Curl.set_url h (Uri.to_string url) ;
-  curl_setup_simple h ;
-  Lwt.try_bind
-    (fun () -> download h)
-    (fun (_code, contents) -> Lwt.return (`String (0, contents)))
-    (fun exn -> Lwt.fail exn)
-  >>= fun ret -> Curl.cleanup h ; Lwt.return ret
+let timer =
+  let already_used = ref false in
+  fun () ->
+    if !already_used then (
+      Lwt_unix.sleep 1.0
+      >>= fun () ->
+      already_used := true ;
+      Lwt.return () )
+    else (
+      already_used := true ;
+      Lwt.return () )
 
 let get : src -> Xmlm.source Lwt.t = function
-  | `Uri src -> get src
+  | `Uri src ->
+      timer ()
+      >>= fun () ->
+      CLU.Client.get src
+      >>= fun (_response, body) ->
+      CLB.to_string body >>= fun data -> Lwt.return (`String (0, data))
   | `Data data -> Lwt.return (`String (0, data))
 
 let parse ?xmlbase = function
