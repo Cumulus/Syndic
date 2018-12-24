@@ -1,7 +1,7 @@
 (executable
  (name test)
  (modules test)
- (libraries syndic curl curl.lwt))
+ (libraries syndic fmt curl curl.lwt))
 
 (executable
  (name test_decisions)
