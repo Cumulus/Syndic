@@ -26,7 +26,7 @@ let curl_setup_simple h =
 
 let download h =
   let b = Buffer.create 16 in
-  Curl.set_writefunction h (fun s -> Buffer.add_string b s ; String.length s) ;
+  Curl.set_writefunction h (fun s -> Fmt.epr "Write %d byte(s).\n%!" (String.length s); Buffer.add_string b s ; String.length s) ;
   Lwt.bind (Curl_lwt.perform h) (fun code ->
       Lwt.return (code, Buffer.contents b) )
 
