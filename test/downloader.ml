@@ -6,6 +6,12 @@
 
 #require "curl" ;;
 
+let () = Printexc.register_printer
+    (function
+      | Curl.CurlException (code, errno, err) ->
+        Some (Fmt.strf "(CurlException (%s, %d, %s))" (Curl.strerror code) errno err)
+      | _ -> None)
+
 let curl_setup_simple h =
   let open Curl in
   set_useragent h "Syndic" ;
