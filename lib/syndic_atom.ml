@@ -75,7 +75,7 @@ let text_construct_of_xml ~xmlbase
 
 type author = {name: string; uri: Uri.t option; email: string option}
 
-let dummy_author = {name= ""; uri= None; email= None}
+let empty_author = {name= ""; uri= None; email= None}
 let not_empty_author a = a.name <> "" || a.uri <> None || a.email <> None
 let author ?uri ?email name = {uri; email; name}
 
@@ -828,6 +828,8 @@ type feed' =
   | `Updated of updated
   | `Entry of entry ]
 
+let dummy_name = "\000"
+
 let make_entry ~pos l =
   let authors =
     List.fold_left
@@ -865,7 +867,7 @@ let make_entry ~pos l =
             "<entry> does not contain an <author> and its <source> neither does"
           in
           raise (Error.Error (pos, msg)) )
-    | [], None -> (dummy_author, [])
+    | [], None -> ({name= dummy_name; uri= None; email= None}, [])
     (* unacceptable value, see fix_author below *)
     (* atomCategory* *)
   in
@@ -1104,7 +1106,7 @@ let make_feed ~pos (l : _ list) =
   (* atomEntry* *)
   let fix_author pos (e : entry) =
     match e.authors with
-    | a, [] when a.name = "" -> (
+    | a, [] when a.name = dummy_name -> (
       (* In an Atom Feed Document, the atom:author elements of the containing
          atom:feed element are considered to apply to the entry if there are no
          atom:author elements in the locations described above.
@@ -1303,7 +1305,7 @@ let set_main_author_entry author (e : entry) =
   let authors =
     match remove_empty_authors (a0 :: a) with
     | a0 :: a -> (a0, a)
-    | [] -> ((if author_ok then author else dummy_author), [])
+    | [] -> ((if author_ok then author else empty_author), [])
   in
   let contributors = remove_empty_authors e.contributors in
   {e with authors; contributors; source}
