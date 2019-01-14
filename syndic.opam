@@ -18,6 +18,7 @@ build: [
   [ "dune" "runtest" "-p" name ] {with-test}
 ]
 
+
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune"
@@ -31,3 +32,10 @@ depends: [
   "base-unix" {with-test}
   "jsonm" {with-test}
 ]
+
+extra-source "test/001.feed" { src: "http://16andcounting.libsyn.com/rss" }
+extra-source "test/002.feed" { src: "http://rgrinberg.com/atom.xml" }
+extra-source "test/003.feed" { src: "http://ocaml.org/feed.xml" }
+extra-source "test/004.feed" { src: "http://korben.info/feed" }
+extra-source "test/005.feed" { src: "http://linuxfr.org/journaux.atom" }
+extra-source "test/006.feed" { src: "http://www.reddit.com/r/ocaml/.rss" }
