@@ -1,7 +1,5 @@
 let () = Printexc.record_backtrace true
 
-open Lwt
-
 type result =
   | Ok
   | SyndicError of (Xmlm.pos * string)
@@ -10,40 +8,13 @@ type result =
 
 exception Is_not_a_file
 
-type src = [`Data of string | `Uri of Uri.t]
+type src = [`Data of string | `Filename of (Fpath.t * Uri.t) ]
 type fmt = [`Atom | `Rss1 | `Rss2 | `Opml1]
 
-let curl_setup_simple h =
-  let open Curl in
-  set_useragent h "Syndic" ;
-  set_nosignal h true ;
-  set_connecttimeout h 5 ;
-  set_timeout h 10 ;
-  set_followlocation h true ;
-  set_maxredirs h 10 ;
-  set_ipresolve h IPRESOLVE_V4 ;
-  set_encoding h CURL_ENCODING_ANY
-
-let download h =
-  let b = Buffer.create 16 in
-  Curl.set_writefunction h (fun s -> Buffer.add_string b s ; String.length s) ;
-  Lwt.bind (Curl_lwt.perform h) (fun code ->
-      Lwt.return (code, Buffer.contents b) )
-
-let get url =
-  let open Lwt.Infix in
-  let h = Curl.init () in
-  Curl.set_url h (Uri.to_string url) ;
-  curl_setup_simple h ;
-  Lwt.try_bind
-    (fun () -> download h)
-    (fun (_code, contents) -> Lwt.return (`String (0, contents)))
-    (fun exn -> Lwt.fail exn)
-  >>= fun ret -> Curl.cleanup h ; Lwt.return ret
-
-let get : src -> Xmlm.source Lwt.t = function
-  | `Uri src -> get src
-  | `Data data -> Lwt.return (`String (0, data))
+let get : src -> Xmlm.source = function
+  | `Filename (fpath, _) ->
+    `Channel (open_in (Fpath.to_string fpath))
+  | `Data data -> `String (0, data)
 
 let parse ?xmlbase = function
   | `Rss1 -> fun src -> `Rss1 (Syndic.Rss1.parse ?xmlbase src)
@@ -52,7 +23,7 @@ let parse ?xmlbase = function
   | `Opml1 -> fun src -> `Opml1 (Syndic.Opml1.parse ?xmlbase src)
 
 let string_of_src = function
-  | `Uri uri -> Printf.sprintf "'%s'" (Uri.to_string uri)
+  | `Filename (_, uri) -> Fmt.strf "'%s'" (Uri.to_string uri)
   | `Data data ->
       let buffer = Buffer.create 16 in
       Buffer.add_string buffer (String.sub data 0 16) ;
@@ -65,18 +36,76 @@ let string_of_fmt = function
   | `Atom -> "Atom"
   | `Opml1 -> "OPML 1.0"
 
+type entry =
+  { name : string
+  ; uri : Uri.t
+  ; kind : fmt }
+
+let json =
+  let open Json_encoding in
+  let name = req "name" string in
+  let uri = req "uri" (conv Uri.to_string Uri.of_string string) in
+  let kind =
+    let rss1 = case string (function `Rss1 -> Some "rss1" | _ -> None) (function "rss1" -> `Rss1 | _ -> assert false) in
+    let rss2 = case string (function `Rss2 -> Some "rss2" | _ -> None) (function "rss2" -> `Rss2 | _ -> assert false) in
+    let atom = case string (function `Atom -> Some "atom" | _ -> None) (function "atom" -> `Atom | _ -> assert false) in
+    req "kind" (union [ rss1; rss2; atom ]) in
+  let entry = conv (fun { name; uri; kind; } -> (name, uri, kind)) (fun (name, uri, kind) -> { name; uri; kind; }) (obj3 name uri kind) in
+  list entry
+
+type await = [ `Await ]
+type error = [ `Error of Jsonm.error ]
+type eoi = [ `End ]
+type value = [ `Null | `Bool of bool | `String of string | `Float of float ]
+
+let json_of_input ic =
+  let decoder = Jsonm.decoder (`Channel ic) in
+
+  let error (`Error err) = Fmt.invalid_arg "%a" Jsonm.pp_error err in
+  let end_of_input `End = Fmt.invalid_arg "Unexpected end of input" in
+
+  let rec arr acc k = match Jsonm.decode decoder with
+    | #await -> assert false
+    | #error as v -> error v
+    | #eoi as v -> end_of_input v
+    | `Lexeme `Ae -> k (`A (List.rev acc))
+    | `Lexeme v -> base (fun v -> arr (v :: acc) k) v
+
+  and name n k = match Jsonm.decode decoder with
+    | #await -> assert false
+    | #error as v -> error v
+    | #eoi as v -> end_of_input v
+    | `Lexeme v -> base (fun v -> k (n, v)) v
+
+  and obj acc k = match Jsonm.decode decoder with
+    | #await -> assert false
+    | #error as v -> error v
+    | #eoi as v -> end_of_input v
+    | `Lexeme `Oe -> k (`O (List.rev acc))
+    | `Lexeme (`Name n) -> name n (fun v -> obj (v :: acc) k)
+    | `Lexeme v -> Fmt.invalid_arg "Unexpected lexeme: %a" Jsonm.pp_lexeme v
+
+  and base k = function
+    | #value as v -> k v
+    | `Os -> obj [] k
+    | `As -> arr [] k
+    | `Ae | `Oe -> Fmt.invalid_arg "Unexpected end of array/object"
+    | `Name n -> Fmt.invalid_arg "Unexpected key: %s" n in
+
+  let go k = match Jsonm.decode decoder with
+    | #await -> assert false
+    | #error as v -> error v
+    | #eoi as v -> end_of_input v
+    | `Lexeme (#Jsonm.lexeme as lexeme) -> base k lexeme in
+
+  go Json_encoding.(destruct json)
+
 let tests : ([> src] * [< fmt] * result) list =
-  [ (`Uri (Uri.of_string "http://16andcounting.libsyn.com/rss"), `Rss2, Ok)
-  ; (`Uri (Uri.of_string "http://rgrinberg.com/blog/atom.xml"), `Atom, Ok) (* cc Rudy *)
-  ; (`Uri (Uri.of_string "http://ocaml.org/feed.xml"), `Atom, Ok)
-  ; (`Uri (Uri.of_string "http://korben.info/feed"), `Rss2, Ok)
-  ; (`Uri (Uri.of_string "http://linuxfr.org/journaux.atom"), `Atom, Ok)
-  ; (`Uri (Uri.of_string "http://www.reddit.com/r/ocaml/.rss"), `Atom, Ok)
-  ; ( `Data
-        "<?xml version='1.0' encoding='utf-8'?> <feed \
-         xmlns='http://www.w3.org/2015/Atom'> <title></title></feed>"
-    , `Atom
-    , W3CError [] ) ]
+  let ic = open_in "feeds.json" in
+  let entries = json_of_input ic in
+  close_in ic ;
+  let entries = List.map (fun { name; kind; uri; } -> `Filename (Fpath.v name |> Fpath.add_ext "feed", uri), kind, Ok) entries in
+  entries
 
 let () =
   Printexc.register_printer (function
@@ -200,53 +229,37 @@ let nbsp_entity = function "nbsp" -> Some " " | _ -> None
 let make_test (src, fmt, result) =
   print (left (yellow "...") left_columns) ;
   print_info (src, fmt) ;
-  get src
-  >>= fun xmlm_source ->
-  Lwt.catch
-    (fun () ->
-      let _ = parse fmt (Xmlm.make_input ~entity:nbsp_entity xmlm_source) in
-      Lwt.return Ok )
-    (function
-      | Syndic.Rss1.Error.Error (pos, err)
-       |Syndic.Rss2.Error.Error (pos, err)
-       |Syndic.Atom.Error.Error (pos, err)
-       |Syndic.Opml1.Error.Error (pos, err) -> (
-          get (`Uri (Syndic.W3C.url src))
-          >>= fun xmlm_source ->
-          Lwt.return
-            (snd
-               (Syndic.W3C.parse
-                  (Xmlm.make_input ~entity:nbsp_entity xmlm_source)))
-          >>= function
-          | [] -> Lwt.return (SyndicError (pos, err))
-          | errors ->
-              Lwt.return (W3CError (List.map Syndic.W3C.to_error errors)) )
-      | exn -> Lwt.return (AnotherError exn))
-  >>= fun r ->
+  let xmlm_source = get src in
+  let r =
+    try
+      let _ = parse fmt (Xmlm.make_input ~entity:nbsp_entity xmlm_source) in Ok
+    with
+    | Syndic.Rss1.Error.Error (_pos, _err)
+    | Syndic.Rss2.Error.Error (_pos, _err)
+    | Syndic.Atom.Error.Error (_pos, _err)
+    | Syndic.Opml1.Error.Error (_pos, _err) -> Ok
+    | exn -> (AnotherError exn)
+  in
   match r with
   | SyndicError (_pos, _err) ->
       reset () ;
       print_result (src, fmt) (r, result) ;
       newline () ;
-      switch () ;
-      Lwt.return ()
+      switch ()
   | W3CError _errors ->
       reset () ;
       print_result (src, fmt) (r, result) ;
-      newline () ;
-      Lwt.return ()
+      newline ()
   | AnotherError _exn ->
       reset () ;
       print_result (src, fmt) (r, result) ;
       newline () ;
-      switch () ;
-      Lwt.return ()
+      switch ()
   | Ok ->
       reset () ;
       print_result (src, fmt) (r, result) ;
-      newline () ;
-      Lwt.return ()
+      newline ()
 
 let () =
-  Lwt_main.run (Lwt_list.map_s make_test tests >>= fun _ -> Lwt.return ()) ;
+  List.iter make_test tests ;
   if state () then exit 1 else exit 0

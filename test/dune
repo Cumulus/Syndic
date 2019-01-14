@@ -1,15 +1,15 @@
 (executable
  (name test)
  (modules test)
- (libraries syndic fmt curl curl.lwt))
+ (libraries syndic jsonm fpath fmt ocplib-json-typed unix))
 
-(executable
- (name test_decisions)
- (modules test_decisions)
- (libraries syndic cohttp-lwt-unix ssl tls))
+(include dune.inc)
+
+(rule
+ (targets dune.inc.gen)
+ (deps (:gen generate.ml) (:feeds feeds.json))
+ (action (run %{ocaml} %{gen} --json %{feeds} --output %{targets})))
 
 (alias
  (name runtest)
- (package syndic)
- (deps (:test test.exe))
- (action (run %{test} -q --color=always)))
+ (action (diff dune.inc dune.inc.gen)))

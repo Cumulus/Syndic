@@ -26,5 +26,8 @@ depends: [
   "xmlm" {>= "1.2.0"}
   "fmt" {with-test}
   "ocurl" {with-test}
-  "lwt" {with-test}
+  "fpath" {with-test}
+  "ocplib-json-typed" {with-test}
+  "base-unix" {with-test}
+  "jsonm" {with-test}
 ]
