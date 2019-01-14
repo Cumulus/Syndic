@@ -3,7 +3,7 @@
       "uri": "http://16andcounting.libsyn.com/rss",
       "kind": "rss2" },
     { "name": "002",
-      "uri": "http://rgrinberg.com/atom.xml",
+      "uri": "http://rgrinberg.com/blog/atom.xml",
       "kind": "atom" },
     { "name": "003",
       "uri": "http://ocaml.org/feed.xml",

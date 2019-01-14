@@ -1,5 +1,5 @@
 (rule (targets 001.feed) (deps (:gen downloader.ml)) (action (run %{ocaml} %{gen} --uri http://16andcounting.libsyn.com/rss --output %{targets})))
-(rule (targets 002.feed) (deps (:gen downloader.ml)) (action (run %{ocaml} %{gen} --uri http://rgrinberg.com/atom.xml --output %{targets})))
+(rule (targets 002.feed) (deps (:gen downloader.ml)) (action (run %{ocaml} %{gen} --uri http://rgrinberg.com/blog/atom.xml --output %{targets})))
 (rule (targets 003.feed) (deps (:gen downloader.ml)) (action (run %{ocaml} %{gen} --uri http://ocaml.org/feed.xml --output %{targets})))
 (rule (targets 004.feed) (deps (:gen downloader.ml)) (action (run %{ocaml} %{gen} --uri http://korben.info/feed --output %{targets})))
 (rule (targets 005.feed) (deps (:gen downloader.ml)) (action (run %{ocaml} %{gen} --uri http://linuxfr.org/journaux.atom --output %{targets})))
