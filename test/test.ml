@@ -26,7 +26,7 @@ let curl_setup_simple h =
 
 let download h =
   let b = Buffer.create 16 in
-  Curl.set_writefunction h (fun s -> Fmt.epr "Write %d byte(s).\n%!" (String.length s); Buffer.add_string b s ; String.length s) ;
+  Curl.set_writefunction h (fun s -> Buffer.add_string b s ; String.length s) ;
   Lwt.bind (Curl_lwt.perform h) (fun code ->
       Lwt.return (code, Buffer.contents b) )
 
@@ -67,6 +67,7 @@ let string_of_fmt = function
 
 let tests : ([> src] * [< fmt] * result) list =
   [ (`Uri (Uri.of_string "http://16andcounting.libsyn.com/rss"), `Rss2, Ok)
+  ; (`Uri (Uri.of_string "http://rgrinberg.com/blog/atom.xml"), `Atom, Ok) (* cc Rudy *)
   ; (`Uri (Uri.of_string "http://ocaml.org/feed.xml"), `Atom, Ok)
   ; (`Uri (Uri.of_string "http://korben.info/feed"), `Rss2, Ok)
   ; (`Uri (Uri.of_string "http://linuxfr.org/journaux.atom"), `Atom, Ok)
