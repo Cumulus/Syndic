@@ -108,6 +108,7 @@ let pp_json ppf map =
 
 let pp_entry ppf entry =
   Fmt.pf ppf "(rule (targets %s.feed) \
+              (fallback) \
               (deps (:gen downloader.ml)) \
               (action (run %%{ocaml} %%{gen} --uri %s --output %%{targets})))"
     entry.name (Uri.to_string entry.uri)
