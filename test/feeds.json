@@ -1,0 +1,20 @@
+[
+    { "name": "001",
+      "uri": "http://16andcounting.libsyn.com/rss",
+      "kind": "rss2" },
+    { "name": "002",
+      "uri": "http://rgrinberg.com/blog/atom.xml",
+      "kind": "atom" },
+    { "name": "003",
+      "uri": "http://ocaml.org/feed.xml",
+      "kind": "atom" },
+    { "name": "004",
+      "uri": "http://korben.info/feed",
+      "kind": "rss2" },
+    { "name": "005",
+      "uri": "http://linuxfr.org/journaux.atom",
+      "kind": "atom" },
+    { "name": "006",
+      "uri": "http://www.reddit.com/r/ocaml/.rss",
+      "kind": "atom" }
+]

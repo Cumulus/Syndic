@@ -18,15 +18,24 @@ build: [
   [ "dune" "runtest" "-p" name ] {with-test}
 ]
 
+
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune"
   "ptime"
   "uri" {>= "1.9"}
   "xmlm" {>= "1.2.0"}
-  "cohttp" {with-test & >= "1.0.0"}
-  "cohttp-lwt-unix" {with-test & >= "1.0.0"}
-  "lwt" {with-test}
-  "ssl" {with-test}
-  "tls" {with-test}
+  "fmt" {with-test}
+  "ocurl" {with-test}
+  "fpath" {with-test}
+  "ocplib-json-typed" {with-test}
+  "base-unix" {with-test}
+  "jsonm" {with-test}
 ]
+
+extra-source "test/001.feed" { src: "http://16andcounting.libsyn.com/rss" }
+extra-source "test/002.feed" { src: "http://rgrinberg.com/blog/atom.xml" }
+extra-source "test/003.feed" { src: "http://ocaml.org/feed.xml" }
+extra-source "test/004.feed" { src: "http://korben.info/feed" }
+extra-source "test/005.feed" { src: "http://linuxfr.org/journaux.atom" }
+extra-source "test/006.feed" { src: "http://www.reddit.com/r/ocaml/.rss" }

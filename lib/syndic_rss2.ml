@@ -800,11 +800,10 @@ let channel_language_of_xml ~xmlbase:_ (pos, _tag, datas) =
     raise
       (Error.Error (pos, "The content of <language> MUST be a non-empty string"))
 
-let channel_copyright_of_xml ~xmlbase:_ (pos, _tag, datas) =
-  try `Copyright (get_leaf datas) with Not_found ->
-    raise
-      (Error.Error
-         (pos, "The content of <copyright> MUST be a non-empty string"))
+let channel_copyright_of_xml ~xmlbase:_ (_pos, _tag, datas) =
+  try `Copyright (get_leaf datas) with Not_found -> `Copyright ""
+
+(* XXX(dinosaure): aempty copyright is allowed. *)
 
 let channel_managingeditor_of_xml ~xmlbase:_ (pos, _tag, datas) =
   try `ManagingEditor (get_leaf datas) with Not_found ->
