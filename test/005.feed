@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xml:lang="en-US" xmlns="http://www.w3.org/2005/Atom" xmlns:wfw="http://wellformedweb.org/CommentAPI/">
+  <id>tag:linuxfr.org,2005:/journaux</id>
+  <link rel="alternate" type="text/html" href="https://linuxfr.org/journaux"/>
+  <link rel="self" type="application/atom+xml" href="https://linuxfr.org/journaux.atom"/>
+  <title>LinuxFr.org : les journaux</title>
+  <updated>2019-01-20T11:55:12+01:00</updated>
+  <icon>/favicon.png</icon>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38327</id>
+    <published>2019-01-20T11:55:12+01:00</published>
+    <updated>2019-01-20T17:27:31+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/raphj/journaux/le-drm-widevine-l3-cracke"/>
+    <title>Le DRM Widevine L3 cracké</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Je n’ai pas encore vu de journal ou de dépêche à ce sujet, alors je me lance. C’est un peu décousu, je rapporte ça pèle-mêle.&lt;/p&gt;
+
+&lt;p&gt;Widevine est un DRM (&lt;em&gt;Digital Rights Management&lt;/em&gt;, ou moins officiel mais plus exact &lt;em&gt;Digital Restriction Management&lt;/em&gt;) assez répandu, géré par Google, une grosse multinationale qui touche pas mal de domaines dans les nouvelles technologies et au‐delà.&lt;/p&gt;
+
+&lt;p&gt;Le but d’un tel composant est de limiter le « piratage », en restreignant les personnes utilisant légalement le service d’un service fournissant du contenu sur la manière dont elles lisent et stockent le contenu.&lt;br&gt;
+L’utilisateur probablement le plus connu de ce DRM est Netflix (un gros service de diffusion de vidéos à la demande dont le modèle économique est basé sur un abonnement mensuel ; avant ils envoyaient des DVD par la poste).&lt;/p&gt;
+
+&lt;p&gt;L’efficacité et le principe des DRM sont contestés (« De toute façon, tout ce qui est sur Netflix est accessible très rapidement illégalement et gratuitement ailleurs »).&lt;/p&gt;
+
+&lt;p&gt;Côté éthique, les DRM sont qualifiés de &lt;a href="https://www.defectivebydesign.org/what_is_drm_digital_restrictions_management"&gt;défectueux par conception&lt;/a&gt;. Les raisons principales sont : ils nécessitent l’utilisation côté client d’un code non libre et/ou d’un circuit matériel dont la conception est secrète, et en tout cas sont conçus pour limiter la liberté des utilisateurs, &lt;em&gt;a priori&lt;/em&gt; incompatible avec le logiciel libre. Les problèmes soulevés par l’utilisation d’un binaire non libre et dont les sources ne sont pas disponibles sont toujours les mêmes : on ne peut pas être sûr de ce qu’il fait derrière notre dos ou de sa qualité côté sécurité et confidentialité, il ne fonctionnera pas sur une nouvelle architecture matérielle sans l’implication des développeurs… Bref, la personne utilisant le service n’a pas le contrôle de ce qui tourne sur sa machine. Souvent sans le savoir ; pour citer Peter Lee de chez Disney :&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;« &lt;em&gt;If consumers even know there’s a DRM, what it is, and how it works, we’ve already failed.&lt;/em&gt; »&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Traduction libre et gratuite :&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;« Si tout simplement les consommateurs savent qu’il y a un DRM, ce que c’est et comment ça marche, nous avons déjà échoué. »&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;D’ailleurs, même &lt;a href="https://www.engadget.com/2017/09/09/spotify-drops-safari-streaming-support/"&gt;Apple ne veut pas de Widevine sur son navigateur Safari&lt;/a&gt;, considérant le binaire comme trop peu sûr. Et puis de toute façon, Apple a sa propre solution DRM, donc bon, le DRM Google on peut facilement imaginer qu’ils n’en veulent pas…&lt;/p&gt;
+
+&lt;p&gt;Widevine vient avec plusieurs niveaux de « sécurité », grosso modo L1 et L3 :&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;le niveau L3 ne dépend que d’un composant logiciel « obfusqué » pour le décodage, c’est un niveau de sécurité considéré comme limité ;&lt;/li&gt;
+&lt;li&gt;le niveau L1 dépend également d’un composant matériel « de confiance » certifié, on va le retrouver notamment dans certains téléphones Android.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Widevine L3 est fourni « de base comme extension » avec Chrome / Chromium et Firefox notamment. Le bazar est téléchargé par le navigateur à un certain moment avant la lecture du contenu « protégé ».&lt;/p&gt;
+
+&lt;p&gt;D’après ce qu’on peut lire par‐ci par‐là, Netflix limite la qualité des flux pouvant être lus avec ce niveau L3. Les flux dans les plus hautes définitions nécessitent le niveau L1.&lt;/p&gt;
+
+&lt;p&gt;David Buchanan affirme avoir cassé le niveau L3 en quelques après‐midis (on se détend comme on peut, n’est‐ce pas), et il n’y a pas de solution pour réparer la faille : Widevine L3 est cassé par conception. Il n’a à ma connaissance pas diffusé son &lt;em&gt;exploit&lt;/em&gt;. Je suppose que c’est pour faire gagner un peu de temps aux utilisateurs de ce DRM…&lt;/p&gt;
+
+&lt;p&gt;Certaines personnes s’inquiètent pour Netflix : « Mais c’est la panique, on va retrouver tous les contenus de Netflix dans la nature ! ». D’autres répondent : « Mais on s’en fout, ça ne concerne que les flux basse définition, personne ne veut regarder les trucs dans cette qualité. » Et encore d’autres de rajouter que de toute façon tout Netflix est déjà sur les torrents.&lt;/p&gt;
+
+&lt;p&gt;Mais moi, ce qui m’intéresse aussi et dont personne n’a l’air de trop parler, c’est : &lt;em&gt;quid&lt;/em&gt; de Spotify, Deezer, Tidal et autres plates‐formes musicales utilisant actuellement Winevine niveau L3 pour restreindre l’accès à leurs flux ? Si je pouvais me prendre un abonnement à ces plates‐formes et accéder au contenu avec du code libre, ça résoudrait imparfaitement mon problème, qui est : je veux pouvoir écouter de la musique hors ligne en bonne qualité tout en rémunérant les artistes, sans m’embêter avec le niveau de qualité inégal disponible sur YouTube, avec le logiciel et le matériel de mon choix.&lt;/p&gt;
+
+&lt;p&gt;À ce qu’il paraît, l’Apple Store fournit ses musiques sans DRM. Mais, bon, il faut utiliser iTunes pour y accéder et, en plus, aucun effort n’est fait pour prendre en charge mon système d’exploitation (pourquoi ne fournissent‐ils pas simplement une interface Web ?). Et puis « Meh, GAFAM ». On peut acheter des MP3 à l’unité autour d’1 € sur Amazon. Mais, là encore, « Meh, GAFAM », et puis, je ne peux pas avoir la qualité CD pour choisir mon format préféré plutôt qu’un format avec perte particulièrement peu efficace par rapport à ses concurrents (bonjour Opus – et de toute façon, dans vingt ans, il y aura probablement encore mieux) ?&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/raphj/journaux/le-drm-widevine-l3-cracke.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116246/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/raphj/journaux/le-drm-widevine-l3-cracke#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>raphj</name>
+    </author>
+    <category term="drm"/>
+    <category term="google"/>
+    <category term="netflix"/>
+    <category term="widevine"/>
+    <category term="spotify"/>
+    <category term="deezer"/>
+    <category term="tidal"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116246/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38326</id>
+    <published>2019-01-19T18:34:35+01:00</published>
+    <updated>2019-01-20T17:05:58+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/mcmic/journaux/php-7-3-apporte-la-gestion-des-controles-dans-php-ldap"/>
+    <title>PHP 7.3 apporte la gestion des contrôles dans PHP-LDAP</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;h2 class="sommaire"&gt;Sommaire&lt;/h2&gt;
+&lt;ul class="toc"&gt;
+&lt;li&gt;&lt;a href="#toc-php-ldap"&gt;PHP-LDAP&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#toc-php72-les-op%C3%A9rations-%C3%A9tendues"&gt;PHP 7.2 : les opérations étendues&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#toc-php73-lescontr%C3%B4les"&gt;PHP 7.3 : les contrôles&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#toc-futur"&gt;Futur&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;PHP 7.3 est sorti le 6 décembre 2018 et apporte la gestion des contrôles dans l’extension LDAP.&lt;/p&gt;
+
+&lt;p&gt;La précédente version 7.2 contenait, elle, la prise en charge des opérations étendues.&lt;/p&gt;
+
+&lt;p&gt;Étant à l’origine de ces deux ajouts je voulais revenir sur ces fonctionnalités et leur prise en charge dans PHP.&lt;/p&gt;
+&lt;h2 id="toc-php-ldap"&gt;PHP-LDAP&lt;/h2&gt;
+
+&lt;p&gt;Le gestion de LDAP dans PHP est un peu datée. Il n’y a pas d’interface orientée objet, et la prise en charge de certaines fonctionnalités avancées du protocole LDAP était manquante.&lt;/p&gt;
+
+&lt;p&gt;En cherchant un peu, je suis tombé sur des correctifs et des tickets qui dataient de 2005 pour les plus vieux. Ça manquait clairement de mainteneur côté PHP, et la seule fonctionnalité à avoir été fusionnée était la gestion des contrôles dans le cas très spécifique de la pagination : &lt;a href="http://php.net/manual/fr/function.ldap-control-paged-result.php"&gt;http://php.net/manual/fr/function.ldap-control-paged-result.php&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;J’ai donc contacté le projet PHP et j’ai demandé à devenir mainteneur du module LDAP. C’était étonnamment facile d’obtenir le poste (&lt;em&gt;a priori&lt;/em&gt;, personne chez PHP ne s’intéressent à LDAP, et c’était juste un truc qu’ils gardaient dans un coin parce que ça marche). Mon employeur a accepté que je fasse ça sur mon temps de travail, vu l’usage avancé que l’on fait de LDAP, et on compte bien utiliser les nouvelles fonctionnalités à terme.&lt;/p&gt;
+
+&lt;p&gt;J’ai d’abord naïvement pensé qu’il suffirait de relancer les gens qui s’étaient heurtés à des refus pour être enseveli par les propositions de correctifs et n’avoir plus qu’à faire mon marché. Mais étonnamment, depuis 2005, il semble que les gens concernés aient changé de postes, d’entreprise ou d’intérêts, et je n’ai quasiment pas eu de réponses. J’ai assez vite compris que j’allais devoir développer moi‐même si je voulais faire avancer les choses, en m’inspirant des différents correctifs glanés sur le Web.&lt;br&gt;
+Ça a été un peu difficile puisque, comme j’ai toujours contacté les serveurs LDAP au travers de PHP, les choses qui ne sont pas gérées par PHP-LDAP, je ne les ai jamais utilisées. Mais j’y suis parvenu, et l’on arrive enfin au terme de cette trop longue introduction.&lt;/p&gt;
+&lt;h2 id="toc-php72-les-opérations-étendues"&gt;PHP 7.2 : les opérations étendues&lt;/h2&gt;
+
+&lt;p&gt;Les opérations étendues (Extended Operations, souvent abrégées &lt;em&gt;exop&lt;/em&gt;), sont des opérations autre que celles de base (&lt;code&gt;add&lt;/code&gt;, &lt;code&gt;bind&lt;/code&gt;, &lt;code&gt;delete&lt;/code&gt;, &lt;code&gt;search&lt;/code&gt;, &lt;code&gt;compare&lt;/code&gt; et `modify), dont la prise en charge varie d’un serveur LDAP à un autre. Il faut donc d’abord consulter le RootDSE, c’est‐à‐dire faire une recherche LDAP avec un DN (&lt;em&gt;distinguished name&lt;/em&gt;) vide et le &lt;em&gt;scope&lt;/em&gt; &lt;strong&gt;base&lt;/strong&gt;. Dans le résultat, on regarde l’attribut &lt;strong&gt;supportedExtension&lt;/strong&gt; qui liste les &lt;a href="https://fr.wikipedia.org/wiki/OID" title="Définition Wikipédia"&gt;OID&lt;/a&gt; des opérations étendues gérées par ce serveur.&lt;/p&gt;
+
+&lt;p&gt;PHP 7.2 ajoute donc la fonction suivante pour appeler de telles opérations :&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="php"&gt;&lt;span class="nx"&gt;ldap_exop&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="nx"&gt;resource&lt;/span&gt; &lt;span class="nv"&gt;$link&lt;/span&gt; &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;string&lt;/span&gt; &lt;span class="nv"&gt;$reqoid&lt;/span&gt; &lt;span class="p"&gt;[,&lt;/span&gt; &lt;span class="nx"&gt;string&lt;/span&gt; &lt;span class="nv"&gt;$reqdata&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;NULL&lt;/span&gt; &lt;span class="p"&gt;[,&lt;/span&gt; &lt;span class="k"&gt;array&lt;/span&gt; &lt;span class="nv"&gt;$serverctrls&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;NULL&lt;/span&gt; &lt;span class="p"&gt;[,&lt;/span&gt; &lt;span class="nx"&gt;string&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nv"&gt;$retdata&lt;/span&gt; &lt;span class="p"&gt;[,&lt;/span&gt; &lt;span class="nx"&gt;string&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nv"&gt;$retoid&lt;/span&gt; &lt;span class="p"&gt;]]]]&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;mixed&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Comme &lt;code&gt;$reqdata&lt;/code&gt; doit pour la plupart des opérations contenir des données encodées en BER et que c’est pas forcément trivial à faire, il existe aussi des &lt;em&gt;helpers&lt;/em&gt; pour les opérations étendues les plus courantes :&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;code&gt;ldap_​exop_​passwd&lt;/code&gt; : opération étendue pour changer un mot de passe (qui laisse le serveur s’occuper du hachage et permet à des &lt;em&gt;overlays&lt;/em&gt; comme &lt;em&gt;password policy&lt;/em&gt; d’appliquer des politiques de mot de passe) ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;ldap_​exop_​refresh&lt;/code&gt; : opération pour rafraîchir une entrée dynamique (uniquement disponible dans PHP 7.3, j’ai raté la date butoir) ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;ldap_​exop_​whoami&lt;/code&gt; : opération pour obtenir le DN utilisé lors du &lt;em&gt;bind&lt;/em&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;À noter que des constantes sont aussi définies pour tous les OID des opérations étendues connues, à savoir : &lt;code&gt;LDAP_EXOP_START_TLS&lt;/code&gt;, &lt;code&gt;LDAP_EXOP_MODIFY_PASSWD&lt;/code&gt;, &lt;code&gt;LDAP_EXOP_REFRESH&lt;/code&gt;, &lt;code&gt;LDAP_EXOP_WHO_AM_I&lt;/code&gt; et &lt;code&gt;LDAP_EXOP_TURN&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="toc-php73-lescontrôles"&gt;PHP 7.3 : les contrôles&lt;/h2&gt;
+
+&lt;p&gt;Les contrôles sont un autre moyen d’étendre le protocole LDAP, cette fois‐ci lors d’une opération standard, mais à laquelle on veut rajouter des contraintes ou des fonctionnalités. De la même manière que pour les opérations étendues, on peut connaître les contrôles gérés par le serveur en interrogeant le RootDSE et en regardant l’attribut &lt;code&gt;supportedControl&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Comme il y a beaucoup plus de contrôles et qu’il doivent être passés avec les opérations classiques, je n’ai pas fait une méthode par contrôle pris en charge, mais j’ai convenu d’une façon de représenter chaque contrôle sous forme d’un tableau. Avec la plupart des opérations LDAP il est maintenant possible de passer un tableau contenant pour chaque contrôle à envoyer un tableau contenant les clés suivantes :&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;em&gt;oid&lt;/em&gt; : chaîne contenant l’OID du contrôle ; il est recommandé d’utiliser les constantes prédéfinies ;&lt;/li&gt;
+&lt;li&gt;
+&lt;em&gt;iscritical&lt;/em&gt; : booléen indiquant quoi faire si le serveur ne connaît pas ce contrôle : soit il l’ignore, soit l’opération échoue ; attention, certains contrôles indiquent dans leur RFC que &lt;em&gt;iscritical&lt;/em&gt; doit toujours être à &lt;strong&gt;vrai&lt;/strong&gt; ;&lt;/li&gt;
+&lt;li&gt;
+&lt;em&gt;value&lt;/em&gt; : soit une chaîne contenant directement la valeur, soit, pour les contrôles pris en charge, un tableau contenant les données appropriées.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Pour les clés attendues dans &lt;em&gt;value&lt;/em&gt; en fonction des contrôles, je vous laisse lire la &lt;a href="http://php.net/manual/fr/ldap.controls.php"&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Les contrôles gérés sont les suivants :&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_PAGEDRESULTS&lt;/code&gt;, qui permet de paginer les résultats d’une recherche ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_ASSERT&lt;/code&gt;, qui permet d’ajouter une assertion nécessaire à l’exécution d’une opération (exemple : s’assurer qu’un entier vaut &lt;em&gt;n&lt;/em&gt; dans une modification qui le met à &lt;em&gt;n&lt;/em&gt; + 1) ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_VALUESRETURNFILTER&lt;/code&gt;, qui permet de filtrer les valeurs retournées pour un attribut ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_PRE_READ&lt;/code&gt;, qui permet de lire certains attributs avant exécution de l’opération (exemple : sauver la valeur de certains attributs lors d’une suppression) ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_POST_READ&lt;/code&gt;, qui permet de lire certains attributs après opération (exemple : lire la valeur d’un attribut auto‐généré à la création d’une entrée) ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_SORTREQUEST&lt;/code&gt;, qui permet de demander au serveur de trier les résultats d’une requête ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_VLVREQUEST&lt;/code&gt;, qui permet de faire des vues, assez proche de la pagination ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_PASSWORDPOLICYREQUEST&lt;/code&gt;, qui indique qu’on souhaite avoir les informations &lt;em&gt;ppolicy&lt;/em&gt; dans la réponse ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_MANAGEDSAIT&lt;/code&gt;, qui indique qu’on veut modifier une référence et pas l’objet qu’elle référence ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_DONTUSECOPY&lt;/code&gt;, qui interdit au serveur de travailler sur une copie des données ;&lt;/li&gt;
+&lt;li&gt;
+&lt;code&gt;LDAP_CONTROL_PROXY_AUTHZ&lt;/code&gt;, qui est l’équivalent LDAP d’un &lt;code&gt;sudo&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Il peut aussi y avoir des contrôles dans les réponses, qui sont récupérables avec &lt;code&gt;ldap_parse_result&lt;/code&gt;.&lt;br&gt;
+Pour les opérations qui ne donnaient pas accès à l’objet réponse, par exemple &lt;code&gt;ldap_bind&lt;/code&gt; qui renvoie directement un booléen, une version avec le suffixe « _ext » a été ajoutée pour obtenir l’objet réponse.&lt;/p&gt;
+&lt;h2 id="toc-futur"&gt;Futur&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;ldap_sort&lt;/code&gt; est déprécié et sera retiré dans PHP 8, &lt;code&gt;ldap_control_paged_result&lt;/code&gt; et &lt;code&gt;ldap_control_paged_result_response&lt;/code&gt; devraient être bientôt dépréciées et retirées aussi de PHP 8, au profit de la nouvelle API.&lt;/p&gt;
+
+&lt;p&gt;Idéalement, il faudrait ajouter à &lt;em&gt;ldap_exop&lt;/em&gt; la gestion des &lt;em&gt;exop&lt;/em&gt; sous forme de tableau, comme pour les contrôles, pour ne pas avoir à passer par les fonctions spécifiques à chaque &lt;em&gt;exop&lt;/em&gt; et pouvoir facilement envoyer des contrôles avec une &lt;em&gt;exop&lt;/em&gt; et récupérer les contrôles retournés par le serveur.&lt;/p&gt;
+
+&lt;p&gt;À noter que toutes ces fonctionnalités ont encore été peu testées. Donc, n’hésitez pas à ouvrir des rapports de bogue si vous rencontrez des problèmes lors de leur utilisation.&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/mcmic/journaux/php-7-3-apporte-la-gestion-des-controles-dans-php-ldap.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116242/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/mcmic/journaux/php-7-3-apporte-la-gestion-des-controles-dans-php-ldap#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>MCMic</name>
+    </author>
+    <category term="php"/>
+    <category term="ldap"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116242/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38325</id>
+    <published>2019-01-19T16:09:53+01:00</published>
+    <updated>2019-01-20T13:02:30+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/oumph/journaux/linuxfr-org-premiere-quinzaine-de-janvier-2019"/>
+    <title>LinuxFr.org : première quinzaine de janvier 2019</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Cent‐douzième épisode dans la communication entre les différents intervenants autour du site &lt;em&gt;LinuxFr.org&lt;/em&gt; : l’idée est tenir tout le monde au courant de ce qui est fait par les rédacteurs, les admins, les modérateurs, les codeurs, les membres de l’association, etc.&lt;/p&gt;
+
+&lt;p&gt;L’actu résumée (&lt;code&gt;[*]&lt;/code&gt; signifie une modification du sujet du courriel) :&lt;/p&gt;
+&lt;h2 id="toc-statistiques"&gt;Statistiques&lt;/h2&gt;
+
+&lt;p&gt;Du 1&lt;sup&gt;er&lt;/sup&gt; au 15 janvier 2019 :&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;1 703 commentaires publiés (dont 9 masqués depuis) ;&lt;/li&gt;
+&lt;li&gt;286 étiquettes (&lt;em&gt;tags&lt;/em&gt;) posées ;&lt;/li&gt;
+&lt;li&gt;131 comptes ouverts (dont 31 fermés depuis) ;&lt;/li&gt;
+&lt;li&gt;48 entrées de forum publiées (dont 8 masquées depuis) ;&lt;/li&gt;
+&lt;li&gt;20 liens publiés (dont 4 masqués depuis) ;&lt;/li&gt;
+&lt;li&gt;14 dépêches publiées ;&lt;/li&gt;
+&lt;li&gt;24 journaux publiés (dont 0 masqué depuis) ;&lt;/li&gt;
+&lt;li&gt;5 entrées nouvelles, 0 corrigée et 1 invalide dans le système de suivi ;&lt;/li&gt;
+&lt;li&gt;0 sondage publié ;&lt;/li&gt;
+&lt;li&gt;1 page wiki publiée (dont 0 masquée depuis).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="toc-listes-de-diffusion-horspourriel"&gt;Listes de diffusion (hors pourriel)&lt;/h2&gt;
+&lt;h3 id="toc-liste-linuxfr-membres--restreint"&gt;Liste &lt;em&gt;linuxfr-membres@&lt;/em&gt; — [restreint]&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;[membres linuxfr] Participer au Libre en Fête 2019 (du 2 mars au 7 avril inclus) : organiser et communiquer au sujet de son évènement.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="toc-liste-meta-restreint"&gt;Liste &lt;em&gt;meta@&lt;/em&gt; — [restreint]&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;R. A. S. (d’ailleurs, un jour, on devrait penser à la fermer cette liste).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="toc-liste-moderateurs-restreint"&gt;Liste &lt;em&gt;moderateurs@&lt;/em&gt; — [restreint]&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;R. A. S.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="toc-liste-prizes-restreint"&gt;Liste &lt;em&gt;prizes@&lt;/em&gt; — [restreint]&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;R. A. S.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="toc-liste-redacteurs-restreint"&gt;Liste &lt;em&gt;redacteurs@&lt;/em&gt; — [restreint]&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;R. A. S.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="toc-liste-team--restreint"&gt;Liste &lt;em&gt;team@&lt;/em&gt; — [restreint]&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;[team linuxfr] Participer au Libre en Fête 2019 (du 2 mars au 7 avril inclus) : organiser et communiquer au sujet de son évènement.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="toc-liste-webmaster-restreint"&gt;Liste &lt;em&gt;webmaster@&lt;/em&gt; — [restreint]&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;R. A. S.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="toc-canal-irc-adminsys-résumé"&gt;Canal IRC adminsys (résumé)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;vœux de bonne année ;&lt;/li&gt;
+&lt;li&gt;correction du problème de configuration Let’s Encrypt sur nos Debian Stretch ;&lt;/li&gt;
+&lt;li&gt;liens divers: &lt;a href="https://github.com/usefathom/fathom"&gt;des outils d’analytics libres et annoncés respectueux de la vie privée&lt;/a&gt;, &lt;a href="https://bundler.io/blog/2019/01/03/announcing-bundler-2.html"&gt;Bundler 2&lt;/a&gt;, &lt;a href="https://lists.gnu.org/archive/html/bug-bash/2019-01/msg00063.html"&gt;Bash 5&lt;/a&gt; avec son originale « &lt;em&gt;new (disabled by default, undocumented) shell option&lt;/em&gt; » (une fonctionnalité désactivée et non documentée, mais signalée) ;&lt;/li&gt;
+&lt;li&gt;passage en Ruby 2.3 de Debian Stretch sur alpha ;&lt;/li&gt;
+&lt;li&gt;mises à jour de sécurité (et veille sur les dernières failles &lt;a href="https://www.qualys.com/2019/01/09/system-down/system-down.txt"&gt;systemd&lt;/a&gt; &lt;a href="https://www.debian.org/security/2019/dsa-4367"&gt;DSA-4367&lt;/a&gt;/&lt;a href="https://usn.ubuntu.com/3855-1/"&gt;USN-3855-1&lt;/a&gt; ou &lt;a href="https://sintonen.fi/advisories/scp-client-multiple-vulnerabilities.txt"&gt;scp&lt;/a&gt; &lt;a href="https://security-tracker.debian.org/tracker/CVE-2018-20685"&gt;CVE-2018-20685&lt;/a&gt;/&lt;a href="https://security-tracker.debian.org/tracker/CVE-2019-6110"&gt;CVE-2019-6110&lt;/a&gt;/&lt;a href="https://security-tracker.debian.org/tracker/CVE-2019-6109"&gt;CVE-2019-6109&lt;/a&gt;) ;&lt;/li&gt;
+&lt;li&gt;dans notre boîte aux lettres : « je ne sais pas faire le signe dollar… et apparemment le Grand Internet non plus… », « la société LINUX » ;&lt;/li&gt;
+&lt;li&gt;
+&lt;a href="//linuxfr.org/users/trim/journaux/mes-activites-open-sources-libres-recentes-0ff2a6f0-6b07-4c66-8011-ed744e3e0246"&gt;journal de Trim&lt;/a&gt; : « Et voilà, c’est ainsi que 2019 est déjà arrivé et que je n’ai malheureusement pas contribué au code source de LinuxFr. » (contributeur en 2017 sur de &lt;a href="https://github.com/linuxfrorg/linuxfr.org/commits?author"&gt;nombreux commits&lt;/a&gt;, merci à lui).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="toc-tribune-de-rédaction-résumé"&gt;Tribune de rédaction (résumé)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;du spam signalé ;&lt;/li&gt;
+&lt;li&gt;question initiale : faut‐il mettre en valeur les journaux ayant beaucoup de commentaires (indépendamment de leur note) ? Actuellement le critère n’est pas la quantité (la somme des notes), mais la popularité (chaque note vient d’un compte différent), si l’on suppose que les « inutiles » sont négligeables sur les contenus populaires ; faut‐il mettre en valeur les contenus ayant beaucoup de commentaires très bien notés (indépendamment de leur note) ?&lt;/li&gt;
+&lt;li&gt;correction post‐modération sur les notes de bas de page (voir les entrées de suivi « &lt;a href="//linuxfr.org/suivi/bug-en-redaction-sur-notes-de-bas-de-page"&gt;bug en rédaction sur notes de bas de page&lt;/a&gt; » et « &lt;a href="//linuxfr.org/suivi/reinitialisation-de-l-indice-des-notes-de-bas-de-page-entre-la-1-partie-et-la-2-partie"&gt;Réinitialisation de l’indice des notes de bas de page entre la 1ʳᵉ partie et la 2ᵈᵉ partie&lt;/a&gt; » ;&lt;/li&gt;
+&lt;li&gt;vœux de bonne année.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="toc-tribune-de-modération-résumé"&gt;Tribune de modération (résumé)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;spam, spam, spam (dont du fourbe avec réutilisation d’un autre commentaire, en vietnamien, en anglais ou en arabe, du spammeur signalant un arnaqueur, etc.) ;&lt;/li&gt;
+&lt;li&gt;vœux de bonne année.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="toc-commitspushs-de-code-httpsgithubcomlinuxfrorg"&gt;Commits/pushs de code &lt;a href="https://github.com/linuxfrorg/"&gt;https://github.com/linuxfrorg/&lt;/a&gt;
+&lt;/h2&gt;
+
+&lt;p&gt;(scripts adminsys)&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fix Let’s Encrypt config.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="toc-divers"&gt;Divers&lt;/h2&gt;
+
+&lt;p&gt;En attente de vidéos RMLL et Geek Faëries (&lt;a href="https://peertube.mindpalace.io/accounts/geekfaeries/videos"&gt;de plus en plus sont en ligne cependant&lt;/a&gt;), voir la &lt;a href="//linuxfr.org/news/conference-et-table-ronde-linuxfr-org-aux-rmll-2018-strasbourg"&gt;dépêche post‐événement&lt;/a&gt;.&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/oumph/journaux/linuxfr-org-premiere-quinzaine-de-janvier-2019.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116239/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/oumph/journaux/linuxfr-org-premiere-quinzaine-de-janvier-2019#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>Benoît Sibaud</name>
+    </author>
+    <category term="linuxfr"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116239/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38324</id>
+    <published>2019-01-18T15:42:38+01:00</published>
+    <updated>2019-01-18T15:42:38+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/cppuser/journaux/linux-s-en-sort-bien"/>
+    <title>Linux s'en sort bien</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Bonjour,&lt;br&gt;
+au final linux s'en sort pas trop mal. Le lien est ici&lt;br&gt;
+&lt;a href="https://www.phoronix.com/scan.php?page=article&amp;amp;item=2990wx-linux-windows"&gt;Texte du lien&lt;/a&gt;&lt;br&gt;
+&lt;a href="https://www.phoronix.com/scan.php?page=article&amp;amp;item=windows-server-2990wx"&gt;Texte du lien&lt;/a&gt;&lt;br&gt;
+&lt;a href="https://www.anandtech.com/show/13853/amd-comments-on-threadripper-2-performance-and-windows-scheduler"&gt;Texte du lien&lt;/a&gt;&lt;br&gt;
+En bref, grâce à un meilleur ordonnanceur linux aurait entre 10% et 20% de performance en plus sur certains processeurs AMD, et Microsoft serait en train de regarder cela.&lt;br&gt;
+Bon week-end&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/cppuser/journaux/linux-s-en-sort-bien.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116232/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/cppuser/journaux/linux-s-en-sort-bien#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>cppuser</name>
+    </author>
+    <wfw:commentRss>https://linuxfr.org/nodes/116232/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38323</id>
+    <published>2019-01-17T23:58:24+01:00</published>
+    <updated>2019-01-19T11:25:47+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/sixela/journaux/hackathon-factur-x-le-24-25-janvier-2019-a-paris"/>
+    <title>Hackathon Factur-X le 24-25 janvier 2019 à Paris</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Le &lt;a href="http://fnfe-mpe.org/"&gt;Forum National de la Facture Electronique&lt;/a&gt; (FNFE-MPE) organise un &lt;a href="http://fnfe-mpe.org/hackathon-factur-x/"&gt;Hackathon&lt;/a&gt; sur Factur-X le 24-25 janvier 2019 dans les locaux de GS1 France à Paris. &lt;/p&gt;
+
+&lt;p&gt;Pour rappel, &lt;a href="http://fnfe-mpe.org/factur-x/"&gt;Factur-X&lt;/a&gt; est une norme franco-allemande de facture électronique, aussi appelée ZUGFeRD 2.0, qui a été publiée en version finale le 31 décembre 2017. Une facture Factur-X est une facture PDF qui embarque un fichier XML à la norme &lt;a href="http://tfig.unece.org/FR/contents/cross-industry-invoice-cii.htm"&gt;CrossIndustryInvoice&lt;/a&gt; (CII) qui décrit la facture de façon structurée. Une facture Factur-X peut donc être lue par un humain avec son lecteur PDF préféré et aussi de façon fiable par un logiciel qui parse le fichier XML contenu à l'intérieur du PDF. Depuis avril 2018, le format Factur-X est supporté par &lt;a href="https://chorus-pro.gouv.fr/"&gt;Chorus Pro&lt;/a&gt;, la plateforme de facturation électronique de l'administration française. Depuis le 1er Janvier 2019, toutes les entreprises de plus de 10 salariés ont l'&lt;a href="https://communaute.chorus-pro.gouv.fr/documentation/contexte-et-calendrier-des-entreprises-concernees-2/"&gt;obligation&lt;/a&gt; d'utiliser Chorus Pro pour facturer l'administration (collectivités locales, fonction publique d'Etat, armée, hôpitaux, …).&lt;/p&gt;
+
+&lt;p&gt;L'objectif de ce Hackathon est d'aider les développeurs à implémenter la norme Factur-X dans leurs logiciels. Il y aura des présentations techniques sur Factur-X, des conseils et retours d'expérience d'implémentation, des sessions de développements, etc… Il existe maintenant des librairies opensource pour factur-x dans de multiples langages (Python, Java, PHP, …). Je serai présent pendant les deux jours du Hackathon pour partager mon expérience d'implémentation de Factur-X dans Odoo, aider à l'utilisation de ma librairie Python &lt;a href="https://pypi.org/project/factur-x/"&gt;factur-x&lt;/a&gt; et coder dans la joie et la bonne humeur sur Factur-X.&lt;/p&gt;
+
+&lt;p&gt;L'accès au hackathon est gratuit ; il faut simplement &lt;a href="http://fnfe-mpe.org/hackathon-factur-x/"&gt;s'enregistrer&lt;/a&gt; au préalable.&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/sixela/journaux/hackathon-factur-x-le-24-25-janvier-2019-a-paris.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116229/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/sixela/journaux/hackathon-factur-x-le-24-25-janvier-2019-a-paris#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>Alexis de Lattre</name>
+    </author>
+    <wfw:commentRss>https://linuxfr.org/nodes/116229/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38322</id>
+    <published>2019-01-17T20:56:46+01:00</published>
+    <updated>2019-01-18T14:06:42+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/belegar--2/journaux/lunii-la-boite-a-histoires-sous-linux"/>
+    <title>Lunii, la boîte à histoires sous Linux</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Cher journal,&lt;/p&gt;
+
+&lt;p&gt;Tu connais sûrement Lunii, un petit appareil (presque) sans écran qui permet de raconter des histoires à composer soit même à l'aide d'une molette de choix. Par exemple on choisit son héros, un objet et un lieu, puis zouu l'histoire correspondante se lance.&lt;/p&gt;
+
+&lt;p&gt;Les gosses adorent et ça fait un bon moyen de les occuper en voiture tout en faisant travailler l'imaginaire.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="//img.linuxfr.org/img/68747470733a2f2f63646e2e73686f706966792e636f6d2f732f66696c65732f312f303038312f313137382f333939342f70726f64756374732f6c756e69692d66616272697175652d612d686973746f6972652d6a65752d656e66616e742d65647563617469662d657665696c2d6672616e63652d66756e64792d7261636f6e7465722d756e652d686973746f6972655f373130782e6a7067/lunii-fabrique-a-histoire-jeu-enfant-educatif-eveil-france-fundy-raconter-une-histoire_710x.jpg" alt="Titre de l'image" title="Source : https://cdn.shopify.com/s/files/1/0081/1178/3994/products/lunii-fabrique-a-histoire-jeu-enfant-educatif-eveil-france-fundy-raconter-une-histoire_710x.jpg"&gt;&lt;/p&gt;
+
+&lt;p&gt;Bref, ma fille en a eu un à Noël. Une fois les 48 combinaisons différentes épuisées dans le pack de base, je lui ai proposé d'en rajouter en passant par leur boutique à eux. Stupéfaction pour une boîte française, ils fournissent un logiciel sous Linux, un package pour ma distribution (Debian) !&lt;/p&gt;
+
+&lt;p&gt;Je l'installe, aucun soucis, je le lance puis achète une histoire. Au moment du paiement, petit bug, aucun message de succès ni d'alerte et mon panier n'est pas vidé. Bon le produit apparaît dans ma bibliothèque, c'est le principal. Voici le bug en question :&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="//img.linuxfr.org/img/68747470733a2f2f746f662e63782f696d616765732f323031392f30312f31372f39393462663837653938336163613339323434643030373965383736383132332e706e67/994bf87e983aca39244d0079e8768123.png" alt="Titre de l'image" title="Source : https://tof.cx/images/2019/01/17/994bf87e983aca39244d0079e8768123.png"&gt;&lt;/p&gt;
+
+&lt;p&gt;Branchement fébrile de l'appareil … reconnu … détecté par le logiciel … upload des nouvelles histoires … tout fonctionne impeccable !&lt;/p&gt;
+
+&lt;p&gt;Hormis le petit bug d'achat, rien à redire. En fouillant un peu, a priori le store est fait en Java, d'où la portabilité facilité sur les différents systèmes. Voilà, donc, n'hésitez pas à l'acheter ou à l'offrir, c'est vraiment bien.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://www.lunii.fr/"&gt;https://www.lunii.fr/&lt;/a&gt;&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/belegar--2/journaux/lunii-la-boite-a-histoires-sous-linux.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116228/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/belegar--2/journaux/lunii-la-boite-a-histoires-sous-linux#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>Belegar</name>
+    </author>
+    <wfw:commentRss>https://linuxfr.org/nodes/116228/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38321</id>
+    <published>2019-01-17T17:27:45+01:00</published>
+    <updated>2019-01-18T18:57:40+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/niconico/journaux/passer-l-election-europeenne-a-la-vraie-proportionnelle"/>
+    <title>Passer l'élection européenne à la vraie proportionnelle</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;La proportionnelle est un bon mode de scrutin pour représenter toutes les tendances en France, moins pour forcer la prise de décision. C'est officiellement ce qui est utilisé pour l'élection européenne en France.&lt;/p&gt;
+
+&lt;p&gt;La France n'aime pas la proportionnelle, cela provient du mauvais fonctionnement de la 4ième république pendant la décolonisation, enfin, le pouvoir en place n'aime pas voir ses voies diluées.&lt;/p&gt;
+
+&lt;p&gt;Il y a 79 députés français à lire, cela ferait normalement 1,26 % des voies pour avoir un député. Une manière de gonfler le résultat des plus gros partie est de mettre un seuil à 5 %. Ainsi, tout ceux en dessous de 5 % dégage. 4 parties qui cumuleraient 4*4 %=16 % des voies n'auront aucune représentation. La cours constitutionnel allemande a rejeté une telle modification pour leur élection, ce qui n'est pas le cas en France.&lt;/p&gt;
+
+&lt;p&gt;Depuis 2004, il y a eu une introduction de vote majoritaire supplémentaire, la création de 8 régions. Ainsi, cela faisait entre 9 et 13 sièges à pourvoir par circonscription, soit de 11 % à 8 % des voies pour avoir un seul député ! Heureusement ce mode disparaît en 2019.&lt;/p&gt;
+
+&lt;p&gt;Il y a toujours eu un dédain pour les « petites » listes par les médias et « l'élite », comme si elles n'étaient jamais sérieuses ou représentatives. Les médias moquent la multitude de ces listes, et en même temps, se plaignent du désintérêt des français pour la politique. Curieusement, ils ne font pas de lien entre ces deux faits. Les français s'intéressent bien à la politique mais n'arrivent pas à se faire représenter correctement, et ils se lancent eux-même.&lt;/p&gt;
+
+&lt;p&gt;Il existe d'autres obstacles pour ses listes. &lt;/p&gt;
+
+&lt;p&gt;Le frein de l'argent :Le seuil de remboursement à 3 % oblige à trouver 300 000€ en bulletin papier et en affiche standard, alors que les gros parties empruntent à une banque qui sera rembourser plus tard. C'est facile pour eux de faire plus de 3 %, beaucoup moins pour ceux qui démarrent. Ce n'est que les dépenses de base, sans aucun meeting, ni tracts.&lt;/p&gt;
+
+&lt;p&gt;Le frein réglementaire : même si une nouvelle liste ne peut espérer, dans ses rêves les plus fou, avoir un seul député, il faut produire une liste complète avec suppléant, soit 2*79 personnes à parité homme/femme. Cela peut demander beaucoup d'énergie uniquement pour avoir le droit de déposer sa liste.&lt;/p&gt;
+
+&lt;p&gt;Le frein de l'accès au média : en 2014, il y a avait un temps de diffusion égal sur les télévisions, maintenant il sera proportionnel à la composition du parlement national. Impossible pour une nouvelle liste de passer à la télé, sans avoir de transfuge en provenance d'un autre parti.&lt;/p&gt;
+
+&lt;p&gt;Les petits partis seront les gros partis de demain. Les partis actuels agissent pour les empêcher d'exister, en niant le coté anti-démocratique de ces manœuvres.&lt;/p&gt;
+
+&lt;p&gt;Le parlement européen est la seule assemblée élue à la proportionnelle en France, elle devrait l'être à la proportionnelle réelle, sans seuil à 5 %, ni seuil de remboursement pour les frais de base (bulletin de vote !).&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://fr.wikipedia.org/wiki/%C3%89lections_europ%C3%A9ennes_de_2019_en_France"&gt;https://fr.wikipedia.org/wiki/%C3%89lections_europ%C3%A9ennes_de_2019_en_France&lt;/a&gt;&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/niconico/journaux/passer-l-election-europeenne-a-la-vraie-proportionnelle.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116226/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/niconico/journaux/passer-l-election-europeenne-a-la-vraie-proportionnelle#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>Nicolas Boulay</name>
+    </author>
+    <category term="débat"/>
+    <category term="scrutin"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116226/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38320</id>
+    <published>2019-01-16T23:27:02+01:00</published>
+    <updated>2019-01-16T23:27:02+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/freem/journaux/debian-installations-automatiques-et-arm"/>
+    <title>Debian, installations automatiques et ARM</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;h2 class="sommaire"&gt;Sommaire&lt;/h2&gt;
+&lt;ul class="toc"&gt;
+&lt;li&gt;
+&lt;a href="#toc-installation-r%C3%A9seau-automatis%C3%A9e-pour-x86"&gt;Installation réseau automatisée pour x86&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#toc-mauvais-sujet-changer-sujet"&gt;mauvais sujet, changer sujet&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;a href="#toc-on-cause-darm"&gt;on cause d'ARM?&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#toc-arm-boot-standard"&gt;ARM, boot standard&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#toc-arm-boot-r%C3%A9seau"&gt;ARM, boot réseau&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#toc-conclusion-et-purge-du-cerveau-%C3%A0-grands-coups-de-trash"&gt;Conclusion et purge du cerveau, à grands coups de traSH&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Salut.&lt;/p&gt;
+
+&lt;p&gt;À la base, je ne suis qu'un développeur, mais comme «malheureusement» dans ma boîte je suis celui qui connaît le mieux le système (en tout cas ceux que l'on déploie: Debian avec kernel linux), je suis celui qui s'occupe en pratique de configurer et déployer les machines (je ne me considère pas comme un admin sys, par manque de compétences).&lt;/p&gt;
+&lt;h2 id="toc-installation-réseau-automatisée-pour-x86"&gt;Installation réseau automatisée pour x86&lt;/h2&gt;
+
+&lt;p&gt;Les premiers systèmes sur lesquels j'ai «officié» étaient basés sur des architectures x86, je me suis donc orienté vers un démarrage «diskless» &lt;a href="https://en.wikipedia.org/wiki/Preboot_Execution_Environment"&gt;PXE&lt;/a&gt; qui log automatiquement l'utilisateur root, qui a lui-même un .profile qui lance le formatage du «disque dur» et y installe un chroot via (c)debootstrap (en mode minimal, histoire que je puisse avoir la plus grosse maîtrise possible sur ce qui est effectivement installé: non, wamerican n'a aucun intérêt, par exemple…), chroot qui est ensuite utilisé pour installer la base de données et les divers logiciel nécessaire à mon taf (je laisserai cet aspect de côté, parce que ce que j'ai fait est &lt;strong&gt;sale&lt;/strong&gt;. J'y gagnerais à nettoyer et surtout finir, mais pour ça, il me faudrait du temps… sigh).&lt;br&gt;
+Plutôt simple, dans le fond (enfin, quand on sait, y'a des trucs qui s'inventent pas), mais je vais rappeller ici ce qu'il est nécessaire de faire ou, en tout cas, comment moi j'ai fait:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;installer et configurer un DHCPd (isc-dhcp-server pour moi, c'est le mieux documenté de ceux sous Debian) pour servir les requêtes DHCP/BOOTP (réseau physique différent du lan, parce que je n'ai pas encore trouvé le temps d'avoir le lan sous contrôle). Pas forcément le meilleur outil, mais au moins, trouver de la doc voire des exemples est relativement simple. À noter tout de même, selon les implémentations du client PXE, la machine qui doit servir le fichier à exécuter est déterminée de façon différente, mais je pense que c'est lié au fait que je n'avais pas spécifié à l'époque de routeur dans le DHCPd: en tout cas, les machines physiques utilisaient l'IP du DHCPd, alors que virtualbox nécessitait une URI complète. Je tiens aussi à mentionner l'option 'dynamic-bootp', ou un truc du genre;&lt;/li&gt;
+&lt;li&gt;installer et configurer un TFTPd (tftp-hpa pour moi), pour permettre le téléchargement par la cible d'un exécutable, ici un binaire de pxelinux. Outil super simple à utiliser, vraiment.&lt;/li&gt;
+&lt;li&gt;installer et configurer un bootloader (pxelinux… blabla), qui s'occupe de télécharger le noyau et l'initrd. La doc est un peu obtuse, notamment sur comment passer au noyau l'interface à utiliser si par malheur le système cible à plusieurs ports ethernet (et tant qu'à faire un PXE pour la 1ère fois, autant que ça ne soit pas dans la configuration la plus simple, pas vrai?) sans quoi ce dernier… freeze. Je remercie stack overflow sur ce coup, quelqu'un m'a filé une piste qui m'a permis de comprendre ce que je lisais dans la doc, plus spécificiquement, &lt;a href="https://www.syslinux.org/wiki/index.php?title=SYSLINUX#SYSAPPEND_bitmask"&gt;il est possible d'ajouter «BOOTIF=[MAC-ADDRESS]»&lt;/a&gt; afin que syslinux file la bonne interface au noyau (honnêtement, j'ai mis du temps avant de comprendre qu'il s'agit d'une option de syslinux et non du noyau… quoique, j'ai une doute? Je regarderai au taf demain au pire);&lt;/li&gt;
+&lt;li&gt;installer (c)debootstrap(-static) et l'utiliser pour créer un système complet;&lt;/li&gt;
+&lt;li&gt;configurer initramfs-tools dans le bootstrap afin de générer une image qui inclue les pilotes NFS, et probablement d'autres détails que j'ignore;&lt;/li&gt;
+&lt;li&gt;installer et configurer nfs-kernel-server afin de permettre l'accès par le réseau au bootstrap. Dans mon cas, j'ai mis l'accès en &lt;code&gt;rw&lt;/code&gt;, j'aurai préféré &lt;code&gt;ro&lt;/code&gt;, voire utiliser autre chose que NFS, peut-être TFTP ou SFTP ou SCP… surtout que je ne comprend pas quel daemon fait quoi dans NFS… mais bon, ça juste marche, et vu que c'est pour le taf, j'ai pas le choix de laisser des trucs moyennement maîtrisés tant qu'il n'y a pas une vraie raison de maîtriser (oui, ça me fait chier cette façon de faire)…&lt;/li&gt;
+&lt;li&gt;et bien sûr, créer un script qui partitionne automatiquement (sfdisk est bien pratique de ce point de vue), formate les partitions, crée les points de montages, les monte, invoque (c)debootstrap(-static), crée le fstab, initialise les mots de passe (merci à chpasswd sur ce coup) et mets en place les divers éléments nécessaires.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="toc-mauvais-sujet-changer-sujet"&gt;mauvais sujet, changer sujet&lt;/h3&gt;
+
+&lt;p&gt;Bon, tout ça, c'est bien (ou pas, d'ailleurs, pour être franc c'est aussi une sorte de mea culpa pour mon manque de maîtrise), mais c'est pour des archis de type intel. Ça aidera peut-être quelques mollusques ici (j'en doute, mais, sait-on jamais?) mais ce n'était pas le sujet. J'ai bien précisé ARM dans le titre, après tout.&lt;br&gt;
+Hors, il s'avère que les machines ARM, ça ne boote pas comme nos bons (enfin, tant que le spectre de la sécurité ne nous hante pas quoi) vieux CPU intel, équipés de leurs bons vieux firmwares majoritairement fermés, quelques peu buggués (surtout depuis l'avènement de l'UEFI, d'ailleurs!).&lt;br&gt;
+De ce que j'ai compris (pour info, j'écris ceci le jour même ou j'ai finallement réussi à booter une beaglebone black via le réseau, je suis loin de maîtriser tout) le contenu d'une mémoire est chargé et exécuté. Comment et pourquoi, je n'en sais encore rien (mais j'ai l'intention d'apprendre pour un projet perso).&lt;br&gt;
+Ce qui est sûr, c'est que dans le cas des beaglebone black que j'ai au boulot, ça charge une version de &lt;a href="https://en.wikipedia.org/wiki/Das_U-Boot"&gt;«Das U-boot»&lt;/a&gt; vieille de 3 ans (au pifomètre), et que la &lt;a href="https://www.denx.de/wiki/U-Boot"&gt;«documentation»&lt;/a&gt; est franchement triste. Bien sûr, mes prédécesseurs ne maîtrisaient pas non plus le sujet, et ils ne sont de toute façon plus là… sinon s'pas drôle, pas vrai?&lt;br&gt;
+Trouver des articles de gens qui en parle est également difficile, et le peu que j'ai trouvé datent d'il y a plusieurs années. Le problème, c'est que le support d'ARM à été, comme tout bon bivalve le sait, considérablement remanié, et ces remaniements ont manifestement pas mal affecté le beaglebone black. Notamment, la configuration matérielle est à priori modifiable à l'exécution, peut-être est-ce lié à &lt;a href="//linuxfr.org/users/martoni/journaux/2019-l-annee-de-la-liberation-des-fpga"&gt;une sombre histoire de fermiers&lt;/a&gt;, je ne sais pas.&lt;/p&gt;
+&lt;h2 id="toc-on-cause-darm"&gt;on cause d'ARM?&lt;/h2&gt;
+&lt;h3 id="toc-arm-boot-standard"&gt;ARM, boot standard&lt;/h3&gt;
+
+&lt;p&gt;Ce que je sais, c'est que j'ai dû dumper le contenu des variables, qui servent également de scripts, passer ce dump dans un script (fait maison, je n'ai pas connaissance d'outil fait pour) histoire de tranformer des one-liners de plusieurs dizaines d'instructions en un script lisible (30 lignes de shell, certes, mais c'est pénible quand même) qui ne liste que le code potentiellement appellé.&lt;br&gt;
+Par défaut, &lt;a href="https://www.denx.de/wiki/view/DULG/UBootEnvVariables"&gt;le contenu de la variable «bootcmd»&lt;/a&gt; est exécuté.&lt;br&gt;
+En pratique, on pourrait résumer ce script en ces quelques étapes (sur une BBB, hein):&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;configurer quelques connecteurs;&lt;/li&gt;
+&lt;li&gt;chercher comment accéder à la mémoire de masse;&lt;/li&gt;
+&lt;li&gt;reconfigurer les connecteurs;&lt;/li&gt;
+&lt;li&gt;chercher comment accéder à une autre mémoire de masse;&lt;/li&gt;
+&lt;li&gt;si pas de mémoire de masse trouvée, faire la gueule;&lt;/li&gt;
+&lt;li&gt;autrement charger un fichier de config (uEnv.txt) qui peut se trouver à divers endroits (sinon s'pas drôle, quoi);&lt;/li&gt;
+&lt;li&gt;éventuellement l'exécuter;&lt;/li&gt;
+&lt;li&gt;charger le noyal, l'initrd ET un fichier de config dtd qui, de ce que j'ai compris, permets de configurer les connecteurs (oui, ça fait potentiellement 3 fois qu'on les config, et si ça se trouve le système lui-même va les re-bidouiller…) en mémoire;&lt;/li&gt;
+&lt;li&gt;lancer le noyal avec en paramètres (passés par les registres du CPU à vue de nez) l'adresse de l'initrd et celle de la config hardware à utiliser;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="toc-arm-boot-réseau"&gt;ARM, boot réseau&lt;/h3&gt;
+
+&lt;p&gt;Tout ça, c'est ce qui se fait en démarrage normal. Les docs (leS, parce que je parle a la fois de celle sur le site officielle, de celle à laquelle on peut accéder via &lt;code&gt;help bla&lt;/code&gt; dans le prompt u-boot, et de celle dans le code-source) mentionnent une commande DHCP, qui, selon elles, permet de télécharger et d'exécuter un fichier.&lt;br&gt;
+&lt;strong&gt;Ne les croyez surtout pas!!!&lt;/strong&gt; En pratique, la commande DHCP se contente de récupérer la configuration réseau et de charger en mémoire le fichier éventuellement indiqué par le serveur DHCP. Charger. Pas exécuter. Et non, il n'est pas possible de spécifier l'URI du fichier à télécharger depuis la carte ARM (ou, du moins, pas de cette façon).&lt;br&gt;
+Une fois la commande DHCP faite, nous avons donc récupéré une configuration IP, et chargé un fichier en mémoire. Il faut donc l'exécuter, et non, cela ne se fait pas forcément avec une commande nommée "bootmachinchose", on peut aussi utiliser la commande «source». Pourquoi pas, après tout, un binaire et un script sont 2 choses différentes, pas de souci ici.&lt;br&gt;
+Du coup, le but est de créer un fichier source. Un simple fichier texte qui contiendrait les instructions? Ah non, ça le fait pas: il faut créer un binaire via la commande &lt;code&gt;mkimage&lt;/code&gt;. Ce binaire contiendra l'information de format, de compression, d'architecture probablement, et j'imagine d'autres trucs, mais pas trop, vue la taille du header…&lt;br&gt;
+Ce fichier pourrait, par exemple, utiliser la commande &lt;code&gt;tftp&lt;/code&gt; (non, elle n'est pas dans la doc, je l'ai trouvée en lisant le code des scripts par défaut, et, oui, c'est built-in) afin de télécharger un fichier arbitraire à un emplacement mémoire arbitraire.&lt;br&gt;
+J'ai commencé par suivre plus ou moins bêtement un article de blog qui indiquait de ne télécharger que le fichier de config matérielle et le noyau. Grâce au fait d'avoir monté un PXE classique, j'ai été intrigué de l'absence explicite de l'initrd… à raison. Non, ça ne boote pas sans initrd ou, en tout cas, pas une Debian standard.&lt;br&gt;
+Il faut donc télécharger 3 fichiers: le noyau, l'initrd, et le dtb (config matérielle). Sauf que, ça ne boote toujours pas…&lt;br&gt;
+Pour une raison qui m'échappe, il faut, pour que ça démarre, passer l'initrd par la commande mkimage, sans quoi U-boot se mêle de ce qui ne le regarde pas (le format de l'initrd) et refuse de démarrer.&lt;/p&gt;
+
+&lt;p&gt;Tout ce bazard ne remplace que la configuration de pxelinux….&lt;/p&gt;
+&lt;h2 id="toc-conclusion-et-purge-du-cerveau-à-grands-coups-de-trash"&gt;Conclusion et purge du cerveau, à grands coups de traSH&lt;/h2&gt;
+
+&lt;p&gt;U-boot, je trouve ça sale.&lt;br&gt;
+La doc est à la fois incomplète et erronée, centrée sur un produit bien précis et donc tout sauf générique, les scripts exécutables sont dans des variables indiscernables des vraies variables, et j'ai du mal a avaler le fait d'avoir passé plus d'une semaine à comprendre comment ça marche en surface! Parce que non, je ne comprend toujours pas comment ça marche vraiment (alors que quand j'avais 15 ans, j'ai été capable de comprendre comment un BIOS bootait un kernel en quelques jours hein).&lt;br&gt;
+Comme je veux mettre à jour U-boot, par exemple pour qu'il soit capable de comprendre que non, je n'ai pas l'intention de n'avoir qu'un seul système viable sur la mémoire (double banque pour les MàJ) je sais que je vais encore en chier, et pas qu'un peu. Je vais sûrement finir par juste chainer les bootloaders…&lt;br&gt;
+Je peux aussi ajouter le fait que le chemin d'exécution originel, qui est la faute de Texas Instruments, pèse plus de 400 lignes alors que moins de 10 sont vraiment nécessaires (bon, je peux comprendre ça, et puis, ça reste super rapide) mais &lt;strong&gt;surtout&lt;/strong&gt; le fait de faire des one-liners! Je ne sais pas si c'est à cause de Das U-boot ou de TI, mais c'est vraiment super moche. Le langage lui-même semble encourager le «code d'aviateurs» avec de looooooooongues ailes constituée de cascades de IFs.&lt;br&gt;
+Bref, c'est libre donc c'est génial, mais ça reste moche techniquement, selon moi. Mais je n'ai probablement pas tout compris…&lt;/p&gt;
+
+&lt;p&gt;PS: désolé pour le formatage&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/freem/journaux/debian-installations-automatiques-et-arm.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116221/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/freem/journaux/debian-installations-automatiques-et-arm#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>freem</name>
+    </author>
+    <category term="arm"/>
+    <category term="u-boot"/>
+    <category term="uboot"/>
+    <category term="pxe"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116221/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38319</id>
+    <published>2019-01-16T09:28:00+01:00</published>
+    <updated>2019-01-16T09:28:00+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/martoni/journaux/2019-l-annee-de-la-liberation-des-fpga"/>
+    <title>2019, l’année de la libération des FPGA ?</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;En matière de liberté le monde du FPGA est resté dans les années 90. Une époque obscure où l’on cachait le mode de fonctionnement des logiciels, où il fallait signer des accords de non divulgation (NDA) avant de pouvoir simplement utiliser un logiciel. Une époque où l’on croyait encore que &lt;a href="https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_par_l%27obscurit%C3%A9"&gt;la sécurité par l’obfuscation&lt;/a&gt; était le summum de l’état de l’art pour sécuriser et protéger son logiciel et ses données. Mais il est possible que les nouvelles de sorties de nouveaux logiciels libre de fin d'année 2018 changent la donne.&lt;/p&gt;
+
+&lt;p&gt;Un FPGA est littéralement un champs de portes programmable. Le paysan-développeur ensemence son champs avec un fichier nommé «bitstream». Ce bitstream permet de configurer les liens entre les différentes portes logiques du FPGA et constituer ainsi un circuit électronique (numérique).&lt;/p&gt;
+
+&lt;p&gt;C’est ce fichier qui n’est documenté par &lt;strong&gt;aucun&lt;/strong&gt; fabricant de FPGA.&lt;/p&gt;
+
+&lt;p&gt;Jusqu’à très récemment pour ses semailles, le développeur devait passer par le logiciel fourni par le fabricant pour générer son bitstream. À chaque modèle un logiciel spécifique, avec tous les défauts inhérent aux logiciels fermés :&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;    Obligé d’utiliser un ordinateur et un système d’exploitation supporté officiellement par le fabricant (impossible de générer le bitstream sur un système embarqué ARM par exemple).&lt;/li&gt;
+&lt;li&gt;    Grande difficulté à gérer les bugs du logiciels (et les bugs c’est vraiment pas ça qui manque)&lt;/li&gt;
+&lt;li&gt;    Support aléatoire&lt;/li&gt;
+&lt;li&gt;    Obligé de payer une licence pour les «gros» FPGA&lt;/li&gt;
+&lt;li&gt;    Licence Gratuite pour les petits FPGA mais un système de gestion de ladite licence obligeant à être fliqué par le fabricant (serveur de gestion de licence, obligation d’identification, collectes de données personnelles, …).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;L’argument principale des fabricants est qu’ils risquent de perdre toutes crédibilités en matière de sécurité auprès des clients militaires notamment. Et qu’ils risquent d’être plus facilement copié par les chinois (Même s’ils y a déjà &lt;a href="http://www.fabienm.eu/flf/fpga-chinois/"&gt;des copies fabriquées en chine&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;Il a pourtant été démontré depuis longtemps qu’il est tout à fait possible de faire le reverse-engineering des bitstream. C’est notamment ce qu’avait fait en 2008 &lt;a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.117.6043&amp;amp;rep=rep1&amp;amp;type=pdf"&gt;Jean-Baptiste Note et Éric Rannaud&lt;/a&gt; avec &lt;a href="https://github.com/Martoni/debit"&gt;debit&lt;/a&gt; pour les FPGA de Xilinx notamment. Mais c’est surtout ce qu’a fait Wolf Clifford en &lt;a href="https://connect.ed-diamond.com/Open-Silicium/OS-017/Icestorm-une-chaine-de-developpement-libre-pour-FPGA"&gt;2015&lt;/a&gt; avec &lt;a href="http://www.clifford.at/icestorm/"&gt;Icestorm&lt;/a&gt; pour servir notamment à son logiciel de synthèse &lt;a href="http://www.clifford.at/yosys/"&gt;Yosys&lt;/a&gt; en utilisant une plate-forme réel : les &lt;a href="https://www.latticesemi.com/Products/FPGAandCPLD/iCE40.aspx"&gt;ice40&lt;/a&gt; de Lattice.&lt;/p&gt;
+
+&lt;p&gt;Ce «déverrouillage» des ice40 a permis une véritable révolution dans le domaine du FPGA chez les bidouilleurs. Beaucoup de cartes électroniques utilisant un ice40 on vu le jours, et le projet à fédéré tout un tas de nouveau projet de logiciels libre.&lt;/p&gt;
+
+&lt;p&gt;À l’origine, icestorm permettait de faire la synthèse avec yosys (transformer du verilog en netlist), le placement routage avec arachne-pnr (placer les différentes portes dans le FPGA et les relier entre elles) ainsi que la génération du bitstream avec icestorm (icepack).&lt;/p&gt;
+
+&lt;p&gt;Un fois le bitstream généré il est nécessaire de vérifier que les temps de propagation entre les différentes portes soient inférieur au cycle d’horloge. Il est donc nécessaire de posséder la spécification des temps de propagation entre les portes dans le FGPA. Chose qui a également été documenté dans le projet Icestorm (&lt;a href="https://youtu.be/IG5CpFJRnOk"&gt;icetime&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;Le problème qui persistait avec cette chaîne de développement était &lt;a href="https://github.com/YosysHQ/arachne-pnr/commits/master"&gt;arachne-pnr&lt;/a&gt; qui ne prenait pas en compte les timings du FPGA pour faire son placement routage. C’est ce verrou qui vient de sauter fin 2018 avec la &lt;a href="https://www.youtube.com/watch?v=Zi9gaSPFqM0"&gt;sortie du nouveau logiciel&lt;/a&gt; de placement routage &lt;a href="https://github.com/YosysHQ/nextpnr"&gt;nextpnr&lt;/a&gt; initié par Clifford mais fédérant une communauté de développeurs de plus en plus grosse.&lt;/p&gt;
+
+&lt;p&gt;En plus de faire du placement routage en fonction des temps de propagations, nextpnr possède une interface graphique permettant une visualisation du FPGA une fois le projet routé.&lt;br&gt;
+Vue de l'interface graphique de nextpnr.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="//img.linuxfr.org/img/68747470733a2f2f63616d6f2e67697468756275736572636f6e74656e742e636f6d2f353534393464333835613036623238616662653964666331306332343534353361633965326137662f3638373437343730373333613266326636393265363936643637373537323265363336663664326633303733373036643663343236313265373036653637/68747470733a2f2f692e696d6775722e636f6d2f3073706d6c42612e706e67" alt="Vu de l’interface graphique de nextpnr (source github officiel)" title="Source : https://camo.githubusercontent.com/55494d385a06b28afbe9dfc10c245453ac9e2a7f/68747470733a2f2f692e696d6775722e636f6d2f3073706d6c42612e706e67"&gt;&lt;/p&gt;
+
+&lt;p&gt;Tous ces outils sont désormais regroupés dans un projet opensource ayant pour objectif de réaliser un IDE complet pour les FPGA et nommé &lt;a href="https://symbiflow.github.io/"&gt;SymbiFlow&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Le projet SymbiFlow a pour objectif de devenir le &lt;a href="https://www.youtube.com/watch?v=5RryRQ1Rr0M"&gt;«GCC du FPGA et des ASIC»&lt;/a&gt;. En plus de icestorm, SymbiFlow intègre d’autres projets de «reverse-bitstream», notamment:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;    &lt;a href="https://github.com/cliffordwolf/icestorm"&gt;icestorm&lt;/a&gt;: déjà longuement décrit dans cet article, permet de faire un développement complet avec des outils opensource.&lt;/li&gt;
+&lt;li&gt;    &lt;a href="https://github.com/SymbiFlow/prjxray"&gt;X-Ray&lt;/a&gt;: Projet de rétro-ingénierie des FPGA de la série 7 de xilinx. Les «tuiles standard» de ces FPGA sont déjà bien documenté et il est possible de générer un bitstream pour des Artix 7.&lt;/li&gt;
+&lt;li&gt;    &lt;a href="https://github.com/SymbiFlow/prjtrellis"&gt;Trellis&lt;/a&gt;: Projet de rétro-ingénierie des FPGA &lt;a href="https://www.latticesemi.com/Products/FPGAandCPLD/ECP5.aspx"&gt;ECP5&lt;/a&gt; de Lattice. Toute la matrice a été documenté, et il est désormais possible de faire un projet pour ECP5 de bout en bout avec des outils open-source.&lt;/li&gt;
+&lt;li&gt;    &lt;a href="https://github.com/JohnDMcMaster/project2064"&gt;2064&lt;/a&gt;: Projet de rétro-ingénierie des FPGA XC2064 de xilinx. Bon ce projet peut être considéré comme anecdotique puisque il vise à reverser le premier fpga de Xilinx du début des années 80 : le &lt;a href="https://spectrum.ieee.org/tech-history/silicon-revolution/chip-hall-of-fame-xilinx-xc2064-fpga"&gt;xc2064&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Le projet SymbiFlow est un projet encore «en travaux» mais il permet de tracer une voie et fournir des outils permettant de faire la retro-ingénierie d’autres FPGA. Comme on le voit dans les différents projets intégrés il est possible de voir fleurir d’autre projets de retro-ingénierie de FPGA et voir émerger une solution opensource solide pour développer sur FPGA.&lt;/p&gt;
+
+&lt;p&gt;L’année 2018 s’est terminée en fanfare avec la présentation de &lt;a href="https://www.youtube.com/watch?v=Zi9gaSPFqM0"&gt;nextpnr au 35c3&lt;/a&gt;. L’année 2019 sera-t-elle celle de la libération des FPGA avec une fédération des projets de rétro-ingénierie de tous les FPGA du Marché ? Un fabricant de FPGA osera-t-il publier la documentation des ses bitstream pour ses FPGA ? Vera-t-on l’émergence de nouveaux acteur du FPGA faisant du libre ?&lt;/p&gt;
+
+&lt;p&gt;Vous saurez tous cela en suivant le prochain épisode de l’année 2019 !&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/martoni/journaux/2019-l-annee-de-la-liberation-des-fpga.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116216/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/martoni/journaux/2019-l-annee-de-la-liberation-des-fpga#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>martoni</name>
+    </author>
+    <category term="matériel"/>
+    <category term="verilog"/>
+    <category term="fpga"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116216/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38318</id>
+    <published>2019-01-15T22:44:34+01:00</published>
+    <updated>2019-01-15T22:44:34+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/totof2000/journaux/remede-au-probleme-demarrage-devuan-ascii-sur-raspberry-pi-2"/>
+    <title>Remède au problème démarrage  devuan ascii  sur raspberry pi 2 </title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Un petit post pour partager avec vous la résolution d'un petit problème que j'ai rencontré en voulant installer devuan ascii sur mon raspberry pi 2.&lt;br&gt;
+J'ai tenté de &lt;a href="https://files2.roundr.devuan.org/devuan_ascii/embedded/"&gt;télécharger l'image adéquate&lt;/a&gt; et de l'écrire sur une carte SD, mais une fois la carte insérée dans le raspberry pi, elle ne lui a pas permis de démarrer.&lt;/p&gt;
+
+&lt;p&gt;A cet instant, je doutais que le problème vienne de ma carte puisqu'elle m'avait déjà permis de démarrer freebsd.&lt;/p&gt;
+
+&lt;p&gt;Du coup je m'y suis pris autrement: j'ai téléchargé &lt;a href="https://files2.roundr.devuan.org/devuan_jessie/embedded/"&gt;l'image de la précédente version&lt;/a&gt;, et écrit celle-ci sur ma carte SD. Mon raspberry a correctement démarré.&lt;/p&gt;
+
+&lt;p&gt;Ensuite, j'ai effectué un upgrade de version comme &lt;a href="https://devuan.org/os/documentation/dev1fanboy/upgrade-to-ascii"&gt;indiqué ici&lt;/a&gt;; j'ai ajouté ces 4 lignes dans /etc/apt/sources.list et commenté les autres :&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;deb http://deb.devuan.org/merged ascii main
+deb http://deb.devuan.org/merged ascii-updates main
+deb http://deb.devuan.org/merged ascii-security main
+deb http://deb.devuan.org/merged ascii-backports main
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;J'ai continué avec un apt-get update, mais j'ai eu un problème de clé GPG (je n'ai plus le message exact, je l'ai perdu dans mon terminal) que j'ai corrigé en adaptant &lt;a href="https://www.commentcamarche.net/faq/4445-debian-apt-get-no-pubkey-gpg-error"&gt;ceci&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gpg --keyserver pgpkeys.mit.edu --recv-key BB23C00C61FC752C | gpg -a --export BB23C00C61FC752C | sudo apt-key add -
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;J'ai relancé apt-get update, puis  apt-get dist-upgrade et un reboot après, je me trouve avec une devuan ascii toute propre.&lt;/p&gt;
+
+&lt;p&gt;Je vais en profiter pour faire quelques petites personnalisation, exécuter un apt-get clean et un peu de nettoyage autre, et je récupèrerai la carte SD pour en faire une image réutilisable ultérieurement.&lt;/p&gt;
+
+&lt;p&gt;Voila, j'espère que ce petit post pourra servir à d'autres. Sur ce, bonne nuit.&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/totof2000/journaux/remede-au-probleme-demarrage-devuan-ascii-sur-raspberry-pi-2.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116213/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/totof2000/journaux/remede-au-probleme-demarrage-devuan-ascii-sur-raspberry-pi-2#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>totof2000</name>
+    </author>
+    <wfw:commentRss>https://linuxfr.org/nodes/116213/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38317</id>
+    <published>2019-01-15T14:40:19+01:00</published>
+    <updated>2019-01-15T14:40:19+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/volts/journaux/une-bonne-resolution"/>
+    <title>Une bonne résolution</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Bonjour Nal,&lt;/p&gt;
+
+&lt;p&gt;Après un long temps de réflexion, de doutes parfois et des décisions pas tout à fait aisées à faire face, j'ai enfin passé à l'acte.&lt;/p&gt;
+
+&lt;p&gt;Auparavant, des moules bienveillantes m'ont fait remarqué que mon nick précédent, &lt;code&gt;VendrediOuLeTrollSauvage&lt;/code&gt;, est déjà trop long.&lt;/p&gt;
+
+&lt;p&gt;Je reconnais que c'est parfois gênant quand on va sur la &lt;a href="//linuxfr.org/board"&gt;tribune&lt;/a&gt; et qu'on voit que le pseudo prend une colonne entière, au plus grand désagrément des membres.&lt;/p&gt;
+
+&lt;p&gt;De plus, je fais des fautes de frappe de temps en temps sur mon nick. C'est pas super pratique, c'est ridicule et ça m'agace.&lt;/p&gt;
+
+&lt;p&gt;Désormais, c'est fait: mon &lt;a href="//linuxfr.org/users/vendrediouletrollsauvage"&gt;ancien compte&lt;/a&gt; est fermé pour laisser place à un &lt;a href="//linuxfr.org/users/volts"&gt;nouveau&lt;/a&gt; où j'ai raccourcis mon nick en initial &lt;code&gt;volts&lt;/code&gt;. Et j'ai fait bon usage du champs &lt;code&gt;Prénom et nom&lt;/code&gt; dans mes préférences du compte, ce qui n'avait pas été fait dans l'ancien.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;- Très bien. C'est tout ce que tu as à écrire comme journal ? On aurait aimer voir d'autres résolutions que celle-ci…&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Bien sûr que non, ce n'est pas la seule bonne résolution !&lt;/p&gt;
+
+&lt;p&gt;Avec l'accord de mon hôte physique, je passerai quelques journaux plus consistants sur ses propres projets en rapport avec le Libre. Pour le moment, il est plutôt timide et se sert de moi comme intermédiaire pour se couvrir.&lt;/p&gt;
+
+&lt;p&gt;Contributeurs et contributrices, à très bientôt !&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/volts/journaux/une-bonne-resolution.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116206/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/volts/journaux/une-bonne-resolution#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>Vendredi Ou le Troll Sauvage</name>
+    </author>
+    <category term="moule"/>
+    <category term="autopromotion"/>
+    <category term="pseudo"/>
+    <category term="humour_pas_drôle"/>
+    <category term="spam"/>
+    <category term="faisunblog"/>
+    <category term="c_était_vraiment_très_intéressant"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116206/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38316</id>
+    <published>2019-01-15T09:01:40+01:00</published>
+    <updated>2019-01-17T14:06:56+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/niconico/journaux/passer-l-election-presidentielle-au-scrutin-jugement-majoritaire"/>
+    <title>Passer l'élection présidentielle au scrutin jugement majoritaire.</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Ce mode de scrutin, le jugement majoritaire, permet d'éviter les effets pervers du scrutin actuel. Par exemple, Jospin qui est éliminé du second tour alors que plus de personne le voulaient au second tour que Le Pen. Mais il est impossible de signifier notre « second choix » au premier tour.&lt;/p&gt;
+
+&lt;p&gt;On peut voir la même chose avec les 6 % de Hamon qui aurait pu changer le second tour de la dernière présidentielle.&lt;/p&gt;
+
+&lt;p&gt;Le problème principal du scrutin actuel est que l'ajout d'un candidat même « petit » peut changer le résultat final, alors que c'est absurde démocratiquement.&lt;/p&gt;
+
+&lt;p&gt;Le jugement majoritaire est le seul mode de scrutin qui minimise l'impact du vote stratégique parmi toutes les méthodes qui échappent au paradoxe d'Arrow (retirer ou rajouter un candidat C ne change pas l'ordre entre deux candidats A et B), et au paradoxe de Condorcet (l'ordre entre deux candidats est transitif : il existe toujours un gagnant). &lt;/p&gt;
+
+&lt;p&gt;Le vote de Condorcet propose un système de classement, mais pose un paradoxe dans certaine situation. Un peu comme le Brexit où il n'y a aucune solution majoritaire en duel, une à une, entre le  No Deal, l'accord, et le Remain.&lt;/p&gt;
+
+&lt;p&gt;Le jugement majoritaire a été utilisé en 2016 pour faire une expérience. On voit clairement que Hamon dépasse les 16 %, ainsi on peut voir l'effet du vote stratégique vers Mélanchon dans le vote réel.&lt;/p&gt;
+
+&lt;p&gt;Le principe de base est la notation et non le classement des candidats, ce qui permet d'avoir des choix égaux et d'ensuite de prendre le candidat avec la meilleure médiane. En cas d'égalité, on regarde la somme des mentions supérieures et inférieures, le chiffre le plus important décide de la victoire ou de la défaite.&lt;/p&gt;
+
+&lt;p&gt;Je propose que l'on passe l'élection présidentielle à ce mode d'élection, pour éviter les effets pervers des divisions et autres manœuvres politiciennes.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://fr.wikipedia.org/wiki/Jugement_majoritaire"&gt;https://fr.wikipedia.org/wiki/Jugement_majoritaire&lt;/a&gt;&lt;br&gt;
+&lt;a href="http://www.college-de-france.fr/site/pierre-rosanvallon/seminar-2012-02-29-10h00.htm"&gt;http://www.college-de-france.fr/site/pierre-rosanvallon/seminar-2012-02-29-10h00.htm&lt;/a&gt;&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/niconico/journaux/passer-l-election-presidentielle-au-scrutin-jugement-majoritaire.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116197/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/niconico/journaux/passer-l-election-presidentielle-au-scrutin-jugement-majoritaire#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>Nicolas Boulay</name>
+    </author>
+    <category term="débat"/>
+    <category term="scrutin"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116197/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38315</id>
+    <published>2019-01-14T10:55:46+01:00</published>
+    <updated>2019-01-14T10:55:46+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/devnewton/journaux/cahier-de-doleances"/>
+    <title>Cahier de doléances</title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Bonjour Nal,&lt;/p&gt;
+
+&lt;p&gt;Tu sais que depuis quelques mois l'enthousiasme pour les réformes de notre gouvernement est visible en jaune sur de nombreux ronds points. Pour ne pas laisser les gens dehors dans le froid, notre cher président a décidé de lancer un &lt;a href="https://www.gouvernement.fr/le-grand-debat-national"&gt;gros débat&lt;/a&gt; dans tout le pays. De plus pour que ces braves gens n'attrapent pas de rhume de cerveaux, il a aussi listé des questions qui contiennent les réponses dans une &lt;a href="https://www.lemonde.fr/politique/article/2019/01/13/document-la-lettre-d-emmanuel-macron-aux-francais_5408564_823448.html"&gt;lettre aux Français&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;L'espace &lt;a href="https://granddebat.fr/"&gt;numérique et disruptif&lt;/a&gt; de ce gros débat n'étant pas encore prêt, je te propose d'utiliser les commentaires de ce nourjal comme un grand cahier de doléances digital et collaboratif pour que les moules et autres utilisateurs de linuxfr puissent faire des propositions pour réformer notre beau pays.&lt;/p&gt;
+
+&lt;p&gt;Les autres ethnies (belge, suisse, québécois…) peuvent bien sûr participer ! L'internationalisme n'a jamais tué personne.&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/devnewton/journaux/cahier-de-doleances.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116189/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/devnewton/journaux/cahier-de-doleances#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>devnewton</name>
+    </author>
+    <category term="sujet"/>
+    <category term="complet"/>
+    <category term="débat"/>
+    <category term="doléance"/>
+    <category term="démocratie"/>
+    <category term="république"/>
+    <category term="gilets_jaunes"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116189/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38314</id>
+    <published>2019-01-13T19:01:56+01:00</published>
+    <updated>2019-01-13T19:01:56+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/omc/journaux/google-apps-vente-liee-et-action-collective"/>
+    <title>Google apps, vente liée et action collective ?  </title>
+    <rights>Licence CC by-sa http://creativecommons.org/licenses/by-sa/4.0/deed.fr</rights>
+    <content type="html">&lt;p&gt;Cher journal,&lt;br&gt;
+J'ai commandé pour Noël un nouveau smartphone. J'ai pris soin de choisir celui-ci en fonction de mon (petit) budget et de sa compatibilité avec &lt;a href="https://download.lineageos.org/"&gt;LineageOS&lt;/a&gt;. Le but, c'est d'utiliser un android un peu allégé en blob mais surtout de me passer des google apps et autres applications GAFAM (comme l'app Facebook).&lt;/p&gt;
+
+&lt;p&gt;Si tout va bien, je devrais le recevoir dans quelques jours. Je sais d'avance que je vais galérer pour installer un os alternatif, ce qui, au passage, va faire sauter la garantie de mon téléphone. Malgré mes expériences passées, je table sur au moins une demie-journée, voir une journée complète pour faire ce boulot. &lt;/p&gt;
+
+&lt;p&gt;Aussi, j'enrage à l'avance de perdre mon temps à faire ce qui devrait être proposé par le constructeur du téléphone.&lt;/p&gt;
+
+&lt;p&gt;D'où ma question/remarque. Depuis 4 ans, nous pouvons faire des &lt;a href="https://www.lepetitjuriste.fr/droit-civil/la-class-action-a-la-francaise/"&gt;actions juridiques collectives&lt;/a&gt;. Or, ces applications préinstallées sont très difficiles, voire impossibles à supprimer.  Je ne suis pas juriste, mais cela ressemble fortement à de la vente liée/forcée. &lt;/p&gt;
+
+&lt;p&gt;Bref, pensez-vous qu'une action collective concernant cette vente liée soit envisageable ? &lt;br&gt;
+Avez vous eu vent d'une démarche similaire ?&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/omc/journaux/google-apps-vente-liee-et-action-collective.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116181/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/omc/journaux/google-apps-vente-liee-et-action-collective#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>omc</name>
+    </author>
+    <category term="android"/>
+    <category term="aosp"/>
+    <category term="lineageos"/>
+    <category term="juridique"/>
+    <wfw:commentRss>https://linuxfr.org/nodes/116181/comments.atom</wfw:commentRss>
+  </entry>
+  <entry>
+    <id>tag:linuxfr.org,2005:Diary/38313</id>
+    <published>2019-01-12T22:08:05+01:00</published>
+    <updated>2019-01-12T22:08:05+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://linuxfr.org/users/spacefox/journaux/service-apres-vente-boulet-le-dessinateur-et-l-art-libre"/>
+    <title>Service après-vente : Boulet (le dessinateur) et l'art libre</title>
+    <content type="html">&lt;p&gt;En octobre, j'avais basé un texte sur une idée de Boulet, le dessinateur. S'en était suivi &lt;a href="//linuxfr.org/users/spacefox/journaux/ecriture-inktober-2018-libre-mais-pas-en-dessins#comment-1750517"&gt;un débat quant à sa position sur l'art libre&lt;/a&gt;. J'y avais promis &lt;a href="//linuxfr.org/users/spacefox/journaux/ecriture-inktober-2018-libre-mais-pas-en-dessins#comment-1750525"&gt;de lui poser la question la prochaine fois qu'il ferait un &lt;em&gt;live&lt;/em&gt; sur Twitch&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Chose promise, chose due – et comme je ne peux plus répondre directement à mon commentaire, je fais un journal à ce sujet. Donc, pour Boulet :&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;L'art libre est un concept intéressant, il admire ceux qui arrivent à « libérer » leur production,&lt;/li&gt;
+&lt;li&gt;Mais il ne se considère pas capable de s'y mettre : il est trop attaché à la propriété intellectuelle et à ses personnages/histoires, et ne se sent pas capable d'admettre qu'on puisse en faire n'importe quoi avec ses créations (sans que ça remette en cause le premier point, au contraire)&lt;/li&gt;
+&lt;li&gt;Pour lui ça ne peut pas avoir d'impact significatif (à terme visible) sur la situation (catastrophique) des auteurs.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Une position donc bien plus neutre et réfléchie que ce qu'on a pu lire au moment de l'histoire avec Pepper &amp;amp; Carrot, ou que les caricatures qu'on a pu lire à droite à gauche :)&lt;/p&gt;
+
+&lt;p&gt;Peut-être que la réponse exacte et complète &lt;a href="https://www.twitch.tv/bouletcorp"&gt;sera dans les replays sur Twitch&lt;/a&gt; s'il les active.&lt;/p&gt;
+
+&lt;hr&gt;
+
+&lt;p&gt;&lt;em&gt;Ce document est sous licence CC-0&lt;/em&gt;&lt;/p&gt;
+&lt;div&gt;&lt;a href="https://linuxfr.org/users/spacefox/journaux/service-apres-vente-boulet-le-dessinateur-et-l-art-libre.epub"&gt;Télécharger ce contenu au format Epub&lt;/a&gt;&lt;/div&gt;    &lt;p&gt;
+      &lt;strong&gt;Commentaires :&lt;/strong&gt;
+      &lt;a href="//linuxfr.org/nodes/116174/comments.atom"&gt;voir le flux atom&lt;/a&gt;
+      &lt;a href="https://linuxfr.org/users/spacefox/journaux/service-apres-vente-boulet-le-dessinateur-et-l-art-libre#comments"&gt;ouvrir dans le navigateur&lt;/a&gt;
+    &lt;/p&gt;
+</content>
+    <author>
+      <name>SpaceFox</name>
+    </author>
+    <wfw:commentRss>https://linuxfr.org/nodes/116174/comments.atom</wfw:commentRss>
+  </entry>
+</feed>
