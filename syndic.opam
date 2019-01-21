@@ -7,6 +7,7 @@ license:      "MIT"
 homepage:     "https://github.com/Cumulus/Syndic"
 dev-repo:     "git+https://github.com/Cumulus/Syndic.git"
 bug-reports:  "https://github.com/Cumulus/Syndic/issues"
+doc:          "https://cumulus.github.io/Syndic/"
 synopsis:     "RSS1, RSS2, Atom and OPML1 parsing"
 description: """
 Pure OCaml Library for parsing and writing various types of
