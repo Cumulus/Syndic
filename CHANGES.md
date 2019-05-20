@@ -1,3 +1,8 @@
+v1.6.1 05-20-2019 Mons (Belgium)
+--------------------------------
+
+* `Syndic.Date.of_rfc822` accepts dates such as “May 15th, 2019”.
+
 v1.6.0 01-21-2019 Paris (France)
 --------------------------------
 
