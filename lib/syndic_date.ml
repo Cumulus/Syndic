@@ -86,11 +86,13 @@ let of_rfc822 s =
   try
     if 'A' <= s.[0] && s.[0] <= 'Z' then
       try sscanf s "%_s %i %s %i %i:%i%s %s" make_date with _ ->
-        sscanf s "%_s %ist %s %i %i:%i%s %s" make_date
+        try sscanf s "%_s %ist %s %i %i:%i%s %s" make_date with _ ->
+          (* For e.g. "May 15th, 2019" — even though it is not standard *)
+          sscanf s "%s %i%_s %i" (fun m d y -> make_date d m y 0 0 "" "UT")
     else
       try sscanf s "%i %s %i %i:%i%s %s" make_date with _ ->
         sscanf s "%i %s %i" (fun d m y -> make_date d m y 0 0 "" "UT")
-  with _ -> invalid_arg (sprintf "Syndic.Date.of_string: cannot parse %S" s)
+  with _ -> invalid_arg (sprintf "Syndic.Date.of_string+: cannot parse %S" s)
 
 type month =
   | Jan
