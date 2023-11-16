@@ -491,7 +491,7 @@ type source =
   ; updated: updated option }
 
 let source ?(categories = []) ?(contributors = []) ?generator ?icon
-    ?(links = []) ?logo ?rights ?subtitle ?updated ~authors ~id ~title =
+    ?(links = []) ?logo ?rights ?subtitle ?updated ~authors ~id ~title () =
   { authors
   ; categories
   ; contributors

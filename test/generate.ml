@@ -140,7 +140,7 @@ let () =
   let data = List.sort compare_entry (json_of_input ic) in
   let oc = open_out (Fpath.to_string output) in
   let ppf = Format.formatter_of_out_channel oc in
-  Fmt.pf ppf "%a@\n@\n%!" Fmt.(list ~sep:(always "@\n") pp_entry) data ;
+  Fmt.pf ppf "%a@\n@\n%!" Fmt.(list ~sep:(any "@\n") pp_entry) data ;
   Fmt.pf ppf "%a@\n" pp_test data ;
   close_out oc ;
   exit success
