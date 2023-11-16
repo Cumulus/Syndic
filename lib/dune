@@ -1,5 +1,4 @@
 (library
- (name syndic)
  (public_name syndic)
  (libraries xmlm uri ptime))
 
