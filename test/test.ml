@@ -8,12 +8,11 @@ type result =
 
 exception Is_not_a_file
 
-type src = [`Data of string | `Filename of (Fpath.t * Uri.t) ]
-type fmt = [`Atom | `Rss1 | `Rss2 | `Opml1]
+type src = [ `Data of string | `Filename of Fpath.t * Uri.t ]
+type fmt = [ `Atom | `Rss1 | `Rss2 | `Opml1 ]
 
 let get : src -> Xmlm.source = function
-  | `Filename (fpath, _) ->
-    `Channel (open_in (Fpath.to_string fpath))
+  | `Filename (fpath, _) -> `Channel (open_in (Fpath.to_string fpath))
   | `Data data -> `String (0, data)
 
 let parse ?xmlbase = function
@@ -23,11 +22,11 @@ let parse ?xmlbase = function
   | `Opml1 -> fun src -> `Opml1 (Syndic.Opml1.parse ?xmlbase src)
 
 let string_of_src = function
-  | `Filename (_, uri) -> Fmt.strf "'%s'" (Uri.to_string uri)
+  | `Filename (_, uri) -> Fmt.str "'%s'" (Uri.to_string uri)
   | `Data data ->
       let buffer = Buffer.create 16 in
-      Buffer.add_string buffer (String.sub data 0 16) ;
-      Buffer.add_string buffer "…" ;
+      Buffer.add_string buffer (String.sub data 0 16);
+      Buffer.add_string buffer "…";
       Buffer.contents buffer
 
 let string_of_fmt = function
@@ -36,21 +35,36 @@ let string_of_fmt = function
   | `Atom -> "Atom"
   | `Opml1 -> "OPML 1.0"
 
-type entry =
-  { name : string
-  ; uri : Uri.t
-  ; kind : fmt }
+type entry = { name : string; uri : Uri.t; kind : fmt }
 
 let json =
   let open Json_encoding in
   let name = req "name" string in
   let uri = req "uri" (conv Uri.to_string Uri.of_string string) in
   let kind =
-    let rss1 = case string (function `Rss1 -> Some "rss1" | _ -> None) (function "rss1" -> `Rss1 | _ -> assert false) in
-    let rss2 = case string (function `Rss2 -> Some "rss2" | _ -> None) (function "rss2" -> `Rss2 | _ -> assert false) in
-    let atom = case string (function `Atom -> Some "atom" | _ -> None) (function "atom" -> `Atom | _ -> assert false) in
-    req "kind" (union [ rss1; rss2; atom ]) in
-  let entry = conv (fun { name; uri; kind; } -> (name, uri, kind)) (fun (name, uri, kind) -> { name; uri; kind; }) (obj3 name uri kind) in
+    let rss1 =
+      case string
+        (function `Rss1 -> Some "rss1" | _ -> None)
+        (function "rss1" -> `Rss1 | _ -> assert false)
+    in
+    let rss2 =
+      case string
+        (function `Rss2 -> Some "rss2" | _ -> None)
+        (function "rss2" -> `Rss2 | _ -> assert false)
+    in
+    let atom =
+      case string
+        (function `Atom -> Some "atom" | _ -> None)
+        (function "atom" -> `Atom | _ -> assert false)
+    in
+    req "kind" (union [ rss1; rss2; atom ])
+  in
+  let entry =
+    conv
+      (fun { name; uri; kind } -> (name, uri, kind))
+      (fun (name, uri, kind) -> { name; uri; kind })
+      (obj3 name uri kind)
+  in
   list entry
 
 type await = [ `Await ]
@@ -64,60 +78,65 @@ let json_of_input ic =
   let error (`Error err) = Fmt.invalid_arg "%a" Jsonm.pp_error err in
   let end_of_input `End = Fmt.invalid_arg "Unexpected end of input" in
 
-  let rec arr acc k = match Jsonm.decode decoder with
+  let rec arr acc k =
+    match Jsonm.decode decoder with
     | #await -> assert false
     | #error as v -> error v
     | #eoi as v -> end_of_input v
     | `Lexeme `Ae -> k (`A (List.rev acc))
     | `Lexeme v -> base (fun v -> arr (v :: acc) k) v
-
-  and name n k = match Jsonm.decode decoder with
+  and name n k =
+    match Jsonm.decode decoder with
     | #await -> assert false
     | #error as v -> error v
     | #eoi as v -> end_of_input v
     | `Lexeme v -> base (fun v -> k (n, v)) v
-
-  and obj acc k = match Jsonm.decode decoder with
+  and obj acc k =
+    match Jsonm.decode decoder with
     | #await -> assert false
     | #error as v -> error v
     | #eoi as v -> end_of_input v
     | `Lexeme `Oe -> k (`O (List.rev acc))
     | `Lexeme (`Name n) -> name n (fun v -> obj (v :: acc) k)
     | `Lexeme v -> Fmt.invalid_arg "Unexpected lexeme: %a" Jsonm.pp_lexeme v
-
   and base k = function
     | #value as v -> k v
     | `Os -> obj [] k
     | `As -> arr [] k
     | `Ae | `Oe -> Fmt.invalid_arg "Unexpected end of array/object"
-    | `Name n -> Fmt.invalid_arg "Unexpected key: %s" n in
+    | `Name n -> Fmt.invalid_arg "Unexpected key: %s" n
+  in
 
-  let go k = match Jsonm.decode decoder with
+  let go k =
+    match Jsonm.decode decoder with
     | #await -> assert false
     | #error as v -> error v
     | #eoi as v -> end_of_input v
-    | `Lexeme (#Jsonm.lexeme as lexeme) -> base k lexeme in
+    | `Lexeme (#Jsonm.lexeme as lexeme) -> base k lexeme
+  in
 
   go Json_encoding.(destruct json)
 
-let tests : ([> src] * [< fmt] * result) list =
+let tests : ([> src ] * [< fmt ] * result) list =
   let ic = open_in "feeds.json" in
   let entries = json_of_input ic in
-  close_in ic ;
-  let entries = List.map (fun { name; kind; uri; } -> `Filename (Fpath.v name |> Fpath.add_ext "feed", uri), kind, Ok) entries in
+  close_in ic;
+  let entries =
+    List.map
+      (fun { name; kind; uri } ->
+        (`Filename (Fpath.v name |> Fpath.add_ext "feed", uri), kind, Ok))
+      entries
+  in
   entries
 
 let () =
   Printexc.register_printer (function
-    | Syndic.Rss1.Error.Error _ as exn ->
-        Some (Syndic.Rss1.Error.to_string exn)
-    | Syndic.Rss2.Error.Error _ as exn ->
-        Some (Syndic.Rss2.Error.to_string exn)
-    | Syndic.Atom.Error.Error _ as exn ->
-        Some (Syndic.Atom.Error.to_string exn)
+    | Syndic.Rss1.Error.Error _ as exn -> Some (Syndic.Rss1.Error.to_string exn)
+    | Syndic.Rss2.Error.Error _ as exn -> Some (Syndic.Rss2.Error.to_string exn)
+    | Syndic.Atom.Error.Error _ as exn -> Some (Syndic.Atom.Error.to_string exn)
     | Syndic.Opml1.Error.Error _ as exn ->
         Some (Syndic.Opml1.Error.to_string exn)
-    | _ -> None )
+    | _ -> None)
 
 module Printf = struct
   include Printf
@@ -125,9 +144,9 @@ module Printf = struct
   let add_list ?(sep = "") add_data ch lst =
     let rec aux = function
       | [] -> ()
-      | [x] -> add_data ch x
+      | [ x ] -> add_data ch x
       | x :: r ->
-          Printf.fprintf ch "%a%s" add_data x sep ;
+          Printf.fprintf ch "%a%s" add_data x sep;
           aux r
     in
     aux lst
@@ -153,10 +172,10 @@ let with_process_in cmd f =
   let ic = Unix.open_process_in cmd in
   try
     let r = f ic in
-    ignore (Unix.close_process_in ic) ;
+    ignore (Unix.close_process_in ic);
     r
   with exn ->
-    ignore (Unix.close_process_in ic) ;
+    ignore (Unix.close_process_in ic);
     raise exn
 
 let columns =
@@ -165,9 +184,9 @@ let columns =
     try
       with_process_in "stty size" (fun ic ->
           match Stringext.split (input_line ic) ~on:' ' with
-          | [_; v] -> int_of_string v
-          | _ -> failwith "stty" )
-    with _ -> ( try int_of_string (Sys.getenv "COLUMNS") with _ -> 80 ) )
+          | [ _; v ] -> int_of_string v
+          | _ -> failwith "stty")
+    with _ -> ( try int_of_string (Sys.getenv "COLUMNS") with _ -> 80))
 
 let line oc ?color c =
   let line =
@@ -189,13 +208,13 @@ let print_info (src, fmt) =
   print (sp "%s %s" (blue_s (string_of_fmt fmt)) (string_of_src src))
 
 let error (src, fmt) str =
-  print (left (red "[ERROR]") left_columns) ;
-  print_info (src, fmt) ;
+  print (left (red "[ERROR]") left_columns);
+  print_info (src, fmt);
   Printf.printf str
 
 let expected (src, fmt) str =
-  print (left (green "[EXPECTED]") left_columns) ;
-  print_info (src, fmt) ;
+  print (left (green "[EXPECTED]") left_columns);
+  print_info (src, fmt);
   Printf.printf str
 
 let result_equal a b =
@@ -206,7 +225,7 @@ let result_equal a b =
 
 let print_result p (r, e) =
   let add_error _ (pos, err) =
-    print (left (gray_s "W3C:") left_columns) ;
+    print (left (gray_s "W3C:") left_columns);
     print (Syndic.W3C.Error.Error (pos, err) |> Syndic.W3C.Error.to_string)
   in
   match r with
@@ -219,7 +238,7 @@ let print_result p (r, e) =
       (error p "\n%a") (Printf.add_list ~sep:"\n" add_error) errors
   | AnotherError exn -> (error p "exn: %s") (Printexc.to_string exn)
   | Ok ->
-      print (left (green "[OK]") left_columns) ;
+      print (left (green "[OK]") left_columns);
       print_info p
 
 let newline () = print "\n"
@@ -227,39 +246,41 @@ let reset () = print "\r"
 let nbsp_entity = function "nbsp" -> Some " " | _ -> None
 
 let make_test (src, fmt, result) =
-  print (left (yellow "...") left_columns) ;
-  print_info (src, fmt) ;
+  print (left (yellow "...") left_columns);
+  print_info (src, fmt);
   let xmlm_source = get src in
   let r =
     try
-      let _ = parse fmt (Xmlm.make_input ~entity:nbsp_entity xmlm_source) in Ok
+      let _ = parse fmt (Xmlm.make_input ~entity:nbsp_entity xmlm_source) in
+      Ok
     with
     | Syndic.Rss1.Error.Error (_pos, _err)
     | Syndic.Rss2.Error.Error (_pos, _err)
     | Syndic.Atom.Error.Error (_pos, _err)
-    | Syndic.Opml1.Error.Error (_pos, _err) -> Ok
-    | exn -> (AnotherError exn)
+    | Syndic.Opml1.Error.Error (_pos, _err) ->
+        Ok
+    | exn -> AnotherError exn
   in
   match r with
   | SyndicError (_pos, _err) ->
-      reset () ;
-      print_result (src, fmt) (r, result) ;
-      newline () ;
+      reset ();
+      print_result (src, fmt) (r, result);
+      newline ();
       switch ()
   | W3CError _errors ->
-      reset () ;
-      print_result (src, fmt) (r, result) ;
+      reset ();
+      print_result (src, fmt) (r, result);
       newline ()
   | AnotherError _exn ->
-      reset () ;
-      print_result (src, fmt) (r, result) ;
-      newline () ;
+      reset ();
+      print_result (src, fmt) (r, result);
+      newline ();
       switch ()
   | Ok ->
-      reset () ;
-      print_result (src, fmt) (r, result) ;
+      reset ();
+      print_result (src, fmt) (r, result);
       newline ()
 
 let () =
-  List.iter make_test tests ;
+  List.iter make_test tests;
   if state () then exit 1 else exit 0
