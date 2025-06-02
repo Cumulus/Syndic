@@ -23,7 +23,7 @@ let parse ?xmlbase = function
   | `Opml1 -> fun src -> `Opml1 (Syndic.Opml1.parse ?xmlbase src)
 
 let string_of_src = function
-  | `Filename (_, uri) -> Fmt.strf "'%s'" (Uri.to_string uri)
+  | `Filename (_, uri) -> Fmt.str "'%s'" (Uri.to_string uri)
   | `Data data ->
       let buffer = Buffer.create 16 in
       Buffer.add_string buffer (String.sub data 0 16) ;

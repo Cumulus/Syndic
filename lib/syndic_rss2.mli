@@ -179,7 +179,7 @@ type item =
   ; content: Uri.t option * string
   ; link: Uri.t option
   ; author: string option
-  ; category: category option
+  ; categories: category list
   ; comments: Uri.t option
   ; enclosure: enclosure option
   ; guid: guid option

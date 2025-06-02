@@ -270,7 +270,7 @@ val source :
   -> ?updated:updated
   -> authors:author list
   -> id:id
-  -> title:title
+  -> title
   -> source
 
 (** A MIME type that conform to the syntax of a MIME media type, but MUST NOT
