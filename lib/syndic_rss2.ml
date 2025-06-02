@@ -439,7 +439,7 @@ type item =
   ; link: Uri.t option
   ; author: string option
   ; (* e-mail *)
-    category: category option
+    categories: category list
   ; comments: Uri.t option
   ; enclosure: enclosure option
   ; guid: guid option
@@ -489,10 +489,9 @@ let make_item ~pos (l : _ list) =
     | Some (`Author a) -> Some a
     | _ -> None
   in
-  let category =
-    match find (function `Category _ -> true | _ -> false) l with
-    | Some (`Category c) -> Some c
-    | _ -> None
+  let categories =
+    let fn = fun acc -> function `Category x -> x :: acc | _ -> acc in
+    List.fold_left fn [] l |> List.rev
   in
   let comments =
     match find (function `Comments _ -> true | _ -> false) l with
@@ -524,7 +523,7 @@ let make_item ~pos (l : _ list) =
       ; content
       ; link
       ; author
-      ; category
+      ; categories
       ; comments
       ; enclosure
       ; guid
@@ -1084,12 +1083,8 @@ let entry_of_item ch_link ch_updated (it : item) : Atom.entry =
         {Atom.name= ""; uri= None; email= None}
   in
   let categories =
-    match it.category with
-    | Some c ->
-        [ { Atom.term= c.data
-          ; scheme= map_option c.domain (fun d -> d)
-          ; label= None } ]
-    | None -> []
+    let fn (c : category) = { Atom.term= c.data; scheme= map_option c.domain (fun d -> d); label= None } in
+    List.map fn it.categories
   in
   let (title : Atom.title), content =
     match it.story with
