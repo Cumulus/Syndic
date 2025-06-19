@@ -1,3 +1,8 @@
+v1.7.0 05-11-2025 Paris (France)
+--------------------------------
+
+* Fix categories on RSS2 (@yawaramin, @dinosaure, #87)
+
 v1.6.1 05-20-2019 Mons (Belgium)
 --------------------------------
 
