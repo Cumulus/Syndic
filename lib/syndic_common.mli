@@ -2,6 +2,17 @@ module XML : sig
   type t = Syndic_xml.t
   type node = Syndic_xml.pos * Syndic_xml.tag * t list
 
+  val generate_catcher_relaxed :
+       ?namespaces:string list
+    -> ?attr_producer:(string * (xmlbase:Uri.t option -> string -> 'a)) list
+    -> ?data_producer:(string * (xmlbase:Uri.t option -> node -> 'a)) list
+    -> ?leaf_producer:(xmlbase:Uri.t option -> Xmlm.pos -> string -> 'a)
+    -> (relaxed:'relaxed -> pos:Xmlm.pos -> 'a list -> 'b)
+    -> relaxed:'relaxed
+    -> xmlbase:Uri.t option
+    -> node
+    -> 'b
+
   val generate_catcher :
        ?namespaces:string list
     -> ?attr_producer:(string * (xmlbase:Uri.t option -> string -> 'a)) list

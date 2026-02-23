@@ -13,7 +13,7 @@ module XML = struct
       Some (Syndic_xml.resolve ~xmlbase (Uri.of_string new_base))
     with Not_found -> xmlbase
 
-  let generate_catcher ?(namespaces = [""]) ?(attr_producer = [])
+  let generate_catcher_relaxed ?(namespaces = [""]) ?(attr_producer = [])
       ?(data_producer = []) ?leaf_producer maker =
     let in_namespaces ((prefix, _), _) = List.mem prefix namespaces in
     let get_attr_name (((_prefix, name), _) : Xmlm.attribute) = name in
@@ -45,15 +45,19 @@ module XML = struct
         | None -> catch_datas ~xmlbase acc r )
       | [] -> acc
     in
-    let generate ~xmlbase ((pos, tag, datas) : node) =
+    let generate ~relaxed ~xmlbase ((pos, tag, datas) : node) =
       (* The spec says that "The base URI for a URI reference appearing in any
          other attribute value, including default attribute values, is the base
          URI of the element bearing the attribute" so get xml:base first. *)
       let xmlbase = xmlbase_of_attr ~xmlbase (get_attrs tag) in
       let acc = catch_attr ~xmlbase [] pos (get_attrs tag) in
-      maker ~pos (catch_datas ~xmlbase acc datas)
+      maker ~relaxed ~pos (catch_datas ~xmlbase acc datas)
     in
     generate
+
+  let generate_catcher ?namespaces ?attr_producer ?data_producer ?leaf_producer maker =
+    generate_catcher_relaxed ?namespaces ?attr_producer ?data_producer ?leaf_producer
+      (fun ~relaxed:() -> maker) ~relaxed:()
 
   let dummy_of_xml ~ctor =
     let leaf_producer ~xmlbase _pos data = ctor ~xmlbase data in

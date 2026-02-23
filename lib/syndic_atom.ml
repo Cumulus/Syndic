@@ -4,6 +4,11 @@ module XML = Syndic_xml
 module Error = Syndic_error
 module Date = Syndic_date
 
+type relaxed_elm =
+  | MissingFeedUpdatedTag of Syndic_date.t
+
+type relaxed_syntax = relaxed_elm list
+
 let atom_ns = "http://www.w3.org/2005/Atom"
 let xhtml_ns = "http://www.w3.org/1999/xhtml"
 let namespaces = [atom_ns]
@@ -1021,7 +1026,7 @@ let feed ?(authors = []) ?(categories = []) ?(contributors = []) ?generator
   ; updated
   ; entries }
 
-let make_feed ~pos (l : _ list) =
+let make_feed ~relaxed ~pos (l : _ list) =
   (* atomAuthor* *)
   let authors =
     List.fold_left
@@ -1097,11 +1102,14 @@ let make_feed ~pos (l : _ list) =
     match find (function `Updated _ -> true | _ -> false) l with
     | Some (`Updated u) -> u
     | _ ->
-        raise
-          (Error.Error
-             ( pos
-             , "<feed> elements MUST contains exactly one <updated> elements"
-             ))
+        match List.find_map (function MissingFeedUpdatedTag u -> Some u) relaxed with
+        | Some u -> u
+        | None ->
+            raise
+              (Error.Error
+                 ( pos
+                 , "<feed> elements MUST contains exactly one <updated> elements"
+                 ))
   in
   (* atomEntry* *)
   let fix_author pos (e : entry) =
@@ -1160,7 +1168,7 @@ let feed_of_xml =
     ; ("updated", updated_of_xml)
     ; ("entry", entry_of_xml) ]
   in
-  generate_catcher ~namespaces ~data_producer make_feed
+  generate_catcher_relaxed ~namespaces ~data_producer make_feed
 
 let feed_of_xml' =
   let data_producer =
@@ -1193,11 +1201,11 @@ let string_of_text_construct = function
   | (Text s : text_construct) | Html (_, s) -> s
   | Xhtml (_, x) -> xhtml_to_string x
 
-let parse ?self ?xmlbase input =
+let parse ?self ?xmlbase ?(relaxed=[]) input =
   let feed =
     match XML.of_xmlm input |> snd with
     | XML.Node (pos, tag, datas) when tag_is tag "feed" ->
-        feed_of_xml ~xmlbase (pos, tag, datas)
+        feed_of_xml ~relaxed ~xmlbase (pos, tag, datas)
     | _ ->
         raise
           (Error.Error
@@ -1220,10 +1228,10 @@ let parse ?self ?xmlbase input =
         in
         {feed with links}
 
-let read ?self ?xmlbase fname =
+let read ?self ?xmlbase ?relaxed fname =
   let fh = open_in fname in
   try
-    let x = parse ?self ?xmlbase (XML.input_of_channel fh) in
+    let x = parse ?self ?xmlbase ?relaxed (XML.input_of_channel fh) in
     close_in fh ; x
   with e -> close_in fh ; raise e
 
