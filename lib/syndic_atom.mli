@@ -422,9 +422,17 @@ val feed :
   -> entry list
   -> feed
 
+(** {2 Relaxed (non-strict) syntax support} *)
+
+type relaxed_elm =
+  | MissingFeedUpdatedTag of Syndic_date.t
+
+type relaxed_syntax = relaxed_elm list
+
+
 (** {2 Input and output} *)
 
-val parse : ?self:Uri.t -> ?xmlbase:Uri.t -> Xmlm.input -> feed
+val parse : ?self:Uri.t -> ?xmlbase:Uri.t -> ?relaxed:relaxed_syntax -> Xmlm.input -> feed
 (** [parse xml] returns the feed corresponding to [xml]. Beware that [xml] is
     mutable, so when the parsing fails, one has to create a new copy of [xml]
     to use it with another function. If you retrieve [xml] from a URL, you
@@ -441,7 +449,7 @@ val parse : ?self:Uri.t -> ?xmlbase:Uri.t -> Xmlm.input -> feed
     information will add an entry to [links] with [rel = Self] unless one
     already exists. *)
 
-val read : ?self:Uri.t -> ?xmlbase:Uri.t -> string -> feed
+val read : ?self:Uri.t -> ?xmlbase:Uri.t -> ?relaxed:relaxed_syntax -> string -> feed
 (** [read fname] reads the file name [fname] and parses it. For the optional
     parameters, see {!parse}. *)
 
