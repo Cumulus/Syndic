@@ -43,43 +43,35 @@ let of_rfc822 s =
         float_of_string (String.sub maybe_s 1 (String.length maybe_s - 1))
       else 0.
     in
-    let span = Ptime.Span.of_int_s ((h * 3600) + (m * 60)) in
+    (* FIXME: this should be made more robust. *)
+    let tz_offset_s =
+      match z with
+      | "" | "GMT" | "UT" | "Z" -> 0
+      | "EST" -> -5 * 3600
+      | "EDT" -> -4 * 3600
+      | "CST" -> -6 * 3600
+      | "CDT" -> -5 * 3600
+      | "MST" -> -7 * 3600
+      | "MDT" -> -6 * 3600
+      | "PST" -> -8 * 3600
+      | "PDT" -> -7 * 3600
+      | "A" -> -1 * 3600
+      | "M" -> -12 * 3600
+      | "N" -> 1 * 3600
+      | "Y" -> 12 * 3600
+      | _ ->
+          let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i) in
+          let zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
+          let tz_sign = if zh < 0 then -1 else 1 in
+          if zh < 0 then tz_sign * ((-zh * 3600) + (zm * 60))
+          else tz_sign * ((zh * 3600) + (zm * 60))
+    in
+    let span = Ptime.Span.of_int_s ((h * 3600) + (m * 60) - tz_offset_s) in
     let span =
-      map (fun x -> Some (Ptime.Span.add span x)) (Ptime.Span.of_float_s s)
+      map (fun x -> Some (Ptime.Span.add span x))
+        (Ptime.Span.of_float_s s)
     in
-    let date_and_time =
-      if z = "" || z = "GMT" || z = "UT" || z = "Z" then
-        map2 (fun date span -> Ptime.add_span date span) date span
-        |> map (fun x -> Some (Ptime.to_date_time x))
-      else
-        (* FIXME: this should be made more robust. *)
-        let tz_offset_s =
-          match z with
-          | "EST" -> -5 * 3600
-          | "EDT" -> -4 * 3600
-          | "CST" -> -6 * 3600
-          | "CDT" -> -5 * 3600
-          | "MST" -> -7 * 3600
-          | "MDT" -> -6 * 3600
-          | "PST" -> -8 * 3600
-          | "PDT" -> -7 * 3600
-          | "A" -> -1 * 3600
-          | "M" -> -12 * 3600
-          | "N" -> 1 * 3600
-          | "Y" -> 12 * 3600
-          | _ ->
-              let zh = sscanf (String.sub z 0 3) "%i" (fun i -> i) in
-              let zm = sscanf (String.sub z 3 2) "%i" (fun i -> i) in
-              let tz_sign = if zh < 0 then -1 else 1 in
-              if zh < 0 then tz_sign * ((-zh * 3600) + (zm * 60))
-              else tz_sign * ((zh * 3600) + (zm * 60))
-        in
-        let rt = map2 (fun date span -> Ptime.add_span date span) date span in
-        (* XXX: We lose minutes with this conversion, but Calendar does not
-           propose to handle minutes. *)
-        map (fun x -> Some (Ptime.to_date_time ~tz_offset_s x)) rt
-    in
-    match map Ptime.of_date_time date_and_time with
+    match map2 (fun date span -> Ptime.add_span date span) date span with
     | Some x -> x
     | None -> invalid_arg (sprintf "Syndic.Date.of_rfc822: cannot parse")
   in
