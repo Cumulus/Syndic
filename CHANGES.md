@@ -1,3 +1,10 @@
+v1.8.0 27-02-2026 Paris (France)
+--------------------------------
+
+- Fix timezone for RFC822 data (@paurkedal, #82)
+- Contributing about documentation (@Olexandr88, #89)
+- Allow selectively relaxed parsing rules (@kit-ty-kate, #90)
+
 v1.7.0 05-11-2025 Paris (France)
 --------------------------------
 
