@@ -64,6 +64,8 @@ let get_html_content html =
          applied. Remove it. *)
       String.concat "" (List.map (XML.to_string ~ns_prefix:rm_namespace) h)
 
+let get_text data = try get_leaf data with Not_found -> ""
+
 type text_construct =
   | Text of string
   | Html of Uri.t option * string
@@ -76,7 +78,7 @@ let text_construct_of_xml ~xmlbase
   | Some (_, "html") -> Html (xmlbase, get_html_content data)
   | Some (_, "application/xhtml+xml") | Some (_, "xhtml") ->
       Xhtml (xmlbase, get_xml_content data data)
-  | _ -> Text (get_leaf data)
+  | _ -> Text (get_text data)
 
 type author = {name: string; uri: Uri.t option; email: string option}
 
@@ -697,10 +699,10 @@ let content_of_xml ~xmlbase
        *  | none *)
       `Content
         ( match find (fun a -> attr_is a "type") attr with
-        | Some (_, "text") | None -> Text (get_leaf data)
+        | Some (_, "text") | None -> Text (get_text data)
         | Some (_, "html") -> Html (xmlbase, get_html_content data)
         | Some (_, "xhtml") -> Xhtml (xmlbase, get_xml_content data data)
-        | Some (_, mime) -> Mime (mime, get_leaf data) )
+        | Some (_, mime) -> Mime (mime, get_text data) )
 
 let content_of_xml' ~xmlbase:_
     ((_pos, (_tag, attr), data) : XML.pos * XML.tag * t list) =

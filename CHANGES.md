@@ -1,3 +1,8 @@
+unreleased
+----------
+
+- Accept empty Atom text constructs and content (#83, #93)
+
 v1.8.0 27-02-2026 Paris (France)
 --------------------------------
 
